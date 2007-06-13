@@ -3,7 +3,7 @@ Tester/new['Comparable']/do {
 SizeMatters := Object/new/do {
     /cmp := /'<=>' := { other --- /str/count <=> other/str/count }
     /init := { /str --- }
-    /to_c := { --- /str }
+    /to code := { --- /str }
     /also[Comparable]
 }
 s1 := SizeMatters/new['Z']

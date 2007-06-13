@@ -48,7 +48,7 @@ static LK_EXT_DEFCFUNC(subtractB__cset_str) {
     pt_cset_subtractstring(CSET(self), LIST(ARG(0)));
     RETURN(self);
 }
-static LK_EXT_DEFCFUNC(to_s__cset) {
+static LK_EXT_DEFCFUNC(to_string__cset) {
     lk_string_t *str = lk_string_new(VM);
     pt_list_t *s = LIST(str);
     uint32_t f, t;
@@ -81,7 +81,7 @@ LK_EXT_DEFINIT(lk_cset_extinitfuncs) {
     lk_ext_cfunc(cset, "negate!", negateB__cset, NULL);
     lk_ext_cfunc(cset, "subtract!", subtractB__cset_cset, cset, NULL);
     lk_ext_cfunc(cset, "subtract!", subtractB__cset_str, str, NULL);
-    lk_ext_cfunc(cset, "to_s", to_s__cset, NULL);
+    lk_ext_cfunc(cset, "to string", to_string__cset, NULL);
 }
 
 /* new */

@@ -23,7 +23,7 @@ static LK_EXT_DEFCFUNC(subtract__ch_fi) {
     }
     RETURN(lk_char_new(VM, CHAR(self) - INT(ARG(0))));
 }
-static LK_EXT_DEFCFUNC(to_s__ch) {
+static LK_EXT_DEFCFUNC(to_string__ch) {
     lk_string_t *str = lk_string_new(VM);
     pt_list_setuchar(LIST(str), 0, CHAR(self));
     RETURN(str);
@@ -35,7 +35,7 @@ LK_EXT_DEFINIT(lk_char_extinitfuncs) {
     lk_ext_cfunc(ch, "cmp", subtract__ch_ch, ch, NULL);
     lk_ext_cfunc(ch, "subtract", subtract__ch_ch, ch, NULL);
     lk_ext_cfunc(ch, "subtract", subtract__ch_fi, fi, NULL);
-    lk_ext_cfunc(ch, "to_s", to_s__ch, NULL);
+    lk_ext_cfunc(ch, "to string", to_string__ch, NULL);
 }
 
 /* new */

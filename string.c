@@ -40,12 +40,12 @@ static LK_EXT_DEFCFUNC(setB__str_fi_fi_str) {
     pt_list_setrange(x, INT(ARG(0)), INT(ARG(1)), y);
     RETURN(self);
 }
-static LK_EXT_DEFCFUNC(to_cs__str) {
+static LK_EXT_DEFCFUNC(to_character_set__str) {
     lk_cset_t *cs = lk_cset_new(VM);
     pt_cset_addstring(CSET(cs), LIST(self));
     RETURN(cs);
 }
-static LK_EXT_DEFCFUNC(to_n__str) {
+static LK_EXT_DEFCFUNC(to_number__str) {
     pt_numberifn_t num;
     switch(pt_number_new(0, LIST(self), &num)) {
     case PT_NUMBERTYPE_INT: RETURN(lk_fi_new(VM, num.i));
@@ -63,8 +63,8 @@ LK_EXT_DEFINIT(lk_string_extinitfuncs) {
     lk_ext_cfunc(str, "find", find__str_str_fi, str, fi, NULL);
     lk_ext_cfunc(str, "set!", setB__str_fi_ch, fi, ch, NULL);
     lk_ext_cfunc(str, "set!", setB__str_fi_fi_str, fi, fi, str, NULL);
-    lk_ext_cfunc(str, "to_cs", to_cs__str, NULL);
-    lk_ext_cfunc(str, "to_n", to_n__str, NULL);
+    lk_ext_cfunc(str, "to character set", to_character_set__str, NULL);
+    lk_ext_cfunc(str, "to_number", to_number__str, NULL);
 }
 
 /* new */

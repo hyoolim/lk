@@ -1,7 +1,7 @@
 include['tester.lk']
 Tester/new['Inheritance']/do {
 O := Object/new; O/.type := 'O'
-O/to_s := { /.type }
+O/to string := { /.type }
 A := O/new; A/.type := 'A'
 B := O/new; B/.type := 'B'
 C := O/new; C/.type := 'C'

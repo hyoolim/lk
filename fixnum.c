@@ -78,10 +78,10 @@ static LK_EXT_DEFCFUNC(subtractB__fi_fi) {
     INT(self) -= INT(ARG(0));
     RETURN(self);
 }
-static LK_EXT_DEFCFUNC(to_r__fi) {
+static LK_EXT_DEFCFUNC(to_real__fi) {
     RETURN(lk_fr_new(VM, (double)INT(self)));
 }
-static LK_EXT_DEFCFUNC(to_s__fi_str) {
+static LK_EXT_DEFCFUNC(to_string__fi_str) {
     const char *fmt = pt_list_tocstr(LIST(ARG(0)));
     char *ret;
     lk_string_t *kcret;
@@ -148,10 +148,10 @@ static LK_EXT_DEFCFUNC(subtractB__fr_fr) {
     DBL(self) -= DBL(ARG(0));
     RETURN(self);
 }
-static LK_EXT_DEFCFUNC(to_i__fr) {
+static LK_EXT_DEFCFUNC(to_integer__fr) {
     RETURN(lk_fi_new(VM, (int)DBL(self)));
 }
-static LK_EXT_DEFCFUNC(to_s__fr_str) {
+static LK_EXT_DEFCFUNC(to_string__fr_str) {
     const char *fmt = pt_list_tocstr(LIST(ARG(0)));
     char *ret;
     lk_string_t *kcret;
@@ -190,8 +190,8 @@ LK_EXT_DEFINIT(lk_fixnum_extinitfuncs) {
     lk_ext_cfunc(fi, "positive?", positive__fi, NULL);
     lk_ext_cfunc(fi, "subtract", subtract__fi_fi, fi, NULL);
     lk_ext_cfunc(fi, "subtract!", subtractB__fi_fi, fi, NULL);
-    lk_ext_cfunc(fi, "to_r", to_r__fi, NULL);
-    lk_ext_cfunc(fi, "to_s", to_s__fi_str, str, NULL);
+    lk_ext_cfunc(fi, "to real", to_real__fi, NULL);
+    lk_ext_cfunc(fi, "to string", to_string__fi_str, str, NULL);
     lk_ext_cfunc(fi, "zero?", zero__fi, NULL);
     /* */
     lk_ext_global("Real", f);
@@ -213,8 +213,8 @@ LK_EXT_DEFINIT(lk_fixnum_extinitfuncs) {
     lk_ext_cfunc(fr, "positive?", positive__fr, NULL);
     lk_ext_cfunc(fr, "subtract", subtract__fr_fr, fr, NULL);
     lk_ext_cfunc(fr, "subtract!", subtractB__fr_fr, fr, NULL);
-    lk_ext_cfunc(fr, "to_i", to_i__fr, NULL);
-    lk_ext_cfunc(fr, "to_s", to_s__fr_str, str, NULL);
+    lk_ext_cfunc(fr, "to integer", to_integer__fr, NULL);
+    lk_ext_cfunc(fr, "to string", to_string__fr_str, str, NULL);
     lk_ext_cfunc(fr, "zero?", zero__fr, NULL);
 }
 

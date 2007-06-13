@@ -21,10 +21,10 @@ Range      := Object/with { /.type := 'Range' }
 Boolean/do {
 
     # Always returns itself.
-    /to_b := { | /. }
+    /to boolean := { | /. }
 
     # Returns true or false.
-    /to_c := { | /to_s }
+    /to code := { | /to string }
 }
 
 # Buffer < GenericList
@@ -171,13 +171,13 @@ Enumerable/do {
     }
 
     # Returns a sorted list of items.
-    /sort := { args... | /to_l/sort![*args] }
+    /sort := { args... | /to list/sort![*args] }
 
     # Returns a list of all the items.
-    /to_l := { | /reduce[[ ]] { a; v | a/push![v] } }
+    /to list := { | /reduce[[ ]] { a; v | a/push![v] } }
 
     # Returns a space delimited string composed of all the items.
-    /to_s := { | /reduce[''] { a; v | a ++ v/to_s ++ ' ' } }
+    /to string := { | /reduce[''] { a; v | a ++ v/to string ++ ' ' } }
 }
 
 # Environment
@@ -192,16 +192,16 @@ ENV/do {
 # Error
 Error/do {
     /init := { /message : String | }
-    /to_s := { | /message/to_s }
+    /to string := { | /message/to string }
 }
 MessageError/do {
-    /to_s := { |
-        'Unable to send ' ++ /message ++ /args/to_c ++
-        ' message to ' ++ /receiver/to_c
+    /to string := { |
+        'Unable to send ' ++ /message ++ /args/to code ++
+        ' message to ' ++ /receiver/to code
     }
 }
 NameError/do {
-    /to_s := { | "Unable to access '" ++ /name ++ "'" }
+    /to string := { | "Unable to access '" ++ /name ++ "'" }
 }
 
 # Extension
@@ -215,7 +215,7 @@ F/do {
     # Always calls if_false argument.
     /then = { if_true; if_false | if_false[] }
     /not? := true
-    /to_s := 'false'
+    /to string := 'false'
 }
 
 # File
@@ -292,7 +292,7 @@ GenericList/do {
     /sort! := /.retrieve['quicksort!']
 
     # Returns true if there are any items in the list, false otherwise.
-    /to_b := { | /count != 0 }
+    /to boolean := { | /count != 0 }
 
     # Inserts the value argument before the first item in the list.
     /unshift! := { value | /insert![0; value]; /. }
@@ -307,22 +307,22 @@ GenericList/do {
 GenericSet/do {
 
     # Returns true if there are any items in the set, false otherwise.
-    /to_b := { | /count != 0 }
+    /to boolean := { | /count != 0 }
 }
 
 # Integer < Number
 Integer/do {
-    /add := { value : Real | /to_r + value }
-    /cmp := { to : Real | /to_r - to }
-    /divide := { by : Real | /to_r % by }
-    /eq? := { to : Real | /to_r == to }
+    /add := { value : Real | /to real + value }
+    /cmp := { to : Real | /to real - to }
+    /divide := { by : Real | /to real % by }
+    /eq? := { to : Real | /to real == to }
     /integer? := true
-    /multiply := { by : Real | /to_r * by }
-    /subtract := { value : Real | /to_r - value }
+    /multiply := { by : Real | /to real * by }
+    /subtract := { value : Real | /to real - value }
 
     # Always returns itself.
-    /to_i := { | /. }
-    /to_s := { | /to_s['%i'] }
+    /to integer := { | /. }
+    /to string := { | /to string['%i'] }
 }
 
 # IpAddress
@@ -354,16 +354,16 @@ List/do {
         /count < 1 ?? return['']
         /rest/reduce[/first/clone] { a; v | a << delim << v }
     }
-    /to_c := { | '[' ++ (/map { x | x/to_c } ->join['; ']) ++ ']' }
-    /to_l := { | /clone }
+    /to code := { | '[' ++ (/map { x | x/to code } ->join['; ']) ++ ']' }
+    /to list := { | /clone }
 }
 
 # N (nil) < Boolean
 N/do {
     /nil? := true
-    /to_b := false
-    /to_c := { | /to_s }
-    /to_s := 'nil'
+    /to boolean := false
+    /to code := { | /to string }
+    /to string := 'nil'
 }
 
 # NegativeInfinity (-inf)
@@ -372,7 +372,7 @@ NegativeInfinity/do {
     /cmp := { to | -1 }
     /inf? := true
     /negate := PositiveInfinity
-    /to_s := '-inf'
+    /to string := '-inf'
 }
 
 # Number
@@ -386,9 +386,9 @@ Number/do {
     /integer? := false
     /real? := false
     /succ := { | /. + 1 }
-    /to_b := { | /. != 0 }
-    /to_c := { | /to_s }
-    /to_n := { | /. }
+    /to boolean := { | /. != 0 }
+    /to code := { | /to string }
+    /to number := { | /. }
     /also[Comparable]
 }
 
@@ -398,7 +398,7 @@ Object/do {
 
     # Returns other if the receiver evaluates
     # to true or false otherwise.
-    /and := { other | /to_b ?? other :: false }
+    /and := { other | /to boolean ?? other :: false }
     /cmp := { to : PositiveInfinity | -1 }
     /cmp  = { to : NegativeInfinity | 1 }
     /eq? := { to | /.id == to/.id }
@@ -407,21 +407,21 @@ Object/do {
     # Default init function that never does anything.
     /init := { | }
     /match? := /.retrieve['eq?']
-    /then := { args... | /to_b/then[*args] }
+    /then := { args... | /to boolean/then[*args] }
     /ne? := { to | /. == to ->not? }
     /new := { args... | new := /alloc; new/init[*args]; new }
     /nil? := false
     /nil_or := { other | /nil? ?? other :: /. }
-    /or := { other | /to_b ?? /. :: other }
+    /or := { other | /to boolean ?? /. :: other }
     /print := { | /print[stdout] }
     /print  = { to | to/write[/.]; /. }
     /println := { | /println[stdout] }
     /println  = { to | to/write[/.; nl]; /. }
     /subtract := { other | /clone/subtract![other] }
     /to := { to | Range/new[/.; to] }
-    /to_b := true
-    /to_c := { | '<<' ++ /to_s ++ '>>' }
-    /to_s := { | /.type ++ '#' ++ /.id/to_s }
+    /to boolean := true
+    /to code := { | '<<' ++ /to string ++ '>>' }
+    /to string := { | /.type ++ '#' ++ /.id/to string }
 }
 
 # PositiveInfinity (inf)
@@ -430,7 +430,7 @@ PositiveInfinity/do {
     /cmp := { to | 1 }
     /inf? := true
     /negate := NegativeInfinity
-    /to_s := 'inf'
+    /to string := 'inf'
 }
 
 # Random
@@ -454,29 +454,29 @@ Range/do {
         }
     }
     /init := { /from; /to | }
-    /to_c := { | /from/to_c ++ ' ~ ' ++ /to/to_c }
+    /to code := { | /from/to code ++ ' ~ ' ++ /to/to code }
     /also[Enumerable]
 }
 
 # Real < Number
 Real/do {
-    /add := { value : Integer | /. + value/to_r }
-    /ceil := { | i := /to_i; /. > 0 && /. - i != 0.0 ?? i + 1 :: i }
-    /cmp := { to : Integer | /. - to/to_r }
-    /divide := { by : Integer | /. % by/to_r }
-    /eq? := { to : Integer | /. == to/to_r }
-    /floor := { | i := /to_i; /. > 0 || /. - i == 0.0 ?? i :: i - 1 }
-    /multiply := { by : Integer | /. * by/to_r }
+    /add := { value : Integer | /. + value/to real }
+    /ceil := { | i := /to integer; /. > 0 && /. - i != 0.0 ?? i + 1 :: i }
+    /cmp := { to : Integer | /. - to/to real }
+    /divide := { by : Integer | /. % by/to real }
+    /eq? := { to : Integer | /. == to/to real }
+    /floor := { | i := /to integer; /. > 0 || /. - i == 0.0 ?? i :: i - 1 }
+    /multiply := { by : Integer | /. * by/to real }
     /real? := true
     /round := { |
-        i := /to_i
+        i := /to integer
         /. - i > 0.5 ?? i + 1 ::
         /. - i < -0.5 ?? i - 1 ::
         i
     }
-    /subtract := { value : Integer | /. - value/to_r }
-    /to_r := { | /. }
-    /to_s := { | /to_s['%f'] }
+    /subtract := { value : Integer | /. - value/to real }
+    /to real := { | /. }
+    /to string := { | /to string['%f'] }
 }
 
 # Set < GenericSet
@@ -538,12 +538,11 @@ String/do {
     # Replaces all the occurences of from argument in the string
     # with to argument.
     /replace! := { from; to | /divide[from]/join[to] }
-    /to_c := { | "'" ++ /. ++ "'" }
-    /to_f := { ... }
-    /to_i := { ... }
+    /to code := { | "'" ++ /. ++ "'" }
+    /to integer := { ... }
 
     # Returns itself.
-    /to_s := { | /. }
+    /to string := { | /. }
     /trim := { args... | /clone/trim![*args] }
 
     # Removes all the whitespaces from beginning and end of the string.
@@ -581,7 +580,7 @@ T/do {
     # Always calls if_true argument.
     /then = { if_true; if_false | if_true[] }
     /not? := false
-    /to_s := 'true'
+    /to string := 'true'
 }
 
 # Vector < GenericList
@@ -629,7 +628,7 @@ WritableFile/do {
 
     # Convert each of the arguments into Strings
     # and calls write on them.
-    /write = { args... | args/each { v | /write[v/to_s] }; /. }
+    /write = { args... | args/each { v | /write[v/to string] }; /. }
 
     # Calls write on the arguments and nl.
     /writeln := { args... | /write[*args; nl] }
@@ -647,7 +646,7 @@ rescue { e |
         } :: {
             i := c/.current
             stderr/writeln['    @ ';
-            i/RESOURCE; ' '; i/LINE; ': '; i/MESSAGE; f/.args/to_c]
+            i/RESOURCE; ' '; i/LINE; ': '; i/MESSAGE; f/.args/to code]
         }
     }
 }

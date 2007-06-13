@@ -14,7 +14,7 @@ static LK_EXT_DEFCFUNC(alloc__ip_str) {
     inet_aton(pt_list_tocstr(LIST(ARG(0))), &IPADDR->addr);
     RETURN(self);
 }
-static LK_EXT_DEFCFUNC(to_s__ip) {
+static LK_EXT_DEFCFUNC(to_string__ip) {
     RETURN(lk_string_newfromcstr(VM, inet_ntoa(IPADDR->addr)));
 }
 
@@ -84,7 +84,7 @@ LK_EXT_DEFINIT(lk_socket_extinit) {
     lk_ext_global("IpAddress", ip);
     lk_ext_set(ip, "ANY", lk_object_alloc(ip));
     lk_ext_cfunc(ip, "init", alloc__ip_str, str, NULL);
-    lk_ext_cfunc(ip, "to_s", to_s__ip, NULL);
+    lk_ext_cfunc(ip, "to string", to_string__ip, NULL);
     /* */
     lk_ext_global("Socket", sock); LK_VM_SETGLOBAL(vm, Socket, sock);
     lk_ext_cfunc(sock, "accept", accept__sock, NULL);

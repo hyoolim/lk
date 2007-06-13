@@ -33,11 +33,11 @@ static LK_OBJECT_DEFALLOCFUNC(alloc__parser) {
     PARSER->comments = pt_list_allocptr();
     /* unary op names */
     setunaryop(PARSER, "!",    "not?");
-    setunaryop(PARSER, "@",    "to_l");
+    setunaryop(PARSER, "@",    "to list");
     setunaryop(PARSER, "#",    "count");
-    setunaryop(PARSER, "$",    "to_s");
+    setunaryop(PARSER, "$",    "to string");
     setunaryop(PARSER, "-",    "negate");
-    setunaryop(PARSER, "+",    "to_n");
+    setunaryop(PARSER, "+",    "to number");
     /* binary op names */
     setbinaryop(PARSER, "~",   "to");
     setbinaryop(PARSER, "~=",  "match?");

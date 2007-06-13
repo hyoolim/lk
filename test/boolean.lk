@@ -5,6 +5,6 @@ Tester/new['Boolean']/do {
 /test['?? #2'; false ?? 1 :: 2; 2]
 /test['not? #1'; true/not?; false]
 /test['not? #2'; false/not?; true]
-/test['to_s'; true/to_s; 'true']
+/test['to string'; true/to string; 'true']
 /finish
 }

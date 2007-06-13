@@ -25,7 +25,7 @@ c := ['albatross'; 'dog'; 'horse']
 /test['reject[if : Function]'; a/reject { x --- x < 3 }; [3; 4]]
 /test['sort[using] #1'; b/sort; [1; 1; 2; 2; 2; 3; 4; 6; 10]]
 /test['sort[using] #2'; b/sort { a; b --- b <=> a }; [10; 6; 4; 3; 2; 2; 2; 1; 1]]
-/test['to_l'; a/to_l; [1; 2; 3; 4]]
-/test['to_s'; a/to_s; '1 2 3 4 ']
+/test['to list'; a/to list; [1; 2; 3; 4]]
+/test['to string'; a/to string; '1 2 3 4 ']
 /finish
 }

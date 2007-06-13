@@ -37,7 +37,7 @@ DocumentGeneratorFile := WritableFile/with {
             }
         }
         slots = slots/sort { x; y --- x[1] <=> y[1] }
-        non_words := '0-9A-Za-z'/to_cs/negate!
+        non_words := '0-9A-Za-z'/to character set/negate!
         /write['<h2 class="slots_header">Slots</h2>']
         /write['<p class="slot_names">']
         slots/each { slot ---
@@ -67,7 +67,7 @@ DocumentGeneratorFile := WritableFile/with {
                     function/signature/count > 0 ?? {
                         /write['[']
                         function/signature/each { i; sig ---
-                            sig_name := sig/name ||| 'a' ++ i/to_s
+                            sig_name := sig/name ||| 'a' ++ i/to string
                             /write['<span class="arg">'; sig_name]
                             sig_type := sig/type
                             sig_type/nil?/not? && Object != sig_type ?? {
@@ -92,7 +92,7 @@ DocumentGeneratorFile := WritableFile/with {
                 function/ancestor?[Function] ?? {
                     function/doc/nil?/not? ?? /write[function/doc]
                 } :: {
-                    /write['Always returns '; function/to_c; '.']
+                    /write['Always returns '; function/to code; '.']
                 }
                 /write['</p>']
                 /write['</div>']

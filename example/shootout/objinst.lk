@@ -1,0 +1,28 @@
+Toggle := Object/new/with {
+    ./init := { start-state : Boolean --- ./bool := start-state }
+    ./value := { --- ./bool }
+    ./activate := { --- ./bool = !(./bool); . }
+}
+NthToggle := Toggle/new/with {
+    ./init := { start-state : Boolean; max-counter : FixedInteger ---
+        ./bool := start-state
+        ./count-max := max-counter
+        ./counter := 0
+    }
+    ./activate := {
+        ./counter = ./counter + 1
+        ./counter >= ./count-max ?? { ./bool = !(./bool); ./counter = 0 }
+        .
+    }
+}
+
+n := 40000
+toggle := Toggle/new[true]
+1 ~ 5 ->each { toggle/activate/value ?? 'true' :: 'false' ->println }
+1 ~ n ->each { toggle = Toggle/new[true] }
+
+''/println
+
+ntoggle := NthToggle/new[true; 3]
+1 ~ 8 ->each { ntoggle/activate/value ?? 'true' :: 'false' ->println }
+1 ~ n ->each { ntoggle = NthToggle/new[true; 3] }

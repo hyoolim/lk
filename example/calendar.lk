@@ -1,0 +1,15 @@
+include['datetime.lk']
+write['Year? ']; year := read[0c\n]/chop!/to-n
+write['Month? ']; month := read[0c\n]/chop!/to-n
+d := Date/new[year; month; 1; 0; 0; 0.0]
+d/day = 1
+writeln[d/month/to-s ++ '/' ++ d/year/to-s ->justify-r[27]]
+writeln['-' ** 27]
+writeln['Sun Mon Tue Wed Thu Fri Sat']
+dow := d/day-of-week
+write['    ' ** dow]
+d ~ (d + Duration/new[0; 1; -1; 0; 0; 0]) ->each { v ---
+    write[v/day/to-s['% 3d ']]
+    (dow += 1) %% 7 == 0 ?? writeln
+}
+writeln

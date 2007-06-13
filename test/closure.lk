@@ -1,0 +1,14 @@
+include['tester.lk']
+Tester/new['Closure']/do {
+maker := { x --- { x += 1 } }
+c1 := maker[0]
+c2 := maker[10]
+
+/test['c1 #1'; c1; 1]
+/test['c2 #1'; c2; 11]
+/test['c2 #2'; c2; 12]
+/test['c1 #2'; c1; 2]
+/test['c2 #3'; c2; 13]
+/test['c1 #3'; c1; 3]
+/finish
+}

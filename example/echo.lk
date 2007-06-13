@@ -1,0 +1,6 @@
+'press q<enter> to quit'/println
+loop {
+    line := StandardInput/read['\nt'/to-cs]/limit![-1]
+    line == 'q' ?? break
+    line/println
+}

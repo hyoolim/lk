@@ -1,0 +1,6 @@
+a := { raise['raising error in a']; 'after a'/println }
+b := { a['calling a'; 'to die' ]; 'after b'/println }
+c := { b['calling b']; 'after c'/println }
+d := { c['calling c'; 'with'; 'some'; 'args']; 'after d'/println }
+d['calling d'; 'to start']
+'end'/println

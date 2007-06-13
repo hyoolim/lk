@@ -1,0 +1,8 @@
+include['tester.lk']
+Tester/new['Function']/do {
+func1 := { x; args... --- args }
+
+/test['{ x; rest... --- } syntax #1'; func1[1]; [ ]]
+/test['{ x; rest... --- } syntax #2'; func1[1; 2; 3]; [2; 3]]
+/finish
+}

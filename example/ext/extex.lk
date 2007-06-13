@@ -1,0 +1,6 @@
+include['../v1.lk']
+Extension/load['+build/liblk-extex.so'; 'lk_extex_extinit']
+e := ExtensionExample/new
+e/x = 1
+e/y = 2
+e/add/println

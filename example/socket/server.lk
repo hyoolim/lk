@@ -1,0 +1,13 @@
+\\ Socket - server
+'awaiting connection...'/println
+server := Socket/new
+server/bind[IpAddress/new['127.0.0.1']; 1234]
+server/listen
+conn := server/accept
+'connected! - will echo client input'/println
+'enter q<enter> to quit both server and client'/println
+loop {
+    line := conn/read[0c\n]/limit[-1]
+    line == 'q' ?? break
+    line/println
+}

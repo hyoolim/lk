@@ -1,0 +1,27 @@
+prefix := bindir := libdir := yn := ''
+loop {
+
+# ask.
+'\n* Please configure lk:'/println
+'  * PREFIX[/usr/local]? ' ->print; prefix = read[0c\n] ->chop!
+prefix ||= '/usr/local'
+'  * BINDIR[' ++ prefix ++ '/bin]? ' ->print; bindir = read[0c\n] ->chop!
+bindir ||= prefix ++ '/bin'
+'  * LIBDIR[' ++ prefix ++ '/lib/lk]?' ->print; libdir = read[0c\n] ->chop!
+libdir ||= prefix ++ '/lib/lk'
+
+# verify.
+'\n* Please confirm the following inputs:'/println
+'  * PREFIX="' ++ prefix ++ '"' ->println
+'  * BINDIR="' ++ bindir ++ '"' ->println
+'  * LIBDIR="' ++ libdir ++ '"' ->println
+'\n* Write the config file[Y/n]? ' ->print; yn = read[0c\n] ->chop!
+yn/lc != 'n' ?? break;
+}
+
+# save.
+WritableFile/new['+build/config']/do {
+    /writeln['PREFIX="' ++ prefix ++ '"']
+    /writeln['BINDIR="' ++ bindir ++ '"']
+    /writeln['LIBDIR="' ++ libdir ++ '"']
+}

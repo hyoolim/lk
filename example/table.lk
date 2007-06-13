@@ -1,0 +1,27 @@
+Row := List/with {
+    /.type := 'Row'
+    /eq? := { x --- /map { v --- v == x } }
+    /gt? := { x --- /map { v --- v > x } }
+    /lt? := { x --- /map { v --- v < x } }
+}
+Table := Object/with {
+    /.type := 'Table'
+    /init := { /columns... ---
+        /data := Dictionary/new
+        /columns/each { v; i ---
+            /data/set![v; r := Row/new]
+            /define-assign![v; r]
+        }
+    }
+    /insert := { params... ---
+        /columns/count != params/count ?? { raise['wrong number of params'] }
+        /columns/each { v; i --- /data[v]/push![params[i]] }
+    }
+}
+
+person := Table/new['name'; 'gender'; 'age']
+person/insert['hyoo'; 'm'; 25]
+person/insert['jason'; 'm'; 25]
+person/insert['hai'; 'm'; 20]
+person/insert['scott'; 'f'; 40]
+person/age < 30 ->println

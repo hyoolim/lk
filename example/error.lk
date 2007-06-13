@@ -1,0 +1,17 @@
+# error.
+rescue { e --- '## outside: caught error: '/print; e/println; resume }
+raise['dying outside']
+'## outside: after error'/println
+once {
+    rescue { e --- '## inside1: caught error: '/print; e/println }
+    raise['dying inside1']
+    '## inside1: after error'/println
+}
+'## outside: after inside1'/println
+once {
+    raise['dying inside2']
+    '## inside2: after error'/println
+}
+'## outside: after inside2'/println
+rescue { e --- e/println; raise['dying inside rescue block'] }
+raise['test dying inside rescue block']

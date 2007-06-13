@@ -1,0 +1,6 @@
+include['tester.lk']
+Tester/new['Object']/do {
+
+## /test['repeat[count] #1'; 3 ** 3; [3; 3; 3]]
+/finish
+}

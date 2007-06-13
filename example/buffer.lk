@@ -1,0 +1,3 @@
+# Buffer
+a-file := File/new['examples/buffer.lk'; 'r']
+a-file/read[20]/to-code/println

@@ -1,0 +1,13 @@
+CsvJoiner := Object/with {
+    /csv-line := { list ---
+        list/map { i ---
+            i/find[',"\n'/to-cs; 0]/nil? ?? i :: {
+                '"' ++ i/replace['"'; '""'] ++ '"'
+            }
+        } -> join[',']
+    }
+    /to-csv := { args... ---
+        args/map { item --- /csv-line[item] } -> join['\n']
+    }
+}
+CsvJoiner/to-csv[['this "is a" test'; 'yeah!'; 'baby']; ['line2'; 'line3\n with a lf in it.'; 'blah']] ->println

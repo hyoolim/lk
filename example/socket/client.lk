@@ -1,0 +1,12 @@
+\\ Socket - client
+'initiating connection...'/println
+client := Socket/new
+client/connect[IpAddress/new['127.0.0.1']; 1234]
+'writing something and see it echo on the server.'/println
+'enter q<enter> to quit both server and client'/println
+loop {
+    line := StandardInput/read[0c\n]/limit[-1]
+    client/write[line ++ '\n']
+    client/flush
+    line == 'q' ?? break
+}

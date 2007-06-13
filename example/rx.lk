@@ -1,0 +1,10 @@
+include['tester.lk']
+Tester/new['RegularGrammar']/do {
+
+/test['ab ~= *a b'; 'ab' ~= rg[rg*['a']; 'b']; 'ab']
+/test['aaaab ~= *a b'; 'aaaab' ~= rg[rg*['a']; 'b']; 'aaaab']
+/test['b ~= *a b'; 'b' ~= rg[rg*['a']; 'b']; 'b']
+# /test['abab ~= {2, 3}[ab]'; 'abab' ~= rg[rg#[2; 3; 'ab'/to-cs]]; 'aba']
+# /test['a ~= {2, 3}[ab]'; 'a' ~= rg[rg#[2; 3; 'ab'/to-cs]]; false]
+/finish
+}

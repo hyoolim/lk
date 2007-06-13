@@ -1,0 +1,14 @@
+include['tester.lk']
+Tester/new['Dictionary']/do {
+d1 := Dictionary/new/do {
+    /set!['x'; 10]
+    /set!['y'; 20]
+    /set!['x'; 30]
+    /set!['z'; 40]
+}
+/test['at'; d1/at['y']; 20]
+/test['count'; d1/count; 3]
+/test['keys'; d1/keys/sort; ['x'; 'y'; 'z']]
+/test['values'; d1/values/sort; [20; 30; 40]]
+/finish
+}

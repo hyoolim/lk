@@ -1,0 +1,8 @@
+Directory/new['..']/directories -> println
+
+# File
+File/new['example/file.lk'; 'r']/read-all/print
+a-file := File/new['test.file'; 'w']
+a-file/write['hello ']
+a-file/write['world!\n']
+File/new['non-existent-file.lk'; 'r']

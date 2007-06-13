@@ -1,0 +1,8 @@
+THIS IS ALPHA RELEASE. USE AT YOUR OWN RISK.
+
+To build and run:
+
+$ make
+$ +build/lk filename
+
+Directory named 'example' contains some example source files.

@@ -1,0 +1,14 @@
+Tester := Object/new/do {
+    /init := { /name --- /index := 0 }
+    /finish := { ---
+        /name/to_s ++ ': Ran ' ++ /index/to_s ++
+        ' test(s) successfully' ->println
+    }
+    /test := { name; actual; expected ---
+        /index += 1
+        actual != expected ?? {
+            raise[/name/to_s ++ ": '" ++ name/to_s ++ "' test failed: " ++
+            'expected ' ++ expected/to_c ++ ' but got ' ++ actual/to_c]
+        }
+    }
+}

@@ -1,0 +1,25 @@
+include['tester.lk']
+Tester/new['Inheritance']/do {
+O := Object/new; O/.type := 'O'
+O/to_s := { /.type }
+A := O/new; A/.type := 'A'
+B := O/new; B/.type := 'B'
+C := O/new; C/.type := 'C'
+D := O/new; D/.type := 'D'
+E := O/new; E/.type := 'E'
+K1 := C/new; K1/.type := 'K1'
+K1/also[B]
+K1/also[A]
+K2 := E/new; K2/.type := 'K2'
+K2/also[B]
+K2/also[D]
+K3 := A/new; K3/.type := 'K3'
+K3/also[D]
+Z := K3/new; Z/.type := 'Z'
+Z/also[K2]
+Z/also[K1]
+
+/test['Z/ancestors'; Z/ancestors; [Z; K1; K2; K3; D; A; B; C; E; O; Object]]
+/test['Z/ancestor?[D]'; Z/ancestor?[D]; true]
+/finish
+}

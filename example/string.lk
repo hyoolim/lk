@@ -1,0 +1,48 @@
+# String
+#
+'--- ** (repetition) ---'/println
+'Ho! ' ** 3 ->to-c ->println
+#
+'--- << (append) ---'/println
+a := 'hello '
+a << 'world'
+a ->to-c ->println
+#
+'--- <=> (comparison) ---'/println
+'abcdef' <=> 'abcde' ->to-c ->println
+'abcdef' <=> 'abcdef' ->to-c ->println
+'abcdef' <=> 'abcdefg' ->to-c ->println
+'abcdef' <=> 'ABCDEF' ->to-c ->println
+#
+'--- each ---'/println
+'hello;world'/each[';'] { v --- '<'/print; v/print; '>'/println }
+#
+'--- index ---'/println
+'hello'/find['e'] ->to-c ->println
+'hello'/find['lo'] ->to-c ->println
+'hello'/find['a'] ->to-c ->println
+#
+'--- justify-l ---'/println
+'hello'/justify-l[4] ->to-c ->println
+'hello'/justify-l[20] ->to-c ->println
+#
+'--- justify-c ---'/println
+'hello'/justify-c[4] ->to-c ->println
+'hello'/justify-c[20] ->to-c ->println
+#
+'--- justify-r ---'/println
+'hello'/justify-r[4] ->to-c ->println
+'hello'/justify-r[20] ->to-c ->println
+#
+'--- slice-set ---'/println
+'hello'/set![2; 4; 'xyz'] ->to-c ->println
+'hello'/set![-4; 2; 'xyz'] ->to-c ->println
+'hello'/set![2; 0; 'xyz'] ->to-c ->println
+#
+'--- divide ---'/println
+'nows  the time'/divide[' '] ->to-c ->println
+'mellow yellow'/divide['ello'] ->to-c ->println
+#
+'--- char/to-s --'/println
+char := Character/new[] + 48
+char/to-s -> println

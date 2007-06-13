@@ -3,8 +3,12 @@
 #include "fixnum.h"
 
 /* ext map - types */
+static LK_OBJECT_DEFALLOCFUNC(alloc__ch) {
+    CHAR(self) = CHAR(proto);
+}
 LK_EXT_DEFINIT(lk_char_extinittypes) {
     vm->t_char = lk_object_allocwithsize(vm->t_object, sizeof(lk_char_t));
+    lk_object_setallocfunc(vm->t_char, alloc__ch);
 }
 
 /* ext map - funcs */

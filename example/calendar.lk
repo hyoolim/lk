@@ -1,15 +1,15 @@
 include['datetime.lk']
-write['Year? ']; year := read[0c\n]/chop!/to-n
-write['Month? ']; month := read[0c\n]/chop!/to-n
+write['Year? ']; year := read[0c\n]/chop!/to number
+write['Month? ']; month := read[0c\n]/chop!/to number
 d := Date/new[year; month; 1; 0; 0; 0.0]
-d/day = 1
-writeln[d/month/to-s ++ '/' ++ d/year/to-s ->justify-r[27]]
-writeln['-' ** 27]
-writeln['Sun Mon Tue Wed Thu Fri Sat']
-dow := d/day-of-week
+header := 'Sun Mon Tue Wed Thu Fri Sat'
+writeln[d/month/to string ++ '/' ++ d/year/to string ->justify right[header/count]]
+writeln['-' ** header/count]
+writeln[header]
+dow := d/day of week
 write['    ' ** dow]
 d ~ (d + Duration/new[0; 1; -1; 0; 0; 0]) ->each { v ---
-    write[v/day/to-s['% 3d ']]
+    write[v/day $ '% 3d ']
     (dow += 1) %% 7 == 0 ?? writeln
 }
 writeln

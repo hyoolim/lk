@@ -5,52 +5,52 @@ include['duration.lk']
 Date := Object/with {
     # static helpers
     VirtualMachine/epoch := [1970; 1; 1; 0; 0; 0.0; 0.0]
-    days-in-month := [ 31;28;31;30;31;30;  31;31;30;31;30;31]
-    days-in-month-leap := [ 31;29;31;30;31;30;  31;31;30;31;30;31]
-    f-vector := [ 306;337;0; 31;61;92; 122;153;184; 214;245;275 ]
-    days-in-week := [ 'Sunday'; 'Monday'; 'Tuesday'; 'Wednesday'; 'Thursday'; 'Friday'; 'Saturday']
-    days-in-week-short := [ 'Sun'; 'Mon'; 'Tue'; 'Wed'; 'Thu'; 'Fri'; 'Sat' ]
+    days in month := [ 31;28;31;30;31;30;  31;31;30;31;30;31]
+    days in month leap := [ 31;29;31;30;31;30;  31;31;30;31;30;31]
+    f vector := [ 306;337;0; 31;61;92; 122;153;184; 214;245;275 ]
+    days in week := [ 'Sunday'; 'Monday'; 'Tuesday'; 'Wednesday'; 'Thursday'; 'Friday'; 'Saturday']
+    days in week short := [ 'Sun'; 'Mon'; 'Tue'; 'Wed'; 'Thu'; 'Fri'; 'Sat' ]
 
-    valid-date? := { y; m; d --- #  {{{
+    valid date? := { y; m; d --- #  {{{
         m < 1 || m > 12 ?? return[F]
         y < 1 ?? return[F]
-        di := (/leap-year?[y] ?? days-in-month-leap :: days-in-month)
+        di := (/leap year?[y] ?? days in month leap :: days in month)
         d < 1 || d > di[m - 1] ?? return[F]
         y == 1582 && m == 10 && d > 4 && d < 15 ?? return[F]
         T
     }# }}}
-    valid-time? := { h; m; s --- #  {{{
+    valid time? := { h; m; s --- #  {{{
         h > 23 || h < 0 ?? return[F]
         m > 59 || m < 0 ?? return[F]
         s < 60 || s >= 0 ?? return[T]
         F
     }# }}}
-    make-svar := { h; m; s --- #  {{{
-        (h * 3600)/to-r + (m * 60)/to-r + s
+    make svar := { h; m; s --- #  {{{
+        (h * 3600)/to real + (m * 60)/to real + s
     }# }}}
-    make-dvar := { y; m; d --- #  {{{
+    make dvar := { y; m; d --- #  {{{
         # rata-die from http://vsg.cape.com/~pbaum/da/te/rata.htm
         z := (m < 3 ?? y - 1 :: y)
-        f := f-vector[(m - 1)]
+        f := f vector[(m - 1)]
         (d + f + 365 * z + (z % 4) - (z % 100) + (z % 400) - 306)
     } #  }}}
-    make-time := { svar --- #  {{{ 
+    make time := { svar --- #  {{{ 
         #  -i is for "integer" as opposed to "float"/"real"
-        hour-i := (svar % 3600.0)/to-i; hour := hour-i/to-r * 3600.0
-        minute-i := ((svar - hour) % 60.0)/to-i; minute := minute-i/to-r * 60.0
+        hour i := (svar % 3600.0)/to integer; hour := hour i/to real * 3600.0
+        minute i := ((svar - hour) % 60.0)/to integer; minute := minute i/to real * 60.0
         second := svar - hour - minute
-        [hour-i; minute-i; second]
+        [hour i; minute i; second]
     }# }}}
-    make-date := { dvar --- #  {{{
+    make date := { dvar --- #  {{{
         # rata-die from http://vsg.cape.com/~pbaum/date/inrata.htm
         z := dvar + 306
-        g := z/to-r - 0.25
-        a := (g % 36524.25)/to-i
-        b := a - ((a/to-r % 4.0)/to-i)
-        year := ((b + g) % 365.25)/to-i
-        c := b + z - (365.25 * year)/to-i
-        month := ((5.0 * c/to-r + 456.0) % 153.0)/floor
-        day := c - ((153.0 * month/to-r - 457.0) % 5.0)/floor
+        g := z/to real - 0.25
+        a := (g % 36524.25)/to integer
+        b := a - ((a/to real % 4.0)/to integer)
+        year := ((b + g) % 365.25)/to integer
+        c := b + z - (365.25 * year)/to integer
+        month := ((5.0 * c/to real + 456.0) % 153.0)/floor
+        day := c - ((153.0 * month/to real - 457.0) % 5.0)/floor
         month > 12 ?? { year = year + 1; month = month - 12 } 
         [year; month; day]
     }# }}}
@@ -65,62 +65,62 @@ Date := Object/with {
     /hour := 0
     /minute := 0
     /second := 0.0
-     /d-var := { --- 
-         make-dvar[/year; /month; /day]
+     /d var := { --- 
+         make dvar[/year; /month; /day]
      }
-     /s-var := { ---
-         make-svar[/hour; /minute; /second]
+     /s var := { ---
+         make svar[/hour; /minute; /second]
      }
  
      # triggers
-     /year.on-assign := { y ---
-         valid-date?[y; /month; /day]/not? ?? raise['Date Not Valid']
+     /year.on assign := { y ---
+         valid date?[y; /month; /day]/not? ?? raise['Date Not Valid']
          y
      }
-     /month.on-assign := { m ---
-         valid-date?[/year; m; /day]/not? ?? raise['Date Not Valid']
+     /month.on assign := { m ---
+         valid date?[/year; m; /day]/not? ?? raise['Date Not Valid']
          m
      }
-     /day.on-assign := { d ---
-         valid-date?[/year; /month; d]/not? ?? raise['Date Not Valid']
+     /day.on assign := { d ---
+         valid date?[/year; /month; d]/not? ?? raise['Date Not Valid']
          d
      }
-     /hour.on-assign := { h ---
-         valid-time?[h; /minute; /second]/not? ?? raise['Time Not Valid']
+     /hour.on assign := { h ---
+         valid time?[h; /minute; /second]/not? ?? raise['Time Not Valid']
          h
      }
-     /minute.on-assign := { m ---
-         valid-time?[/hour; m; /second]/not? ?? raise['Time Not Valid']
+     /minute.on assign := { m ---
+         valid time?[/hour; m; /second]/not? ?? raise['Time Not Valid']
          m
      }
-     /second.on-assign := { s ---
-         valid-time?[/hour; /minute; s]/not? ?? raise['Time Not Valid']
+     /second.on assign := { s ---
+         valid time?[/hour; /minute; s]/not? ?? raise['Time Not Valid']
          s
      }
 
     #  "Day of Week" Stuff {{{
-    /day-of-week := { ---
-        /d-var %% 7
+    /day of week := { ---
+        /d var %% 7
     }
-    /day-of-week-string := { day-of-week-number ---
-        days-in-week[day-of-week-number]
+    /day of week string := { day of week number ---
+        days in week[day of week number]
     } + { --- 
-        /day-of-week-string[/day-of-week]
+        /day of week string[/day of week]
     }
     #  }}}
     #  "year" stuff {{{
-    /day-of-year := { ---
+    /day of year := { ---
         jan1 := Date/new[/year; 1; 1; 0; 0; 0.0; /tz]
-        /d-var - jan1/d-var + 1
+        /d var - jan1/d var + 1
     }
-    /days-in-year := { --- /leap-year? ?? 366 :: 365 }
-    /leap-year? := { y --- 
+    /days in year := { --- /leap year? ?? 366 :: 365 }
+    /leap year? := { y --- 
          y %% 4 != 0 ?? return[F]
          y < 1582 ?? return[T]
          y %% 100 != 0 ?? return[T]
          y %% 400 == 0
     } + { ---
-        /leap-year?[/year]
+        /leap year?[/year]
     }
     #  }}}
 
@@ -136,38 +136,38 @@ Date := Object/with {
     /add := { duration --- /clone/add![duration] }
     #  }}}
     /subtract := { date --- #  {{{
-         dy-diff := /d-var - date/d-var
-         sc-diff := /s-var - date/s-var
-         Duration/new[0; 0; dy-diff; 0; 0; sc-diff]
+         dy diff := /d var - date/d var
+         sc diff := /s var - date/s var
+         Duration/new[0; 0; dy diff; 0; 0; sc diff]
     }
     #  }}}
 
     # utility methods
     /normalize! := { yr; mo; dy; hr; mi; sc; tz --- # {{{
         # time to seconds first
-        svar := make-svar[hr; mi; sc]
-        days-extra := svar/to-i % 86400
-        svar = svar - (days-extra * 86400)/to-r
-        dy = dy + days-extra
+        svar := make svar[hr; mi; sc]
+        days extra := svar/to integer % 86400
+        svar = svar - (days extra * 86400)/to real
+        dy = dy + days extra
         svar < 0.0 ?? {
             svar = svar + 86400.0
             dy = dy - 1
         }
 
         # date to days second
-        years-extra := (mo - 1) % 12
-        mo = mo - (years-extra * 12)
-        yr = yr + years-extra
+        years extra := (mo - 1) % 12
+        mo = mo - (years extra * 12)
+        yr = yr + years extra
         mo < 0 ?? {
             mo = mo + 12
             yr = yr - 1
         }
 
-        dvar := make-dvar[yr; mo; dy]
+        dvar := make dvar[yr; mo; dy]
 
         # convert the day/second values into date/time values
-        date := make-date[dvar]
-        time := make-time[svar]
+        date := make date[dvar]
+        time := make time[svar]
 
         # update accessors
         # this is just to keep the valid date triggers from blowing up
@@ -199,40 +199,40 @@ Date := Object/with {
 
     # clone
     /clone := { ---
-        Date/new[*(/to-list)]
+        Date/new[*(/to list)]
     }
 
     # Create Now
     /now := { --- # {{{
-        svar := VirtualMachine/seconds-since-epoch +
-            VirtualMachine/seconds-west-of-utc
+        svar := VirtualMachine/seconds since epoch +
+            VirtualMachine/seconds west of utc
         duration := Duration/new[0; 0; 0; 0; 0; svar]
         date := Date/new[*(VirtualMachine/epoch)]
-        date/tz = VirtualMachine/seconds-west-of-utc
+        date/tz = VirtualMachine/seconds west of utc
         date + duration
     }# }}}
-    /now-gmt := { --- # {{{
+    /now gmt := { --- # {{{
         # Create the date of the epoch
-        a-date := Date/new[*(VirtualMachine/epoch)]
+        a date := Date/new[*(VirtualMachine/epoch)]
         # add the time since epoch for now
-        a-date/second = a-date/second + VirtualMachine/seconds-since-epoch
-        a-date/tz = 0.0
+        a date/second = a date/second + VirtualMachine/seconds since epoch
+        a date/tz = 0.0
         # normalize and return the new date
-        a-date/normalize!
+        a date/normalize!
     }# }}}
 
     # to-something else
-    /to-gmt! := { --- #  {{{
-        /to-timezone![0.0]
+    /to gmt! := { --- #  {{{
+        /to timezone![0.0]
     }
-    /to-gmt := { --- /clone/to-gmt! } #  }}}
-    /to-timezone! := { offset --- #  {{{
-        svar := /s-var
+    /to gmt := { --- /clone/to gmt! } #  }}}
+    /to timezone! := { offset --- #  {{{
+        svar := /s var
         svar = (svar - /tz) + offset
         svar > 86400 || svar < 0 ?? {
             /normalize![/year; /month; /day; 0; 0; svar; offset]
         } :: {
-            time := make-time[svar]
+            time := make time[svar]
             /hour = time@0
             /minute = time@1
             /second = time@2
@@ -240,42 +240,42 @@ Date := Object/with {
         }
         /.
     }
-    /to-timezone := { offset --- /clone/to-timezone![offset] } #  }}}
-    /to-localtime! := { --- #  {{{
-        /to-timezone![VirtualMachine/timezone]
+    /to timezone := { offset --- /clone/to timezone![offset] } #  }}}
+    /to localtime! := { --- #  {{{
+        /to timezone![VirtualMachine/timezone]
     }
-    /to-localtime := { --- /clone/to-localtime! } #  }}}
-    /to-list := { ---
+    /to localtime := { --- /clone/to localtime! } #  }}}
+    /to list := { ---
         [/year; /month; /day; /hour; /minute; /second; /tz]
     }
-    /to-s := { ---
-        '[Date: ' ++ /year/to-s ++ '-' ++ /month/to-s ++ '-' ++
-                /day/to-s ++ ' ' ++ /hour/to-s ++ ':' ++ /minute/to-s ++
-                ':' ++ /second/to-s ++ ' ' ++ /tz/to-i/to-s ++ ']'
+    /to string := { ---
+        '[Date: ' ++ /year/to string ++ '-' ++ /month/to string ++ '-' ++
+                /day/to string ++ ' ' ++ /hour/to string ++ ':' ++ /minute/to string ++
+                ':' ++ /second/to string ++ ' ' ++ /tz/to integer/to string ++ ']'
     }
     /serialize := { ---
         # verify date before writing.
-        [/d-var; /s-var]
+        [/d var; /s var]
     }
     
     # comparable
     /cmp := { other ---
-        d1 := /to-gmt
-        d2 := other/to-gmt
-        d-cmp := d1/d-var - d2/d-var
-        s-cmp := d1/s-var - d2/s-var
-        d-cmp == 0 ?? {
-            s-cmp > 0.0 ?? 1 ::
-            s-cmp < 0.0 ?? -1 ::
+        d1 := /to gmt
+        d2 := other/to gmt
+        d cmp := d1/d var - d2/d var
+        s cmp := d1/s var - d2/s var
+        d cmp == 0 ?? {
+            s cmp > 0.0 ?? 1 ::
+            s cmp < 0.0 ?? -1 ::
             0
-        } :: d-cmp
+        } :: d cmp
     }
     /also[Comparable]
 
     # range-support
-    /succ! := { day-change ---
-        day := /day + day-change;
-        di := (/leap-year? ?? days-in-month-leap :: days-in-month)
+    /succ! := { day change ---
+        day := /day + day change;
+        di := (/leap year? ?? days in month leap :: days in month)
         day > di[/month - 1] || day < 1 ?? {
             /normalize![/year; /month; day; /hour; /minute; /second; /tz]
         } :: { /day = day }
@@ -283,50 +283,50 @@ Date := Object/with {
     } + { ---
         /succ[1]
     }
-    /succ := { day-change ---
-        /clone/succ![day-change]
+    /succ := { day change ---
+        /clone/succ![day change]
     } + { ---
         /succ[1]
     }
 }
 
-'--- a-date (1582-10-15 00:00:00) ---' -> println
-a-date := Date/new[1582; 10; 15; 0; 0; 0.0]
-a-date -> println
-'--- b-date ("Now") ---' -> println
-b-date := Date/now
-b-date -> println
-'--- c-date (b-date/to-gmt) ---' -> println
-c-date := b-date/to-gmt
-c-date -> println
-'--- compare b-date to c-date ---' -> println
-'c-date == b-date '/print;
-(c-date == b-date) -> println
-'--- add two days to c-date  ---' -> println
-c-date/succ![2]
-c-date -> println
-'--- range test b-date to c-date ---' -> println
-(b-date ~ c-date)/each { v --- v/println }
-'--- a-duration (create a duration of 13 months) ---' -> println
-a-duration := Duration/new[0;13;0;0;0;0.0]
-a-duration -> println
-'--- b-duration (normalize 13 months to 1 year and 1 month) ---' -> println
-b-duration := a-duration/normalize
-b-duration -> println
-'--- d-date (add a-duration to b-date) ---' -> println
-d-date := b-date + a-duration
-d-date -> println
-'--- e-date (add b-duration to b-date) ---' -> println
-e-date := b-date + b-duration
-e-date -> println
-'--- e-date subtract b-date ---' -> println
-c-duration := e-date - b-date
-c-duration -> println
+'--- a date (1582-10-15 00:00:00) ---' -> println
+a date := Date/new[1582; 10; 15; 0; 0; 0.0]
+a date -> println
+'--- b date ("Now") ---' -> println
+b date := Date/now
+b date -> println
+'--- c date (b date/to gmt) ---' -> println
+c date := b date/to gmt
+c date -> println
+'--- compare b date to c date ---' -> println
+'c date == b date '/print;
+(c date == b date) -> println
+'--- add two days to c date  ---' -> println
+c date/succ![2]
+c date -> println
+'--- range test b date to c date ---' -> println
+(b date ~ c date)/each { v --- v/println }
+'--- a duration (create a duration of 13 months) ---' -> println
+a duration := Duration/new[0;13;0;0;0;0.0]
+a duration -> println
+'--- b duration (normalize 13 months to 1 year and 1 month) ---' -> println
+b duration := a duration/normalize
+b duration -> println
+'--- d date (add a duration to b date) ---' -> println
+d date := b date + a duration
+d date -> println
+'--- e date (add b duration to b date) ---' -> println
+e date := b date + b duration
+e date -> println
+'--- e date subtract b date ---' -> println
+c duration := e date - b date
+c duration -> println
 '--- done ---' -> println
 
 today := Date/now
-first-of-month := Date/new[today/year; today/month; 1; 12; 0; 0.0; today/tz]
-rest-of-month := Duration/new[0; 1; -1; 0; 0; 0.0]
-end-of-month := first-of-month + rest-of-month
-(first-of-month ~ end-of-month)/each { v --- v/to-s ++  v/day-of-week-string -> println }
+first of month := Date/new[today/year; today/month; 1; 12; 0; 0.0; today/tz]
+rest of month := Duration/new[0; 1; -1; 0; 0; 0.0]
+end of month := first of month + rest of month
+(first of month ~ end of month)/each { v --- v/to string ++  v/day of week string -> println }
 

@@ -55,6 +55,7 @@ static LK_OBJECT_DEFALLOCFUNC(alloc__parser) {
     setbinaryop(PARSER, "**=", "repeat!");
     setbinaryop(PARSER, "-",   "subtract");
     setbinaryop(PARSER, "-=",  "subtract!");
+    setbinaryop(PARSER, "$",   "to string");
     setbinaryop(PARSER, "->",  "send");
     setbinaryop(PARSER, "=",   ".assign!");
     setbinaryop(PARSER, "==",  "eq?");
@@ -86,6 +87,7 @@ static LK_OBJECT_DEFALLOCFUNC(alloc__parser) {
     setprec(PARSER, "+",    60000, LK_PREC_ASSOC_LEFT); /* add/concat/sub */
     setprec(PARSER, "++",   60000, LK_PREC_ASSOC_LEFT);
     setprec(PARSER, "-",    60000, LK_PREC_ASSOC_LEFT);
+    setprec(PARSER, "$",    55000, LK_PREC_ASSOC_LEFT);
     setprec(PARSER, "==",   50000, LK_PREC_ASSOC_NON); /* comparison */
     setprec(PARSER, "!=",   50000, LK_PREC_ASSOC_NON);
     setprec(PARSER, "~=",   50000, LK_PREC_ASSOC_NON);

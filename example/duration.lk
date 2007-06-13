@@ -1,11 +1,11 @@
 Duration := Object/with {
-    make-mvar := { y; m --- (y * 12) + m }
-    make-svar := { h; m; s --- (h * 3600)/to-r + (m * 60)/to-r + s }
+    make mvar := { y; m --- (y * 12) + m }
+    make svar := { h; m; s --- (h * 3600)/to real + (m * 60)/to real + s }
 
     # internal storage
-    /m-var := 0
+    /m var := 0
     /day := 0
-    /s-var := 0.0
+    /s var := 0.0
 
     # accessors
     /year := 0
@@ -15,67 +15,67 @@ Duration := Object/with {
     /second := 0.0
 
     # real triggers
-    /month.on-assign := { m --- /m-var = make-mvar[/year; m]; m }
-    /year.on-assign := { y --- /m-var = make-mvar[y; /month]; y }
-    /second.on-assign := { s --- /s-var = make-svar[/hour; /minute; s]; s }
-    /minute.on-assign := { m --- /s-var = make-svar[/hour; m; /second]; m }
-    /hour.on-assign := { h --- /s-var = make-svar[h; /minute; /second]; h }
+    /month.on assign := { m --- /m var = make mvar[/year; m]; m }
+    /year.on assign := { y --- /m var = make mvar[y; /month]; y }
+    /second.on assign := { s --- /s var = make svar[/hour; /minute; s]; s }
+    /minute.on assign := { m --- /s var = make svar[/hour; m; /second]; m }
+    /hour.on assign := { h --- /s var = make svar[h; /minute; /second]; h }
 
     # init
     /init := { /year; /month; /day; /hour; /minute; /second ---
-    } + { /m-var; /day; /s-var --- /normalize
+    } + { /m var; /day; /s var --- /normalize
     }
     /normalize! := { ---
-        month-number := /m-var
-        second-number := /s-var
-        /year = month-number % 12
-        /month = month-number %% 12
+        month number := /m var
+        second number := /s var
+        /year = month number % 12
+        /month = month number %% 12
 
         # time/date adjustment
-        new-days := second-number/to-i % 86400
-        second-number = second-number - (new-days * 86400)/to-r
-        /day = /day + new-days
-        d-adj := (second-number < 0.0 ?? -1 :: 1)
-        second-number < 0.0 || second-number >= 86400.0 ?? {
-            /day = /day + d-adj
-            second-number = second-number - (86400 * d-adj)/to-r
+        new days := second number/to integer % 86400
+        second number = second number - (new days * 86400)/to real
+        /day = /day + new days
+        d adj := (second number < 0.0 ?? -1 :: 1)
+        second number < 0.0 || second number >= 86400.0 ?? {
+            /day = /day + d adj
+            second number = second number - (86400 * d adj)/to real
         }
 
-        /hour = (second-number % 3600.0)/to-i
-        /minute = ((second-number - (/hour/to-r * 3600.0)) % 60.0)/to-i
-        /second = second-number - (/hour/to-r * 3600.0) -
-                (/minute/to-r * 60.0)
+        /hour = (second number % 3600.0)/to integer
+        /minute = ((second number - (/hour/to real * 3600.0)) % 60.0)/to integer
+        /second = second number - (/hour/to real * 3600.0) -
+                (/minute/to real * 60.0)
         /.
     }
     /normalize := { --- /clone/normalize! }
-    /clone := { --- Duration/new[*(/to-list)] }
+    /clone := { --- Duration/new[*(/to list)] }
 
-    # to-something else
-    /to-list := { --- [/year; /month; /day; /hour; /minute; /second] }
-    /serialize := { --- [/m-var; /day; /s-var] }
-    /to-s := { ---
-        '[Duration: ' ++ /year/to-s ++ 'y ' ++ /month/to-s ++ 'mon ' ++
-                /day/to-s ++ 'd ' ++ /hour/to-s ++ 'h ' ++
-                /minute/to-s ++ 'min ' ++ /second/to-s ++ 's]'
+    # to stringomething else
+    /to list := { --- [/year; /month; /day; /hour; /minute; /second] }
+    /serialize := { --- [/m var; /day; /s var] }
+    /to string := { ---
+        '[Duration: ' ++ /year/to string ++ 'y ' ++ /month/to string ++ 'mon ' ++
+                /day/to string ++ 'd ' ++ /hour/to string ++ 'h ' ++
+                /minute/to string ++ 'min ' ++ /second/to string ++ 's]'
     }
 
     # comparable
     /'<=>' := { other ---
         d1 := /clone/normalize
         d2 := other/clone/normalize
-        m-cmp := d1/m-var - d2/m-var
-        d-cmp := d1/day - d2/day
-        s-cmp := d1/s-var - d2/s-var
-        m-cmp == 0 ?? {
-            d-cmp == 0 ?? {
-                s-cmp > 0.0 ?? 1 ::
-                s-cmp < 0.0 ?? -1 ::
+        m cmp := d1/m var - d2/m var
+        d cmp := d1/day - d2/day
+        s cmp := d1/s var - d2/s var
+        m cmp == 0 ?? {
+            d cmp == 0 ?? {
+                s cmp > 0.0 ?? 1 ::
+                s cmp < 0.0 ?? -1 ::
                 0
-            } :: d-cmp
+            } :: d cmp
         } :: {
-            d-cmp != 0 || s-cmp != 0.0 ??
+            d cmp != 0 || s cmp != 0.0 ??
                     raise['Cannot compare: Incompatible Durations']
-            m-cmp
+            m cmp
         }
     }
     /also[Comparable]

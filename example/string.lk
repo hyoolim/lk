@@ -1,48 +1,48 @@
 # String
 #
 '--- ** (repetition) ---'/println
-'Ho! ' ** 3 ->to-c ->println
+'Ho! ' ** 3 ->to code ->println
 #
 '--- << (append) ---'/println
 a := 'hello '
 a << 'world'
-a ->to-c ->println
+a ->to code ->println
 #
 '--- <=> (comparison) ---'/println
-'abcdef' <=> 'abcde' ->to-c ->println
-'abcdef' <=> 'abcdef' ->to-c ->println
-'abcdef' <=> 'abcdefg' ->to-c ->println
-'abcdef' <=> 'ABCDEF' ->to-c ->println
+'abcdef' <=> 'abcde' ->to code ->println
+'abcdef' <=> 'abcdef' ->to code ->println
+'abcdef' <=> 'abcdefg' ->to code ->println
+'abcdef' <=> 'ABCDEF' ->to code ->println
 #
 '--- each ---'/println
 'hello;world'/each[';'] { v --- '<'/print; v/print; '>'/println }
 #
 '--- index ---'/println
-'hello'/find['e'] ->to-c ->println
-'hello'/find['lo'] ->to-c ->println
-'hello'/find['a'] ->to-c ->println
+'hello'/find['e'] ->to code ->println
+'hello'/find['lo'] ->to code ->println
+'hello'/find['a'] ->to code ->println
 #
-'--- justify-l ---'/println
-'hello'/justify-l[4] ->to-c ->println
-'hello'/justify-l[20] ->to-c ->println
+'--- justify left ---'/println
+'hello'/justify left[4] ->to code ->println
+'hello'/justify left[20] ->to code ->println
 #
-'--- justify-c ---'/println
-'hello'/justify-c[4] ->to-c ->println
-'hello'/justify-c[20] ->to-c ->println
+'--- justify center ---'/println
+'hello'/justify center[4] ->to code ->println
+'hello'/justify center[20] ->to code ->println
 #
-'--- justify-r ---'/println
-'hello'/justify-r[4] ->to-c ->println
-'hello'/justify-r[20] ->to-c ->println
+'--- justify right ---'/println
+'hello'/justify right[4] ->to code ->println
+'hello'/justify right[20] ->to code ->println
 #
-'--- slice-set ---'/println
-'hello'/set![2; 4; 'xyz'] ->to-c ->println
-'hello'/set![-4; 2; 'xyz'] ->to-c ->println
-'hello'/set![2; 0; 'xyz'] ->to-c ->println
+'--- set! ---'/println
+'hello'/set![2; 4; 'xyz'] ->to code ->println
+'hello'/set![-4; 2; 'xyz'] ->to code ->println
+'hello'/set![2; 0; 'xyz'] ->to code ->println
 #
 '--- divide ---'/println
-'nows  the time'/divide[' '] ->to-c ->println
-'mellow yellow'/divide['ello'] ->to-c ->println
+'nows  the time'/divide[' '] ->to code ->println
+'mellow yellow'/divide['ello'] ->to code ->println
 #
-'--- char/to-s --'/println
+'--- char/to string --'/println
 char := Character/new[] + 48
-char/to-s -> println
+char/to string -> println

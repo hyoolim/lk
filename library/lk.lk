@@ -210,10 +210,10 @@ NameError/do {
 F/do {
 
     # Never does anything.
-    /then := { if_true | }
+    /then := { if true | }
 
-    # Always calls if_false argument.
-    /then = { if_true; if_false | if_false[] }
+    # Always calls if false argument.
+    /then = { if true; if false | if false[] }
     /not? := true
     /to string := 'false'
 }
@@ -521,14 +521,14 @@ String/do {
         }
     }
     /format := { ... }
-    /justify_c := { len |
+    /justify center := { len |
         len < /count ?? /. :: {
             len = len - /count
             (' ' ** (len % 2)) ++ /. ++ (' ' ** (len - (len % 2)))
         }
     }
-    /justify_l := { len | len < /count ?? /. :: /. ++ (' ' ** (len - /count)) }
-    /justify_r := { len | len < /count ?? /. :: (' ' ** (len - /count)) ++ /. }
+    /justify left := { len | len < /count ?? /. :: /. ++ (' ' ** (len - /count)) }
+    /justify right := { len | len < /count ?? /. :: (' ' ** (len - /count)) ++ /. }
     /lc := { args... | /clone/lc![*args] }
 
     # Lowercases all the letters in the string.
@@ -546,22 +546,22 @@ String/do {
     /trim := { args... | /clone/trim![*args] }
 
     # Removes all the whitespaces from beginning and end of the string.
-    /trim! := { | /trim_l!/trim_r! }
+    /trim! := { | /trim left!/trim right! }
 
     # Removes all the whitespaces from beginning of the string.
-    /trim_l! := { |
+    /trim left! := { |
         [' '; '\n'; '\r'; '\t']/each { v |
             /slice[0; 1] == v ??
-                { /slice![1; /count - 1]; /trim_l! }
+                { /slice![1; /count - 1]; /trim left! }
         }
         /.
     }
 
     # Removes all the whitespaces from end of the string.
-    /trim_r! := { |
+    /trim right! := { |
         [' '; '\n'; '\r'; '\t']/each { v |
             /slice[/count - 1; 1] == v ??
-                { /slice![0; /count - 1]; /trim_r!  }
+                { /slice![0; /count - 1]; /trim right!  }
         }
         /.
     }
@@ -574,11 +574,11 @@ String/do {
 # T (true) < Boolean
 T/do {
 
-    # Always calls if_true argument.
-    /then := { if_true | if_true[] }
+    # Always calls if true argument.
+    /then := { if true | if true[] }
 
-    # Always calls if_true argument.
-    /then = { if_true; if_false | if_true[] }
+    # Always calls if true argument.
+    /then = { if true; if false | if true[] }
     /not? := false
     /to string := 'true'
 }

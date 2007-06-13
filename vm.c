@@ -125,8 +125,8 @@ LK_EXT_DEFINIT(lk_vm_extinitfuncs) {
     lk_ext_cfunc(tvm, "fork", fork__vm, NULL);
     lk_ext_cfunc(tvm, "fork", fork__vm_f, f, NULL);
     lk_ext_cfunc(tvm, "sleep", sleep_vm_fr, fr, NULL);
-    lk_ext_cfunc(tvm, "seconds_since_epoch", seconds_since_epoch__vm, NULL);
-    lk_ext_cfunc(tvm, "seconds_west_of_utc", seconds_west_of_utc__vm, NULL);
+    lk_ext_cfunc(tvm, "seconds since epoch", seconds_since_epoch__vm, NULL);
+    lk_ext_cfunc(tvm, "seconds west of utc", seconds_west_of_utc__vm, NULL);
     lk_ext_cfunc(tvm, "system", system__vm, -1);
     lk_ext_cfunc(tvm, "system2", system2__vm_str, str, NULL);
     lk_ext_cfunc(tvm, "wait", wait__vm, NULL);

@@ -64,7 +64,7 @@ LK_EXT_DEFINIT(lk_string_extinitfuncs) {
     lk_ext_cfunc(str, "set!", setB__str_fi_ch, fi, ch, NULL);
     lk_ext_cfunc(str, "set!", setB__str_fi_fi_str, fi, fi, str, NULL);
     lk_ext_cfunc(str, "to character set", to_character_set__str, NULL);
-    lk_ext_cfunc(str, "to_number", to_number__str, NULL);
+    lk_ext_cfunc(str, "to number", to_number__str, NULL);
 }
 
 /* new */

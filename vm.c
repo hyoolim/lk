@@ -137,7 +137,6 @@ lk_vm_t *lk_vm_new(void) {
     static int vm_id = 0;
     return lk_vm_newwithid(vm_id ++);
 }
-extern LK_EXT_DEFINIT(lk_optional_extinit);
 lk_vm_t *lk_vm_newwithid(int id) {
     lk_vm_t *self = pt_memory_alloc(sizeof(lk_vm_t));
     self->id = id;
@@ -211,7 +210,6 @@ lk_vm_t *lk_vm_newwithid(int id) {
     lk_ext_extinit(self);
     lk_random_extinit(self);
     lk_socket_extinit(self);
-    lk_optional_extinit(self);
     return self;
 }
 void lk_vm_free(lk_vm_t *self) {

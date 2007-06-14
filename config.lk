@@ -20,7 +20,7 @@ yn/lc != 'n' ?? break;
 }
 
 # save.
-WritableFile/new['+build/config']/do {
+WritableFile/new['_build/config']/do {
     /writeln['PREFIX="' ++ prefix ++ '"']
     /writeln['BINDIR="' ++ bindir ++ '"']
     /writeln['LIBDIR="' ++ libdir ++ '"']

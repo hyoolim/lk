@@ -56,6 +56,7 @@ static LK_EXT_DEFCFUNC(to_number__str) {
 LK_EXT_DEFINIT(lk_string_extinitfuncs) {
     lk_object_t *str = vm->t_string, *fi = vm->t_fi, *cset = vm->t_cset,
                 *ch = vm->t_char;
+    lk_ext_global("NEWLINE", lk_string_newfromcstr(vm, "\n"));
     lk_ext_global("String", str);
     lk_ext_cfunc(str, "at", at__str_fi, fi, NULL);
     lk_ext_cfunc(str, "find", find__str_ch_fi, ch, fi, NULL);
@@ -94,8 +95,8 @@ void lk_string_unescape(lk_string_t *self) {
     uint32_t c;
     for(i = 0; (i = pt_list_finduchar(data, '\\', i)) >= 0; i ++) {
         switch(c = pt_list_getuchar(data, i + 1)) {
-        case 'n': UNESCAPE('\n'); break;
-        case 'r': UNESCAPE('\r'); break;
+        case 'n': UNESCAPE('\012'); break;
+        case 'r': UNESCAPE('\015'); break;
         case 't': UNESCAPE('\t'); break;
         default : UNESCAPE(c   ); break;
         }

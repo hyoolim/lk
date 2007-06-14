@@ -20,6 +20,6 @@ Z/also[K2]
 Z/also[K1]
 
 /test['Z/ancestors'; Z/ancestors; [Z; K1; K2; K3; D; A; B; C; E; O; Object]]
-/test['Z/ancestor?[D]'; Z/ancestor?[D]; true]
+/test['Z/ancestor?[D]'; Z/ancestor?[D]; TRUE]
 /finish
 }

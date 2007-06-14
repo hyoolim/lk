@@ -1,10 +1,10 @@
 include['tester.lk']
 Tester/new['Boolean']/do {
 
-/test['?? #1'; true ?? 1 :: 2; 1]
-/test['?? #2'; false ?? 1 :: 2; 2]
-/test['not? #1'; true/not?; false]
-/test['not? #2'; false/not?; true]
-/test['to string'; true/to string; 'true']
+/test['?? #1'; TRUE ?? 1 :: 2; 1]
+/test['?? #2'; FALSE ?? 1 :: 2; 2]
+/test['not? #1'; TRUE/not?; FALSE]
+/test['not? #2'; FALSE/not?; TRUE]
+/test['to string'; TRUE/to string; 'TRUE']
 /finish
 }

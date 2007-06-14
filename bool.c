@@ -11,8 +11,11 @@ LK_EXT_DEFINIT(lk_bool_extinittypes) {
 
 /* ext map - funcs */
 LK_EXT_DEFINIT(lk_bool_extinitfuncs) {
-    lk_ext_global("Unknown", vm->t_unknown);
+    lk_ext_global("NIL", vm->t_unknown);
+    lk_ext_global("NOT FOUND", vm->t_unknown);
+    lk_ext_global("NULL", vm->t_unknown);
+    lk_ext_global("UNKNOWN", vm->t_unknown);
     lk_ext_global("Boolean", vm->t_bool);
-    lk_ext_global("True", vm->t_true);
-    lk_ext_global("False", vm->t_false);
+    lk_ext_global("TRUE", vm->t_true);
+    lk_ext_global("FALSE", vm->t_false);
 }

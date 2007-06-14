@@ -252,12 +252,15 @@ LK_EXT_DEFINIT(lk_file_extinitfuncs) {
     lk_ext_cfunc(wf, "open", open__wf, NULL);
     lk_ext_cfunc(wf, "write", write__wf_str, str, NULL);
     /* StandardInput */
-    lk_ext_global("StandardInput", vm->t_stdin);
+    lk_ext_global("STANDARD INPUT", vm->t_stdin);
+    lk_ext_global("STDIN", vm->t_stdin);
     FILEF(vm->t_stdin) = stdin;
     /* StandardOutput */
-    lk_ext_global("StandardOutput", vm->t_stdout);
+    lk_ext_global("STANDARD OUTPUT", vm->t_stdout);
+    lk_ext_global("STDOUT", vm->t_stdout);
     FILEF(vm->t_stdout) = stdout;
     /* StandardError */
-    lk_ext_global("StandardError", vm->t_stderr);
+    lk_ext_global("STANDARD ERROR", vm->t_stderr);
+    lk_ext_global("STDERR", vm->t_stderr);
     FILEF(vm->t_stderr) = stderr;
 }

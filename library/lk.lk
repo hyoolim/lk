@@ -1,16 +1,3 @@
-# Constants
-false  := False
-F      := False
-nil    := Unknown
-N      := Unknown
-nl     := '\n'
-inf    := PositiveInfinity
-stdin  := StandardInput
-stdout := StandardOutput
-stderr := StandardError
-true   := True
-T      := True
-
 # "Classes"
 Able       := Object/with { /.type := 'Able' }
 Comparable := Able/with { /.type := 'Comparable' }
@@ -93,8 +80,8 @@ Enumerable/do {
     /all?  = {
         match using : Function
         ---
-        /each { v | match using[v] ->not? ?? return[false] }
-        true
+        /each { v | match using[v] ->not? ?? return[FALSE] }
+        TRUE
     }
 
     # Returns true if any of the items are equal to match value argument,
@@ -106,8 +93,8 @@ Enumerable/do {
     /any?  = {
         match using : Function
         ---
-        /each { v | match using[v] ?? return[true] }
-        false
+        /each { v | match using[v] ?? return[TRUE] }
+        FALSE
     }
 
     # Returns the first item equal to match value argument,
@@ -120,7 +107,7 @@ Enumerable/do {
         match using : Function
         ---
         /each { v | match using[v] ?? return[v] }
-        nil
+        UNKNOWN
     }
 
     # Alias for any? slot.
@@ -144,13 +131,13 @@ Enumerable/do {
     /max := { | /max { x; y | x <=> y } }
 
     # Returns the maximum value, using the cmp argument for comparison.
-    /max = { cmp | /reduce[-inf] { a; v | cmp[a; v] < 0 ?? v :: a } }
+    /max = { cmp | /reduce[-INF] { a; v | cmp[a; v] < 0 ?? v :: a } }
 
     # Returns the minimum value, using the cmp operator for comparison.
     /min := { | /min { x; y | x <=> y } }
 
     # Returns the minimum value, using the cmp argument for comparison.
-    /min = { cmp | /reduce[inf] { a; v | cmp[a; v] > 0 ?? v :: a } }
+    /min = { cmp | /reduce[INF] { a; v | cmp[a; v] > 0 ?? v :: a } }
 
     # NEED DOCUMENTATION
     /reduce := { initial value; using |
@@ -207,15 +194,15 @@ NameError/do {
 # Extension
 
 # F (false) < Boolean
-F/do {
+FALSE/do {
 
     # Never does anything.
     /then := { if true | }
 
     # Always calls if false argument.
     /then = { if true; if false | if false[] }
-    /not? := true
-    /to string := 'false'
+    /not? := TRUE
+    /to string := 'FALSE'
 }
 
 # File
@@ -237,7 +224,7 @@ GenericList/do {
             { while[i < /count] { block[/at[i]]; i = i/succ } } ::
             { while[i < /count] { block[i; /at[i]]; i = i/succ } }
     }
-    /eq? = { to | false }
+    /eq? = { to | FALSE }
     /fill! := { do | /each { i; v | /set![i; do] }; /. }
 
     # Returns the first item in the list.
@@ -316,7 +303,7 @@ Integer/do {
     /cmp := { to : Real | /to real - to }
     /divide := { by : Real | /to real % by }
     /eq? := { to : Real | /to real == to }
-    /integer? := true
+    /integer? := TRUE
     /multiply := { by : Real | /to real * by }
     /subtract := { value : Real | /to real - value }
 
@@ -343,9 +330,9 @@ List/do {
     # Returns true if each item in the list is equal to the ones in
     # to argument, using ne? operator for comparison, false otherwise.
     /eq? := { to |
-        to/count - /count != 0 ?? return[false]
-        /each { i; v | v != to[i] ?? return[false] }
-        true
+        to/count - /count != 0 ?? return[FALSE]
+        /each { i; v | v != to[i] ?? return[FALSE] }
+        TRUE
     }
     /flatten := { args... | /clone/flatten![*args] }
     /flatten! := { ... }
@@ -359,20 +346,20 @@ List/do {
 }
 
 # N (nil) < Boolean
-N/do {
-    /nil? := true
-    /to boolean := false
+UNKNOWN/do {
+    /nil? := TRUE
+    /to boolean := FALSE
     /to code := { | /to string }
-    /to string := 'nil'
+    /to string := 'UNKNOWN'
 }
 
-# NegativeInfinity (-inf)
-NegativeInfinity/do {
-    /.forward := { args... | NegativeInfinity }
+# NEGATIVE INFINITY (-inf)
+NEGATIVE INFINITY/do {
+    /.forward := { args... | NEGATIVE INFINITY }
     /cmp := { to | -1 }
-    /inf? := true
-    /negate := PositiveInfinity
-    /to string := '-inf'
+    /inf? := TRUE
+    /negate := POSITIVE INFINITY
+    /to string := '-INF'
 }
 
 # Number
@@ -380,11 +367,11 @@ Number/do {
 
     # Returns the absolute value of the number.
     /abs := { | /negative? ?? /negate :: /. }
-    /eq? := { to | false }
-    /finite? := true
-    /inf? := false
-    /integer? := false
-    /real? := false
+    /eq? := { to | FALSE }
+    /finite? := TRUE
+    /inf? := FALSE
+    /integer? := FALSE
+    /real? := FALSE
     /succ := { | /. + 1 }
     /to boolean := { | /. != 0 }
     /to code := { | /to string }
@@ -398,9 +385,9 @@ Object/do {
 
     # Returns other if the receiver evaluates
     # to true or false otherwise.
-    /and := { other | /to boolean ?? other :: false }
-    /cmp := { to : PositiveInfinity | -1 }
-    /cmp  = { to : NegativeInfinity | 1 }
+    /and := { other | /to boolean ?? other :: FALSE }
+    /cmp := { to : POSITIVE INFINITY | -1 }
+    /cmp  = { to : NEGATIVE INFINITY | 1 }
     /eq? := { to | /.id == to/.id }
     /in? := { list | list/has?[/.] }
 
@@ -410,27 +397,27 @@ Object/do {
     /then := { args... | /to boolean/then[*args] }
     /ne? := { to | /. == to ->not? }
     /new := { args... | new := /alloc; new/init[*args]; new }
-    /nil? := false
+    /nil? := FALSE
     /nil_or := { other | /nil? ?? other :: /. }
     /or := { other | /to boolean ?? /. :: other }
-    /print := { | /print[stdout] }
+    /print := { | /print[STDOUT] }
     /print  = { to | to/write[/.]; /. }
-    /println := { | /println[stdout] }
-    /println  = { to | to/write[/.; nl]; /. }
+    /println := { | /println[STDOUT] }
+    /println  = { to | to/write[/.; NEWLINE]; /. }
     /subtract := { other | /clone/subtract![other] }
     /to := { to | Range/new[/.; to] }
-    /to boolean := true
+    /to boolean := TRUE
     /to code := { | '<<' ++ /to string ++ '>>' }
     /to string := { | /.type ++ '#' ++ /.id/to string }
 }
 
-# PositiveInfinity (inf)
-PositiveInfinity/do {
-    /.forward := { args... | PositiveInfinity }
+# POSITIVE INFINITY (inf)
+POSITIVE INFINITY/do {
+    /.forward := { args... | POSITIVE INFINITY }
     /cmp := { to | 1 }
-    /inf? := true
-    /negate := NegativeInfinity
-    /to string := 'inf'
+    /inf? := TRUE
+    /negate := NEGATIVE INFINITY
+    /to string := 'INF'
 }
 
 # Random
@@ -467,7 +454,7 @@ Real/do {
     /eq? := { to : Integer | /. == to/to real }
     /floor := { | i := /to integer; /. > 0 || /. - i == 0.0 ?? i :: i - 1 }
     /multiply := { by : Integer | /. * by/to real }
-    /real? := true
+    /real? := TRUE
     /round := { |
         i := /to integer
         /. - i > 0.5 ?? i + 1 ::
@@ -502,13 +489,13 @@ String/do {
     /cap! := { | c := /at[0]; c/between?[0ca; 0cz] ?? /at[0] = c + (0cA - 0ca) }
 
     # Returns a list of strings separated by the delim argument.
-    /divide := { delim | /divide[delim; inf] }
+    /divide := { delim | /divide[delim; INF] }
     /divide = { delim; max |
         a := [ ]
         /each[delim; max] { v | a/push![v] }
         a
     }
-    /each = { delim; block | /each[delim; inf; block] }
+    /each = { delim; block | /each[delim; INF; block] }
     /each = { delim; max; block |
         t := /.; i := 0; pos := 0; dl := delim/count || 1
         loop {
@@ -572,15 +559,15 @@ String/do {
 }
 
 # T (true) < Boolean
-T/do {
+TRUE/do {
 
     # Always calls if true argument.
     /then := { if true | if true[] }
 
     # Always calls if true argument.
     /then = { if true; if false | if true[] }
-    /not? := false
-    /to string := 'true'
+    /not? := FALSE
+    /to string := 'TRUE'
 }
 
 # Vector < GenericList
@@ -594,12 +581,12 @@ VM/Frame/do {
     /break := { | raise[breaker] }
 
     # Always calls the block.
-    /if := { cond : T; block | block[] }
+    /if := { cond : TRUE; block | block[] }
 
     # Never does anything.
-    /if = { cond : F; block | }
+    /if = { cond : FALSE; block | }
     /include = { file | /include[file; RESOURCE] }
-    /leave := { | .receiver/.next = nil }
+    /leave := { | .receiver/.next = UNKNOWN }
 
     # Calls the block forever.
     /loop := { block | rescue { e : breaker | }; once { block[]; redo } }
@@ -609,12 +596,12 @@ VM/Frame/do {
     /require = { file | /require[file; RESOURCE] }
     #/resume := { | .receiver/.return_to = .receiver/proto; .receiver/leave }
     #/retry := { | .receiver/proto/redo; .receiver/resume }
-    /read := { args... | stdin/read[*args] }
-    /readln := { | stdin/read[nl] }
-    /while := { cond : T; block | block[]; retry }
-    /while = { cond : F; block | }
-    /write := { args... | stdout/write[*args]; /. }
-    /writeln := { args... | stdout/write[*args; nl]; /. }
+    /read := { args... | STDIN/read[*args] }
+    /readln := { | STDIN/read[NEWLINE] }
+    /while := { cond : TRUE; block | block[]; retry }
+    /while = { cond : FALSE; block | }
+    /write := { args... | STDOUT/write[*args]; /. }
+    /writeln := { args... | STDOUT/write[*args; NEWLINE]; /. }
 }
 
 # VirtualMachine/GarbageCollector
@@ -631,21 +618,21 @@ WritableFile/do {
     /write = { args... | args/each { v | /write[v/to string] }; /. }
 
     # Calls write on the arguments and nl.
-    /writeln := { args... | /write[*args; nl] }
+    /writeln := { args... | /write[*args; NEWLINE] }
 }
 
 # default error handler
 rescue { e |
-    stderr/writeln['Error/'; e/.type; ': '; e]
+    STDERR/writeln['Error/'; e/.type; ': '; e]
     f := .
     c := f/.caller ->nil? ->not? ?? loop {
         f = c
         c = c/.caller ->nil? ?? break
         f/.function/nil? ?? {
-            stderr/writeln['    @ CFunction']
+            STDERR/writeln['    @ CFunction']
         } :: {
             i := c/.current
-            stderr/writeln['    @ ';
+            STDERR/writeln['    @ ';
             i/RESOURCE; ' '; i/LINE; ': '; i/MESSAGE; f/.args/to code]
         }
     }

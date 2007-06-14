@@ -169,8 +169,9 @@ LK_EXT_DEFINIT(lk_fixnum_extinitfuncs) {
                 *f = vm->t_real, *fr = vm->t_fr;
     /* */
     lk_ext_global("Number", num);
-    lk_ext_global("PositiveInfinity", vm->t_pi);
-    lk_ext_global("NegativeInfinity", vm->t_ni);
+    lk_ext_global("POSITIVE INFINITY", vm->t_pi);
+    lk_ext_global("INF", vm->t_pi);
+    lk_ext_global("NEGATIVE INFINITY", vm->t_ni);
     lk_ext_global("Integer", i);
     lk_ext_global("FixedInteger", fi);
     lk_ext_cfunc(fi, "add", add__fi_fi, fi, NULL);

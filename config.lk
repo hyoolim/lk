@@ -4,11 +4,11 @@ loop {
 # ask.
 '\n* Please configure lk:'/println
 '  * PREFIX[/usr/local]? ' ->print; prefix = read[0c\n] ->chop!
-prefix ||= '/usr/local'
+prefix = prefix || '/usr/local'
 '  * BINDIR[' ++ prefix ++ '/bin]? ' ->print; bindir = read[0c\n] ->chop!
-bindir ||= prefix ++ '/bin'
+bindir = bindir || prefix ++ '/bin'
 '  * LIBDIR[' ++ prefix ++ '/lib/lk]?' ->print; libdir = read[0c\n] ->chop!
-libdir ||= prefix ++ '/lib/lk'
+libdir = libdir || prefix ++ '/lib/lk'
 
 # verify.
 '\n* Please confirm the following inputs:'/println

@@ -12,18 +12,18 @@ Date := Object/with {
     days in week short := [ 'Sun'; 'Mon'; 'Tue'; 'Wed'; 'Thu'; 'Fri'; 'Sat' ]
 
     valid date? := { y; m; d --- #  {{{
-        m < 1 || m > 12 ?? return[F]
-        y < 1 ?? return[F]
+        m < 1 || m > 12 ?? return[FALSE]
+        y < 1 ?? return[FALSE]
         di := (/leap year?[y] ?? days in month leap :: days in month)
-        d < 1 || d > di[m - 1] ?? return[F]
-        y == 1582 && m == 10 && d > 4 && d < 15 ?? return[F]
-        T
+        d < 1 || d > di[m - 1] ?? return[FALSE]
+        y == 1582 && m == 10 && d > 4 && d < 15 ?? return[FALSE]
+        TRUE
     }# }}}
     valid time? := { h; m; s --- #  {{{
-        h > 23 || h < 0 ?? return[F]
-        m > 59 || m < 0 ?? return[F]
-        s < 60 || s >= 0 ?? return[T]
-        F
+        h > 23 || h < 0 ?? return[FALSE]
+        m > 59 || m < 0 ?? return[FALSE]
+        s < 60 || s >= 0 ?? return[TRUE]
+        FALSE
     }# }}}
     make svar := { h; m; s --- #  {{{
         (h * 3600)/to real + (m * 60)/to real + s
@@ -115,9 +115,9 @@ Date := Object/with {
     }
     /days in year := { --- /leap year? ?? 366 :: 365 }
     /leap year? := { y --- 
-         y %% 4 != 0 ?? return[F]
-         y < 1582 ?? return[T]
-         y %% 100 != 0 ?? return[T]
+         y %% 4 != 0 ?? return[FALSE]
+         y < 1582 ?? return[TRUE]
+         y %% 100 != 0 ?? return[TRUE]
          y %% 400 == 0
     } + { ---
         /leap year?[/year]

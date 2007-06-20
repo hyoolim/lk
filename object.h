@@ -45,6 +45,7 @@ int lk_object_calcancestors(lk_object_t *self);
 int lk_object_isa(lk_object_t *self, lk_object_t *t);
 struct lk_slotv *lk_object_getdef(lk_object_t *self, lk_object_t *k);
 lk_object_t *lk_object_getslotv(lk_object_t *self, struct lk_slotv *slotv);
+lk_object_t *lk_object_slotget(lk_object_t *self, lk_object_t *k);
 int lk_object_hashcode(const void *k, int capa);
 int lk_object_keycmp(const void *self, const void *other);
 #define LK_OBJECT_ISTYPE(self, t) \

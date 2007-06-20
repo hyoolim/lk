@@ -24,6 +24,7 @@ struct lk_frame {
     lk_instr_t          *next;
     lk_instr_t          *current;
     lk_object_t         *func;
+    lk_object_t         *currreceiver;
     int                  argc;
 };
 #define LK_FRAME(v) ((lk_frame_t *)(v))

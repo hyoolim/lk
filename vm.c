@@ -319,6 +319,9 @@ lk_frame_t *lk_vm_prepevalfunc(lk_vm_t *vm) {
     return self;
 }
 #define CALLFUNC(self, func, args) do { \
+    (func) = LK_O(lk_func_match(LK_FUNC(func), (args), (args)->receiver)); \
+    if((func) == NULL) lk_vm_raisecstr( \
+    vm, "Cannot find matching function"); \
     (args)->argc = PT_LIST_ISINIT(&(args)->stack) \
     ? PT_LIST_COUNT(&(args)->stack) : 0; \
     if(LK_OBJECT_ISCFUNC(LK_O(func))) { \
@@ -341,36 +344,23 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
     /* freq used types */
     lk_object_t *t_func = vm->t_func;
     /* used in slot resolution */
-    lk_instr_t *msg;
-    lk_string_t *msgn;
-    pt_set_t *slots;
-    pt_setitem_t *si;
     struct lk_slotv *slot;
-    pt_list_t *ancs;
-    int anci, ancc;
-    lk_object_t *recv, *r, *slotv;
-    lk_func_t *func;
+    lk_object_t *func;
     /* rescue error and run approp func */
     struct lk_rescue rescue;
     rescue.prev = vm->rescue;
     rescue.rsrc = vm->rsrc;
     vm->rescue = &rescue;
     if(setjmp(rescue.buf)) {
-        recv = LK_O(self->frame);
+        lk_object_t *recv = LK_O(self->frame);
         args = lk_vm_prepevalfunc(vm);
         lk_frame_stackpush(args, LK_O(vm->lasterror));
         for(; recv != NULL; recv = LK_O(LK_FRAME(recv)->returnto)) {
-            if((slots = recv->co.slots) == NULL) continue;
-            if((si = pt_set_get(slots, vm->str_rescue)) == NULL) continue;
-            slot = LK_SLOTV(PT_SETITEM_VALUEPTR(si));
-            slotv = lk_object_getslotv(recv, slot);
-            if(!LK_OBJECT_ISFUNC(slot->type)
-            || LK_OBJECT_ISA(slotv, t_func) < 3) continue;
-            func = lk_func_match(LK_FUNC(slotv), args, args->self);
+            func = lk_object_slotget(recv, LK_O(vm->str_rescue));
             if(func == NULL) continue;
             args->receiver = recv;
             args->returnto = LK_FRAME(recv)->returnto;
-            args->func = slotv; /* LK_O(func); */
+            args->func = func;
             CALLFUNC(self, func, args);
         }
         vm->rescue = vm->rescue->prev;
@@ -392,15 +382,30 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
     /* skip comments */
     /* msg represents a possiblity, a function to be exec'd */
     case LK_INSTRTYPE_SELFMSG:
-        lk_frame_stackpush(self, self->self != NULL ? self->self : N);
+        self->currreceiver = self->self != NULL ? self->self : N;
         goto sendmsg;
     case LK_INSTRTYPE_FRAMEMSG:
-        lk_frame_stackpush(self, LK_O(self->frame));
+        self->currreceiver = LK_O(self->frame);
         goto sendmsg;
     case LK_INSTRTYPE_APPLYMSG:
+        self->currreceiver = lk_frame_stackpop(self);
         sendmsg:
-        lk_frame_stackpush(self, LK_O(instr));
+        slot = lk_object_getdef(self->currreceiver, instr->v);
+        if(slot != NULL) {
+            lk_frame_stackpush(self,
+            lk_object_getslotv(self->currreceiver, slot));
+        } else {
+            slot = lk_object_getdef(
+            self->currreceiver, LK_O(vm->str_forward));
+            if(slot != NULL) {
+                lk_frame_stackpush(self,
+                lk_object_getslotv(self->currreceiver, slot));
+            } else {
+                lk_vm_raisecstr(vm, "Cannot find slot named %s", instr->v);
+            }
+        }
         if(instr->opts & LK_INSTROPT_HASMSGARGS) goto nextinstr;
+        if(!(slot->opts & LK_SLOTVOPT_AUTORUN)) goto nextinstr;
         args = NULL;
         goto apply;
     case LK_INSTRTYPE_APPLY:
@@ -459,78 +464,30 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
     /* take the frame and use as args for msg */
     case LK_FRAMETYPE_APPLY:
         apply:
-        /*
-        msg = LK_INSTR(lk_frame_stackpop(self));
-        msgn = LK_STRING(msg->v);
-        recv = r = lk_frame_stackpop(self);
-        */
-        recv = r = lk_frame_stackpop(self);
-        if(LK_OBJECT_ISINSTR(recv)) {
-            msg = LK_INSTR(recv);
-            msgn = LK_STRING(msg->v);
-            recv = r = lk_frame_stackpop(self);
-        } else {
-            msg = NULL;
-            msgn = vm->str_at;
-        }
-        ancs = NULL;
-        findslot:
-        if((slots = r->co.slots) == NULL) goto proto;
-        if((si = pt_set_get(slots, msgn)) == NULL) goto proto;
-        found:
-        slot = LK_SLOTV(PT_SETITEM_VALUEPTR(si));
-        slotv = lk_object_getslotv(recv, slot);
+        func = lk_frame_stackpop(self);
         /* slot contains func obj - call? */
-        if(LK_OBJECT_ISA(slotv, t_func) > 2
-        && slot->opts & LK_SLOTVOPT_AUTORUN) {
+        if(LK_OBJECT_ISA(func, t_func) > 2) {
             callfunc:
             if(args == NULL) args = lk_vm_prepevalfunc(vm);
-            func = lk_func_match(LK_FUNC(slotv), args, recv);
-            if(func == NULL) goto proto;
             args->type = LK_FRAMETYPE_RETURN;
             args->frame = args;
-            args->receiver = recv;
-            args->func = slotv; /* LK_O(func); */
+            args->receiver = self->currreceiver;
+            args->func = func;
             CALLFUNC(self, func, args);
         } else {
             /* called like a func? */
-            if(args != NULL) {
-                /* slot contains func */
+            /*if(args != NULL) {
                 if(LK_OBJECT_ISA(slotv, t_func) > 2) {
                     goto callfunc;
-                /* call at/apply if there are args */
                 } else if(PT_LIST_ISINIT(&args->stack)
                        && PT_LIST_COUNT(&args->stack) > 0) {
                     msgn = vm->str_at;
                     recv = r = slotv;
                     ancs = NULL;
-                    goto findslot;
                 }
-            }
-            lk_frame_stackpush(self, slotv);
+            }*/
+            lk_frame_stackpush(self, func);
             goto nextinstr;
-        }
-        proto:
-        if((ancs = r->co.ancestors) != NULL) {
-            ancc = PT_LIST_COUNT(ancs);
-            for(anci = 1; anci < ancc; anci ++) {
-                r = PT_LIST_ATPTR(ancs, anci);
-                if((slots = r->co.slots) == NULL) continue;
-                if((si = pt_set_get(slots, msg->v)) == NULL) continue;
-                goto found;
-            }
-        } else {
-            r = r->co.proto;
-            goto findslot;
-        }
-        /* forward: */
-        if(PT_LIST_EQ(LIST(msgn), LIST(vm->str_forward))) {
-            lk_vm_raisecstr(vm, "Cannot find slot named %s", msg->v);
-        } else {
-            msgn = vm->str_forward;
-            r = recv;
-            ancs = NULL;
-            goto findslot;
         }
     /* should never happen */
     default: BUG("Invalid frame type");

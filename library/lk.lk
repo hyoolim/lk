@@ -208,6 +208,9 @@ FALSE/do {
 # File
 
 # FixedInteger < Integer < Number
+FixedInteger/do {
+    /to string = { | /to string['%i'] }
+}
 
 # FixedReal < Real < Number
 
@@ -500,7 +503,7 @@ String/do {
         t := /.; i := 0; pos := 0; dl := delim/count || 1
         loop {
             e := /find[delim; pos]
-            e/nil? || i >= max ??
+            e/nil? || max < i ??
                 { block[t/offset[pos]]; break } ::
                 { block[t/slice[pos; e - pos]] }
             pos = e + dl

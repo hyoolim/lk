@@ -10,6 +10,6 @@ dow := d/day of week
 write['    ' ** dow]
 d ~ (d + Duration/new[0; 1; -1; 0; 0; 0]) ->each { v ---
     write[v/day $ '% 3d ']
-    (dow += 1) %% 7 == 0 ?? writeln
+    (dow += 1) %% 7 == 0 ? writeln
 }
 writeln

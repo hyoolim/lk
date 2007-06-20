@@ -8,6 +8,6 @@ conn := server/accept
 'enter q<enter> to quit both server and client'/println
 loop {
     line := conn/read[0c\n]/limit[-1]
-    line == 'q' ?? break
+    line == 'q' ? break
     line/println
 }

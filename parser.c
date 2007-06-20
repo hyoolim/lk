@@ -55,7 +55,7 @@ static LK_OBJECT_DEFALLOCFUNC(alloc__parser) {
     setbinaryop(PARSER, "**=", "repeat!");
     setbinaryop(PARSER, "-",   "subtract");
     setbinaryop(PARSER, "-=",  "subtract!");
-    setbinaryop(PARSER, "$",   "to string");
+    setbinaryop(PARSER, "$",   "format");
     setbinaryop(PARSER, "->",  "send");
     setbinaryop(PARSER, "=",   ".assign!");
     setbinaryop(PARSER, "==",  "eq?");
@@ -65,7 +65,7 @@ static LK_OBJECT_DEFALLOCFUNC(alloc__parser) {
     setbinaryop(PARSER, "++=", "concat!");
     setbinaryop(PARSER, ":",   ".define!");
     setbinaryop(PARSER, ":=",  ".define_assign!");
-    setbinaryop(PARSER, "::",  "else");
+    setbinaryop(PARSER, "!",   "else");
     setbinaryop(PARSER, "||",  "or");
     setbinaryop(PARSER, "|||", "nil_or");
     setbinaryop(PARSER, "<",   "lt?");
@@ -75,7 +75,7 @@ static LK_OBJECT_DEFALLOCFUNC(alloc__parser) {
     setbinaryop(PARSER, ">",   "gt?");
     setbinaryop(PARSER, ">=",  "ge?");
     setbinaryop(PARSER, "/",   "send");
-    setbinaryop(PARSER, "??",  "then");
+    setbinaryop(PARSER, "?",   "then");
     /* prec map */
     setprec(PARSER, "@",   100000, LK_PREC_ASSOC_LEFT); /* misc */
     setprec(PARSER, "/",    90000, LK_PREC_ASSOC_LEFT);
@@ -99,8 +99,8 @@ static LK_OBJECT_DEFALLOCFUNC(alloc__parser) {
     setprec(PARSER, "&&",   40000, LK_PREC_ASSOC_LEFT); /* logical */
     setprec(PARSER, "||",   40000, LK_PREC_ASSOC_LEFT);
     setprec(PARSER, "|||",  40000, LK_PREC_ASSOC_LEFT);
-    setprec(PARSER, "??",   20000, LK_PREC_ASSOC_RIGHT); /* flow */
-    setprec(PARSER, "::",   19999, LK_PREC_ASSOC_RIGHT);
+    setprec(PARSER, "?",    20000, LK_PREC_ASSOC_RIGHT); /* flow */
+    setprec(PARSER, "!",    19999, LK_PREC_ASSOC_RIGHT);
     setprec(PARSER, "->",  -10000, LK_PREC_ASSOC_LEFT); /* misc - low prec */
 }
 static LK_OBJECT_DEFMARKFUNC(mark__parser) {
@@ -255,7 +255,7 @@ static lk_prec_t *shiftreduce(lk_parser_t *self, lk_instr_t *op) {
                 top = arg;
                 top->type = LK_INSTRTYPE_APPLYMSG;
                 goto gotarg;
-            /* rec ?? arg -> rec ?? { arg } */
+            /* rec ? arg -> rec ? { arg } */
             } else if(arg->type != LK_INSTRTYPE_FUNC
                    && pt_list_cmpcstr(topstr, "then") == 0) {
                 arg = lk_instr_newfunc(self, arg);
@@ -836,8 +836,8 @@ static lk_instr_t *applymacros(lk_parser_t *self, lk_instr_t *it) {
             }
         } else if(it->type == LK_INSTRTYPE_APPLYMSG
                && pt_list_cmpcstr(LIST(it->v), "else") == 0) {
-            /* 1 /?? @[2 ]  /:: @[3 ]   -> 1 /?? @[2 3 ] */
-            /*   op  add(a) it  args(b) ->   op  args    */
+            /* 1 /? @[2 ]  /! @[3 ]   -> 1 /? @[2 3 ] */
+            /*   op add(a) it args(b) ->   op args    */
             lk_instr_t *args = it->next;
             if(args->type == LK_INSTRTYPE_APPLY) {
                 lk_instr_t *add = it->prev;
@@ -846,7 +846,7 @@ static lk_instr_t *applymacros(lk_parser_t *self, lk_instr_t *it) {
                     lk_instr_t *a = LK_INSTR(add->v), *b = LK_INSTR(args->v);
                     (op->next = args)->prev = op;
                     while(a->next != NULL) a = a->next;
-                    /* convert b to func if op is ?? for short-circuiting */
+                    /* convert b to func if op is ? for short-circuiting */
                     if(b->type != LK_INSTRTYPE_FUNC
                     && pt_list_cmpcstr(LIST(op->v), "then") == 0) {
                         b = lk_instr_newfunc(self, b);

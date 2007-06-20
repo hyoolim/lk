@@ -2,7 +2,7 @@ Enumerable/do {
     /to csv := {
         /map { line |
             line/map { item ---
-                item/find[',"\n'/to character set; 0]/nil? ?? item :: {
+                item/find[',"\n'/to character set; 0]/nil? ? item ! {
                     '"' ++ item/replace['"'; '""'] ++ '"'
                 }
             } ->join[',']

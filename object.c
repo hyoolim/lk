@@ -463,13 +463,6 @@ lk_object_t *lk_object_getslotv(lk_object_t *self, struct lk_slotv *slotv) {
         return slotv->v.value;
     }
 }
-lk_object_t *lk_object_slotget(lk_object_t *self, lk_object_t *k) {
-    pt_set_t *slots = self->co.slots;
-    pt_setitem_t *si;
-    if(slots == NULL) return NULL;
-    if((si = pt_set_get(slots, k)) == NULL) return NULL;
-    return lk_object_getslotv(self, LK_SLOTV(PT_SETITEM_VALUEPTR(si)));
-}
 int lk_object_hashcode(const void *k, int capa) {
     return pt_list_hc(LIST(k)) % capa;
 }

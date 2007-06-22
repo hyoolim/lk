@@ -14,7 +14,7 @@ Table := Object/with {
         }
     }
     /insert := { params... ---
-        /columns/count != params/count ? { raise['wrong number of params'] }
+        /columns/count != params/count ?? { raise['wrong number of params'] }
         /columns/each { v; i --- /data[v]/push![params[i]] }
     }
 }

@@ -16,7 +16,7 @@ libdir = libdir || prefix ++ '/lib/lk'
 '  * BINDIR="' ++ bindir ++ '"' ->println
 '  * LIBDIR="' ++ libdir ++ '"' ->println
 '\n* Write the config file[Y/n]? ' ->print; yn = read[0c\n] ->chop!
-yn/lc != 'n' ? break;
+yn/lc != 'n' ?? break;
 }
 
 # save.

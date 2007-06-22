@@ -30,8 +30,8 @@ struct lk_instr {
     uint8_t           opts;
 };
 #define LK_INSTR(v) ((lk_instr_t *)(v))
-#define LK_INSTROPT_HASMSGARGS (1 << 0)
-#define LK_INSTROPT_END        (1 << 1)
+#define LK_INSTROHASMSGARGS (1 << 0)
+#define LK_INSTROEND        (1 << 1)
 
 /* ext map */
 LK_EXT_DEFINIT(lk_instr_extinittypes);

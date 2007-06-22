@@ -5,22 +5,22 @@
 /* ext map - types */
 LK_EXT_DEFINIT(lk_vector_extinittypes) {
     vm->t_vector = lk_object_alloc(vm->t_glist);
-    pt_list_fin(LIST(vm->t_vector));
-    pt_list_init(LIST(vm->t_vector), sizeof(int), 16);
+    list_fin(LIST(vm->t_vector));
+    list_init(LIST(vm->t_vector), sizeof(int), 16);
 }
 
 /* ext map - funcs */
 static LK_EXT_DEFCFUNC(at__vec_fi) {
-    int *v = pt_list_get(LIST(self), INT(ARG(0)));
+    int *v = list_get(LIST(self), INT(ARG(0)));
     RETURN(v != NULL ? LK_O(lk_fi_new(VM, *v)) : N);
 }
-#define AT(i) (*(int *)PT_LIST_AT(values, *(int *)PT_LIST_AT(indexes, (i))))
+#define AT(i) (*(int *)LIST_AT(values, *(int *)LIST_AT(indexes, (i))))
 #define SWAP(x, y) do { \
-    t = *(int *)PT_LIST_AT(indexes, (x)); \
-    *(int *)PT_LIST_AT(indexes, (x)) = *(int *)PT_LIST_AT(indexes, (y)); \
-    *(int *)PT_LIST_AT(indexes, (y)) = t; \
+    t = *(int *)LIST_AT(indexes, (x)); \
+    *(int *)LIST_AT(indexes, (x)) = *(int *)LIST_AT(indexes, (y)); \
+    *(int *)LIST_AT(indexes, (y)) = t; \
 } while(0)
-static void quicksort_hoare(pt_list_t *values, pt_list_t *indexes, int low, int hi) {
+static void quicksort_hoare(list_t *values, list_t *indexes, int low, int hi) {
     if(low < hi) {
         int l = low, h = hi, p = AT(hi), t;
         do {
@@ -35,24 +35,24 @@ static void quicksort_hoare(pt_list_t *values, pt_list_t *indexes, int low, int 
 }
 static LK_EXT_DEFCFUNC(grade__vec) {
     lk_vector_t *indexes = LK_VECTOR(lk_object_alloc(VM->t_vector));
-    pt_list_t *sl = LIST(self), *il = LIST(indexes);
-    pt_list_resize(il, PT_LIST_COUNT(sl));
-    PT_LIST_EACH(il, i, v, *(int *)v = i);
-    quicksort_hoare(sl, il, 0, PT_LIST_COUNT(il) - 1);
+    list_t *sl = LIST(self), *il = LIST(indexes);
+    list_resize(il, LIST_COUNT(sl));
+    LIST_EACH(il, i, v, *(int *)v = i);
+    quicksort_hoare(sl, il, 0, LIST_COUNT(il) - 1);
     RETURN(indexes);
 }
 static LK_EXT_DEFCFUNC(insertB__vec_fi_fi) {
-    pt_list_insert(LIST(self), INT(ARG(0)), &INT(ARG(1)));
+    list_insert(LIST(self), INT(ARG(0)), &INT(ARG(1)));
     RETURN(self);
 }
 static LK_EXT_DEFCFUNC(removeB__vec_fi) {
     int i = INT(ARG(0));
-    int *v = pt_list_get(LIST(self), i);
-    pt_list_remove(LIST(self), i);
+    int *v = list_get(LIST(self), i);
+    list_remove(LIST(self), i);
     RETURN(v != NULL ? LK_O(lk_fi_new(VM, *v)) : N);
 }
 static LK_EXT_DEFCFUNC(setB__vec_fi_fi) {
-    pt_list_set(LIST(self), INT(ARG(0)), &INT(ARG(1)));
+    list_set(LIST(self), INT(ARG(0)), &INT(ARG(1)));
     RETURN(self);
 }
 LK_EXT_DEFINIT(lk_vector_extinitfuncs) {

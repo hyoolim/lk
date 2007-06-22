@@ -12,5 +12,5 @@ LK_EXT_DEFINIT(lk_buffer_extinittypes);
 LK_EXT_DEFINIT(lk_buffer_extinitfuncs);
 
 /* new */
-lk_buffer_t *lk_buffer_newfromlist(lk_vm_t *vm, pt_list_t *buf);
+lk_buffer_t *lk_buffer_newfromlist(lk_vm_t *vm, list_t *buf);
 #endif

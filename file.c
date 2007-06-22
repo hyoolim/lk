@@ -113,15 +113,15 @@ static LK_EXT_DEFCFUNC(read__dir) {
             RETURN(N);
         } else {
             lk_object_t *f = lk_object_alloc(VM->t_file);
-            pt_string_t *p1, *p2, *fs = LIST(VM->str_filesep);
+            string_t *p1, *p2, *fs = LIST(VM->str_filesep);
             PATH(f) = lk_string_newfromlist(VM, LIST(PATH(self)));
             p1 = LIST(PATH(f));
-            p2 = pt_string_allocfromcstr(e->d_name);
-            if(pt_list_findlist(p1, fs, p1->count - fs->count) < 0) {
-                pt_list_concat(p1, fs);
+            p2 = string_allocfromcstr(e->d_name);
+            if(list_findlist(p1, fs, p1->count - fs->count) < 0) {
+                list_concat(p1, fs);
             }
-            pt_list_concat(p1, p2);
-            pt_list_free(p2);
+            list_concat(p1, p2);
+            list_free(p2);
             RETURN(f);
         }
     }
@@ -153,7 +153,7 @@ static LK_EXT_DEFCFUNC(read__rf) {
     FILE *f = FILEF(self);
     if(f == NULL) BUG("ReadableFile->st.file should NEVER be NULL");
     else {
-        pt_string_t *c = pt_string_allocfromfile(f);
+        string_t *c = string_allocfromfile(f);
         RETURN(c != NULL ? LK_O(lk_string_newfromlist(VM, c)) : N);
     }
 }
@@ -161,7 +161,7 @@ static LK_EXT_DEFCFUNC(read__rf_ch) {
     FILE *f = FILEF(self);
     if(f == NULL) BUG("ReadableFile->st.file should NEVER be NULL");
     else {
-        pt_string_t *c = pt_string_allocfromfileuntilchar(f, CHAR(ARG(0)));
+        string_t *c = string_allocfromfileuntilchar(f, CHAR(ARG(0)));
         RETURN(c != NULL ? LK_O(lk_string_newfromlist(VM, c)) : N);
     }
 }
@@ -169,7 +169,7 @@ static LK_EXT_DEFCFUNC(read__rf_cset) {
     FILE *f = FILEF(self);
     if(f == NULL) BUG("ReadableFile->st.file should NEVER be NULL");
     else {
-        pt_string_t *c = pt_string_allocfromfileuntilcset(f, CSET(ARG(0)));
+        string_t *c = string_allocfromfileuntilcset(f, CSET(ARG(0)));
         RETURN(c != NULL ? LK_O(lk_string_newfromlist(VM, c)) : N);
     }
 }
@@ -177,7 +177,7 @@ static LK_EXT_DEFCFUNC(read__rf_fi) {
     FILE *f = FILEF(self);
     if(f == NULL) BUG("ReadableFile->st.file should NEVER be NULL");
     else {
-        pt_list_t *c = pt_list_allocfromfile(f, INT(ARG(0)));
+        list_t *c = list_allocfromfile(f, INT(ARG(0)));
         /* RETURN(c != NULL ? LK_O(lk_buffer_newfromlist(VM, c)) : N); */
         RETURN(c != NULL ? LK_O(lk_string_newfromlist(VM, c)) : N);
     }
@@ -204,7 +204,7 @@ static LK_EXT_DEFCFUNC(write__wf_str) {
     FILE *f = FILEF(self);
     if(f == NULL) BUG("WritableFile->st.file should NEVER be NULL");
     else {
-        pt_string_print(LIST(ARG(0)), f);
+        string_print(LIST(ARG(0)), f);
         RETURN(self);
     }
 }

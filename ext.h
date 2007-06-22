@@ -17,7 +17,7 @@ typedef struct lk_ext {
 /* ext shortcuts */
 #define ARG(i) ( \
 assert(env != NULL && 0 <= (i) && (i) < env->argc), \
-LK_O(PT_LIST_ATPTR(&env->stack, (i))))
+LK_O(LIST_ATPTR(&env->stack, (i))))
 #define DONE return
 #define RETURN(v) do { \
     lk_object_t *_r = LK_O(v); \
@@ -33,7 +33,7 @@ LK_O(PT_LIST_ATPTR(&env->stack, (i))))
 #define F (VM->t_false)
 #define INT(v) (LK_FI(v)->i)
 #define LIST(v) (&LK_GLIST(v)->data)
-#define CSTR(v) (pt_list_tocstr(LIST(v)))
+#define CSTR(v) (list_tocstr(LIST(v)))
 #define N (VM->t_unknown)
 #define T (VM->t_true)
 #define VM (LK_VM(self))

@@ -1,79 +1,79 @@
 #include "_list.h"
 
 /* new */
-static struct pt_listdata *listdata_alloc(int ilen, int capa) {
-    struct pt_listdata *self;
+static struct listdata *listdata_alloc(int ilen, int capa) {
+    struct listdata *self;
     int c = 8;
     while(capa > c) c *= 2;
-    self = pt_memory_alloc(sizeof(struct pt_listdata) - sizeof(char) + ilen * c);
+    self = memory_alloc(sizeof(struct listdata) - sizeof(char) + ilen * c);
     self->capa = c;
     self->used = 0;
     self->ilen = ilen;
     self->refc = 1;
     return self;
 }
-static void listdata_free(struct pt_listdata *self) {
+static void listdata_free(struct listdata *self) {
     if(self->refc > 0) self->refc --;
-    if(self->refc < 1) pt_memory_free(self);
+    if(self->refc < 1) memory_free(self);
 }
-pt_list_t *pt_list_alloc(int ilen, int capa) {
-    pt_list_t *self = pt_memory_alloc(sizeof(pt_list_t));
-    pt_list_init(self, ilen, capa);
+list_t *list_alloc(int ilen, int capa) {
+    list_t *self = memory_alloc(sizeof(list_t));
+    list_init(self, ilen, capa);
     return self;
 }
-pt_list_t *pt_list_allocptr(void) {
-    return pt_list_allocptrwithcapa(10);
+list_t *list_allocptr(void) {
+    return list_allocptrwithcapa(10);
 }
-pt_list_t *pt_list_allocptrwithcapa(int capa) {
-    return pt_list_alloc(sizeof(void *), capa);
+list_t *list_allocptrwithcapa(int capa) {
+    return list_alloc(sizeof(void *), capa);
 }
-pt_list_t *pt_list_allocfromfile(FILE *stream, size_t rs) {
-    pt_list_t *self = pt_list_alloc(1, rs);
+list_t *list_allocfromfile(FILE *stream, size_t rs) {
+    list_t *self = list_alloc(1, rs);
     self->count =
     self->data->used = fread(self->first, 1, rs, stream);
     return self;
 }
-pt_list_t *pt_list_clone(pt_list_t *self) {
-    pt_list_t *clone = pt_memory_alloc(sizeof(pt_list_t));
-    pt_list_copy(clone, self);
+list_t *list_clone(list_t *self) {
+    list_t *clone = memory_alloc(sizeof(list_t));
+    list_copy(clone, self);
     return clone;
 }
-void pt_list_init(pt_list_t *self, int ilen, int capa) {
+void list_init(list_t *self, int ilen, int capa) {
     self->data = listdata_alloc(ilen, capa);
     self->first = &self->data->item;
     self->count = 0;
 }
-void pt_list_initptr(pt_list_t *self) {
-    pt_list_init(self, sizeof(void *), 10);
+void list_initptr(list_t *self) {
+    list_init(self, sizeof(void *), 10);
 }
-void pt_list_copy(pt_list_t *self, pt_list_t *src) {
+void list_copy(list_t *self, list_t *src) {
     (self->data = src->data)->refc ++;
     self->first = src->first;
     self->count = src->count;
 }
-void pt_list_fin(pt_list_t *self) {
+void list_fin(list_t *self) {
     listdata_free(self->data);
 }
-void pt_list_free(pt_list_t *self) {
+void list_free(list_t *self) {
     listdata_free(self->data);
-    pt_memory_free(self);
+    memory_free(self);
 }
 
 /* update */
 #define SETITEM(self, t, i, v) do { \
-    *(t *)PT_LIST_AT(self, i) = *(t *)v; \
+    *(t *)LIST_AT(self, i) = *(t *)v; \
 } while(0)
 #define SETANYITEM(self, i, v) do { \
     switch((self)->data->ilen) { \
     case sizeof(char ): SETITEM((self), char,  (i), (v)); break; \
     case sizeof(short): SETITEM((self), short, (i), (v)); break; \
     case sizeof(long ): SETITEM((self), long,  (i), (v)); break; \
-    default: memmove(PT_LIST_AT( \
+    default: memmove(LIST_AT( \
     self, i), (v), (self)->data->ilen); break; \
     } \
 } while(0)
-static void list_prepupdate(pt_list_t *self, int i, int newcount) {
-    struct pt_listdata *bd = self->data;
+static void list_prepupdate(list_t *self, int i, int newcount) {
+    struct listdata *bd = self->data;
     int newcapa = bd->capa, ilen = bd->ilen;
     if(newcount > newcapa) {
         do { newcapa *= 2; } while(newcount > newcapa);
@@ -87,8 +87,8 @@ static void list_prepupdate(pt_list_t *self, int i, int newcount) {
         /* resize existing buf */
         } else {
             ptrdiff_t d = self->first - &bd->item;
-            bd = self->data = pt_memory_resize(bd,
-            sizeof(struct pt_listdata) - sizeof(char) + ilen * newcapa);
+            bd = self->data = memory_resize(bd,
+            sizeof(struct listdata) - sizeof(char) + ilen * newcapa);
             bd->capa = newcapa;
             self->first = &bd->item + d;
         }
@@ -99,21 +99,21 @@ static void list_prepupdate(pt_list_t *self, int i, int newcount) {
     bd->used = newcount + (self->first - &bd->item);
     self->count = newcount;
 }
-void pt_list_clear(pt_list_t *self) {
-    pt_list_limit(self, 0);
+void list_clear(list_t *self) {
+    list_limit(self, 0);
 }
-void pt_list_concat(pt_list_t *self, pt_list_t *v) {
+void list_concat(list_t *self, list_t *v) {
     int sc = self->count, vc = v->count;
     int sl = self->data->ilen, vl = self->data->ilen;
     list_prepupdate(self, sc, sc + vc);
     if(sl == vl) memcpy(self->first + sl * sc, v->first, vl * vc);
     else NOIMPL("Cannot concat differently sized buffers");
 }
-void pt_list_insert(pt_list_t *self, int i, void *v) {
+void list_insert(list_t *self, int i, void *v) {
     int count = self->count;
     if(i < 0) i += count;
-    if(i < 0) pt_list_set(self, i - count - 1, v);
-    else if(i > count) pt_list_set(self, i, v);
+    if(i < 0) list_set(self, i - count - 1, v);
+    else if(i > count) list_set(self, i, v);
     else {
         int ilen = self->data->ilen;
         list_prepupdate(self, i, count + 1);
@@ -122,26 +122,26 @@ void pt_list_insert(pt_list_t *self, int i, void *v) {
     }
     SETANYITEM(self, i, v);
 }
-void pt_list_insertptr(pt_list_t *self, int i, void *v) {
-    pt_list_insert(self, i, (void *)&v);
+void list_insertptr(list_t *self, int i, void *v) {
+    list_insert(self, i, (void *)&v);
 }
 #define INSERTUINT(self, t, i, v) do { \
     t nv = (v); \
-    pt_list_insert(self, (i), (void *)&nv); \
+    list_insert(self, (i), (void *)&nv); \
 } while(0);
-void pt_list_insertuchar(pt_list_t *self, int i, uint32_t v) {
+void list_insertuchar(list_t *self, int i, uint32_t v) {
     switch(self->data->ilen) {
     case sizeof(uint8_t ): INSERTUINT(self, uint8_t,  i, v); break;
     case sizeof(uint16_t): INSERTUINT(self, uint16_t, i, v); break;
     case sizeof(uint32_t): INSERTUINT(self, uint32_t, i, v); break;
-    default: BUG("Invalid ilen in pt_list_insertuchar\n");
+    default: BUG("Invalid ilen in list_insertuchar\n");
     }
 }
-void pt_list_limit(pt_list_t *self, int n) {
+void list_limit(list_t *self, int n) {
     if(n < 0) n += self->count;
     if(n >= 0 && n < self->count) self->count = n;
 }
-void pt_list_offset(pt_list_t *self, int n) {
+void list_offset(list_t *self, int n) {
     if(n < 0) n += self->count;
     if(n == 0) return;
     if(n < 0 || n >= self->count) self->count = 0;
@@ -150,25 +150,25 @@ void pt_list_offset(pt_list_t *self, int n) {
         self->count -= n;
     }
 }
-void *pt_list_peekptr(pt_list_t *self) {
-    return pt_list_getptr((self), (self)->count - 1);
+void *list_peekptr(list_t *self) {
+    return list_getptr((self), (self)->count - 1);
 }
-uint32_t pt_list_peekuchar(pt_list_t *self) {
-    return pt_list_getuchar((self), (self)->count - 1);
+uint32_t list_peekuchar(list_t *self) {
+    return list_getuchar((self), (self)->count - 1);
 }
-void *pt_list_popptr(pt_list_t *self) {
-    return pt_list_removeptr(self, self->count - 1);
+void *list_popptr(list_t *self) {
+    return list_removeptr(self, self->count - 1);
 }
-uint32_t pt_list_popuchar(pt_list_t *self) {
-    return pt_list_removeuchar(self, self->count - 1);
+uint32_t list_popuchar(list_t *self) {
+    return list_removeuchar(self, self->count - 1);
 }
-void pt_list_pushptr(pt_list_t *self, void *v) {
-    pt_list_setptr(self, self->count, v);
+void list_pushptr(list_t *self, void *v) {
+    list_setptr(self, self->count, v);
 }
-void pt_list_pushuchar(pt_list_t *self, uint32_t v) {
-    pt_list_setuchar(self, self->count, v);
+void list_pushuchar(list_t *self, uint32_t v) {
+    list_setuchar(self, self->count, v);
 }
-void pt_list_remove(pt_list_t *self, int i) {
+void list_remove(list_t *self, int i) {
     int count = self->count;
     if(i < 0) i += count;
     if(i < 0 || i >= count) return;
@@ -179,21 +179,21 @@ void pt_list_remove(pt_list_t *self, int i) {
         self->first + ilen * (i + 1), ilen * (count - i));
     }
 }
-void *pt_list_removeptr(pt_list_t *self, int i) {
-    void *item = pt_list_getptr(self, i);
-    pt_list_remove(self, i);
+void *list_removeptr(list_t *self, int i) {
+    void *item = list_getptr(self, i);
+    list_remove(self, i);
     return item;
 }
-uint32_t pt_list_removeuchar(pt_list_t *self, int i) {
-    uint32_t v = pt_list_getuchar(self, i);
-    pt_list_remove(self, i);
+uint32_t list_removeuchar(list_t *self, int i) {
+    uint32_t v = list_getuchar(self, i);
+    list_remove(self, i);
     return v;
 }
-void pt_list_resize(pt_list_t *self, int s) {
+void list_resize(list_t *self, int s) {
     if(s <= self->count) return;
     list_prepupdate(self, s - 1, s);
 }
-void pt_list_resizeitem(pt_list_t *self, pt_list_t *other) {
+void list_resizeitem(list_t *self, list_t *other) {
     if(self->data->ilen != other->data->ilen) {
         NOIMPL("Cannot resize item");
     }
@@ -208,8 +208,8 @@ void pt_list_resizeitem(pt_list_t *self, pt_list_t *other) {
         *((t *)to + c - i - 1) = a; \
     } \
 } while(0)
-void pt_list_reverse(pt_list_t *self) {
-    struct pt_listdata *bd = self->data;
+void list_reverse(list_t *self) {
+    struct listdata *bd = self->data;
     int ilen = bd->ilen, i = 0, c = self->count, c2 = (c + 1) / 2;
     char *from = self->first, *to;
     if(bd->refc > 1) {
@@ -225,7 +225,7 @@ void pt_list_reverse(pt_list_t *self) {
     case sizeof(short): SWAPITEMS(short); break;
     case sizeof(long ): SWAPITEMS(long ); break;
     default: {
-        char *a = pt_memory_alloc(ilen * 2);
+        char *a = memory_alloc(ilen * 2);
         char *b = a + ilen;
         for(; i < c2; i ++) {
             memcpy(a, from + i, ilen);
@@ -233,11 +233,11 @@ void pt_list_reverse(pt_list_t *self) {
             memcpy(to + i, b, ilen);
             memcpy(to + c - i - 1, a, ilen);
         }
-        pt_memory_free(a);
+        memory_free(a);
     }
     }
 }
-void pt_list_set(pt_list_t *self, int i, void *v) {
+void list_set(list_t *self, int i, void *v) {
     int count = self->count;
     if(i < 0) i += count;
     if(i < 0) {
@@ -246,51 +246,51 @@ void pt_list_set(pt_list_t *self, int i, void *v) {
     }
     SETANYITEM(self, i, v);
 }
-void pt_list_setptr(pt_list_t *self, int i, void *v) {
-    pt_list_set(self, i, (void *)&v);
+void list_setptr(list_t *self, int i, void *v) {
+    list_set(self, i, (void *)&v);
 }
-void pt_list_setrange(pt_list_t *self, int b, int e, pt_list_t *v) {
+void list_setrange(list_t *self, int b, int e, list_t *v) {
     int i, d, sc = self->count, vc = v->count;
     if(b < 0) b += sc;
     if(e < 0) e += vc;
     d = e - b - vc + 1;
-    if(d > 0) for(; d > 0; d --) pt_list_remove(self, b);
+    if(d > 0) for(; d > 0; d --) list_remove(self, b);
     else if(d < 0) {
         void *t = NULL;
-        for(; d < 0; d ++) pt_list_insert(self, b, (void *)&t);
+        for(; d < 0; d ++) list_insert(self, b, (void *)&t);
     }
-    for(i = 0; i < vc; i ++) pt_list_set(self, b ++, pt_list_get(v, i));
+    for(i = 0; i < vc; i ++) list_set(self, b ++, list_get(v, i));
 }
 #define SETUINT(self, t, i, v) do { \
     t nv = (v); \
-    pt_list_set(self, (i), (void *)&nv); \
+    list_set(self, (i), (void *)&nv); \
 } while(0);
-void pt_list_setuchar(pt_list_t *self, int i, uint32_t v) {
+void list_setuchar(list_t *self, int i, uint32_t v) {
     switch(self->data->ilen) {
     case sizeof(uint8_t ): SETUINT(self, uint8_t,  i, v); break;
     case sizeof(uint16_t): SETUINT(self, uint16_t, i, v); break;
     case sizeof(uint32_t): SETUINT(self, uint32_t, i, v); break;
-    default: BUG("Invalid ilen in pt_list_setuchar\n");
+    default: BUG("Invalid ilen in list_setuchar\n");
     }
 }
-void *pt_list_shiftptr(pt_list_t *self) {
-    return pt_list_removeptr(self, 0);
+void *list_shiftptr(list_t *self) {
+    return list_removeptr(self, 0);
 }
-void pt_list_slice(pt_list_t *self, int offset, int limit) {
-    pt_list_offset(self, offset);
-    pt_list_limit(self, limit);
+void list_slice(list_t *self, int offset, int limit) {
+    list_offset(self, offset);
+    list_limit(self, limit);
 }
-const char *pt_list_tocstr(pt_list_t *self) {
-    pt_list_setuchar(self, self->count, '\0');
+const char *list_tocstr(list_t *self) {
+    list_setuchar(self, self->count, '\0');
     self->count --;
     return self->first;
 }
-void pt_list_unshiftptr(pt_list_t *self, void *v) {
-    pt_list_insertptr(self, 0, v);
+void list_unshiftptr(list_t *self, void *v) {
+    list_insertptr(self, 0, v);
 }
 
 /* info */
-int pt_list_cmp(const pt_list_t *self, const pt_list_t *other) {
+int list_cmp(const list_t *self, const list_t *other) {
     if(self == other) return 0;
     else {
         int sc = self->count, oc = other->count, d = sc - oc;
@@ -305,9 +305,9 @@ int pt_list_cmp(const pt_list_t *self, const pt_list_t *other) {
                 printf("Trying to compare strings"
                 " with different item length\n");
                 printf("self=%p(%i) '", (void *)self, self->data->ilen);
-                pt_string_print(self, stdout); printf("'\n");
+                string_print(self, stdout); printf("'\n");
                 printf("other=%p(%i) '", (void *)other, other->data->ilen);
-                pt_string_print(other, stdout); printf("'\n");
+                string_print(other, stdout); printf("'\n");
                  */
                 abort();
     }   }   }
@@ -318,7 +318,7 @@ int pt_list_cmp(const pt_list_t *self, const pt_list_t *other) {
         if(cd != 0) return cd; \
     } \
 } while(0)
-int pt_list_cmpcstr(const pt_list_t *self, const char *other) {
+int list_cmpcstr(const list_t *self, const char *other) {
     int sc = self->count, oc = strlen(other), d = sc - oc;
     int len = d > 0 ? oc : sc;
     uint8_t ilen = self->data->ilen;
@@ -327,42 +327,42 @@ int pt_list_cmpcstr(const pt_list_t *self, const char *other) {
     if(     ilen == sizeof(uint8_t )) COMPARECSTR(uint8_t );
     else if(ilen == sizeof(uint16_t)) COMPARECSTR(uint16_t);
     else if(ilen == sizeof(uint32_t)) COMPARECSTR(uint16_t);
-    else BUG("Invalid ilen in pt_list_cmpcstr\n");
+    else BUG("Invalid ilen in list_cmpcstr\n");
     return d;
 }
 #define MATCHCHAR(type) do { \
     for(; o < c; o ++) if(((type *)buf)[o] == pat) return o; \
 } while(0)
-int pt_list_finduchar(const pt_list_t *self, uint32_t pat, int o) {
+int list_finduchar(const list_t *self, uint32_t pat, int o) {
     void *buf = self->first;
     int c = self->count;
     switch(self->data->ilen) {
     case sizeof(uint8_t ): MATCHCHAR(uint8_t ); break;
     case sizeof(uint16_t): MATCHCHAR(uint16_t); break;
     case sizeof(uint32_t): MATCHCHAR(uint32_t); break;
-    default: BUG("Invalid ilen in pt_list_finduchar\n");
+    default: BUG("Invalid ilen in list_finduchar\n");
     }
     return -1;
 }
 #define MATCHCSET(type) do { \
-    for(; o < c; o ++) if(pt_cset_has(pat, ((type *)buf)[o])) return o; \
+    for(; o < c; o ++) if(cset_has(pat, ((type *)buf)[o])) return o; \
 } while(0)
-int pt_list_findcset(const pt_list_t *self, const pt_cset_t *pat, int o) {
+int list_findcset(const list_t *self, const cset_t *pat, int o) {
     void *buf = self->first;
     int c = self->count;
     switch(self->data->ilen) {
     case sizeof(uint8_t ): MATCHCSET(uint8_t ); break;
     case sizeof(uint16_t): MATCHCSET(uint16_t); break;
     case sizeof(uint32_t): MATCHCSET(uint32_t); break;
-    default: BUG("Invalid ilen in pt_list_findcset\n");
+    default: BUG("Invalid ilen in list_findcset\n");
     }
     return -1;
 }
-int pt_list_findlist(const pt_list_t *self, const pt_list_t *pat, int o) {
+int list_findlist(const list_t *self, const list_t *pat, int o) {
     int self_c = self->count, pat_c = pat->count;
     if(pat_c == 0) return o < self_c ? o : -1;
     if(pat_c > self_c) return -1;
-    if(pat_c == 1) return pt_list_finduchar(self, pt_list_getuchar(pat, 0), o);
+    if(pat_c == 1) return list_finduchar(self, list_getuchar(pat, 0), o);
     else {
         switch(self->data->ilen) {
         case sizeof(uint8_t): {
@@ -383,31 +383,31 @@ int pt_list_findlist(const pt_list_t *self, const pt_list_t *pat, int o) {
             }
             break; }
         default:
-            BUG("Invalid ilen in pt_list_findlist\n");
+            BUG("Invalid ilen in list_findlist\n");
         }
         return -1;
     }
 }
-void *pt_list_get(const pt_list_t *self, int i) {
+void *list_get(const list_t *self, int i) {
     int count = self->count;
     if(i < 0) i += count;
-    return i < 0 || i >= count ? NULL : PT_LIST_AT(self, i);
+    return i < 0 || i >= count ? NULL : LIST_AT(self, i);
 }
-void *pt_list_getptr(const pt_list_t *self, int i) {
-    void **vptr = (void **)pt_list_get(self, i);
+void *list_getptr(const list_t *self, int i) {
+    void **vptr = (void **)list_get(self, i);
     return vptr != NULL ? *vptr : NULL;
 }
-uint32_t pt_list_getuchar(const pt_list_t *self, int i) {
-    void *vptr = pt_list_get(self, i);
+uint32_t list_getuchar(const list_t *self, int i) {
+    void *vptr = list_get(self, i);
     if(vptr == NULL) return 0;
     switch(self->data->ilen) {
     case sizeof(uint8_t ): return *(uint8_t  *)vptr;
     case sizeof(uint16_t): return *(uint16_t *)vptr;
     case sizeof(uint32_t): return *(uint32_t *)vptr;
-    default: BUG("Invalid ilen in pt_list_getuchar\n");
+    default: BUG("Invalid ilen in list_getuchar\n");
     }
 }
-int pt_list_hc(const pt_list_t *self) {
+int list_hc(const list_t *self) {
     register const uint8_t *beg = (uint8_t *)self->first;
     register const uint8_t *end = beg + self->data->ilen * self->count;
     int hc = 5381;
@@ -422,11 +422,11 @@ int pt_list_hc(const pt_list_t *self) {
     for(; i < end; i ++) fprintf((stream), " " f, (t)*i); \
     fprintf((stream), "\n"); \
 } while(0)
-void pt_list_write(const pt_list_t *self, FILE *stream) {
-    struct pt_listdata *bd = self->data;
+void list_write(const list_t *self, FILE *stream) {
+    struct listdata *bd = self->data;
     int ilen = bd->ilen;
     char *first = self->first;
-    fprintf(stream, "pt_list_t(%p", (void *)self);
+    fprintf(stream, "list_t(%p", (void *)self);
     fprintf(stream, ", first=%p", (void *)first);
     fprintf(stream, "(%i)", (first - &bd->item) / ilen);
     fprintf(stream, ", count=%i", self->count);

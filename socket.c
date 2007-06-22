@@ -11,7 +11,7 @@ int inet_aton(const char *cp, struct in_addr *pin);
 
 /* ext map - ip addr */
 static LK_EXT_DEFCFUNC(alloc__ip_str) {
-    inet_aton(pt_list_tocstr(LIST(ARG(0))), &IPADDR->addr);
+    inet_aton(list_tocstr(LIST(ARG(0))), &IPADDR->addr);
     RETURN(self);
 }
 static LK_EXT_DEFCFUNC(to_string__ip) {
@@ -34,7 +34,7 @@ static LK_OBJECT_DEFFREEFUNC(free__sock) {
     if(LK_SOCKET(self)->in != NULL) fclose(LK_SOCKET(self)->in);
     if(LK_SOCKET(self)->out != NULL) fclose(LK_SOCKET(self)->out);
 }
-static LK_EXT_DEFCFUNC(accept__sock) {
+static LK_EXT_DEFCFUNC(acce_sock) {
     struct sockaddr remote;
     socklen_t len = sizeof(struct sockaddr);
     lk_socket_t *conn = LK_SOCKET(lk_object_alloc(LK_VM_GETGLOBAL(VM, Socket)));
@@ -87,7 +87,7 @@ LK_EXT_DEFINIT(lk_socket_extinit) {
     lk_ext_cfunc(ip, "to string", to_string__ip, NULL);
     /* */
     lk_ext_global("Socket", sock); LK_VM_SETGLOBAL(vm, Socket, sock);
-    lk_ext_cfunc(sock, "accept", accept__sock, NULL);
+    lk_ext_cfunc(sock, "accept", acce_sock, NULL);
     lk_ext_cfunc(sock, "bind", bind__sock_ip_fi, ip, fi, NULL);
     lk_ext_cfunc(sock, "connect", connect__sock_ip_fi, ip, fi, NULL);
     lk_ext_cfunc(sock, "listen", listen__sock, NULL);

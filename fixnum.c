@@ -82,7 +82,7 @@ static LK_EXT_DEFCFUNC(to_real__fi) {
     RETURN(lk_fr_new(VM, (double)INT(self)));
 }
 static LK_EXT_DEFCFUNC(to_string__fi_str) {
-    const char *fmt = pt_list_tocstr(LIST(ARG(0)));
+    const char *fmt = list_tocstr(LIST(ARG(0)));
     char *ret;
     lk_string_t *kcret;
     asprintf(&ret, fmt, INT(self));
@@ -152,7 +152,7 @@ static LK_EXT_DEFCFUNC(to_integer__fr) {
     RETURN(lk_fi_new(VM, (int)DBL(self)));
 }
 static LK_EXT_DEFCFUNC(to_string__fr_str) {
-    const char *fmt = pt_list_tocstr(LIST(ARG(0)));
+    const char *fmt = list_tocstr(LIST(ARG(0)));
     char *ret;
     lk_string_t *kcret;
     asprintf(&ret, fmt, DBL(self));

@@ -12,9 +12,9 @@ struct lk_slotv {
     } v;
 };
 #define LK_SLOTV(v) ((struct lk_slotv *)(v))
-#define LK_SLOTVOPT_CFIELD   (1 << 0)
-#define LK_SLOTVOPT_READONLY (1 << 1)
-#define LK_SLOTVOPT_AUTORUN  (1 << 2)
+#define LK_SLOTVOCFIELD   (1 << 0)
+#define LK_SLOTVOREADONLY (1 << 1)
+#define LK_SLOTVOAUTORUN  (1 << 2)
 
 /* ext map */
 LK_EXT_DEFINIT(lk_object_extinittypes);
@@ -63,13 +63,13 @@ lk_object_isa((self), (t)))
 #define LK_OBJECT_HASONEPARENT(pars) ((ptrdiff_t)(pars) & 1)
 #define LK_OBJECT_ONEPARENT(pars) LK_O((ptrdiff_t)(pars) & ~1)
 #define LK_OBJECT_PROTO(self) LK_OBJECT_HASONEPARENT((self)->co.parents) \
-? LK_OBJECT_ONEPARENT((self)->co.parents) : PT_LIST_ATPTR((self)->co.parents, 0)
+? LK_OBJECT_ONEPARENT((self)->co.parents) : LIST_ATPTR((self)->co.parents, 0)
  */
 #define LK_OBJECT_HASPARENTS(self) ((ptrdiff_t)((self)->co.proto) & 1)
-#define LK_OBJECT_PARENTS(self) PT_LIST((ptrdiff_t)((self)->co.proto) & ~1)
+#define LK_OBJECT_PARENTS(self) ((list_t *)((ptrdiff_t)((self)->co.proto) & ~1))
 #define LK_OBJECT_PROTO(self) ( \
     LK_OBJECT_HASPARENTS(self) \
-    ? pt_list_getptr(LK_OBJECT_PARENTS(self), -1) \
+    ? list_getptr(LK_OBJECT_PARENTS(self), -1) \
     : (self)->co.proto \
 )
 #define LK_OBJECT_ISA(self, t) ( \

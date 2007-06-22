@@ -6,7 +6,7 @@
 
 /* ext map - funcs */
 static LK_EXT_DEFCFUNC(at__env_str) {
-    const char *k = pt_list_tocstr(LIST(ARG(0)));
+    const char *k = list_tocstr(LIST(ARG(0)));
     const char *v = getenv(k);
     RETURN(v != NULL ? LK_O(lk_string_newfromcstr(VM, v)) : N);
 }
@@ -22,7 +22,7 @@ static LK_EXT_DEFCFUNC(keys__env) {
     const char *v;
     for(i = 0; (v = environ[i]) != NULL; i ++) {
         for(j = 0; v[j] != '\0' && v[j] != '='; j ++) { }
-        pt_list_pushptr(LIST(keys), lk_string_newfromdata(VM, v, j));
+        list_pushptr(LIST(keys), lk_string_newfromdata(VM, v, j));
     }
     RETURN(keys);
 }

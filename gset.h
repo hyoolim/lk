@@ -6,7 +6,7 @@ typedef struct lk_gset lk_gset_t;
 #include "vm.h"
 struct lk_gset {
     struct lk_common co;
-    pt_set_t         set;
+    set_t         set;
 };
 #define LK_GSET(v) ((lk_gset_t *)(v))
 #define SET(v) (&LK_GSET(v)->set)

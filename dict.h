@@ -13,7 +13,7 @@ LK_EXT_DEFINIT(lk_dict_extinitfuncs);
 
 /* new */
 lk_dict_t *lk_dict_new(lk_vm_t *vm);
-lk_dict_t *lk_dict_newfrompt(lk_vm_t *vm, pt_set_t *ht);
+lk_dict_t *lk_dict_newfrompt(lk_vm_t *vm, set_t *ht);
 
 /* update */
 void lk_dict_set(lk_dict_t *self, lk_object_t *k, lk_object_t *v);

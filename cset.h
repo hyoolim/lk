@@ -6,7 +6,7 @@ typedef struct lk_cset lk_cset_t;
 #include "vm.h"
 struct lk_cset {
     struct lk_common co;
-    pt_cset_t        cs;
+    cset_t        cs;
 };
 #define LK_CSET(v) ((lk_cset_t *)(v))
 

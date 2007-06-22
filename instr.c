@@ -78,10 +78,10 @@ lk_instr_t *lk_instr_newarglist(lk_parser_t *parser, lk_instr_t *func) {
     return new;
 }
 /*
-static lk_string_t *instr_newsymbol(lk_vm_t *vm, pt_string_t *s) {
+static lk_string_t *instr_newsymbol(lk_vm_t *vm, string_t *s) {
     lk_string_t *new = lk_string_newfromlist(vm, s);
-    pt_setitem_t *i = pt_set_get(vm->symbols, new);
-    if(i == NULL) pt_set_set(vm->symbols, new);
+    setitem_t *i = set_get(vm->symbols, new);
+    if(i == NULL) set_set(vm->symbols, new);
     else {
         lk_object_free(LK_O(new));
         new = LK_STRING(i->key);
@@ -116,10 +116,10 @@ lk_instr_t *lk_instr_newmessage(lk_parser_t *parser, lk_string_t *name) {
     lk_instr_t *new = instr_new(parser, LK_INSTRTYPE_APPLYMSG);
     new->v = LK_O(name); /* instr_newsymbol(LK_VM(parser), name)); */
     {
-        pt_list_t *cs = parser->comments;
-        lk_string_t *c = pt_list_removeptr(cs, 0);
+        list_t *cs = parser->comments;
+        lk_string_t *c = list_removeptr(cs, 0);
         while(cs->count > 0) {
-            pt_list_concat(LIST(c), LIST(pt_list_removeptr(cs, 0)));
+            list_concat(LIST(c), LIST(list_removeptr(cs, 0)));
         }
         new->comment = c;
     }
@@ -152,7 +152,7 @@ void lk_instr_print(lk_instr_t *self) {
         break;
     case LK_INSTRTYPE_STRING:
         printf("'");
-        pt_string_print(LIST(self->v), stdout);
+        string_print(LIST(self->v), stdout);
         printf("'");
         break;
     case LK_INSTRTYPE_FIXINT:
@@ -166,17 +166,17 @@ void lk_instr_print(lk_instr_t *self) {
         break;
     case LK_INSTRTYPE_APPLYMSG:
         printf("/");
-        pt_string_print(LIST(self->v), stdout);
-        if(!(self->opts & LK_INSTROPT_HASMSGARGS)) printf("[]");
+        string_print(LIST(self->v), stdout);
+        if(!(self->opts & LK_INSTROHASMSGARGS)) printf("[]");
         break;
     case LK_INSTRTYPE_FRAMEMSG:
-        pt_string_print(LIST(self->v), stdout);
-        if(!(self->opts & LK_INSTROPT_HASMSGARGS)) printf("[]");
+        string_print(LIST(self->v), stdout);
+        if(!(self->opts & LK_INSTROHASMSGARGS)) printf("[]");
         break;
     case LK_INSTRTYPE_SELFMSG:
         printf("./");
-        pt_string_print(LIST(self->v), stdout);
-        if(!(self->opts & LK_INSTROPT_HASMSGARGS)) printf("[]");
+        string_print(LIST(self->v), stdout);
+        if(!(self->opts & LK_INSTROHASMSGARGS)) printf("[]");
         break;
     case LK_INSTRTYPE_MORE:
         break;
@@ -186,9 +186,9 @@ void lk_instr_print(lk_instr_t *self) {
     }
     if(self->comment != NULL) {
         printf(" #*");
-        pt_string_print(LIST(self->comment), stdout);
+        string_print(LIST(self->comment), stdout);
         printf(" *#");
     }
-    printf(self->opts & LK_INSTROPT_END ? "; " : " ");
+    printf(self->opts & LK_INSTROEND ? "; " : " ");
     lk_instr_print(self->next);
 }

@@ -16,15 +16,15 @@ struct lk_func {
         lk_instr_t  *sigdef;
         int          minargc;
         int          maxargc;
-        pt_list_t   *sigs;
+        list_t   *sigs;
         lk_sig_t    *rest;
         lk_string_t *doc;
         uint8_t      opts;
     }                cf;
 };
 #define LK_FUNC(v) ((lk_func_t *)(v))
-#define LK_FUNCOPT_RUNNING  (1 << 0)
-#define LK_FUNCOPT_ASSIGNED (1 << 1)
+#define LK_FUNCORUNNING  (1 << 0)
+#define LK_FUNCOASSIGNED (1 << 1)
 struct lk_cfunc {
     struct lk_common      co;
     struct lk_commonfunc cf;
@@ -34,7 +34,7 @@ struct lk_cfunc {
 struct lk_gfunc {
     struct lk_common      co;
     struct lk_commonfunc  cf;
-    pt_list_t            *funcs;
+    list_t            *funcs;
 };
 #define LK_GFUNC(v) ((lk_gfunc_t *)(v))
 struct lk_kfunc {

@@ -11,7 +11,7 @@
 
 /* ext map - types */
 static LK_OBJECT_DEFMARKFUNC(mark__fra) {
-    if(PT_LIST_ISINIT(FRAMESTACK)) PT_LIST_EACHPTR(FRAMESTACK, i, v, mark(v));
+    if(LIST_ISINIT(FRAMESTACK)) LIST_EACHPTR(FRAMESTACK, i, v, mark(v));
     mark(LK_O(FRAME->frame));
     mark(LK_O(FRAME->receiver));
     mark(LK_O(FRAME->self));
@@ -24,7 +24,7 @@ static LK_OBJECT_DEFMARKFUNC(mark__fra) {
     mark(LK_O(FRAME->func));
 }
 static LK_OBJECT_DEFFREEFUNC(free__fra) {
-    if(PT_LIST_ISINIT(FRAMESTACK)) pt_list_fin(FRAMESTACK);
+    if(LIST_ISINIT(FRAMESTACK)) list_fin(FRAMESTACK);
 }
 LK_EXT_DEFINIT(lk_frame_extinittypes) {
     vm->t_frame = lk_object_allocwithsize(vm->t_object, sizeof(lk_frame_t));
@@ -34,10 +34,10 @@ LK_EXT_DEFINIT(lk_frame_extinittypes) {
 
 /* ext map - funcs */
 static LK_EXT_DEFCFUNC(Dargs__fra) {
-    if(!PT_LIST_ISINIT(FRAMESTACK)) RETURN(lk_list_new(VM));
+    if(!LIST_ISINIT(FRAMESTACK)) RETURN(lk_list_new(VM));
     else {
         lk_list_t *args = lk_list_newfromlist(VM, FRAMESTACK);
-        pt_list_limit(LIST(args), FRAME->argc);
+        list_limit(LIST(args), FRAME->argc);
         RETURN(args);
     }
 }
@@ -53,22 +53,22 @@ static LK_EXT_DEFCFUNC(DassignB__fra_str_obj) {
     lk_object_setslotv(self, sv, LK_O(k), v);
     v = lk_object_getslotv(self, sv);
     if(LK_OBJECT_ISFUNC(v)) {
-        SETOPT(sv->opts, LK_SLOTVOPT_AUTORUN);
-        SETOPT(LK_FUNC(v)->cf.opts, LK_FUNCOPT_ASSIGNED);
+        SETOPT(sv->opts, LK_SLOTVOAUTORUN);
+        SETOPT(LK_FUNC(v)->cf.opts, LK_FUNCOASSIGNED);
     }
     RETURN(v);
 }
 static LK_EXT_DEFCFUNC(include__fra_str_str) {
     lk_frame_t *fr = lk_vm_evalfile(VM,
-    pt_list_tocstr(LIST(ARG(0))), pt_list_tocstr(LIST(ARG(1))));
+    list_tocstr(LIST(ARG(0))), list_tocstr(LIST(ARG(1))));
     if(fr != NULL) {
-        pt_set_t *from = fr->co.slots;
+        set_t *from = fr->co.slots;
         if(from != NULL) {
-            pt_set_t *to = self->co.slots;
-            if(to == NULL) to = self->co.slots = pt_set_alloc(
+            set_t *to = self->co.slots;
+            if(to == NULL) to = self->co.slots = set_alloc(
             sizeof(struct lk_slotv), lk_object_hashcode, lk_object_keycmp);
-            PT_SET_EACH(from, i,
-                *LK_SLOTV(pt_set_set(to, i->key)) = *LK_SLOTV(PT_SETITEM_VALUEPTR(i));
+            SET_EACH(from, i,
+                *LK_SLOTV(set_set(to, i->key)) = *LK_SLOTV(SETITEM_VALUEPTR(i));
             );
         }
     }
@@ -83,13 +83,13 @@ static LK_EXT_DEFCFUNC(raise__fra_str) {
     lk_vm_raiseerror(VM, err);
 }
 static LK_EXT_DEFCFUNC(redo__fra) {
-    if(PT_LIST_ISINIT(FRAMESTACK)) pt_list_clear(FRAMESTACK);
+    if(LIST_ISINIT(FRAMESTACK)) list_clear(FRAMESTACK);
     FRAME->next = FRAME->first;
     DONE;
 }
 static LK_EXT_DEFCFUNC(require__fra_str_str) {
     RETURN(lk_vm_evalfile(VM,
-    pt_list_tocstr(LIST(ARG(0))), pt_list_tocstr(LIST(ARG(1)))));
+    list_tocstr(LIST(ARG(0))), list_tocstr(LIST(ARG(1)))));
 }
 static LK_EXT_DEFCFUNC(rescue__fra_f) {
     RETURN(lk_object_getslotv(self, lk_object_setslot(
@@ -104,7 +104,7 @@ static LK_EXT_DEFCFUNC(retry__fra) {
     lk_instr_t *i = caller->current->prev;
     FRAME->next = NULL;
     FRAME->returnto = caller;
-    while(i->prev != NULL && !(i->prev->opts & LK_INSTROPT_END)) i = i->prev;
+    while(i->prev != NULL && !(i->prev->opts & LK_INSTROEND)) i = i->prev;
     caller->next = i;
     DONE;
 }
@@ -112,14 +112,14 @@ static LK_EXT_DEFCFUNC(return__fra) {
     lk_frame_t *f = FRAME;
     for(; ; f = LK_OBJECT_PROTO(f)) {
         if(f == NULL) lk_vm_abort(VM, NULL);
-        if(CHKOPT(LK_FUNC(f->func)->cf.opts, LK_FUNCOPT_ASSIGNED)) break;
+        if(CHKOPT(LK_FUNC(f->func)->cf.opts, LK_FUNCOASSIGNED)) break;
     }
     f = f->returnto;
     FRAME->next = NULL;
     FRAME->returnto = f;
-    if(PT_LIST_ISINIT(&env->stack)) {
-        if(!PT_LIST_ISINIT(FRAMESTACK)) pt_list_initptr(FRAMESTACK);
-        pt_list_concat(FRAMESTACK, &env->stack);
+    if(LIST_ISINIT(&env->stack)) {
+        if(!LIST_ISINIT(FRAMESTACK)) list_initptr(FRAMESTACK);
+        list_concat(FRAMESTACK, &env->stack);
     }
     DONE;
 }
@@ -152,22 +152,22 @@ LK_EXT_DEFINIT(lk_frame_extinitfuncs) {
 /* update */
 void lk_frame_stackpush(lk_frame_t *self, lk_object_t *v) {
     assert(v != NULL);
-    if(!PT_LIST_ISINIT(&self->stack)) pt_list_initptr(&self->stack);
-    pt_list_pushptr(&self->stack, lk_object_addref(LK_O(self), v));
+    if(!LIST_ISINIT(&self->stack)) list_initptr(&self->stack);
+    list_pushptr(&self->stack, lk_object_addref(LK_O(self), v));
 }
 lk_object_t *lk_frame_stackpop(lk_frame_t *self) {
-    assert(PT_LIST_ISINIT(&self->stack));
-    assert(PT_LIST_COUNT(&self->stack) > 0);
-    return pt_list_popptr(&self->stack);
+    assert(LIST_ISINIT(&self->stack));
+    assert(LIST_COUNT(&self->stack) > 0);
+    return list_popptr(&self->stack);
 }
 lk_object_t *lk_frame_stackpeek(lk_frame_t *self) {
     lk_vm_t *vm = LK_VM(self);
-    if(!PT_LIST_ISINIT(&self->stack)) return vm->t_unknown;
-    if(PT_LIST_COUNT(&self->stack) < 1) return vm->t_unknown;
-    return pt_list_peekptr(&self->stack);
+    if(!LIST_ISINIT(&self->stack)) return vm->t_unknown;
+    if(LIST_COUNT(&self->stack) < 1) return vm->t_unknown;
+    return list_peekptr(&self->stack);
 }
 lk_list_t *lk_frame_stacktolist(lk_frame_t *self) {
     lk_list_t *stack = lk_list_new(LK_VM(self));
-    if(PT_LIST_ISINIT(&self->stack)) pt_list_copy(LIST(stack), &self->stack);
+    if(LIST_ISINIT(&self->stack)) list_copy(LIST(stack), &self->stack);
     return stack;
 }

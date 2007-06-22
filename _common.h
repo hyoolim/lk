@@ -1,5 +1,5 @@
-#ifndef PT_COMMON_H
-#define PT_COMMON_H
+#ifndef COMMON_H
+#define COMMON_H
 #include <assert.h>
 #include <limits.h>
 #include <float.h>

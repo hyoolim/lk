@@ -1,20 +1,19 @@
-#ifndef PT_STRING_H
-#define PT_STRING_H
+#ifndef STRING_H
+#define STRING_H
 #include "_common.h"
 #include "_list.h"
 
 /* type */
-#define pt_string_t pt_list_t
-#define PT_STRING(o) ((pt_string_t *)(o))
+#define string_t list_t
 
 /* new */
-pt_string_t *pt_string_alloc(uint8_t ilen, int capa);
-pt_string_t *pt_string_allocfromdata(const void *data, int len);
-pt_string_t *pt_string_allocfromcstr(const char *cstr);
-pt_string_t *pt_string_allocfromfile(FILE *stream);
-pt_string_t *pt_string_allocfromfileuntilchar(FILE *stream, uint32_t pat);
-pt_string_t *pt_string_allocfromfileuntilcset(FILE *stream, const pt_cset_t *pat);
+string_t *string_alloc(uint8_t ilen, int capa);
+string_t *string_allocfromdata(const void *data, int len);
+string_t *string_allocfromcstr(const char *cstr);
+string_t *string_allocfromfile(FILE *stream);
+string_t *string_allocfromfileuntilchar(FILE *stream, uint32_t pat);
+string_t *string_allocfromfileuntilcset(FILE *stream, const cset_t *pat);
 
 /* info */
-void pt_string_print(const pt_string_t *self, FILE *stream);
+void string_print(const string_t *self, FILE *stream);
 #endif

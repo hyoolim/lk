@@ -6,7 +6,7 @@ typedef struct lk_glist lk_glist_t;
 #include "vm.h"
 struct lk_glist {
     struct lk_common co;
-    pt_list_t        data;
+    list_t        data;
 };
 #define LK_GLIST(v) ((lk_glist_t *)(v))
 

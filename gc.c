@@ -4,17 +4,17 @@
 
 /* ext map - types */
 static LK_OBJECT_DEFFREEFUNC(free__gc) {
-    pt_memory_free(GC->unused);
-    pt_memory_free(GC->pending);
-    pt_memory_free(GC->used);
-    pt_memory_free(GC->permanent);
+    memory_free(GC->unused);
+    memory_free(GC->pending);
+    memory_free(GC->used);
+    memory_free(GC->permanent);
 }
 LK_EXT_DEFINIT(lk_gc_extinittypes) {
     vm->gc = LK_GC(lk_object_allocwithsize(vm->t_object, sizeof(lk_gc_t)));
-    vm->gc->unused = pt_memory_alloc(sizeof(struct lk_objgroup));
-    vm->gc->pending = pt_memory_alloc(sizeof(struct lk_objgroup));
-    vm->gc->used = pt_memory_alloc(sizeof(struct lk_objgroup));
-    vm->gc->permanent = pt_memory_alloc(sizeof(struct lk_objgroup));
+    vm->gc->unused = memory_alloc(sizeof(struct lk_objgroup));
+    vm->gc->pending = memory_alloc(sizeof(struct lk_objgroup));
+    vm->gc->used = memory_alloc(sizeof(struct lk_objgroup));
+    vm->gc->permanent = memory_alloc(sizeof(struct lk_objgroup));
     lk_object_setfreefunc(LK_O(vm->gc), free__gc);
 }
 
@@ -72,7 +72,7 @@ void lk_object_markused(lk_object_t *self) {
         lk_objgroup_remove(self);
         lk_objgroup_insert(gc->used, self);
         if(LK_OBJECT_HASPARENTS(self)) {
-            PT_LIST_EACHPTR(LK_OBJECT_PARENTS(self), i, v,
+            LIST_EACHPTR(LK_OBJECT_PARENTS(self), i, v,
                 lk_object_markpending(LK_O(v));
             );
         } else {
@@ -80,9 +80,9 @@ void lk_object_markused(lk_object_t *self) {
         }
         if(self->co.slots != NULL) {
             struct lk_slotv *sv;
-            PT_SET_EACH(self->co.slots, item,
+            SET_EACH(self->co.slots, item,
                 lk_object_markpending(LK_O(item->key));
-                sv = LK_SLOTV(PT_SETITEM_VALUEPTR(item));
+                sv = LK_SLOTV(SETITEM_VALUEPTR(item));
                 lk_object_markpending(sv->type);
                 lk_object_markpending(lk_object_getslotv(self, sv));
             );
@@ -130,8 +130,8 @@ void lk_gc_sweep(lk_gc_t *self) {
         lk_objgroup_count(self->used));
          */
         lk_object_markpending(LK_O(vm->currframe));
-        PT_LIST_EACHPTR(vm->retained, i, v, lk_object_markpending(LK_O(v)));
-        PT_SET_EACH(vm->symbols, i, lk_object_markpending(LK_O(i->key)));
+        LIST_EACHPTR(vm->retained, i, v, lk_object_markpending(LK_O(v)));
+        SET_EACH(vm->symbols, i, lk_object_markpending(LK_O(i->key)));
         for(; rsrc != NULL; rsrc = rsrc->prev) {
             lk_object_markpending(LK_O(rsrc->rsrc));
         }

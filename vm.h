@@ -36,8 +36,8 @@ struct lk_objgroup {
 };
 struct lk_common {
     lk_object_t            *proto;
-    pt_list_t              *ancestors;
-    pt_set_t               *slots;
+    list_t              *ancestors;
+    set_t               *slots;
     struct lk_tag          *tag;
     struct lk_mark {
         lk_object_t        *prev;
@@ -52,14 +52,14 @@ struct lk_common {
 #define LK_VM_DEFGLOBAL_PROTO(name) \
     lk_object_t *lk_global_ ## name(lk_vm_t *vm)
 #define LK_VM_DEFGLOBAL(name) \
-    static pt_list_t *g_ ## name; \
-    LK_VM_DEFGLOBAL_PROTO(name) { return pt_list_getptr(g_ ## name, vm->id); } \
+    static list_t *g_ ## name; \
+    LK_VM_DEFGLOBAL_PROTO(name) { return list_getptr(g_ ## name, vm->id); } \
     LK_VM_DEFGLOBAL_PROTO(name) /* for ; */
 #define LK_VM_SETGLOBAL(vm, name, v) do { \
     lk_object_t *g = (v); \
-    g_ ## name = pt_list_allocptr(); \
-    pt_list_setptr(g_ ## name, (vm)->id, g); \
-    pt_list_pushptr((vm)->retained, g); \
+    g_ ## name = list_allocptr(); \
+    list_setptr(g_ ## name, (vm)->id, g); \
+    list_pushptr((vm)->retained, g); \
     } while(0)
 #define LK_VM_GETGLOBAL(vm, name) \
     (lk_global_ ## name(vm))
@@ -86,8 +86,8 @@ struct lk_object {
 };
 struct lk_vm {
     int id;
-    pt_list_t *retained;
-    pt_set_t *symbols;
+    list_t *retained;
+    set_t *symbols;
     struct lk_rsrcchain {
         uint8_t              isstring;
         lk_string_t         *rsrc;

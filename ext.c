@@ -9,10 +9,10 @@ static LK_OBJECT_DEFFREEFUNC(free__ext) {
     if(LK_EXT(self)->lib != NULL) dlclose(LK_EXT(self)->lib);
 }
 static LK_EXT_DEFCFUNC(init__ext_str_str) {
-    const char *libpath = pt_list_tocstr(LIST(ARG(0)));
+    const char *libpath = list_tocstr(LIST(ARG(0)));
     void *lib = dlopen(libpath, RTLD_NOW);
     if(lib != NULL) {
-        const char *initname = pt_list_tocstr(LIST(ARG(1)));
+        const char *initname = list_tocstr(LIST(ARG(1)));
         union { void *p; lk_extinitfunc_t *f; } initfunc;
         initfunc.p = dlsym(lib, initname);
         LK_EXT(self)->lib = lib;
@@ -51,7 +51,7 @@ void lk_ext_cfield(lk_object_t *self, const char *k, lk_object_t *t,
     struct lk_slotv *sv = lk_object_setslot(
     LK_O(self), LK_O(k_kc), t, vm->t_unknown);
     assert(offset >= sizeof(struct lk_common));
-    sv->opts |= LK_SLOTVOPT_CFIELD;
+    sv->opts |= LK_SLOTVOCFIELD;
     sv->v.offset = offset;
 }
 void lk_ext_cfunc(lk_object_t *obj, const char *k, lk_cfuncfunc_t *func, ...) {
@@ -62,7 +62,7 @@ void lk_ext_cfunc(lk_object_t *obj, const char *k, lk_cfuncfunc_t *func, ...) {
     lk_cfunc_t *cfunc = lk_cfunc_new(vm, func, 0, 0);
     struct lk_slotv *sv = lk_object_setslot(obj,
     LK_O(lk_string_newfromcstr(vm, k)), vm->t_func, LK_O(cfunc));
-    SETOPT(sv->opts, LK_SLOTVOPT_AUTORUN);
+    SETOPT(sv->opts, LK_SLOTVOAUTORUN);
     va_start(args, func);
     for(i = 0; ; i ++) {
         a = va_arg(args, lk_object_t *);
@@ -74,7 +74,7 @@ void lk_ext_cfunc(lk_object_t *obj, const char *k, lk_cfuncfunc_t *func, ...) {
             cfunc->cf.maxargc = INT_MAX;
             break;
         }
-        pt_list_setptr(cfunc->cf.sigs, i, lk_sig_new(vm, NULL, a));
+        list_setptr(cfunc->cf.sigs, i, lk_sig_new(vm, NULL, a));
     }
     va_end(args);
 }

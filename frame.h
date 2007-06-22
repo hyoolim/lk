@@ -13,7 +13,7 @@ struct lk_frame {
         LK_FRAMETYPE_LIST,
         LK_FRAMETYPE_RETURN
     }                    type;
-    pt_list_t            stack;
+    list_t            stack;
     lk_frame_t          *frame;
     lk_object_t         *receiver;
     lk_object_t         *self;

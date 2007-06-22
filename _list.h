@@ -1,9 +1,9 @@
-#ifndef PT_LIST_H
-#define PT_LIST_H
+#ifndef LIST_H
+#define LIST_H
 #include "_common.h"
 
 /* type - contains actual list data */
-struct pt_listdata {
+struct listdata {
     int  capa;
     int  used;
     int  ilen; /* length of item in data in bytes */
@@ -12,83 +12,82 @@ struct pt_listdata {
 };
 
 /* type */
-typedef struct pt_list {
-    struct pt_listdata *data;
+typedef struct list {
+    struct listdata *data;
     char               *first;
     int                 count;
-} pt_list_t;
-#define PT_LIST(o) ((pt_list_t *)(o))
+} list_t;
 
 /* new */
-pt_list_t *pt_list_alloc(int ilen, int capa);
-pt_list_t *pt_list_allocptr(void);
-pt_list_t *pt_list_allocptrwithcapa(int capa);
-pt_list_t *pt_list_allocfromfile(FILE *stream, size_t rs);
-pt_list_t *pt_list_clone(pt_list_t *self);
-void pt_list_init(pt_list_t *self, int ilen, int capa);
-void pt_list_initptr(pt_list_t *self);
-void pt_list_copy(pt_list_t *self, pt_list_t *src);
-void pt_list_fin(pt_list_t *self);
-void pt_list_free(pt_list_t *self);
+list_t *list_alloc(int ilen, int capa);
+list_t *list_allocptr(void);
+list_t *list_allocptrwithcapa(int capa);
+list_t *list_allocfromfile(FILE *stream, size_t rs);
+list_t *list_clone(list_t *self);
+void list_init(list_t *self, int ilen, int capa);
+void list_initptr(list_t *self);
+void list_copy(list_t *self, list_t *src);
+void list_fin(list_t *self);
+void list_free(list_t *self);
 
 /* update */
-void pt_list_clear(pt_list_t *self);
-void pt_list_concat(pt_list_t *self, pt_list_t *v);
-void pt_list_insert(pt_list_t *self, int i, void *v);
-void pt_list_insertptr(pt_list_t *self, int i, void *v);
-void pt_list_insertuchar(pt_list_t *self, int i, uint32_t v);
-void pt_list_limit(pt_list_t *self, int n);
-void pt_list_offset(pt_list_t *self, int n);
-void *pt_list_peekptr(pt_list_t *self);
-uint32_t pt_list_peekuchar(pt_list_t *self);
-void *pt_list_popptr(pt_list_t *self);
-uint32_t pt_list_popuchar(pt_list_t *self);
-void pt_list_pushptr(pt_list_t *self, void *v);
-void pt_list_pushuchar(pt_list_t *self, uint32_t v);
-void pt_list_remove(pt_list_t *self, int i);
-void *pt_list_removeptr(pt_list_t *self, int i);
-uint32_t pt_list_removeuchar(pt_list_t *self, int i);
-void pt_list_resize(pt_list_t *self, int s);
-void pt_list_resizeitem(pt_list_t *self, pt_list_t *other);
-void pt_list_reverse(pt_list_t *self);
-void pt_list_set(pt_list_t *self, int i, void *v);
-void pt_list_setptr(pt_list_t *self, int i, void *v);
-void pt_list_setrange(pt_list_t *self, int b, int e, pt_list_t *v);
-void pt_list_setuchar(pt_list_t *self, int i, uint32_t v);
-void *pt_list_shiftptr(pt_list_t *self);
-void pt_list_slice(pt_list_t *self, int offset, int limit);
-const char *pt_list_tocstr(pt_list_t *self);
-void pt_list_unshiftptr(pt_list_t *self, void *v);
+void list_clear(list_t *self);
+void list_concat(list_t *self, list_t *v);
+void list_insert(list_t *self, int i, void *v);
+void list_insertptr(list_t *self, int i, void *v);
+void list_insertuchar(list_t *self, int i, uint32_t v);
+void list_limit(list_t *self, int n);
+void list_offset(list_t *self, int n);
+void *list_peekptr(list_t *self);
+uint32_t list_peekuchar(list_t *self);
+void *list_popptr(list_t *self);
+uint32_t list_popuchar(list_t *self);
+void list_pushptr(list_t *self, void *v);
+void list_pushuchar(list_t *self, uint32_t v);
+void list_remove(list_t *self, int i);
+void *list_removeptr(list_t *self, int i);
+uint32_t list_removeuchar(list_t *self, int i);
+void list_resize(list_t *self, int s);
+void list_resizeitem(list_t *self, list_t *other);
+void list_reverse(list_t *self);
+void list_set(list_t *self, int i, void *v);
+void list_setptr(list_t *self, int i, void *v);
+void list_setrange(list_t *self, int b, int e, list_t *v);
+void list_setuchar(list_t *self, int i, uint32_t v);
+void *list_shiftptr(list_t *self);
+void list_slice(list_t *self, int offset, int limit);
+const char *list_tocstr(list_t *self);
+void list_unshiftptr(list_t *self, void *v);
 
 /* info */
-#define PT_LIST_AT(self, i) ((self)->first + (self)->data->ilen * i)
-#define PT_LIST_ATPTR(self, i) (*(void **)PT_LIST_AT(self, (i)))
-int pt_list_cmp(const pt_list_t *self, const pt_list_t *other);
-int pt_list_cmpcstr(const pt_list_t *self, const char *other);
-#define PT_LIST_COUNT(self) ((self)->count)
-#define PT_LIST_EACH(self, i, v, block) do { \
-    pt_list_t *_l = (self); \
-    int i, _c = PT_LIST_COUNT(_l); \
+#define LIST_AT(self, i) ((self)->first + (self)->data->ilen * i)
+#define LIST_ATPTR(self, i) (*(void **)LIST_AT(self, (i)))
+int list_cmp(const list_t *self, const list_t *other);
+int list_cmpcstr(const list_t *self, const char *other);
+#define LIST_COUNT(self) ((self)->count)
+#define LIST_EACH(self, i, v, block) do { \
+    list_t *_l = (self); \
+    int i, _c = LIST_COUNT(_l); \
     void *v; \
     for(i = 0; i < _c; i ++) { \
-        v = PT_LIST_AT(_l, i); \
+        v = LIST_AT(_l, i); \
         { block; } \
     } \
 } while(0)
-#define PT_LIST_EACHPTR(self, i, v, block) \
-    PT_LIST_EACH(self, i, v, v = *(void **)v; block);
-#define PT_LIST_EQ(self, other) ( \
-    PT_LIST_COUNT(self) != PT_LIST_COUNT(other) \
-    ? 0 : pt_list_cmp((self), (other)) == 0 \
+#define LIST_EACHPTR(self, i, v, block) \
+    LIST_EACH(self, i, v, v = *(void **)v; block);
+#define LIST_EQ(self, other) ( \
+    LIST_COUNT(self) != LIST_COUNT(other) \
+    ? 0 : list_cmp((self), (other)) == 0 \
 )
 #include "_cset.h"
-int pt_list_findcset(const pt_list_t *self, const pt_cset_t *pat, int o);
-int pt_list_findlist(const pt_list_t *self, const pt_list_t *pat, int o);
-int pt_list_finduchar(const pt_list_t *self, uint32_t pat, int o);
-void *pt_list_get(const pt_list_t *self, int i);
-void *pt_list_getptr(const pt_list_t *self, int i);
-uint32_t pt_list_getuchar(const pt_list_t *self, int i);
-int pt_list_hc(const pt_list_t *self);
-#define PT_LIST_ISINIT(self) ((self)->data != NULL)
-void pt_list_write(const pt_list_t *self, FILE *stream);
+int list_findcset(const list_t *self, const cset_t *pat, int o);
+int list_findlist(const list_t *self, const list_t *pat, int o);
+int list_finduchar(const list_t *self, uint32_t pat, int o);
+void *list_get(const list_t *self, int i);
+void *list_getptr(const list_t *self, int i);
+uint32_t list_getuchar(const list_t *self, int i);
+int list_hc(const list_t *self);
+#define LIST_ISINIT(self) ((self)->data != NULL)
+void list_write(const list_t *self, FILE *stream);
 #endif

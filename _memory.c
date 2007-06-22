@@ -4,9 +4,9 @@
 static size_t alloctotal = 0;
 static size_t allocused = 0;
 static size_t allocpeak = 0;
-static void *recycled[PT_MEMORY_MAXRECYCLED];
-void *pt_memory_alloc(size_t size) {
-    if(size < PT_MEMORY_MAXRECYCLED && recycled[size] != NULL) {
+static void *recycled[MEMORY_MAXRECYCLED];
+void *memory_alloc(size_t size) {
+    if(size < MEMORY_MAXRECYCLED && recycled[size] != NULL) {
         void *next = *(void **)recycled[size];
         void *new = recycled[size];
         recycled[size] = next;
@@ -22,10 +22,10 @@ void *pt_memory_alloc(size_t size) {
         return new + 1;
     }
 }
-void pt_memory_free(void *ptr) {
+void memory_free(void *ptr) {
     if(ptr != NULL) {
         int size = *((size_t *)ptr - 1);
-        if(size < PT_MEMORY_MAXRECYCLED) {
+        if(size < MEMORY_MAXRECYCLED) {
             *(void **)ptr = recycled[size];
             recycled[size] = ptr;
         } else {
@@ -35,10 +35,10 @@ void pt_memory_free(void *ptr) {
         }
     }
 }
-void pt_memory_freerecycled(void) {
+void memory_freerecycled(void) {
     int i;
     void *curr;
-    for(i = 0; i < PT_MEMORY_MAXRECYCLED; i ++) {
+    for(i = 0; i < MEMORY_MAXRECYCLED; i ++) {
         curr = recycled[i];
         if(curr != NULL) {
             while(curr != NULL) {
@@ -50,8 +50,8 @@ void pt_memory_freerecycled(void) {
         }
     }
 }
-void *pt_memory_resize(void *old, size_t size) {
-    if(old == NULL) return pt_memory_alloc(size);
+void *memory_resize(void *old, size_t size) {
+    if(old == NULL) return memory_alloc(size);
     else {
         int old_size = *(size_t *)(old = (size_t *)old - 1);
         size_t *new = realloc(old, size + sizeof(size_t));
@@ -65,12 +65,12 @@ void *pt_memory_resize(void *old, size_t size) {
 }
 
 /* info */
-size_t pt_memory_alloctotal(void) {
+size_t memory_alloctotal(void) {
     return alloctotal;
 }
-size_t pt_memory_allocused(void) {
+size_t memory_allocused(void) {
     return allocused;
 }
-size_t pt_memory_allocpeak(void) {
+size_t memory_allocpeak(void) {
     return allocpeak;
 }

@@ -26,13 +26,6 @@ LK_EXT_DEFINIT(lk_object_extinittypes) {
 }
 
 /* ext map - funcs */
-#define CHECKDEF(self, k) do { \
-    if((self)->co.slots != NULL \
-    && set_get((self)->co.slots, (k)) != NULL) { \
-        string_print(LIST(k), stdout); \
-        lk_vm_raisecstr(VM, "Cannot assign to %s without defining it first", k); \
-    } \
-} while(0)
 static LK_EXT_DEFCFUNC(DassignB__obj_str_obj) {
     lk_object_t *k = ARG(0);
     lk_object_t *v = ARG(1);
@@ -47,33 +40,24 @@ static LK_EXT_DEFCFUNC(DassignB__obj_str_obj) {
     }
     RETURN(v);
 }
+static LK_EXT_DEFCFUNC(Ddefine_and_assignB__obj_str_obj_obj);
 static LK_EXT_DEFCFUNC(Ddefine__obj_str_obj) {
-    lk_object_t *k = ARG(0);
-    lk_object_t *t = ARG(1);
-    CHECKDEF(self, k);
-    lk_object_setslot(self, k, t, N);
-    RETURN(t);
+    env->argc ++;
+    list_pushptr(&env->stack, N);
+    GOTO(Ddefine_and_assignB__obj_str_obj_obj);
 }
 static LK_EXT_DEFCFUNC(Ddefine_and_assignB__obj_str_obj) {
-    lk_object_t *k = ARG(0);
-    lk_object_t *t = VM->t_object;
-    lk_object_t *v = ARG(1);
-    struct lk_slot *slot;
-    CHECKDEF(self, k);
-    slot = lk_object_setslot(self, k, t, v);
-    v = lk_object_getslot(self, slot);
-    if(LK_OBJECT_ISFUNC(v)) {
-        SETOPT(slot->opts, LK_SLOTVOAUTORUN);
-        SETOPT(LK_FUNC(v)->cf.opts, LK_FUNCOASSIGNED);
-        LK_FUNC(v)->cf.doc = env->caller->current->prev->comment;
-    }
-    RETURN(v);
+    env->argc ++;
+    list_insertptr(&env->stack, 1, VM->t_object);
+    GOTO(Ddefine_and_assignB__obj_str_obj_obj);
 }
 static LK_EXT_DEFCFUNC(Ddefine_and_assignB__obj_str_obj_obj) {
     lk_object_t *k = ARG(0);
     lk_object_t *v = ARG(2);
     struct lk_slot *slot;
-    CHECKDEF(self, k);
+    if(self->co.slots != NULL && set_get(self->co.slots, k) != NULL) {
+        lk_vm_raisecstr(VM, "Cannot redefine %s", k);
+    }
     slot = lk_object_setslot(self, k, ARG(1), v);
     v = lk_object_getslot(self, slot);
     if(LK_OBJECT_ISFUNC(v)) {

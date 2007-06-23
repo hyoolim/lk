@@ -259,7 +259,7 @@ lk_func_t *lk_func_match(lk_func_t *self, lk_frame_t *args, lk_object_t *recv) {
 void lk_kfunc_updatesig(lk_kfunc_t *self) {
     lk_instr_t *typeinstr, *argdef = self->cf.sigdef;
     int isself;
-    struct lk_slotv *slot;
+    struct lk_slot *slot;
     list_t *sigs = self->cf.sigs;
     lk_string_t *name;
     lk_object_t *type;
@@ -280,7 +280,7 @@ void lk_kfunc_updatesig(lk_kfunc_t *self) {
                     typeinstr = typeinstr->next;
                     slot = lk_object_getdef(LK_O(VM->currframe), typeinstr->v);
                     if(slot != NULL) {
-                        type = lk_object_getslotv(LK_O(VM->currframe), slot);
+                        type = lk_object_getslot(LK_O(VM->currframe), slot);
                     } else {
                         printf("Invalid sig, invalid type\n");
                         exit(EXIT_FAILURE);

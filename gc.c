@@ -79,12 +79,12 @@ void lk_object_markused(lk_object_t *self) {
             if(self->co.proto != NULL) lk_object_markpending(self->co.proto);
         }
         if(self->co.slots != NULL) {
-            struct lk_slotv *sv;
+            struct lk_slot *slot;
             SET_EACH(self->co.slots, item,
                 lk_object_markpending(LK_O(item->key));
-                sv = LK_SLOTV(SETITEM_VALUEPTR(item));
-                lk_object_markpending(sv->type);
-                lk_object_markpending(lk_object_getslotv(self, sv));
+                slot = LK_SLOTV(SETITEM_VALUEPTR(item));
+                lk_object_markpending(slot->type);
+                lk_object_markpending(lk_object_getslot(self, slot));
             );
         }
         if(self->co.tag->markfunc != NULL) {

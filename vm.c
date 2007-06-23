@@ -345,7 +345,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
     lk_string_t *msgn;
     set_t *slots;
     setitem_t *si;
-    struct lk_slotv *slot;
+    struct lk_slot *slot;
     list_t *ancs;
     int anci, ancc;
     lk_object_t *recv, *r, *slotv;
@@ -363,7 +363,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
             if((slots = recv->co.slots) == NULL) continue;
             if((si = set_get(slots, vm->str_rescue)) == NULL) continue;
             slot = LK_SLOTV(SETITEM_VALUEPTR(si));
-            slotv = lk_object_getslotv(recv, slot);
+            slotv = lk_object_getslot(recv, slot);
             if(!LK_OBJECT_ISFUNC(slot->type)
             || LK_OBJECT_ISA(slotv, t_func) < 3) continue;
             func = lk_func_match(LK_FUNC(slotv), args, args->self);
@@ -479,7 +479,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         if((si = set_get(slots, msgn)) == NULL) goto proto;
         found:
         slot = LK_SLOTV(SETITEM_VALUEPTR(si));
-        slotv = lk_object_getslotv(recv, slot);
+        slotv = lk_object_getslot(recv, slot);
         /* slot contains func obj - call? */
         if(LK_OBJECT_ISA(slotv, t_func) > 2
         && slot->opts & LK_SLOTVOAUTORUN) {
@@ -575,9 +575,9 @@ void lk_vm_exit(lk_vm_t *self) {
 }
 void lk_vm_abort(lk_vm_t *self, lk_error_t *error) {
     if(error != NULL) {
-        struct lk_slotv *sv = lk_object_getdef(
+        struct lk_slot *slot = lk_object_getdef(
         LK_O(error), LK_O(self->str_type));
-        lk_string_t *type = LK_STRING(lk_object_getslotv(LK_O(error), sv));
+        lk_string_t *type = LK_STRING(lk_object_getslot(LK_O(error), slot));
         lk_instr_t *expr = error->instr;
         int i = 0;
         string_print(LIST(type), stdout);

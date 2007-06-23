@@ -3,7 +3,7 @@
 #include "vm.h"
 
 /* type */
-struct lk_slotv {
+struct lk_slot {
     uint8_t          opts;
     lk_object_t     *type;
     union {
@@ -11,7 +11,7 @@ struct lk_slotv {
         size_t        offset;
     } v;
 };
-#define LK_SLOTV(v) ((struct lk_slotv *)(v))
+#define LK_SLOTV(v) ((struct lk_slot *)(v))
 #define LK_SLOTVOCFIELD   (1 << 0)
 #define LK_SLOTVOREADONLY (1 << 1)
 #define LK_SLOTVOAUTORUN  (1 << 2)
@@ -36,15 +36,15 @@ LK_OBJECT_DEFTAGSETTER(lk_tagmarkfunc_t *, markfunc);
 LK_OBJECT_DEFTAGSETTER(lk_tagfreefunc_t *, freefunc);
 
 /* update */
-struct lk_slotv *lk_object_setslot(lk_object_t *self, lk_object_t *k, lk_object_t *t, lk_object_t *v);
-struct lk_slotv *lk_object_setslotbycstr(lk_object_t *self, const char *k, lk_object_t *t, lk_object_t *v);
-void lk_object_setslotv(lk_object_t *self, struct lk_slotv *slotv, lk_object_t *k, lk_object_t *v);
+struct lk_slot *lk_object_setslot(lk_object_t *self, lk_object_t *k, lk_object_t *t, lk_object_t *v);
+struct lk_slot *lk_object_setslotbycstr(lk_object_t *self, const char *k, lk_object_t *t, lk_object_t *v);
+void lk_object_setslotvalue(lk_object_t *self, struct lk_slot *slot, lk_object_t *k, lk_object_t *v);
 int lk_object_calcancestors(lk_object_t *self);
 
 /* info */
 int lk_object_isa(lk_object_t *self, lk_object_t *t);
-struct lk_slotv *lk_object_getdef(lk_object_t *self, lk_object_t *k);
-lk_object_t *lk_object_getslotv(lk_object_t *self, struct lk_slotv *slotv);
+struct lk_slot *lk_object_getdef(lk_object_t *self, lk_object_t *k);
+lk_object_t *lk_object_getslot(lk_object_t *self, struct lk_slot *slot);
 int lk_object_hashcode(const void *k, int capa);
 int lk_object_keycmp(const void *self, const void *other);
 #define LK_OBJECT_ISTYPE(self, t) \

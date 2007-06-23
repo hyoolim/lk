@@ -44,16 +44,16 @@ static LK_EXT_DEFCFUNC(Dargs__fra) {
 static LK_EXT_DEFCFUNC(DassignB__fra_str_obj) {
     lk_string_t *k = LK_STRING(ARG(0));
     lk_object_t *v = ARG(1);
-    struct lk_slotv *sv = lk_object_getdef(self, LK_O(k));
+    struct lk_slot *slot = lk_object_getdef(self, LK_O(k));
     lk_object_t *oldval;
-    if(sv == NULL) lk_vm_raisecstr(VM, "Cannot assign to %s without defining it first", k);
-    oldval = lk_object_getslotv(self, sv);
+    if(slot == NULL) lk_vm_raisecstr(VM, "Cannot assign to %s without defining it first", k);
+    oldval = lk_object_getslot(self, slot);
     if(LK_OBJECT_ISFUNC(oldval)
     ) v = LK_O(lk_func_combine(LK_FUNC(oldval), LK_FUNC(v)));
-    lk_object_setslotv(self, sv, LK_O(k), v);
-    v = lk_object_getslotv(self, sv);
+    lk_object_setslotvalue(self, slot, LK_O(k), v);
+    v = lk_object_getslot(self, slot);
     if(LK_OBJECT_ISFUNC(v)) {
-        SETOPT(sv->opts, LK_SLOTVOAUTORUN);
+        SETOPT(slot->opts, LK_SLOTVOAUTORUN);
         SETOPT(LK_FUNC(v)->cf.opts, LK_FUNCOASSIGNED);
     }
     RETURN(v);
@@ -66,7 +66,7 @@ static LK_EXT_DEFCFUNC(include__fra_str_str) {
         if(from != NULL) {
             set_t *to = self->co.slots;
             if(to == NULL) to = self->co.slots = set_alloc(
-            sizeof(struct lk_slotv), lk_object_hashcode, lk_object_keycmp);
+            sizeof(struct lk_slot), lk_object_hashcode, lk_object_keycmp);
             SET_EACH(from, i,
                 *LK_SLOTV(set_set(to, i->key)) = *LK_SLOTV(SETITEM_VALUEPTR(i));
             );
@@ -92,7 +92,7 @@ static LK_EXT_DEFCFUNC(require__fra_str_str) {
     list_tocstr(LIST(ARG(0))), list_tocstr(LIST(ARG(1)))));
 }
 static LK_EXT_DEFCFUNC(rescue__fra_f) {
-    RETURN(lk_object_getslotv(self, lk_object_setslot(
+    RETURN(lk_object_getslot(self, lk_object_setslot(
     self, LK_O(VM->str_rescue), VM->t_func, ARG(0))));
 }
 static LK_EXT_DEFCFUNC(RESOURCE__fra) {

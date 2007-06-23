@@ -36,12 +36,12 @@ LK_EXT_DEFINIT(lk_object_extinittypes) {
 static LK_EXT_DEFCFUNC(DassignB__obj_str_obj) {
     lk_object_t *k = ARG(0);
     lk_object_t *v = ARG(1);
-    struct lk_slotv *sv = lk_object_getdef(self, k);
-    if(sv == NULL) lk_vm_raisecstr(VM, "Cannot assign to %s without defining it first", k);
-    sv = lk_object_setslot(self, k, sv->type, v);
-    v = lk_object_getslotv(self, sv);
+    struct lk_slot *slot = lk_object_getdef(self, k);
+    if(slot == NULL) lk_vm_raisecstr(VM, "Cannot assign to %s without defining it first", k);
+    slot = lk_object_setslot(self, k, slot->type, v);
+    v = lk_object_getslot(self, slot);
     if(LK_OBJECT_ISFUNC(v)) {
-        SETOPT(sv->opts, LK_SLOTVOAUTORUN);
+        SETOPT(slot->opts, LK_SLOTVOAUTORUN);
         SETOPT(LK_FUNC(v)->cf.opts, LK_FUNCOASSIGNED);
         LK_FUNC(v)->cf.doc = env->caller->current->prev->comment;
     }
@@ -58,12 +58,12 @@ static LK_EXT_DEFCFUNC(Ddefine_assignB__obj_str_obj) {
     lk_object_t *k = ARG(0);
     lk_object_t *t = VM->t_object;
     lk_object_t *v = ARG(1);
-    struct lk_slotv *sv;
+    struct lk_slot *slot;
     CHECKDEF(self, k);
-    sv = lk_object_setslot(self, k, t, v);
-    v = lk_object_getslotv(self, sv);
+    slot = lk_object_setslot(self, k, t, v);
+    v = lk_object_getslot(self, slot);
     if(LK_OBJECT_ISFUNC(v)) {
-        SETOPT(sv->opts, LK_SLOTVOAUTORUN);
+        SETOPT(slot->opts, LK_SLOTVOAUTORUN);
         SETOPT(LK_FUNC(v)->cf.opts, LK_FUNCOASSIGNED);
         LK_FUNC(v)->cf.doc = env->caller->current->prev->comment;
     }
@@ -72,12 +72,12 @@ static LK_EXT_DEFCFUNC(Ddefine_assignB__obj_str_obj) {
 static LK_EXT_DEFCFUNC(Ddefine_assignB__obj_str_obj_obj) {
     lk_object_t *k = ARG(0);
     lk_object_t *v = ARG(2);
-    struct lk_slotv *sv;
+    struct lk_slot *slot;
     CHECKDEF(self, k);
-    sv = lk_object_setslot(self, k, ARG(1), v);
-    v = lk_object_getslotv(self, sv);
+    slot = lk_object_setslot(self, k, ARG(1), v);
+    v = lk_object_getslot(self, slot);
     if(LK_OBJECT_ISFUNC(v)) {
-        SETOPT(sv->opts, LK_SLOTVOAUTORUN);
+        SETOPT(slot->opts, LK_SLOTVOAUTORUN);
         SETOPT(LK_FUNC(v)->cf.opts, LK_FUNCOASSIGNED);
         LK_FUNC(v)->cf.doc = env->caller->current->prev->comment;
     }
@@ -86,8 +86,8 @@ static LK_EXT_DEFCFUNC(Ddefine_assignB__obj_str_obj_obj) {
 static LK_EXT_DEFCFUNC(Did__obj) {
     RETURN(lk_fi_new(VM, (int)self)); }
 static LK_EXT_DEFCFUNC(Dretrieve__obj_str) {
-    struct lk_slotv *slot = lk_object_getdef(self, ARG(0));
-    if(slot != NULL) RETURN(lk_object_getslotv(self, slot));
+    struct lk_slot *slot = lk_object_getdef(self, ARG(0));
+    if(slot != NULL) RETURN(lk_object_getslot(self, slot));
     else RETURN(N);
 
 }
@@ -149,7 +149,7 @@ static LK_EXT_DEFCFUNC(import__obj_obj) {
     if(from != NULL) {
         set_t *to = self->co.slots;
         if(to == NULL) to = self->co.slots = set_alloc(
-        sizeof(struct lk_slotv), lk_object_hashcode, lk_object_keycmp);
+        sizeof(struct lk_slot), lk_object_hashcode, lk_object_keycmp);
         SET_EACH(from, i,
             *LK_SLOTV(set_set(to, i->key)) = *LK_SLOTV(SETITEM_VALUEPTR(i));
         );
@@ -262,49 +262,49 @@ LK_OBJECT_IMPLTAGSETTER(lk_tagmarkfunc_t *, markfunc);
 LK_OBJECT_IMPLTAGSETTER(lk_tagfreefunc_t *, freefunc);
 
 /* update */
-struct lk_slotv *lk_object_setslot(lk_object_t *self, lk_object_t *k, lk_object_t *t, lk_object_t *v) {
+struct lk_slot *lk_object_setslot(lk_object_t *self, lk_object_t *k, lk_object_t *t, lk_object_t *v) {
     set_t *slots = self->co.slots;
-    struct lk_slotv *sv;
+    struct lk_slot *slot;
     if(slots == NULL) slots = self->co.slots = set_alloc(
-    sizeof(struct lk_slotv), lk_object_hashcode, lk_object_keycmp);
+    sizeof(struct lk_slot), lk_object_hashcode, lk_object_keycmp);
     else {
         setitem_t *si = set_get(slots, k);
         if(si != NULL) {
             lk_object_t *oldval;
-            sv = LK_SLOTV(SETITEM_VALUEPTR(si));
-            sv->type = t;
-            oldval = lk_object_getslotv(self, sv);
+            slot = LK_SLOTV(SETITEM_VALUEPTR(si));
+            slot->type = t;
+            oldval = lk_object_getslot(self, slot);
             if(LK_OBJECT_ISFUNC(oldval)) {
                 v = LK_O(lk_func_combine(LK_FUNC(oldval), LK_FUNC(v)));
             }
-            lk_object_setslotv(self, sv, k, v);
-            return sv;
+            lk_object_setslotvalue(self, slot, k, v);
+            return slot;
         }
     }
-    sv = LK_SLOTV(set_set(slots, k));
-    sv->type = t;
-    lk_object_setslotv(self, sv, k, v);
-    return sv;
+    slot = LK_SLOTV(set_set(slots, k));
+    slot->type = t;
+    lk_object_setslotvalue(self, slot, k, v);
+    return slot;
 }
-struct lk_slotv *lk_object_setslotbycstr(lk_object_t *self, const char *k, lk_object_t *t, lk_object_t *v) {
+struct lk_slot *lk_object_setslotbycstr(lk_object_t *self, const char *k, lk_object_t *t, lk_object_t *v) {
     return lk_object_setslot(self,
     LK_O(lk_string_newfromcstr(LK_VM(self), k)), t, v);
 }
-void lk_object_setslotv(lk_object_t *self, struct lk_slotv *slotv, lk_object_t *k, lk_object_t *v) {
+void lk_object_setslotvalue(lk_object_t *self, struct lk_slot *slot, lk_object_t *k, lk_object_t *v) {
     lk_vm_t *vm = LK_VM(self);
     if(v == NULL) v = vm->t_unknown;
-    if(v == vm->t_unknown || LK_OBJECT_ISTYPE(v, slotv->type)) {
+    if(v == vm->t_unknown || LK_OBJECT_ISTYPE(v, slot->type)) {
         {
             /* on-assign trigger */
             /*
             lk_string_t *kt = lk_string_newfromlist(vm, LIST(k));
-            struct lk_slotv *ou;
+            struct lk_slot *ou;
             list_resizeitem(LIST(kt), LIST(vm->str_onassign));
             list_concat(LIST(kt), LIST(vm->str_onassign));
             ou = lk_object_getdef(self, LK_O(kt));
             lk_object_free(LK_O(kt));
             if(ou != NULL) {
-                lk_kfunc_t *kf = LK_KFUNC(lk_object_getslotv(self, ou));
+                lk_kfunc_t *kf = LK_KFUNC(lk_object_getslot(self, ou));
                 if(LK_OBJECT_ISFUNC(LK_O(kf))) {
                     lk_frame_t *fr = lk_vm_prepevalfunc(vm);
                     lk_frame_stackpush(fr, v);
@@ -317,8 +317,8 @@ void lk_object_setslotv(lk_object_t *self, struct lk_slotv *slotv, lk_object_t *
                         lk_vm_raisecstr(vm,
                         "Cannot assign to var while running on-assign");
                     } else {
-                        if(!(slotv->opts & LK_SLOTVOCFIELD)
-                        && slotv->v.value == NULL) slotv->v.value = vm->t_unknown;
+                        if(!(slot->opts & LK_SLOTVOCFIELD)
+                        && slot->v.value == NULL) slot->v.value = vm->t_unknown;
                         SETOPT(kf->cf.opts, LK_FUNCORUNNING);
                         fr->first = fr->next = kf->first;
                         fr->receiver = fr->self = self;
@@ -329,7 +329,7 @@ void lk_object_setslotv(lk_object_t *self, struct lk_slotv *slotv, lk_object_t *
                         CLROPT(kf->cf.opts, LK_FUNCORUNNING);
                         v = lk_frame_stackpeek(fr);
                         if(v == NULL) v = vm->t_unknown;
-                        slotv = LK_SLOTV(SETITEM_VALUEPTR(
+                        slot = LK_SLOTV(SETITEM_VALUEPTR(
                         set_get(self->co.slots, k)));
                     }
                 }
@@ -337,11 +337,11 @@ void lk_object_setslotv(lk_object_t *self, struct lk_slotv *slotv, lk_object_t *
             */
         }
         lk_object_addref(self, v);
-        if(slotv->opts & LK_SLOTVOCFIELD) {
+        if(slot->opts & LK_SLOTVOCFIELD) {
             if(v == vm->t_unknown) v = NULL;
-            *(lk_object_t **)((ptrdiff_t)self + slotv->v.offset) = v;
+            *(lk_object_t **)((ptrdiff_t)self + slot->v.offset) = v;
         } else {
-            slotv->v.value = v;
+            slot->v.value = v;
         }
     } else {
         printf("type mismatch!\n");
@@ -446,7 +446,7 @@ int lk_object_isa(lk_object_t *self, lk_object_t *t) {
         dist ++;
     );
 }
-struct lk_slotv *lk_object_getdef(lk_object_t *self, lk_object_t *k) {
+struct lk_slot *lk_object_getdef(lk_object_t *self, lk_object_t *k) {
     set_t *slots;
     setitem_t *si;
     FIND(NULL,
@@ -455,12 +455,12 @@ struct lk_slotv *lk_object_getdef(lk_object_t *self, lk_object_t *k) {
         ) return LK_SLOTV(SETITEM_VALUEPTR(si));
     );
 }
-lk_object_t *lk_object_getslotv(lk_object_t *self, struct lk_slotv *slotv) {
-    if(slotv->opts & LK_SLOTVOCFIELD) {
-        lk_object_t *v = *(lk_object_t **)((ptrdiff_t)self + slotv->v.offset);
+lk_object_t *lk_object_getslot(lk_object_t *self, struct lk_slot *slot) {
+    if(slot->opts & LK_SLOTVOCFIELD) {
+        lk_object_t *v = *(lk_object_t **)((ptrdiff_t)self + slot->v.offset);
         return v != NULL ? v : LK_VM(self)->t_unknown;
     } else {
-        return slotv->v.value;
+        return slot->v.value;
     }
 }
 int lk_object_hashcode(const void *k, int capa) {

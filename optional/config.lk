@@ -63,9 +63,9 @@ ConfigOptional/new['regex']/do {
 
 ConfigOptional/new['postgres']/do {
     include_path := VirtualMachine/system2['pg_config --includedir']
-    include_path = include_path ?? '-I' ++ include_path :: ''
+    include_path = include_path ?? '-I' ++ include_path !! ''
     lib_path := VirtualMachine/system2['pg_config --libdir']
-    lib_path = lib_path ?? '-L' ++ lib_path :: ''
+    lib_path = lib_path ?? '-L' ++ lib_path !! ''
     include_path/chop!/concat![' -pipe']
     lib_path/chop!/concat![' -lpq']
     /add_c_flags![include_path]

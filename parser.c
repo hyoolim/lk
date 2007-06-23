@@ -65,7 +65,7 @@ static LK_OBJECT_DEFALLOCFUNC(alloc__parser) {
     setbinaryop(PARSER, "++=", "concat!");
     setbinaryop(PARSER, ":",   ".define!");
     setbinaryop(PARSER, ":=",  ".define_assign!");
-    setbinaryop(PARSER, "::",  "else");
+    setbinaryop(PARSER, "!!",  "else");
     setbinaryop(PARSER, "||",  "or");
     setbinaryop(PARSER, "|||", "nil_or");
     setbinaryop(PARSER, "<",   "lt?");
@@ -100,7 +100,7 @@ static LK_OBJECT_DEFALLOCFUNC(alloc__parser) {
     setprec(PARSER, "||",   40000, LK_PREC_ASSOC_LEFT);
     setprec(PARSER, "|||",  40000, LK_PREC_ASSOC_LEFT);
     setprec(PARSER, "??",   20000, LK_PREC_ASSOC_RIGHT); /* flow */
-    setprec(PARSER, "::",   19999, LK_PREC_ASSOC_RIGHT);
+    setprec(PARSER, "!!",   19999, LK_PREC_ASSOC_RIGHT);
     setprec(PARSER, "->",  -10000, LK_PREC_ASSOC_LEFT); /* misc - low prec */
 }
 static LK_OBJECT_DEFMARKFUNC(mark__parser) {
@@ -836,7 +836,7 @@ static lk_instr_t *applymacros(lk_parser_t *self, lk_instr_t *it) {
             }
         } else if(it->type == LK_INSTRTYPE_APPLYMSG
                && list_cmpcstr(LIST(it->v), "else") == 0) {
-            /* 1 /?? @[2 ]  /:: @[3 ]   -> 1 /?? @[2 3 ] */
+            /* 1 /?? @[2 ]  /!! @[3 ]   -> 1 /?? @[2 3 ] */
             /*   op  add(a) it  args(b) ->   op  args    */
             lk_instr_t *args = it->next;
             if(args->type == LK_INSTRTYPE_APPLY) {

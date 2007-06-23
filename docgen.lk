@@ -33,7 +33,7 @@ DocumentGeneratorFile := WritableFile/with {
         slots := [ ]
         ancestors/each { ancestor ---
             ancestor/.slots/each { slot ---
-                slots/push![[ancestor/.id == class/.id ?? class :: ancestor; slot]]
+                slots/push![[ancestor/.id == class/.id ?? class !! ancestor; slot]]
             }
         }
         slots = slots/sort { x; y --- x[1] <=> y[1] }
@@ -80,7 +80,7 @@ DocumentGeneratorFile := WritableFile/with {
                         max := function/maximum_argument_count
                         max > min ?? {
                             last := function/last_argument
-                            /write[last/nil? ?? '_' :: last/name; '...; ']
+                            /write[last/nil? ?? '_' !! last/name; '...; ']
                         }
                         /write[']']
                     }
@@ -91,7 +91,7 @@ DocumentGeneratorFile := WritableFile/with {
                 /write['<p class="slot_text">']
                 function/ancestor?[Function] ?? {
                     function/doc/nil?/not? ?? /write[function/doc]
-                } :: {
+                } !! {
                     /write['Always returns '; function/to code; '.']
                 }
                 /write['</p>']
@@ -100,7 +100,7 @@ DocumentGeneratorFile := WritableFile/with {
             slot_class/.retrieve[slot_name]/do {
                 /ancestor?[GenericFunction] ?? {
                     /functions/each { f --- write_description[f] }
-                } :: {
+                } !! {
                     write_description[/.]
                 }
             }

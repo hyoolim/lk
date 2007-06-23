@@ -121,7 +121,7 @@ Enumerable/do {
     /keep  = {
         match using : Function
         ---
-        /reduce[[ ]] { a; v | match using[v] ?? a/push![v] :: a }
+        /reduce[[ ]] { a; v | match using[v] ?? a/push![v] !! a }
     }
 
     # Returns a list of items that are returned from using argument.
@@ -131,13 +131,13 @@ Enumerable/do {
     /max := { | /max { x; y | x <=> y } }
 
     # Returns the maximum value, using the cmp argument for comparison.
-    /max = { cmp | /reduce[-INF] { a; v | cmp[a; v] < 0 ?? v :: a } }
+    /max = { cmp | /reduce[-INF] { a; v | cmp[a; v] < 0 ?? v !! a } }
 
     # Returns the minimum value, using the cmp operator for comparison.
     /min := { | /min { x; y | x <=> y } }
 
     # Returns the minimum value, using the cmp argument for comparison.
-    /min = { cmp | /reduce[INF] { a; v | cmp[a; v] > 0 ?? v :: a } }
+    /min = { cmp | /reduce[INF] { a; v | cmp[a; v] > 0 ?? v !! a } }
 
     # NEED DOCUMENTATION
     /reduce := { initial value; using |
@@ -154,7 +154,7 @@ Enumerable/do {
     /reject = {
         match using : Function
         ---
-        /reduce[[ ]] { a; v | match using[v] ?? a :: a/push![v] }
+        /reduce[[ ]] { a; v | match using[v] ?? a !! a/push![v] }
     }
 
     # Returns a sorted list of items.
@@ -221,7 +221,7 @@ GenericList/do {
     /each := { block |
         i := 0
         block/minimum_argument_count <= 1 ??
-            { while[i < /count] { block[/at[i]]; i = i/succ } } ::
+            { while[i < /count] { block[/at[i]]; i = i/succ } } !!
             { while[i < /count] { block[i; /at[i]]; i = i/succ } }
     }
     /eq? = { to | FALSE }
@@ -320,7 +320,7 @@ Integer/do {
 List/do {
     /cmp := { to |
         d := to/count - /count
-        d > 0 ?? to :: /. ->each { i; v |
+        d > 0 ?? to !! /. ->each { i; v |
             d := v <=> to[i]
             d/zero?/not? ?? return[d]
         }
@@ -366,7 +366,7 @@ NEGATIVE INFINITY/do {
 Number/do {
 
     # Returns the absolute value of the number.
-    /abs := { | /negative? ?? /negate :: /. }
+    /abs := { | /negative? ?? /negate !! /. }
     /eq? := { to | FALSE }
     /finite? := TRUE
     /inf? := FALSE
@@ -385,7 +385,7 @@ Object/do {
 
     # Returns other if the receiver evaluates
     # to true or false otherwise.
-    /and := { other | /to boolean ?? other :: FALSE }
+    /and := { other | /to boolean ?? other !! FALSE }
     /cmp := { to : POSITIVE INFINITY | -1 }
     /cmp  = { to : NEGATIVE INFINITY | 1 }
     /eq? := { to | /.id == to/.id }
@@ -398,8 +398,8 @@ Object/do {
     /ne? := { to | /. == to ->not? }
     /new := { args... | new := /alloc; new/init[*args]; new }
     /nil? := FALSE
-    /nil_or := { other | /nil? ?? other :: /. }
-    /or := { other | /to boolean ?? /. :: other }
+    /nil_or := { other | /nil? ?? other !! /. }
+    /or := { other | /to boolean ?? /. !! other }
     /print := { | /print[STDOUT] }
     /print  = { to | to/write[/.]; /. }
     /println := { | /println[STDOUT] }
@@ -431,7 +431,7 @@ Range/do {
                 block[rv]
                 rv = rv/succ
             }
-        } :: {
+        } !! {
             i := 0
             while[i <=> /to ->positive? ->not?] {
                 block[i; rv]
@@ -448,17 +448,17 @@ Range/do {
 # Real < Number
 Real/do {
     /add := { value : Integer | /. + value/to real }
-    /ceil := { | i := /to integer; /. > 0 && /. - i != 0.0 ?? i + 1 :: i }
+    /ceil := { | i := /to integer; /. > 0 && /. - i != 0.0 ?? i + 1 !! i }
     /cmp := { to : Integer | /. - to/to real }
     /divide := { by : Integer | /. % by/to real }
     /eq? := { to : Integer | /. == to/to real }
-    /floor := { | i := /to integer; /. > 0 || /. - i == 0.0 ?? i :: i - 1 }
+    /floor := { | i := /to integer; /. > 0 || /. - i == 0.0 ?? i !! i - 1 }
     /multiply := { by : Integer | /. * by/to real }
     /real? := TRUE
     /round := { |
         i := /to integer
-        /. - i > 0.5 ?? i + 1 ::
-        /. - i < -0.5 ?? i - 1 ::
+        /. - i > 0.5 ?? i + 1 !!
+        /. - i < -0.5 ?? i - 1 !!
         i
     }
     /subtract := { value : Integer | /. - value/to real }
@@ -501,7 +501,7 @@ String/do {
         loop {
             e := /find[delim; pos]
             e/nil? || i >= max ??
-                { block[t/offset[pos]]; break } ::
+                { block[t/offset[pos]]; break } !!
                 { block[t/slice[pos; e - pos]] }
             pos = e + dl
             i = i/succ
@@ -509,17 +509,17 @@ String/do {
     }
     /format := { ... }
     /justify center := { len |
-        len < /count ?? /. :: {
+        len < /count ?? /. !! {
             len = len - /count
             (' ' ** (len % 2)) ++ /. ++ (' ' ** (len - (len % 2)))
         }
     }
-    /justify left := { len | len < /count ?? /. :: /. ++ (' ' ** (len - /count)) }
-    /justify right := { len | len < /count ?? /. :: (' ' ** (len - /count)) ++ /. }
+    /justify left := { len | len < /count ?? /. !! /. ++ (' ' ** (len - /count)) }
+    /justify right := { len | len < /count ?? /. !! (' ' ** (len - /count)) ++ /. }
     /lc := { args... | /clone/lc![*args] }
 
     # Lowercases all the letters in the string.
-    /lc! := { | /map! { v | v/between?[0cA; 0cZ] ?? v + (0ca - 0cA) :: v } }
+    /lc! := { | /map! { v | v/between?[0cA; 0cZ] ?? v + (0ca - 0cA) !! v } }
     /replace := { args... | /clone/replace![*args] }
 
     # Replaces all the occurences of from argument in the string
@@ -555,7 +555,7 @@ String/do {
     /uc := { args... | /clone/uc![*args] }
 
     # Uppercases all the letters in the string.
-    /uc! := { | /map! { v | v/between?[0ca; 0cz] ?? v + (0cA - 0ca) :: v } }
+    /uc! := { | /map! { v | v/between?[0ca; 0cz] ?? v + (0cA - 0ca) !! v } }
 }
 
 # T (true) < Boolean
@@ -630,7 +630,7 @@ rescue { e |
         c = c/.caller ->nil? ?? break
         f/.function/nil? ?? {
             STDERR/writeln['    @ CFunction']
-        } :: {
+        } !! {
             i := c/.current
             STDERR/writeln['    @ ';
             i/RESOURCE; ' '; i/LINE; ': '; i/MESSAGE; f/.args/to code]

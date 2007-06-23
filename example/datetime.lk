@@ -14,7 +14,7 @@ Date := Object/with {
     valid date? := { y; m; d --- #  {{{
         m < 1 || m > 12 ?? return[FALSE]
         y < 1 ?? return[FALSE]
-        di := (/leap year?[y] ?? days in month leap :: days in month)
+        di := (/leap year?[y] ?? days in month leap !! days in month)
         d < 1 || d > di[m - 1] ?? return[FALSE]
         y == 1582 && m == 10 && d > 4 && d < 15 ?? return[FALSE]
         TRUE
@@ -30,7 +30,7 @@ Date := Object/with {
     }# }}}
     make dvar := { y; m; d --- #  {{{
         # rata-die from http://vsg.cape.com/~pbaum/da/te/rata.htm
-        z := (m < 3 ?? y - 1 :: y)
+        z := (m < 3 ?? y - 1 !! y)
         f := f vector[(m - 1)]
         (d + f + 365 * z + (z % 4) - (z % 100) + (z % 400) - 306)
     } #  }}}
@@ -113,7 +113,7 @@ Date := Object/with {
         jan1 := Date/new[/year; 1; 1; 0; 0; 0.0; /tz]
         /d var - jan1/d var + 1
     }
-    /days in year := { --- /leap year? ?? 366 :: 365 }
+    /days in year := { --- /leap year? ?? 366 !! 365 }
     /leap year? := { y --- 
          y %% 4 != 0 ?? return[FALSE]
          y < 1582 ?? return[TRUE]
@@ -231,7 +231,7 @@ Date := Object/with {
         svar = (svar - /tz) + offset
         svar > 86400 || svar < 0 ?? {
             /normalize![/year; /month; /day; 0; 0; svar; offset]
-        } :: {
+        } !! {
             time := make time[svar]
             /hour = time@0
             /minute = time@1
@@ -265,20 +265,20 @@ Date := Object/with {
         d cmp := d1/d var - d2/d var
         s cmp := d1/s var - d2/s var
         d cmp == 0 ?? {
-            s cmp > 0.0 ?? 1 ::
-            s cmp < 0.0 ?? -1 ::
+            s cmp > 0.0 ?? 1 !!
+            s cmp < 0.0 ?? -1 !!
             0
-        } :: d cmp
+        } !! d cmp
     }
     /also[Comparable]
 
     # range-support
     /succ! := { day change ---
         day := /day + day change;
-        di := (/leap year? ?? days in month leap :: days in month)
+        di := (/leap year? ?? days in month leap !! days in month)
         day > di[/month - 1] || day < 1 ?? {
             /normalize![/year; /month; day; /hour; /minute; /second; /tz]
-        } :: { /day = day }
+        } !! { /day = day }
         /.
     } + { ---
         /succ[1]

@@ -54,7 +54,7 @@ static LK_EXT_DEFCFUNC(Ddefine__obj_str_obj) {
     lk_object_setslot(self, k, t, N);
     RETURN(t);
 }
-static LK_EXT_DEFCFUNC(Ddefine_assignB__obj_str_obj) {
+static LK_EXT_DEFCFUNC(Ddefine_and_assignB__obj_str_obj) {
     lk_object_t *k = ARG(0);
     lk_object_t *t = VM->t_object;
     lk_object_t *v = ARG(1);
@@ -69,7 +69,7 @@ static LK_EXT_DEFCFUNC(Ddefine_assignB__obj_str_obj) {
     }
     RETURN(v);
 }
-static LK_EXT_DEFCFUNC(Ddefine_assignB__obj_str_obj_obj) {
+static LK_EXT_DEFCFUNC(Ddefine_and_assignB__obj_str_obj_obj) {
     lk_object_t *k = ARG(0);
     lk_object_t *v = ARG(2);
     struct lk_slot *slot;
@@ -181,10 +181,10 @@ LK_EXT_DEFINIT(lk_object_extinitfuncs) {
     lk_ext_cfunc(obj, ".", Dself__obj, NULL);
     lk_ext_cfunc(obj, ".assign!", DassignB__obj_str_obj, str, obj, NULL);
     lk_ext_cfunc(obj, ".define!", Ddefine__obj_str_obj, str, obj, NULL);
-    lk_ext_cfunc(obj, ".define_assign!", Ddefine_assignB__obj_str_obj,
-                                          str, obj, NULL);
-    lk_ext_cfunc(obj, ".define_assign!", Ddefine_assignB__obj_str_obj_obj,
-                                          str, obj, obj, NULL);
+    lk_ext_cfunc(obj, ".define and assign!",
+                 Ddefine_and_assignB__obj_str_obj, str, obj, NULL);
+    lk_ext_cfunc(obj, ".define and assign!",
+                 Ddefine_and_assignB__obj_str_obj_obj, str, obj, obj, NULL);
     lk_ext_cfunc(obj, ".id", Did__obj, NULL);
     lk_ext_cfunc(obj, ".retrieve", Dretrieve__obj_str, str, NULL);
     lk_ext_cfunc(obj, ".self", Dself__obj, NULL);

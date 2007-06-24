@@ -94,6 +94,15 @@ LK_EXT_DEFINIT(lk_func_extinittypes) {
 static LK_EXT_DEFCFUNC(add__f_f) {
     RETURN(lk_func_combine(LK_FUNC(self), LK_FUNC(ARG(0))));
 }
+static LK_EXT_DEFCFUNC(addB__f_f) {
+    if(env->caller == NULL && env->caller->lastslot == NULL) {
+        lk_vm_raisecstr(VM, "Cannot add to the function without a slot");
+    } else {
+        lk_func_t *new = lk_func_combine(LK_FUNC(self), LK_FUNC(ARG(0)));
+        lk_object_setslotvalue(self, env->caller->lastslot, NULL, new);
+        RETURN(new);
+    }
+}
 static LK_EXT_DEFCFUNC(minimum_argument_count__f) {
     RETURN(lk_fi_new(VM, LK_FUNC(self)->cf.minargc));
 }
@@ -124,6 +133,7 @@ LK_EXT_DEFINIT(lk_func_extinitfuncs) {
     /* */
     lk_ext_global("Function", vm->t_func);
     lk_ext_cfunc(f, "add", add__f_f, f, NULL);
+    lk_ext_cfunc(f, "add!", addB__f_f, f, NULL);
     lk_ext_cfield(f, "doc", f, offsetof(lk_func_t, cf.doc));
     lk_ext_cfunc(f, "minimum_argument_count", minimum_argument_count__f, NULL);
     lk_ext_cfunc(f, "maximum_argument_count", maximum_argument_count__f, NULL);

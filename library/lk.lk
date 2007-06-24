@@ -381,7 +381,7 @@ Number/do {
 
 # Object
 Object/do {
-    /add := { other | /clone/add![other] }
+    /add := { other | /clone[]/add![other] }
 
     # Returns other if the receiver evaluates
     # to true or false otherwise.

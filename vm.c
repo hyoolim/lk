@@ -482,7 +482,11 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         slotv = lk_object_getslot(recv, slot);
         /* slot contains func obj - call? */
         if(LK_OBJECT_ISA(slotv, t_func) > 2
-        && slot->opts & LK_SLOTVOAUTORUN) {
+        && slot->opts & LK_SLOTVOAUTORUN
+        && (instr == NULL
+        || instr->next == NULL
+        || instr->next->type != LK_INSTRTYPE_APPLYMSG
+        || list_cmpcstr(LIST(instr->next->v), "add!") != 0)) {
             callfunc:
             if(args == NULL) args = lk_vm_prepevalfunc(vm);
             func = lk_func_match(LK_FUNC(slotv), args, recv);
@@ -507,6 +511,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
                     goto findslot;
                 }
             }
+            self->lastslot = slot;
             lk_frame_stackpush(self, slotv);
             goto nextinstr;
         }

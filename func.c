@@ -99,7 +99,7 @@ static LK_EXT_DEFCFUNC(addB__f_f) {
         lk_vm_raisecstr(VM, "Cannot add to the function without a slot");
     } else {
         lk_func_t *new = lk_func_combine(LK_FUNC(self), LK_FUNC(ARG(0)));
-        lk_object_setslotvalue(self, env->caller->lastslot, NULL, new);
+        lk_object_setvalueonslot(self, env->caller->lastslot, new);
         RETURN(new);
     }
 }
@@ -288,9 +288,9 @@ void lk_kfunc_updatesig(lk_kfunc_t *self) {
                     typeinstr = LK_INSTR(argdef->v);
                     name = LK_STRING(typeinstr->v);
                     typeinstr = typeinstr->next;
-                    slot = lk_object_getdef(LK_O(VM->currframe), typeinstr->v);
+                    slot = lk_object_getslot(LK_O(VM->currframe), typeinstr->v);
                     if(slot != NULL) {
-                        type = lk_object_getslot(LK_O(VM->currframe), slot);
+                        type = lk_object_getvaluefromslot(LK_O(VM->currframe), slot);
                     } else {
                         printf("Invalid sig, invalid type\n");
                         exit(EXIT_FAILURE);

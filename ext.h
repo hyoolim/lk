@@ -25,7 +25,7 @@ LK_O(LIST_ATPTR(&env->stack, (i))))
     lk_frame_stackpush(env->caller, _r); \
     DONE; \
 } while(0)
-#define GOTO(name) (name(self, currslot, env))
+#define GOTO(name) (name(self, env))
 
 #define CHAR(v) (LK_CHAR(v)->c)
 #define CSET(v) (&LK_CSET(v)->cs)

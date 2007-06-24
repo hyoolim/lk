@@ -157,7 +157,7 @@ static LK_EXT_DEFCFUNC(proto__obj) {
     RETURN(self->co.proto);
 }
 static LK_EXT_DEFCFUNC(with__obj_f) {
-    do__obj_f(lk_object_addref(LK_O(env), lk_object_alloc(self)), currslot, env);
+    do__obj_f(lk_object_addref(LK_O(env), lk_object_alloc(self)), env);
 }
 LK_EXT_DEFINIT(lk_object_extinitfuncs) {
     lk_object_t *obj = vm->t_object, *str = vm->t_string, *f = vm->t_func;

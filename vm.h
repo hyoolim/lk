@@ -77,7 +77,7 @@ typedef LK_EXT_DEFINIT(lk_extinitfunc_t);
 #include "error.h"
 
 /* todo: figure out a way to move this before req primitives */
-#define LK_EXT_DEFCFUNC(name) void name(lk_object_t *self, lk_object_t *currslot, lk_frame_t *env)
+#define LK_EXT_DEFCFUNC(name) void name(lk_object_t *self, lk_frame_t *env)
 typedef LK_EXT_DEFCFUNC(lk_cfuncfunc_t);
 
 /* actual def - add header to above #include's on lk_vm_t change */

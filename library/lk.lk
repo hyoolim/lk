@@ -381,7 +381,7 @@ Number/do {
 
 # Object
 Object/do {
-    /add := { other | /clone[]/add![other] }
+    /add := { other | /clone[]/add=[other] }
 
     # Returns other if the receiver evaluates
     # to true or false otherwise.
@@ -404,7 +404,7 @@ Object/do {
     /print += { to | to/write[/.]; /. }
     /println := { | /println[STDOUT] }
     /println += { to | to/write[/.; NEWLINE]; /. }
-    /subtract := { other | /clone/subtract![other] }
+    /subtract := { other | /clone[]/subtract=[other] }
     /to := { to | Range/new[/.; to] }
     /to boolean := TRUE
     /to code := { | '<<' ++ /to string ++ '>>' }

@@ -124,7 +124,7 @@ Date := Object/with {
     }
     #  }}}
 
-    /add! := { duration --- #  {{{
+    /add= := { duration --- #  {{{
         year := /year + duration/year
         month := /month + duration/month
         day := /day + duration/day
@@ -133,7 +133,7 @@ Date := Object/with {
         second := /second + duration/second
         /normalize![year; month; day; hour; minute; second; /tz]
     }
-    /add := { duration --- /clone/add![duration] }
+    /add := { duration --- /clone[]/add=[duration] }
     #  }}}
     /subtract := { date --- #  {{{
          dy diff := /d var - date/d var

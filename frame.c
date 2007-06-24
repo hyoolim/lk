@@ -128,7 +128,7 @@ LK_EXT_DEFINIT(lk_frame_extinitfuncs) {
                 *str = vm->t_string, *err = vm->t_error, *f = vm->t_func;
     lk_ext_set(vm->t_vm, "Frame", fra);
     lk_ext_cfunc(fra, ".args", Dargs__fra, NULL);
-    lk_ext_cfunc(fra, ".assign!", DassignB__fra_str_obj, str, obj, NULL);
+    lk_ext_cfunc(fra, "assign!", DassignB__fra_str_obj, str, obj, NULL);
     lk_ext_cfield(fra, ".caller", fra, offsetof(lk_frame_t, caller));
     lk_ext_cfield(fra, ".current", instr, offsetof(lk_frame_t, current));
     lk_ext_cfield(fra, ".first", instr, offsetof(lk_frame_t, first));

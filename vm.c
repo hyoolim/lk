@@ -486,7 +486,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         && (instr == NULL
         || instr->next == NULL
         || instr->next->type != LK_INSTRTYPE_APPLYMSG
-        || list_cmpcstr(LIST(instr->next->v), "add!") != 0)) {
+        || list_getuchar(LIST(instr->next->v), -1) != '=')) {
             callfunc:
             if(args == NULL) args = lk_vm_prepevalfunc(vm);
             func = lk_func_match(LK_FUNC(slotv), args, recv);

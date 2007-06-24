@@ -133,7 +133,7 @@ LK_EXT_DEFINIT(lk_func_extinitfuncs) {
     /* */
     lk_ext_global("Function", vm->t_func);
     lk_ext_cfunc(f, "add", add__f_f, f, NULL);
-    lk_ext_cfunc(f, "add!", addB__f_f, f, NULL);
+    lk_ext_cfunc(f, "add=", addB__f_f, f, NULL);
     lk_ext_cfield(f, "doc", f, offsetof(lk_func_t, cf.doc));
     lk_ext_cfunc(f, "minimum_argument_count", minimum_argument_count__f, NULL);
     lk_ext_cfunc(f, "maximum_argument_count", maximum_argument_count__f, NULL);
@@ -282,7 +282,7 @@ void lk_kfunc_updatesig(lk_kfunc_t *self) {
         if((isself = argdef->type == LK_INSTRTYPE_SELFMSG)
         || argdef->type == LK_INSTRTYPE_FRAMEMSG) {
             name = LK_STRING(argdef->v);
-            if(list_cmpcstr(LIST(name), ".define!") == 0) {
+            if(list_cmpcstr(LIST(name), "define!") == 0) {
                 argdef = argdef->next;
                 if(argdef != NULL && argdef->type == LK_INSTRTYPE_APPLY) {
                     typeinstr = LK_INSTR(argdef->v);

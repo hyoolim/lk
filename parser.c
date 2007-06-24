@@ -45,26 +45,26 @@ static LK_OBJECT_DEFALLOCFUNC(alloc__parser) {
     setbinaryop(PARSER, "@",   "at");
     setbinaryop(PARSER, "@=",  "set!");
     setbinaryop(PARSER, "%",   "divide");
-    setbinaryop(PARSER, "%=",  "divide!");
+    setbinaryop(PARSER, "%=",  "divide=");
     setbinaryop(PARSER, "%%",  "modulo");
     setbinaryop(PARSER, "%%=", "modulo!");
     setbinaryop(PARSER, "&&",  "and");
     setbinaryop(PARSER, "*",   "multiply");
-    setbinaryop(PARSER, "*=",  "multiply!");
+    setbinaryop(PARSER, "*=",  "multiply=");
     setbinaryop(PARSER, "**",  "repeat");
-    setbinaryop(PARSER, "**=", "repeat!");
+    setbinaryop(PARSER, "**=", "repeat=");
     setbinaryop(PARSER, "-",   "subtract");
-    setbinaryop(PARSER, "-=",  "subtract!");
+    setbinaryop(PARSER, "-=",  "subtract=");
     setbinaryop(PARSER, "$",   "to string");
     setbinaryop(PARSER, "->",  "send");
-    setbinaryop(PARSER, "=",   ".assign!");
+    setbinaryop(PARSER, "=",   "assign!");
     setbinaryop(PARSER, "==",  "eq?");
     setbinaryop(PARSER, "+",   "add");
-    setbinaryop(PARSER, "+=",  "add!");
+    setbinaryop(PARSER, "+=",  "add=");
     setbinaryop(PARSER, "++",  "concat");
     setbinaryop(PARSER, "++=", "concat!");
-    setbinaryop(PARSER, ":",   ".define!");
-    setbinaryop(PARSER, ":=",  ".define and assign!");
+    setbinaryop(PARSER, ":",   "define!");
+    setbinaryop(PARSER, ":=",  "define=");
     setbinaryop(PARSER, "!!",  "else");
     setbinaryop(PARSER, "||",  "or");
     setbinaryop(PARSER, "|||", "nil_or");
@@ -794,9 +794,9 @@ static lk_instr_t *applymacros(lk_parser_t *self, lk_instr_t *it) {
             }
             */
         } else if(it->type == LK_INSTRTYPE_APPLYMSG
-               && (list_cmpcstr(LIST(it->v), ".define!") == 0
-               || list_cmpcstr(LIST(it->v), ".assign!") == 0
-               || list_cmpcstr(LIST(it->v), ".define and assign!") == 0)) {
+               && (list_cmpcstr(LIST(it->v), "define!") == 0
+               || list_cmpcstr(LIST(it->v), "assign!") == 0
+               || list_cmpcstr(LIST(it->v), "define=") == 0)) {
             lk_instr_t *name = it->prev, *args = it->next;
             if(name->type == LK_INSTRTYPE_SELFMSG
             || name->type == LK_INSTRTYPE_FRAMEMSG
@@ -812,10 +812,10 @@ static lk_instr_t *applymacros(lk_parser_t *self, lk_instr_t *it) {
                 /* var[] /: @[Object ] /= @[1 ] -> := @['var' Object 1 ] */
                 if(nextop != NULL
                 && nextop->type == LK_INSTRTYPE_APPLYMSG
-                && list_cmpcstr(LIST(nextop->v), ".assign!") == 0) {
+                && list_cmpcstr(LIST(nextop->v), "assign!") == 0) {
                     lk_instr_t *a, *nextargs = nextop->next;
                     it->v = LK_O(lk_string_newfromcstr(
-                    LK_VM(it), ".define and assign!"));
+                    LK_VM(it), "define="));
                     (it->next = nextargs)->prev = it;
                     a = LK_INSTR(args->v);
                     while(a->next != NULL) a = a->next;

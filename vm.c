@@ -322,7 +322,7 @@ lk_frame_t *lk_vm_prepevalfunc(lk_vm_t *vm) {
     (args)->argc = LIST_ISINIT(&(args)->stack) \
     ? LIST_COUNT(&(args)->stack) : 0; \
     if(LK_OBJECT_ISCFUNC(LK_O(func))) { \
-        LK_CFUNC(func)->func((args)->receiver, (args)); \
+        LK_CFUNC(func)->func((args)->receiver, currslot, (args)); \
         vm->currframe = (self); \
     } else { \
         (args)->co.proto = LK_O(LK_KFUNC(func)->frame); \
@@ -345,7 +345,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
     lk_string_t *msgn;
     set_t *slots;
     setitem_t *si;
-    struct lk_slot *slot;
+    struct lk_slot *currslot = NULL, *slot;
     list_t *ancs;
     int anci, ancc;
     lk_object_t *recv, *r, *slotv;
@@ -378,6 +378,8 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         lk_vm_raiseerror(vm, vm->lasterror);
     }
     nextinstr:
+    currslot = NULL;
+    nextinstrnoclear:
     /* gc memory? sweep triggered by mark if necessary */
     if(gc->newvalues > 5000) {
         lk_gc_mark(gc);
@@ -507,8 +509,9 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
                     goto findslot;
                 }
             }
+            currslot = slot;
             lk_frame_stackpush(self, slotv);
-            goto nextinstr;
+            goto nextinstrnoclear;
         }
         proto:
         if((ancs = r->co.ancestors) != NULL) {

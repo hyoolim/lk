@@ -262,49 +262,6 @@ struct lk_slot *lk_object_setslotbycstr(lk_object_t *self, const char *k, lk_obj
 void lk_object_setslotvalue(lk_object_t *self, struct lk_slot *slot, lk_object_t *k, lk_object_t *v) {
     lk_vm_t *vm = LK_VM(self);
     if(v == NULL) v = vm->t_unknown;
-    if(v == vm->t_unknown || LK_OBJECT_ISTYPE(v, slot->type)) {
-        {
-            /* on-assign trigger */
-            /*
-            lk_string_t *kt = lk_string_newfromlist(vm, LIST(k));
-            struct lk_slot *ou;
-            list_resizeitem(LIST(kt), LIST(vm->str_onassign));
-            list_concat(LIST(kt), LIST(vm->str_onassign));
-            ou = lk_object_getdef(self, LK_O(kt));
-            lk_object_free(LK_O(kt));
-            if(ou != NULL) {
-                lk_kfunc_t *kf = LK_KFUNC(lk_object_getslot(self, ou));
-                if(LK_OBJECT_ISFUNC(LK_O(kf))) {
-                    lk_frame_t *fr = lk_vm_prepevalfunc(vm);
-                    lk_frame_stackpush(fr, v);
-                    kf = LK_KFUNC(lk_func_match(LK_FUNC(kf), fr, self));
-                    if(kf == NULL) {
-                        vm->currframe = vm->currframe->caller;
-                    } else if(CHKOPT(kf->cf.opts, LK_FUNCORUNNING)) {
-                        string_print(LIST(k), stdout);
-                        printf("\n");
-                        lk_vm_raisecstr(vm,
-                        "Cannot assign to var while running on-assign");
-                    } else {
-                        if(!(slot->opts & LK_SLOTVOCFIELD)
-                        && slot->v.value == NULL) slot->v.value = vm->t_unknown;
-                        SETOPT(kf->cf.opts, LK_FUNCORUNNING);
-                        fr->first = fr->next = kf->first;
-                        fr->receiver = fr->self = self;
-                        fr->func = LK_O(kf);
-                        fr->returnto = NULL;
-                        fr->co.proto = LK_O(kf->frame);
-                        lk_vm_doevalfunc(vm);
-                        CLROPT(kf->cf.opts, LK_FUNCORUNNING);
-                        v = lk_frame_stackpeek(fr);
-                        if(v == NULL) v = vm->t_unknown;
-                        slot = LK_SLOTV(SETITEM_VALUEPTR(
-                        set_get(self->co.slots, k)));
-                    }
-                }
-            }
-            */
-        }
         lk_object_addref(self, v);
         if(slot->opts & LK_SLOTVOCFIELD) {
             if(v == vm->t_unknown) v = NULL;

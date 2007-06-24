@@ -77,7 +77,7 @@ Enumerable/do {
 
     # Returns true if all the items return true via match using
     # argument, false otherwise.
-    /all?  = {
+    /all? += {
         match using : Function
         ---
         /each { v | match using[v] ->not? ?? return[FALSE] }
@@ -90,7 +90,7 @@ Enumerable/do {
 
     # Returns true if any of the items return true via match using
     # argument, false otherwise.
-    /any?  = {
+    /any? += {
         match using : Function
         ---
         /each { v | match using[v] ?? return[TRUE] }
@@ -103,7 +103,7 @@ Enumerable/do {
 
     # Returns the first item that return true via match using argument,
     # nil otherwise.
-    /find  = {
+    /find += {
         match using : Function
         ---
         /each { v | match using[v] ?? return[v] }
@@ -118,7 +118,7 @@ Enumerable/do {
     /keep := { match value | /keep { v | match value == v } }
 
     # Returns a list of all items that return true via match using argument.
-    /keep  = {
+    /keep += {
         match using : Function
         ---
         /reduce[[ ]] { a; v | match using[v] ?? a/push![v] !! a }
@@ -131,13 +131,13 @@ Enumerable/do {
     /max := { | /max { x; y | x <=> y } }
 
     # Returns the maximum value, using the cmp argument for comparison.
-    /max = { cmp | /reduce[-INF] { a; v | cmp[a; v] < 0 ?? v !! a } }
+    /max += { cmp | /reduce[-INF] { a; v | cmp[a; v] < 0 ?? v !! a } }
 
     # Returns the minimum value, using the cmp operator for comparison.
     /min := { | /min { x; y | x <=> y } }
 
     # Returns the minimum value, using the cmp argument for comparison.
-    /min = { cmp | /reduce[INF] { a; v | cmp[a; v] > 0 ?? v !! a } }
+    /min += { cmp | /reduce[INF] { a; v | cmp[a; v] > 0 ?? v !! a } }
 
     # NEED DOCUMENTATION
     /reduce := { initial value; using |
@@ -151,7 +151,7 @@ Enumerable/do {
 
     # Returns a list of all items excluding the ones that return true
     # via the match using argument.
-    /reject = {
+    /reject += {
         match using : Function
         ---
         /reduce[[ ]] { a; v | match using[v] ?? a !! a/push![v] }
@@ -200,7 +200,7 @@ FALSE/do {
     /then := { if true | }
 
     # Always calls if false argument.
-    /then = { if true; if false | if false[] }
+    /then += { if true; if false | if false[] }
     /not? := TRUE
     /to string := 'FALSE'
 }
@@ -224,7 +224,7 @@ GenericList/do {
             { while[i < /count] { block[/at[i]]; i = i/succ } } !!
             { while[i < /count] { block[i; /at[i]]; i = i/succ } }
     }
-    /eq? = { to | FALSE }
+    /eq? += { to | FALSE }
     /fill! := { do | /each { i; v | /set![i; do] }; /. }
 
     # Returns the first item in the list.
@@ -245,8 +245,8 @@ GenericList/do {
     # Inserts the value argument to the end of the list.
     /push! := { value | /set![/count; value]; /. }
     /quicksort! := { | /quicksort! { x; y | x <=> y } }
-    /quicksort!  = { cmp | /quicksort![cmp; 0; /count - 1] }
-    /quicksort!  = { cmp; low; hi |
+    /quicksort! += { cmp | /quicksort![cmp; 0; /count - 1] }
+    /quicksort! += { cmp; low; hi |
         low < hi ?? {
             l := low/clone
             h := hi/clone
@@ -275,7 +275,7 @@ GenericList/do {
     # Removes the first item from the list and returns it.
     /shift! := { | value := /at[0]; /remove![0]; value }
     /slice := { args... | /clone/slice![*args] }
-    /slice! = { a : Range | /slice![a/from; a/to] }
+    /slice! += { a : Range | /slice![a/from; a/to] }
     /sort! := /.retrieve['quicksort!']
 
     # Returns true if there are any items in the list, false otherwise.
@@ -285,7 +285,7 @@ GenericList/do {
     /unshift! := { value | /insert![0; value]; /. }
 
     # Alias for slice slot.
-    /at = /.retrieve['slice']
+    /at += /.retrieve['slice']
     /also[Comparable]
     /also[Enumerable]
 }
@@ -337,7 +337,7 @@ List/do {
     /flatten := { args... | /clone/flatten![*args] }
     /flatten! := { ... }
     /join := { | /join[''] }
-    /join  = { delim |
+    /join += { delim |
         /count < 1 ?? return['']
         /rest/reduce[/first/clone] { a; v | a << delim << v }
     }
@@ -387,7 +387,7 @@ Object/do {
     # to true or false otherwise.
     /and := { other | /to boolean ?? other !! FALSE }
     /cmp := { to : POSITIVE INFINITY | -1 }
-    /cmp  = { to : NEGATIVE INFINITY | 1 }
+    /cmp += { to : NEGATIVE INFINITY | 1 }
     /eq? := { to | /.id == to/.id }
     /in? := { list | list/has?[/.] }
 
@@ -401,9 +401,9 @@ Object/do {
     /nil_or := { other | /nil? ?? other !! /. }
     /or := { other | /to boolean ?? /. !! other }
     /print := { | /print[STDOUT] }
-    /print  = { to | to/write[/.]; /. }
+    /print += { to | to/write[/.]; /. }
     /println := { | /println[STDOUT] }
-    /println  = { to | to/write[/.; NEWLINE]; /. }
+    /println += { to | to/write[/.; NEWLINE]; /. }
     /subtract := { other | /clone/subtract![other] }
     /to := { to | Range/new[/.; to] }
     /to boolean := TRUE
@@ -490,13 +490,13 @@ String/do {
 
     # Returns a list of strings separated by the delim argument.
     /divide := { delim | /divide[delim; INF] }
-    /divide = { delim; max |
+    /divide += { delim; max |
         a := [ ]
         /each[delim; max] { v | a/push![v] }
         a
     }
-    /each = { delim; block | /each[delim; INF; block] }
-    /each = { delim; max; block |
+    /each := { delim; block | /each[delim; INF; block] }
+    /each += { delim; max; block |
         t := /.; i := 0; pos := 0; dl := delim/count || 1
         loop {
             e := /find[delim; pos]
@@ -565,7 +565,7 @@ TRUE/do {
     /then := { if true | if true[] }
 
     # Always calls if true argument.
-    /then = { if true; if false | if true[] }
+    /then += { if true; if false | if true[] }
     /not? := FALSE
     /to string := 'TRUE'
 }
@@ -584,8 +584,8 @@ VM/Frame/do {
     /if := { cond : TRUE; block | block[] }
 
     # Never does anything.
-    /if = { cond : FALSE; block | }
-    /include = { file | /include[file; RESOURCE] }
+    /if += { cond : FALSE; block | }
+    /include += { file | /include[file; RESOURCE] }
     /leave := { | .receiver/.next = UNKNOWN }
 
     # Calls the block forever.
@@ -593,13 +593,13 @@ VM/Frame/do {
 
     # Calls the block once.
     /once := { block | block[] }
-    /require = { file | /require[file; RESOURCE] }
+    /require += { file | /require[file; RESOURCE] }
     #/resume := { | .receiver/.return_to = .receiver/proto; .receiver/leave }
     #/retry := { | .receiver/proto/redo; .receiver/resume }
     /read := { args... | STDIN/read[*args] }
     /readln := { | STDIN/read[NEWLINE] }
     /while := { cond : TRUE; block | block[]; retry }
-    /while = { cond : FALSE; block | }
+    /while += { cond : FALSE; block | }
     /write := { args... | STDOUT/write[*args]; /. }
     /writeln := { args... | STDOUT/write[*args; NEWLINE]; /. }
 }
@@ -615,7 +615,7 @@ WritableFile/do {
 
     # Convert each of the arguments into Strings
     # and calls write on them.
-    /write = { args... | args/each { v | /write[v/to string] }; /. }
+    /write += { args... | args/each { v | /write[v/to string] }; /. }
 
     # Calls write on the arguments and nl.
     /writeln := { args... | /write[*args; NEWLINE] }

@@ -26,20 +26,6 @@ LK_EXT_DEFINIT(lk_object_extinittypes) {
 }
 
 /* ext map - funcs */
-static LK_EXT_DEFCFUNC(DassignB__obj_str_obj) {
-    lk_object_t *k = ARG(0);
-    lk_object_t *v = ARG(1);
-    struct lk_slot *slot = lk_object_getdef(self, k);
-    if(slot == NULL) lk_vm_raisecstr(VM, "Cannot assign to %s without defining it first", k);
-    slot = lk_object_setslot(self, k, slot->type, v);
-    v = lk_object_getslot(self, slot);
-    if(LK_OBJECT_ISFUNC(v)) {
-        SETOPT(slot->opts, LK_SLOTVOAUTORUN);
-        SETOPT(LK_FUNC(v)->cf.opts, LK_FUNCOASSIGNED);
-        LK_FUNC(v)->cf.doc = env->caller->current->prev->comment;
-    }
-    RETURN(v);
-}
 static LK_EXT_DEFCFUNC(Ddefine_and_assignB__obj_str_obj_obj);
 static LK_EXT_DEFCFUNC(Ddefine__obj_str_obj) {
     env->argc ++;
@@ -163,7 +149,6 @@ LK_EXT_DEFINIT(lk_object_extinitfuncs) {
     lk_object_t *obj = vm->t_object, *str = vm->t_string, *f = vm->t_func;
     lk_ext_global("Object", obj);
     lk_ext_cfunc(obj, ".", Dself__obj, NULL);
-    lk_ext_cfunc(obj, ".assign!", DassignB__obj_str_obj, str, obj, NULL);
     lk_ext_cfunc(obj, ".define!", Ddefine__obj_str_obj, str, obj, NULL);
     lk_ext_cfunc(obj, ".define and assign!",
                  Ddefine_and_assignB__obj_str_obj, str, obj, NULL);

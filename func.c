@@ -58,12 +58,12 @@ static LK_OBJECT_DEFMARKFUNC(mark__kf) {
 /* */
 static LK_OBJECT_DEFALLOCFUNC(alloc__sig) {
     LK_SIG(self)->name = LK_SIG(proto)->name;
-    LK_SIG(self)->type = LK_SIG(proto)->type;
+    LK_SIG(self)->check = LK_SIG(proto)->check;
     LK_SIG(self)->isself = LK_SIG(proto)->isself;
 }
 static LK_OBJECT_DEFMARKFUNC(mark__sig) {
     mark(LK_O(LK_SIG(self)->name));
-    mark(LK_O(LK_SIG(self)->type));
+    mark(LK_O(LK_SIG(self)->check));
 }
 LK_EXT_DEFINIT(lk_func_extinittypes) {
     /* */
@@ -124,8 +124,8 @@ static LK_EXT_DEFCFUNC(name__sig) {
     lk_string_t *name = LK_SIG(self)->name;
     RETURN(name != NULL ? name : lk_string_newfromcstr(VM, "_"));
 }
-static LK_EXT_DEFCFUNC(type__sig) {
-    lk_object_t *type = LK_SIG(self)->type;
+static LK_EXT_DEFCFUNC(check__sig) {
+    lk_object_t *type = LK_SIG(self)->check;
     RETURN(type != NULL ? type : VM->t_object);
 }
 LK_EXT_DEFINIT(lk_func_extinitfuncs) {
@@ -149,7 +149,7 @@ LK_EXT_DEFINIT(lk_func_extinitfuncs) {
     /* */
     lk_ext_global("Signature", vm->t_sig);
     lk_ext_cfunc(sig, "name", name__sig, NULL);
-    lk_ext_cfunc(sig, "type", type__sig, NULL);
+    lk_ext_cfunc(sig, "check", check__sig, NULL);
 }
 
 /* new */
@@ -176,7 +176,7 @@ lk_gfunc_t *lk_gfunc_new(lk_vm_t *vm) {
 lk_sig_t *lk_sig_new(lk_vm_t *vm, lk_string_t *name, lk_object_t *type) {
     lk_sig_t *self = LK_SIG(lk_object_alloc(vm->t_sig));
     self->name = name;
-    self->type = type;
+    self->check = type;
     return self;
 }
 
@@ -197,7 +197,7 @@ lk_gfunc_t *lk_func_combine(lk_func_t *self, lk_func_t *other) {
     if(other->cf.sigs != NULL) {
         for(arg_i = 0; arg_i < LIST_COUNT(other->cf.sigs); arg_i ++) {
             arg = LIST_ATPTR(other->cf.sigs, arg_i);
-            other_dist += lk_object_isa(arg->type, vm->t_object);
+            other_dist += lk_object_isa(arg->check, vm->t_object);
         }
     }
     func_c = LIST_COUNT(funcs);
@@ -207,7 +207,7 @@ lk_gfunc_t *lk_func_combine(lk_func_t *self, lk_func_t *other) {
         if(func->cf.sigs != NULL) {
             for(arg_i = 0; arg_i < LIST_COUNT(func->cf.sigs); arg_i ++) {
                 arg = LIST_ATPTR(func->cf.sigs, arg_i);
-                dist += lk_object_isa(arg->type, vm->t_object);
+                dist += lk_object_isa(arg->check, vm->t_object);
             }
         }
         if(other_dist >= dist) break;
@@ -241,12 +241,12 @@ lk_func_t *lk_func_match(lk_func_t *self, lk_frame_t *args, lk_object_t *recv) {
             for(; argi < LIST_COUNT(sigs); argi ++) {
                 sig = LIST_ATPTR(sigs, argi);
                 arg = LIST_ATPTR(stack, argi);
-                if(sig == NULL || sig->type == NULL) goto bindarg;
-                if(LK_OBJECT_ISTYPE(arg, sig->type)) goto bindarg;
+                if(sig == NULL || sig->check == NULL) goto bindarg;
+                if(LK_OBJECT_ISTYPE(arg, sig->check)) goto bindarg;
                 goto nextfunc;
                 bindarg:
                 if(sig->name != NULL) lk_object_setslot(sig->isself
-                ? recv : LK_O(args), LK_O(sig->name), sig->type, arg);
+                ? recv : LK_O(args), LK_O(sig->name), sig->check, arg);
             }
         }
         if(curr->cf.rest != NULL) {
@@ -256,7 +256,7 @@ lk_func_t *lk_func_match(lk_func_t *self, lk_frame_t *args, lk_object_t *recv) {
                 ? lk_list_newfromlist(vm, stack) : lk_list_new(vm));
                 list_offset(LIST(arg), argi);
                 lk_object_setslot(sig->isself
-                ? recv : LK_O(args), LK_O(sig->name), sig->type, arg);
+                ? recv : LK_O(args), LK_O(sig->name), sig->check, arg);
             }
         }
         return curr;

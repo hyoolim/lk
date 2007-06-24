@@ -47,7 +47,7 @@ struct lk_kfunc {
 struct lk_sig {
     struct lk_common  co;
     lk_string_t      *name;
-    lk_object_t      *type;
+    lk_object_t      *check;
     uint8_t           isself;
 };
 #define LK_SIG(v) ((lk_sig_t *)(v))

@@ -364,7 +364,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
             if((si = set_get(slots, vm->str_rescue)) == NULL) continue;
             slot = LK_SLOTV(SETITEM_VALUEPTR(si));
             slotv = lk_object_getvaluefromslot(recv, slot);
-            if(!LK_OBJECT_ISFUNC(slot->type)
+            if(!LK_OBJECT_ISFUNC(slot->check)
             || LK_OBJECT_ISA(slotv, t_func) < 3) continue;
             func = lk_func_match(LK_FUNC(slotv), args, args->self);
             if(func == NULL) continue;

@@ -5,7 +5,7 @@
 /* type */
 struct lk_slot {
     uint8_t          opts;
-    lk_object_t     *type;
+    lk_object_t     *check;
     union {
         lk_object_t *value;
         size_t        offset;
@@ -37,9 +37,9 @@ LK_OBJECT_DEFTAGSETTER(lk_tagfreefunc_t *, freefunc);
 
 /* update */
 struct lk_slot *lk_object_setslot(lk_object_t *self, lk_object_t *k,
-                                  lk_object_t *t, lk_object_t *v);
+                                  lk_object_t *check, lk_object_t *v);
 struct lk_slot *lk_object_setslotbycstr(lk_object_t *self, const char *k,
-                                        lk_object_t *t, lk_object_t *v);
+                                        lk_object_t *check, lk_object_t *v);
 void lk_object_setvalueonslot(lk_object_t *self, struct lk_slot *slot,
                               lk_object_t *v);
 int lk_object_calcancestors(lk_object_t *self);

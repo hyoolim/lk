@@ -232,7 +232,7 @@ LK_OBJECT_IMPLTAGSETTER(lk_tagfreefunc_t *, freefunc);
 
 /* update */
 struct lk_slot *lk_object_setslot(lk_object_t *self, lk_object_t *k,
-                                  lk_object_t *t, lk_object_t *v) {
+                                  lk_object_t *check, lk_object_t *v) {
     struct lk_slot *slot = lk_object_getslot(self, k);
     if(slot == NULL) {
         if(self->co.slots == NULL) {
@@ -241,21 +241,21 @@ struct lk_slot *lk_object_setslot(lk_object_t *self, lk_object_t *k,
                                        lk_object_keycmp);
         }
         slot = LK_SLOTV(set_set(self->co.slots, k));
-        slot->type = t;
+        slot->check = check;
     }
     lk_object_setvalueonslot(self, slot, v);
     return slot;
 }
 struct lk_slot *lk_object_setslotbycstr(lk_object_t *self, const char *k,
-                                        lk_object_t *t, lk_object_t *v) {
+                                        lk_object_t *check, lk_object_t *v) {
     return lk_object_setslot(self,
-    LK_O(lk_string_newfromcstr(LK_VM(self), k)), t, v);
+    LK_O(lk_string_newfromcstr(LK_VM(self), k)), check, v);
 }
 void lk_object_setvalueonslot(lk_object_t *self, struct lk_slot *slot,
                               lk_object_t *v) {
     lk_vm_t *vm = LK_VM(self);
     if(v == NULL) v = vm->t_unknown;
-    if(v == vm->t_unknown || LK_OBJECT_ISTYPE(v, slot->type)) {
+    if(v == vm->t_unknown || LK_OBJECT_ISTYPE(v, slot->check)) {
         lk_object_addref(self, v);
         if(slot->opts & LK_SLOTVOCFIELD) {
             if(v == vm->t_unknown) v = NULL;

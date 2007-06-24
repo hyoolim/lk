@@ -47,6 +47,7 @@ int lk_object_calcancestors(lk_object_t *self);
 /* info */
 int lk_object_isa(lk_object_t *self, lk_object_t *t);
 struct lk_slot *lk_object_getslot(lk_object_t *self, lk_object_t *k);
+struct lk_slot *lk_object_getslotfromany(lk_object_t *self, lk_object_t *k);
 lk_object_t *lk_object_getvaluefromslot(lk_object_t *self,
                                         struct lk_slot *slot);
 int lk_object_hashcode(const void *k, int capa);

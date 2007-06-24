@@ -288,7 +288,7 @@ void lk_kfunc_updatesig(lk_kfunc_t *self) {
                     typeinstr = LK_INSTR(argdef->v);
                     name = LK_STRING(typeinstr->v);
                     typeinstr = typeinstr->next;
-                    slot = lk_object_getslot(LK_O(VM->currframe), typeinstr->v);
+                    slot = lk_object_getslotfromany(LK_O(VM->currframe), typeinstr->v);
                     if(slot != NULL) {
                         type = lk_object_getvaluefromslot(LK_O(VM->currframe), slot);
                     } else {

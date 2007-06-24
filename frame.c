@@ -44,7 +44,7 @@ static LK_EXT_DEFCFUNC(Dargs__fra) {
 static LK_EXT_DEFCFUNC(DassignB__fra_str_obj) {
     lk_string_t *k = LK_STRING(ARG(0));
     lk_object_t *v = ARG(1);
-    struct lk_slot *slot = lk_object_getslot(self, LK_O(k));
+    struct lk_slot *slot = lk_object_getslotfromany(self, LK_O(k));
     lk_object_t *oldval;
     if(slot == NULL) lk_vm_raisecstr(VM, "Cannot assign to %s without defining it first", k);
     oldval = lk_object_getvaluefromslot(self, slot);

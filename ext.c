@@ -59,9 +59,18 @@ void lk_ext_cfunc(lk_object_t *obj, const char *k, lk_cfuncfunc_t *func, ...) {
     va_list args;
     int i;
     lk_object_t *a;
+    lk_string_t *lkk = lk_string_newfromcstr(vm, k);
     lk_cfunc_t *cfunc = lk_cfunc_new(vm, func, 0, 0);
-    struct lk_slot *slot = lk_object_setslot(obj,
-    LK_O(lk_string_newfromcstr(vm, k)), vm->t_func, LK_O(cfunc));
+    struct lk_slot *slot = lk_object_getslot(obj, LK_O(lkk));
+    if(slot != NULL) {
+        lk_object_t *old = lk_object_getvaluefromslot(obj, slot);
+        if(LK_OBJECT_ISFUNC(old)) {
+            old = LK_O(lk_func_combine(LK_FUNC(old), LK_FUNC(cfunc)));
+        }
+        lk_object_setvalueonslot(obj, slot, old);
+    } else {
+        slot = lk_object_setslot(obj, LK_O(lkk), vm->t_func, LK_O(cfunc));
+    }
     SETOPT(slot->opts, LK_SLOTVOAUTORUN);
     va_start(args, func);
     for(i = 0; ; i ++) {

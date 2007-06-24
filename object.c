@@ -56,7 +56,7 @@ static LK_EXT_DEFCFUNC(Ddefine_and_assignB__obj_str_obj_obj) {
 static LK_EXT_DEFCFUNC(Did__obj) {
     RETURN(lk_fi_new(VM, (int)self)); }
 static LK_EXT_DEFCFUNC(Dretrieve__obj_str) {
-    struct lk_slot *slot = lk_object_getslot(self, ARG(0));
+    struct lk_slot *slot = lk_object_getslotfromany(self, ARG(0));
     if(slot != NULL) RETURN(lk_object_getvaluefromslot(self, slot));
     else RETURN(N);
 
@@ -233,26 +233,16 @@ LK_OBJECT_IMPLTAGSETTER(lk_tagfreefunc_t *, freefunc);
 /* update */
 struct lk_slot *lk_object_setslot(lk_object_t *self, lk_object_t *k,
                                   lk_object_t *t, lk_object_t *v) {
-    set_t *slots = self->co.slots;
-    struct lk_slot *slot;
-    if(slots == NULL) slots = self->co.slots = set_alloc(
-    sizeof(struct lk_slot), lk_object_hashcode, lk_object_keycmp);
-    else {
-        setitem_t *si = set_get(slots, k);
-        if(si != NULL) {
-            lk_object_t *oldval;
-            slot = LK_SLOTV(SETITEM_VALUEPTR(si));
-            slot->type = t;
-            oldval = lk_object_getvaluefromslot(self, slot);
-            if(LK_OBJECT_ISFUNC(oldval)) {
-                v = LK_O(lk_func_combine(LK_FUNC(oldval), LK_FUNC(v)));
-            }
-            lk_object_setvalueonslot(self, slot, v);
-            return slot;
+    struct lk_slot *slot = lk_object_getslot(self, k);
+    if(slot == NULL) {
+        if(self->co.slots == NULL) {
+            self->co.slots = set_alloc(sizeof(struct lk_slot),
+                                       lk_object_hashcode,
+                                       lk_object_keycmp);
         }
+        slot = LK_SLOTV(set_set(self->co.slots, k));
+        slot->type = t;
     }
-    slot = LK_SLOTV(set_set(slots, k));
-    slot->type = t;
     lk_object_setvalueonslot(self, slot, v);
     return slot;
 }
@@ -377,6 +367,12 @@ int lk_object_isa(lk_object_t *self, lk_object_t *t) {
     );
 }
 struct lk_slot *lk_object_getslot(lk_object_t *self, lk_object_t *k) {
+    set_t *slots = self->co.slots;
+    setitem_t *item;
+    if(slots == NULL || (item = set_get(slots, k)) == NULL) return NULL;
+    return LK_SLOTV(SETITEM_VALUEPTR(item));
+}
+struct lk_slot *lk_object_getslotfromany(lk_object_t *self, lk_object_t *k) {
     set_t *slots;
     setitem_t *si;
     FIND(NULL,

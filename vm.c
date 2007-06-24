@@ -580,7 +580,7 @@ void lk_vm_exit(lk_vm_t *self) {
 }
 void lk_vm_abort(lk_vm_t *self, lk_error_t *error) {
     if(error != NULL) {
-        struct lk_slot *slot = lk_object_getslot(
+        struct lk_slot *slot = lk_object_getslotfromany(
         LK_O(error), LK_O(self->str_type));
         lk_string_t *type = LK_STRING(lk_object_getvaluefromslot(LK_O(error), slot));
         lk_instr_t *expr = error->instr;

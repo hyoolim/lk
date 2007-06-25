@@ -269,7 +269,7 @@ lk_frame_t *lk_vm_evalfile(lk_vm_t *self, const char *file, const char *base) {
         self->rsrc = &rsrc;
         stream = fopen(cfilename, "r");
         if(stream != NULL) {
-            string_t *src = string_allocfromfile(stream);
+            list_t *src = string_allocfromfile(stream);
             if(src != NULL) {
                 fr = eval(self, lk_string_newfromlist(self, src));
                 self->rsrc = self->rsrc->prev;

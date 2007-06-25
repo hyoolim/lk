@@ -113,7 +113,7 @@ static LK_EXT_DEFCFUNC(read__dir) {
             RETURN(N);
         } else {
             lk_object_t *f = lk_object_alloc(VM->t_file);
-            string_t *p1, *p2, *fs = LIST(VM->str_filesep);
+            list_t *p1, *p2, *fs = LIST(VM->str_filesep);
             PATH(f) = lk_string_newfromlist(VM, LIST(PATH(self)));
             p1 = LIST(PATH(f));
             p2 = string_allocfromcstr(e->d_name);
@@ -153,7 +153,7 @@ static LK_EXT_DEFCFUNC(read__rf) {
     FILE *f = FILEF(self);
     if(f == NULL) BUG("ReadableFile->st.file should NEVER be NULL");
     else {
-        string_t *c = string_allocfromfile(f);
+        list_t *c = string_allocfromfile(f);
         RETURN(c != NULL ? LK_O(lk_string_newfromlist(VM, c)) : N);
     }
 }
@@ -161,7 +161,7 @@ static LK_EXT_DEFCFUNC(read__rf_ch) {
     FILE *f = FILEF(self);
     if(f == NULL) BUG("ReadableFile->st.file should NEVER be NULL");
     else {
-        string_t *c = string_allocfromfileuntilchar(f, CHAR(ARG(0)));
+        list_t *c = string_allocfromfileuntilchar(f, CHAR(ARG(0)));
         RETURN(c != NULL ? LK_O(lk_string_newfromlist(VM, c)) : N);
     }
 }
@@ -169,7 +169,7 @@ static LK_EXT_DEFCFUNC(read__rf_cset) {
     FILE *f = FILEF(self);
     if(f == NULL) BUG("ReadableFile->st.file should NEVER be NULL");
     else {
-        string_t *c = string_allocfromfileuntilcset(f, CSET(ARG(0)));
+        list_t *c = string_allocfromfileuntilcset(f, CSET(ARG(0)));
         RETURN(c != NULL ? LK_O(lk_string_newfromlist(VM, c)) : N);
     }
 }

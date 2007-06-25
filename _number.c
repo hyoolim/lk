@@ -1,7 +1,7 @@
 #include "_number.h"
 
 /* new. */
-numbertype_t number_new(int is_big, string_t *str, numberifn_t *res) {
+numbertype_t number_new(int is_big, list_t *str, numberifn_t *res) {
     static char underscore = '_' - '0', dot = '.' - '0';
     char digit = '\0';
     int i;

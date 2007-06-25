@@ -51,8 +51,8 @@ void lk_ext_cfield(lk_object_t *self, const char *k, lk_object_t *t,
     struct lk_slot *slot = lk_object_setslot(
     LK_O(self), LK_O(k_kc), t, vm->t_unknown);
     assert(offset >= sizeof(struct lk_common));
-    slot->opts |= LK_SLOTVOCFIELD;
-    slot->v.offset = offset;
+    LK_SLOT_SETTYPE(slot, LK_SLOTTYPE_CFIELDLKOBJ);
+    slot->value.coffset = offset;
 }
 void lk_ext_cfunc(lk_object_t *obj, const char *k, lk_cfuncfunc_t *func, ...) {
     lk_vm_t *vm = LK_VM(obj);
@@ -71,7 +71,7 @@ void lk_ext_cfunc(lk_object_t *obj, const char *k, lk_cfuncfunc_t *func, ...) {
     } else {
         slot = lk_object_setslot(obj, LK_O(lkk), vm->t_func, LK_O(cfunc));
     }
-    SETOPT(slot->opts, LK_SLOTVOAUTORUN);
+    LK_SLOT_SETOPTION(slot, LK_SLOTOPTION_AUTOSEND);
     va_start(args, func);
     for(i = 0; ; i ++) {
         a = va_arg(args, lk_object_t *);

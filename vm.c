@@ -362,7 +362,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         for(; recv != NULL; recv = LK_O(LK_FRAME(recv)->returnto)) {
             if((slots = recv->co.slots) == NULL) continue;
             if((si = set_get(slots, vm->str_rescue)) == NULL) continue;
-            slot = LK_SLOTV(SETITEM_VALUEPTR(si));
+            slot = LK_SLOT(SETITEM_VALUEPTR(si));
             slotv = lk_object_getvaluefromslot(recv, slot);
             if(!LK_OBJECT_ISFUNC(slot->check)
             || LK_OBJECT_ISA(slotv, t_func) < 3) continue;
@@ -478,11 +478,11 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         if((slots = r->co.slots) == NULL) goto proto;
         if((si = set_get(slots, msgn)) == NULL) goto proto;
         found:
-        slot = LK_SLOTV(SETITEM_VALUEPTR(si));
+        slot = LK_SLOT(SETITEM_VALUEPTR(si));
         slotv = lk_object_getvaluefromslot(recv, slot);
         /* slot contains func obj - call? */
         if(LK_OBJECT_ISA(slotv, t_func) > 2
-        && slot->opts & LK_SLOTVOAUTORUN
+        && LK_SLOT_CHECKOPTION(slot, LK_SLOTOPTION_AUTOSEND)
         && (instr == NULL
         || instr->next == NULL
         || instr->next->type != LK_INSTRTYPE_APPLYMSG

@@ -47,7 +47,7 @@ static LK_EXT_DEFCFUNC(Ddefine_and_assignB__obj_str_obj_obj) {
     slot = lk_object_setslot(self, k, ARG(1), v);
     v = lk_object_getvaluefromslot(self, slot);
     if(LK_OBJECT_ISFUNC(v)) {
-        SETOPT(slot->opts, LK_SLOTVOAUTORUN);
+        LK_SLOT_SETOPTION(slot, LK_SLOTOPTION_AUTOSEND);
         SETOPT(LK_FUNC(v)->cf.opts, LK_FUNCOASSIGNED);
         LK_FUNC(v)->cf.doc = env->caller->current->prev->comment;
     }
@@ -121,7 +121,7 @@ static LK_EXT_DEFCFUNC(import__obj_obj) {
         if(to == NULL) to = self->co.slots = set_alloc(
         sizeof(struct lk_slot), lk_object_hashcode, lk_object_keycmp);
         SET_EACH(from, i,
-            *LK_SLOTV(set_set(to, i->key)) = *LK_SLOTV(SETITEM_VALUEPTR(i));
+            *LK_SLOT(set_set(to, i->key)) = *LK_SLOT(SETITEM_VALUEPTR(i));
         );
     }
     RETURN(self);
@@ -240,7 +240,7 @@ struct lk_slot *lk_object_setslot(lk_object_t *self, lk_object_t *k,
                                        lk_object_hashcode,
                                        lk_object_keycmp);
         }
-        slot = LK_SLOTV(set_set(self->co.slots, k));
+        slot = LK_SLOT(set_set(self->co.slots, k));
         slot->check = check;
     }
     lk_object_setvalueonslot(self, slot, v);
@@ -257,11 +257,11 @@ void lk_object_setvalueonslot(lk_object_t *self, struct lk_slot *slot,
     if(v == NULL) v = vm->t_unknown;
     if(v == vm->t_unknown || LK_OBJECT_ISTYPE(v, slot->check)) {
         lk_object_addref(self, v);
-        if(slot->opts & LK_SLOTVOCFIELD) {
+        if(LK_SLOT_GETTYPE(slot) == LK_SLOTTYPE_CFIELDLKOBJ) {
             if(v == vm->t_unknown) v = NULL;
-            *(lk_object_t **)((ptrdiff_t)self + slot->v.offset) = v;
+            *(lk_object_t **)((ptrdiff_t)self + slot->value.coffset) = v;
         } else {
-            slot->v.value = v;
+            slot->value.lkobj = v;
         }
     } else {
         printf("type mismatch!\n");
@@ -370,7 +370,7 @@ struct lk_slot *lk_object_getslot(lk_object_t *self, lk_object_t *k) {
     set_t *slots = self->co.slots;
     setitem_t *item;
     if(slots == NULL || (item = set_get(slots, k)) == NULL) return NULL;
-    return LK_SLOTV(SETITEM_VALUEPTR(item));
+    return LK_SLOT(SETITEM_VALUEPTR(item));
 }
 struct lk_slot *lk_object_getslotfromany(lk_object_t *self, lk_object_t *k) {
     set_t *slots;
@@ -378,16 +378,16 @@ struct lk_slot *lk_object_getslotfromany(lk_object_t *self, lk_object_t *k) {
     FIND(NULL,
         if((slots = self->co.slots) != NULL
         && (si = set_get(slots, k)) != NULL
-        ) return LK_SLOTV(SETITEM_VALUEPTR(si));
+        ) return LK_SLOT(SETITEM_VALUEPTR(si));
     );
 }
 lk_object_t *lk_object_getvaluefromslot(lk_object_t *self,
                                         struct lk_slot *slot) {
-    if(slot->opts & LK_SLOTVOCFIELD) {
-        lk_object_t *v = *(lk_object_t **)((ptrdiff_t)self + slot->v.offset);
+    if(LK_SLOT_GETTYPE(slot) == LK_SLOTTYPE_CFIELDLKOBJ) {
+        lk_object_t *v = *(lk_object_t **)((ptrdiff_t)self + slot->value.coffset);
         return v != NULL ? v : LK_VM(self)->t_unknown;
     } else {
-        return slot->v.value;
+        return slot->value.lkobj;
     }
 }
 int lk_object_hashcode(const void *k, int capa) {

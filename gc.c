@@ -82,7 +82,7 @@ void lk_object_markused(lk_object_t *self) {
             struct lk_slot *slot;
             SET_EACH(self->co.slots, item,
                 lk_object_markpending(LK_O(item->key));
-                slot = LK_SLOTV(SETITEM_VALUEPTR(item));
+                slot = LK_SLOT(SETITEM_VALUEPTR(item));
                 lk_object_markpending(slot->check);
                 lk_object_markpending(lk_object_getvaluefromslot(self, slot));
             );

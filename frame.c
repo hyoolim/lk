@@ -53,7 +53,7 @@ static LK_EXT_DEFCFUNC(DassignB__fra_str_obj) {
     lk_object_setvalueonslot(self, slot, v);
     v = lk_object_getvaluefromslot(self, slot);
     if(LK_OBJECT_ISFUNC(v)) {
-        SETOPT(slot->opts, LK_SLOTVOAUTORUN);
+        LK_SLOT_SETOPTION(slot, LK_SLOTOPTION_AUTOSEND);
         SETOPT(LK_FUNC(v)->cf.opts, LK_FUNCOASSIGNED);
     }
     RETURN(v);
@@ -68,7 +68,7 @@ static LK_EXT_DEFCFUNC(include__fra_str_str) {
             if(to == NULL) to = self->co.slots = set_alloc(
             sizeof(struct lk_slot), lk_object_hashcode, lk_object_keycmp);
             SET_EACH(from, i,
-                *LK_SLOTV(set_set(to, i->key)) = *LK_SLOTV(SETITEM_VALUEPTR(i));
+                *LK_SLOT(set_set(to, i->key)) = *LK_SLOT(SETITEM_VALUEPTR(i));
             );
         }
     }

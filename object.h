@@ -3,18 +3,29 @@
 #include "vm.h"
 
 /* type */
-struct lk_slot {
-    uint8_t          opts;
-    lk_object_t     *check;
-    union {
-        lk_object_t *value;
-        size_t        offset;
-    } v;
+enum lk_slottype {
+    LK_SLOTTYPE_LKOBJ,
+    LK_SLOTTYPE_CFIELDLKOBJ
 };
-#define LK_SLOTV(v) ((struct lk_slot *)(v))
-#define LK_SLOTVOCFIELD   (1 << 0)
-#define LK_SLOTVOREADONLY (1 << 1)
-#define LK_SLOTVOAUTORUN  (1 << 2)
+enum lk_slotoption {
+    LK_SLOTOPTION_READONLY = 1 << 4,
+    LK_SLOTOPTION_AUTOSEND = 1 << 5
+};
+struct lk_slot {
+    enum lk_slottype  typeandoption;
+    lk_object_t      *check;
+    union {
+        lk_object_t  *lkobj;
+        size_t        coffset;
+    }                 value;
+};
+#define LK_SLOT(v) ((struct lk_slot *)(v))
+#define LK_SLOT_TYPEMASK ((1 << 4) - 1)
+#define LK_SLOT_OPTIONMASK (~LK_SLOT_TYPEMASK)
+#define LK_SLOT_GETTYPE(self) ((self)->typeandoption & LK_SLOT_TYPEMASK)
+#define LK_SLOT_SETTYPE(self, type) ((self)->typeandoption = ((self)->typeandoption & LK_SLOT_OPTIONMASK) | (type))
+#define LK_SLOT_SETOPTION(self, option) ((self)->typeandoption |= (option))
+#define LK_SLOT_CHECKOPTION(self, option) ((self)->typeandoption & (option))
 
 /* ext map */
 LK_EXT_DEFINIT(lk_object_extinittypes);

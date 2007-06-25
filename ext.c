@@ -39,7 +39,9 @@ void lk_ext_set(lk_object_t *proto, const char *k, lk_object_t *v) {
     lk_string_t *type = vm->str_type;
     lk_string_t *k_kc = lk_string_newfromcstr(vm, k);
     lk_object_setslot(proto, LK_O(k_kc), vm->t_object, v);
+    /*
     lk_object_setslot(v, LK_O(type), vm->t_string, LK_O(k_kc));
+    */
 }
 void lk_ext_global(const char *k, lk_object_t *v) {
     lk_ext_set(LK_O(LK_VM(v)->global), k, v);

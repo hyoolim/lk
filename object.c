@@ -235,6 +235,7 @@ struct lk_slot *lk_object_setslot(lk_object_t *self, lk_object_t *k,
                                   lk_object_t *check, lk_object_t *v) {
     struct lk_slot *slot = lk_object_getslot(self, k);
     if(slot == NULL) {
+        uint32_t first = list_getuchar(LIST(k), 0);
         if(self->co.slots == NULL) {
             self->co.slots = set_alloc(sizeof(struct lk_slot),
                                        lk_object_hashcode,
@@ -242,6 +243,10 @@ struct lk_slot *lk_object_setslot(lk_object_t *self, lk_object_t *k,
         }
         slot = LK_SLOT(set_set(self->co.slots, k));
         slot->check = check;
+        if('A' <= first && first <= 'Z') {
+            lk_object_setslot(v, LK_VM(self)->str_type,
+                              LK_VM(self)->t_string, LK_O(k));
+        }
     }
     lk_object_setvalueonslot(self, slot, v);
     return slot;

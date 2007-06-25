@@ -1,8 +1,8 @@
 # "Classes"
-Able       := Object/with { /.type := 'Able' }
-Comparable := Able/with { /.type := 'Comparable' }
-Enumerable := Able/with { /.type := 'Enumerable' }
-Range      := Object/with { /.type := 'Range' }
+Able       := Object/with { }
+Comparable := Able/with { }
+Enumerable := Able/with { }
+Range      := Object/with { }
 
 # Boolean
 Boolean/do {
@@ -408,7 +408,7 @@ Object/do {
     /to := { to | Range/new[/.; to] }
     /to boolean := TRUE
     /to code := { | '<<' ++ /to string ++ '>>' }
-    /to string := { | /.type ++ '#' ++ /.id/to string }
+    /to string := { | /.CLASS ++ '#' ++ /.id/to string }
 }
 
 # POSITIVE INFINITY (inf)
@@ -623,7 +623,7 @@ WritableFile/do {
 
 # default error handler
 rescue { e |
-    STDERR/writeln['Error/'; e/.type; ': '; e]
+    STDERR/writeln['Error/'; e/.CLASS; ': '; e]
     f := .
     c := f/.caller ->nil? ->not? ?? loop {
         f = c

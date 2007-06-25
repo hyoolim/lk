@@ -170,7 +170,7 @@ lk_vm_t *lk_vm_newwithid(int id) {
     /* init rest of the fields in vm */
     self->global = LK_FRAME(lk_object_alloc(self->t_frame));
     self->currframe = self->global;
-    self->str_type = lk_string_newfromcstr(self, ".type");
+    self->str_type = lk_string_newfromcstr(self, ".CLASS");
     self->str_forward = lk_string_newfromcstr(self, ".forward");
     self->str_rescue = lk_string_newfromcstr(self, ".rescue");
     self->str_onassign = lk_string_newfromcstr(self, ".on_assign");

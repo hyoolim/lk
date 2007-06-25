@@ -1,11 +1,9 @@
 Row := List/with {
-    /.type := 'Row'
     /eq? := { x --- /map { v --- v == x } }
     /gt? := { x --- /map { v --- v > x } }
     /lt? := { x --- /map { v --- v < x } }
 }
 Table := Object/with {
-    /.type := 'Table'
     /init := { /columns... ---
         /data := Dictionary/new
         /columns/each { v; i ---

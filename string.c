@@ -56,7 +56,7 @@ static LK_EXT_DEFCFUNC(to_number__str) {
 LK_EXT_DEFINIT(lk_string_extinitfuncs) {
     lk_object_t *str = vm->t_string, *fi = vm->t_fi, *cset = vm->t_cset,
                 *ch = vm->t_char;
-    lk_ext_global("NEWLINE", lk_string_newfromcstr(vm, "\n"));
+    lk_ext_global("NEWLINE", LK_O(lk_string_newfromcstr(vm, "\n")));
     lk_ext_global("String", str);
     lk_ext_cfunc(str, "at", at__str_fi, fi, NULL);
     lk_ext_cfunc(str, "find", find__str_ch_fi, ch, fi, NULL);

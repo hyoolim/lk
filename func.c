@@ -98,8 +98,8 @@ static LK_EXT_DEFCFUNC(addB__f_f) {
     if(env->caller == NULL && env->caller->lastslot == NULL) {
         lk_vm_raisecstr(VM, "Cannot add to the function without a slot");
     } else {
-        lk_func_t *new = lk_func_combine(LK_FUNC(self), LK_FUNC(ARG(0)));
-        lk_object_setvalueonslot(self, env->caller->lastslot, new);
+        lk_gfunc_t *new = lk_func_combine(LK_FUNC(self), LK_FUNC(ARG(0)));
+        lk_object_setvalueonslot(self, env->caller->lastslot, LK_O(new));
         RETURN(new);
     }
 }

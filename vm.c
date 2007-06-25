@@ -583,8 +583,10 @@ void lk_vm_abort(lk_vm_t *self, lk_error_t *error) {
         struct lk_slot *slot = lk_object_getslotfromany(
         LK_O(error), LK_O(self->str_type));
         lk_string_t *type = LK_STRING(lk_object_getvaluefromslot(LK_O(error), slot));
+        /*
         lk_instr_t *expr = error->instr;
         int i = 0;
+        */
         string_print(LIST(type), stdout);
         /*
         fprintf(stdout, "\n* rsrc: ");

@@ -46,17 +46,22 @@ static LK_EXT_DEFCFUNC(DassignB__fra_str_obj) {
     lk_object_t *v = ARG(1);
     struct lk_slot *slot = lk_object_getslotfromany(self, LK_O(k));
     lk_object_t *oldval;
-    if(slot == NULL) lk_vm_raisecstr(VM, "Cannot assign to %s without defining it first", k);
-    oldval = lk_object_getvaluefromslot(self, slot);
-    if(LK_OBJECT_ISFUNC(oldval)
-    ) v = LK_O(lk_func_combine(LK_FUNC(oldval), LK_FUNC(v)));
-    lk_object_setvalueonslot(self, slot, v);
-    v = lk_object_getvaluefromslot(self, slot);
-    if(LK_OBJECT_ISFUNC(v)) {
-        LK_SLOT_SETOPTION(slot, LK_SLOTOPTION_AUTOSEND);
-        SETOPT(LK_FUNC(v)->cf.opts, LK_FUNCOASSIGNED);
+    if(slot == NULL) {
+        lk_vm_raisecstr(VM, "Cannot assign to undefined slot %s", k);
+    } else if(LK_SLOT_CHECKOPTION(slot, LK_SLOTOPTION_READONLY)) {
+        lk_vm_raisecstr(VM, "Cannot assign to readonly slot %s", k);
+    } else {
+        oldval = lk_object_getvaluefromslot(self, slot);
+        if(LK_OBJECT_ISFUNC(oldval)
+        ) v = LK_O(lk_func_combine(LK_FUNC(oldval), LK_FUNC(v)));
+        lk_object_setvalueonslot(self, slot, v);
+        v = lk_object_getvaluefromslot(self, slot);
+        if(LK_OBJECT_ISFUNC(v)) {
+            LK_SLOT_SETOPTION(slot, LK_SLOTOPTION_AUTOSEND);
+            SETOPT(LK_FUNC(v)->cf.opts, LK_FUNCOASSIGNED);
+        }
+        RETURN(v);
     }
-    RETURN(v);
 }
 static LK_EXT_DEFCFUNC(include__fra_str_str) {
     lk_frame_t *fr = lk_vm_evalfile(VM,

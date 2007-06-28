@@ -6,7 +6,7 @@
 
 /* ext map - types */
 LK_EXT_DEFINIT(lk_string_extinittypes) {
-    vm->t_string = lk_object_alloc(vm->t_glist);
+    vm->t_string = lk_obj_alloc(vm->t_glist);
     list_fin(LIST(vm->t_string));
     list_init(LIST(vm->t_string), sizeof(uint8_t), 16);
 }
@@ -54,9 +54,9 @@ static LK_EXT_DEFCFUNC(to_number__str) {
     }
 }
 LK_EXT_DEFINIT(lk_string_extinitfuncs) {
-    lk_object_t *str = vm->t_string, *fi = vm->t_fi, *cset = vm->t_cset,
+    lk_obj_t *str = vm->t_string, *fi = vm->t_fi, *cset = vm->t_cset,
                 *ch = vm->t_char;
-    lk_ext_global("NEWLINE", LK_O(lk_string_newfromcstr(vm, "\n")));
+    lk_ext_global("NEWLINE", LK_OBJ(lk_string_newfromcstr(vm, "\n")));
     lk_ext_global("String", str);
     lk_ext_cfunc(str, "at", at__str_fi, fi, NULL);
     lk_ext_cfunc(str, "find", find__str_ch_fi, ch, fi, NULL);
@@ -70,10 +70,10 @@ LK_EXT_DEFINIT(lk_string_extinitfuncs) {
 
 /* new */
 lk_string_t *lk_string_new(lk_vm_t *vm) {
-    return LK_STRING(lk_object_alloc(vm->t_string));
+    return LK_STRING(lk_obj_alloc(vm->t_string));
 }
 lk_string_t *lk_string_newfromlist(lk_vm_t *vm, list_t *list) {
-    lk_string_t *self = LK_STRING(lk_object_alloc(vm->t_string));
+    lk_string_t *self = LK_STRING(lk_obj_alloc(vm->t_string));
     list_copy(LIST(self), list);
     return self;
 }

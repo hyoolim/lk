@@ -6,22 +6,22 @@
 int snprintf(char *str, size_t size, const char *format, ...);
 
 /* ext map - types */
-static LK_OBJECT_DEFALLOCFUNC(alloc__fi) {
+static LK_OBJ_DEFALLOCFUNC(alloc__fi) {
     INT(self) = INT(proto);
 }
-static LK_OBJECT_DEFALLOCFUNC(alloc__fr) {
+static LK_OBJ_DEFALLOCFUNC(alloc__fr) {
     DBL(self) = DBL(proto);
 }
 LK_EXT_DEFINIT(lk_fixnum_extinittypes) {
-    vm->t_number = lk_object_alloc(vm->t_object);
-    vm->t_pi = lk_object_alloc(vm->t_object);
-    vm->t_ni = lk_object_alloc(vm->t_object);
-    vm->t_int = lk_object_alloc(vm->t_number);
-    vm->t_real = lk_object_alloc(vm->t_number);
-    vm->t_fi = lk_object_allocwithsize(vm->t_int, sizeof(lk_fi_t));
-    lk_object_setallocfunc(vm->t_fi, alloc__fi);
-    vm->t_fr = lk_object_allocwithsize(vm->t_real, sizeof(lk_fr_t));
-    lk_object_setallocfunc(vm->t_fr, alloc__fr);
+    vm->t_number = lk_obj_alloc(vm->t_obj);
+    vm->t_pi = lk_obj_alloc(vm->t_obj);
+    vm->t_ni = lk_obj_alloc(vm->t_obj);
+    vm->t_int = lk_obj_alloc(vm->t_number);
+    vm->t_real = lk_obj_alloc(vm->t_number);
+    vm->t_fi = lk_obj_allocwithsize(vm->t_int, sizeof(lk_fi_t));
+    lk_obj_setallocfunc(vm->t_fi, alloc__fi);
+    vm->t_fr = lk_obj_allocwithsize(vm->t_real, sizeof(lk_fr_t));
+    lk_obj_setallocfunc(vm->t_fr, alloc__fr);
 }
 
 /* ext map - funcs */
@@ -164,7 +164,7 @@ static LK_EXT_DEFCFUNC(zero__fr) {
     RETURN(DBL(self) == 0.0 ? T : F);
 }
 LK_EXT_DEFINIT(lk_fixnum_extinitfuncs) {
-    lk_object_t *num = vm->t_number, *str = vm->t_string,
+    lk_obj_t *num = vm->t_number, *str = vm->t_string,
                 *i = vm->t_int, *fi = vm->t_fi,
                 *f = vm->t_real, *fr = vm->t_fr;
     /* */
@@ -221,12 +221,12 @@ LK_EXT_DEFINIT(lk_fixnum_extinitfuncs) {
 
 /* new */
 lk_fi_t *lk_fi_new(lk_vm_t *vm, int i) {
-    lk_fi_t *self = LK_FI(lk_object_alloc(vm->t_fi));
+    lk_fi_t *self = LK_FI(lk_obj_alloc(vm->t_fi));
     self->i = i;
     return self;
 }
 lk_fr_t *lk_fr_new(lk_vm_t *vm, double r) {
-    lk_fr_t *self = LK_FR(lk_object_alloc(vm->t_fr));
+    lk_fr_t *self = LK_FR(lk_obj_alloc(vm->t_fr));
     self->r = r;
     return self;
 }

@@ -17,7 +17,7 @@
 #include "gset.h"
 #include "instr.h"
 #include "list.h"
-#include "object.h"
+#include "obj.h"
 #include "parser.h"
 #include "random.h"
 #include "socket.h"
@@ -32,7 +32,7 @@
 
 /* ext map - types */
 LK_EXT_DEFINIT(lk_vm_extinittypes) {
-    vm->t_vm = lk_object_alloc(vm->t_object);
+    vm->t_vm = lk_obj_alloc(vm->t_obj);
 }
 
 /* ext map - funcs */
@@ -54,9 +54,9 @@ static LK_EXT_DEFCFUNC(fork__vm_f) {
         lk_frame_t *fr = lk_vm_prepevalfunc(VM);
         fr->first = fr->next = kf->first;
         fr->receiver = fr->self = self;
-        fr->func = LK_O(kf);
+        fr->func = LK_OBJ(kf);
         fr->returnto = NULL;
-        fr->co.proto = LK_O(kf->frame);
+        fr->co.proto = LK_OBJ(kf->frame);
         lk_vm_doevalfunc(VM);
         lk_vm_exit(VM);
         DONE;
@@ -118,7 +118,7 @@ static LK_EXT_DEFCFUNC(wait__vm) {
     RETURN(lk_fi_new(VM, (int)child));
 }
 LK_EXT_DEFINIT(lk_vm_extinitfuncs) {
-    lk_object_t *tvm = vm->t_vm, *f = vm->t_func, *fr = vm->t_fr,
+    lk_obj_t *tvm = vm->t_vm, *f = vm->t_func, *fr = vm->t_fr,
                 *str = vm->t_string;
     lk_ext_global("VirtualMachine", tvm);
     lk_ext_cfunc(tvm, "exit", exit__vm, NULL);
@@ -141,10 +141,10 @@ lk_vm_t *lk_vm_newwithid(int id) {
     lk_vm_t *self = memory_alloc(sizeof(lk_vm_t));
     self->id = id;
     self->retained = list_allocptr();
-    self->symbols = set_alloc(0, lk_object_hashcode, lk_object_keycmp);
+    self->symbols = set_alloc(0, lk_obj_hashcode, lk_obj_keycmp);
 
     /* must be loaded before other primitive types */
-    lk_object_extinittypes(self);
+    lk_obj_extinittypes(self);
     lk_gc_extinittypes(self);
     lk_vm_extinittypes(self);
     lk_glist_extinittypes(self);
@@ -168,7 +168,7 @@ lk_vm_t *lk_vm_newwithid(int id) {
     lk_parser_extinittypes(self);
 
     /* init rest of the fields in vm */
-    self->global = LK_FRAME(lk_object_alloc(self->t_frame));
+    self->global = LK_FRAME(lk_obj_alloc(self->t_frame));
     self->currframe = self->global;
     self->str_type = lk_string_newfromcstr(self, ".CLASS");
     self->str_forward = lk_string_newfromcstr(self, ".forward");
@@ -198,7 +198,7 @@ lk_vm_t *lk_vm_newwithid(int id) {
     lk_gc_extinitfuncs(self);
     lk_instr_extinitfuncs(self);
     lk_list_extinitfuncs(self);
-    lk_object_extinitfuncs(self);
+    lk_obj_extinitfuncs(self);
     lk_parser_extinitfuncs(self);
     lk_string_extinitfuncs(self);
     lk_vm_extinitfuncs(self);
@@ -214,11 +214,11 @@ lk_vm_t *lk_vm_newwithid(int id) {
 }
 void lk_vm_free(lk_vm_t *self) {
     lk_gc_t *gc = self->gc;
-    lk_objgroup_remove(LK_O(gc));
+    lk_objgroup_remove(LK_OBJ(gc));
     lk_objgroup_freevalues(gc->unused);
     lk_objgroup_freevalues(gc->pending);
     lk_objgroup_freevalues(gc->used);
-    lk_object_justfree(LK_O(gc));
+    lk_obj_justfree(LK_OBJ(gc));
     memory_free(self);
 
     /*
@@ -302,17 +302,17 @@ lk_frame_t *lk_vm_prepevalfunc(lk_vm_t *vm) {
     lk_frame_t *self;
     if(prev->child != NULL && prev->child->co.mark.isref == 0) {
         self = prev->child;
-        self->co.proto = LK_O(prev);
+        self->co.proto = LK_OBJ(prev);
         if(self->co.slots != NULL) set_clear(self->co.slots);
         list_clear(&self->stack);
         /* stat */ vm->cnt_recycledframe ++;
     } else {
-        self = prev->child = LK_FRAME(lk_object_alloc(LK_O(prev)));
+        self = prev->child = LK_FRAME(lk_obj_alloc(LK_OBJ(prev)));
     }
     vm->currframe = self;
     self->type = LK_FRAMETYPE_RETURN;
     self->frame = self;
-    self->receiver = LK_O(self);
+    self->receiver = LK_OBJ(self);
     self->self = prev != NULL ? prev->self : NULL;
     self->caller = self->returnto = prev;
     /* stat */ vm->cnt_frame ++;
@@ -321,12 +321,12 @@ lk_frame_t *lk_vm_prepevalfunc(lk_vm_t *vm) {
 #define CALLFUNC(self, func, args) do { \
     (args)->argc = LIST_ISINIT(&(args)->stack) \
     ? LIST_COUNT(&(args)->stack) : 0; \
-    if(LK_OBJECT_ISCFUNC(LK_O(func))) { \
+    if(LK_OBJ_ISCFUNC(LK_OBJ(func))) { \
         LK_CFUNC(func)->func((args)->receiver, (args)); \
         vm->currframe = (self); \
     } else { \
-        (args)->co.proto = LK_O(LK_KFUNC(func)->frame); \
-        (args)->self = LK_OBJECT_ISFRAME((args)->receiver) \
+        (args)->co.proto = LK_OBJ(LK_KFUNC(func)->frame); \
+        (args)->self = LK_OBJ_ISFRAME((args)->receiver) \
         ? LK_KFUNC(func)->frame->self : (args)->receiver; \
         (args)->first = (args)->next = LK_KFUNC(func)->first; \
         (self) = (args); \
@@ -339,7 +339,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
     lk_instr_t *instr;
     lk_frame_t *args;
     /* freq used types */
-    lk_object_t *t_func = vm->t_func;
+    lk_obj_t *t_func = vm->t_func;
     /* used in slot resolution */
     lk_instr_t *msg;
     lk_string_t *msgn;
@@ -348,7 +348,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
     struct lk_slot *slot;
     list_t *ancs;
     int anci, ancc;
-    lk_object_t *recv, *r, *slotv;
+    lk_obj_t *recv, *r, *slotv;
     lk_func_t *func;
     /* rescue error and run approp func */
     struct lk_rescue rescue;
@@ -356,21 +356,21 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
     rescue.rsrc = vm->rsrc;
     vm->rescue = &rescue;
     if(setjmp(rescue.buf)) {
-        recv = LK_O(self->frame);
+        recv = LK_OBJ(self->frame);
         args = lk_vm_prepevalfunc(vm);
-        lk_frame_stackpush(args, LK_O(vm->lasterror));
-        for(; recv != NULL; recv = LK_O(LK_FRAME(recv)->returnto)) {
+        lk_frame_stackpush(args, LK_OBJ(vm->lasterror));
+        for(; recv != NULL; recv = LK_OBJ(LK_FRAME(recv)->returnto)) {
             if((slots = recv->co.slots) == NULL) continue;
             if((si = set_get(slots, vm->str_rescue)) == NULL) continue;
             slot = LK_SLOT(SETITEM_VALUEPTR(si));
-            slotv = lk_object_getvaluefromslot(recv, slot);
-            if(!LK_OBJECT_ISFUNC(slot->check)
-            || LK_OBJECT_ISA(slotv, t_func) < 3) continue;
+            slotv = lk_obj_getvaluefromslot(recv, slot);
+            if(!LK_OBJ_ISFUNC(slot->check)
+            || LK_OBJ_ISA(slotv, t_func) < 3) continue;
             func = lk_func_match(LK_FUNC(slotv), args, args->self);
             if(func == NULL) continue;
             args->receiver = recv;
             args->returnto = LK_FRAME(recv)->returnto;
-            args->func = slotv; /* LK_O(func); */
+            args->func = slotv; /* LK_OBJ(func); */
             CALLFUNC(self, func, args);
         }
         vm->rescue = vm->rescue->prev;
@@ -395,11 +395,11 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         lk_frame_stackpush(self, self->self != NULL ? self->self : N);
         goto sendmsg;
     case LK_INSTRTYPE_FRAMEMSG:
-        lk_frame_stackpush(self, LK_O(self->frame));
+        lk_frame_stackpush(self, LK_OBJ(self->frame));
         goto sendmsg;
     case LK_INSTRTYPE_APPLYMSG:
         sendmsg:
-        lk_frame_stackpush(self, LK_O(instr));
+        lk_frame_stackpush(self, LK_OBJ(instr));
         if(instr->opts & LK_INSTROHASMSGARGS) goto nextinstr;
         args = NULL;
         goto apply;
@@ -418,16 +418,16 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
     case LK_INSTRTYPE_FIXF:
     case LK_INSTRTYPE_STRING: 
     case LK_INSTRTYPE_CHAR: 
-        lk_frame_stackpush(self, lk_object_clone(instr->v));
+        lk_frame_stackpush(self, lk_obj_clone(instr->v));
         goto nextinstr;
     /* funcs also need ref to env for closures to work */
     case LK_INSTRTYPE_FUNC: {
-        lk_kfunc_t *clone = LK_KFUNC(lk_object_clone(instr->v));
+        lk_kfunc_t *clone = LK_KFUNC(lk_obj_clone(instr->v));
         lk_kfunc_updatesig(clone);
-        lk_object_addref(LK_O(clone), LK_O(self->frame));
+        lk_obj_addref(LK_OBJ(clone), LK_OBJ(self->frame));
         clone->frame = self->frame;
-        lk_object_addref(LK_O(clone), LK_O(self->receiver));
-        lk_frame_stackpush(self, LK_O(clone));
+        lk_obj_addref(LK_OBJ(clone), LK_OBJ(self->receiver));
+        lk_frame_stackpush(self, LK_OBJ(clone));
         goto nextinstr; }
     /* read more instr from the parser */
     case LK_INSTRTYPE_MORE:
@@ -453,7 +453,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         goto nextinstr;
     /* take the frame and convert to list */
     case LK_FRAMETYPE_LIST:
-        lk_frame_stackpush(self, LK_O(lk_frame_stacktolist(args)));
+        lk_frame_stackpush(self, LK_OBJ(lk_frame_stacktolist(args)));
         vm->currframe = self;
         goto nextinstr;
     /* take the frame and use as args for msg */
@@ -465,7 +465,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         recv = r = lk_frame_stackpop(self);
         */
         recv = r = lk_frame_stackpop(self);
-        if(LK_OBJECT_ISINSTR(recv)) {
+        if(LK_OBJ_ISINSTR(recv)) {
             msg = LK_INSTR(recv);
             msgn = LK_STRING(msg->v);
             recv = r = lk_frame_stackpop(self);
@@ -479,9 +479,9 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         if((si = set_get(slots, msgn)) == NULL) goto proto;
         found:
         slot = LK_SLOT(SETITEM_VALUEPTR(si));
-        slotv = lk_object_getvaluefromslot(recv, slot);
+        slotv = lk_obj_getvaluefromslot(recv, slot);
         /* slot contains func obj - call? */
-        if(LK_OBJECT_ISA(slotv, t_func) > 2
+        if(LK_OBJ_ISA(slotv, t_func) > 2
         && LK_SLOT_CHECKOPTION(slot, LK_SLOTOPTION_AUTOSEND)
         && (instr == NULL
         || instr->next == NULL
@@ -494,13 +494,13 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
             args->type = LK_FRAMETYPE_RETURN;
             args->frame = args;
             args->receiver = recv;
-            args->func = slotv; /* LK_O(func); */
+            args->func = slotv; /* LK_OBJ(func); */
             CALLFUNC(self, func, args);
         } else {
             /* called like a func? */
             if(args != NULL) {
                 /* slot contains func */
-                if(LK_OBJECT_ISA(slotv, t_func) > 2) {
+                if(LK_OBJ_ISA(slotv, t_func) > 2) {
                     goto callfunc;
                 /* call at/apply if there are args */
                 } else if(LIST_ISINIT(&args->stack)
@@ -542,10 +542,10 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
     }
 }
 void lk_vm_raisecstr(lk_vm_t *self, const char *message, ...) {
-    lk_error_t *error = LK_ERROR(lk_object_alloc(self->t_error));
+    lk_error_t *error = LK_ERROR(lk_obj_alloc(self->t_error));
     va_list ap;
     error->instr = self->currinstr;
-    error->text = LK_STRING(lk_object_alloc(self->t_string));
+    error->text = LK_STRING(lk_obj_alloc(self->t_string));
     va_start(ap, message);
     for(; *message != '\0'; message ++) {
         if(*message == '%') {
@@ -563,7 +563,7 @@ void lk_vm_raisecstr(lk_vm_t *self, const char *message, ...) {
     lk_vm_raiseerror(self, error);
 }
 void lk_vm_raiseerrno(lk_vm_t *self) {
-    lk_error_t *error = LK_ERROR(lk_object_alloc(self->t_error));
+    lk_error_t *error = LK_ERROR(lk_obj_alloc(self->t_error));
     error->text = lk_string_newfromcstr(self, strerror(errno));
     lk_vm_raiseerror(self, error);
 }
@@ -580,9 +580,9 @@ void lk_vm_exit(lk_vm_t *self) {
 }
 void lk_vm_abort(lk_vm_t *self, lk_error_t *error) {
     if(error != NULL) {
-        struct lk_slot *slot = lk_object_getslotfromany(
-        LK_O(error), LK_O(self->str_type));
-        lk_string_t *type = LK_STRING(lk_object_getvaluefromslot(LK_O(error), slot));
+        struct lk_slot *slot = lk_obj_getslotfromany(
+        LK_OBJ(error), LK_OBJ(self->str_type));
+        lk_string_t *type = LK_STRING(lk_obj_getvaluefromslot(LK_OBJ(error), slot));
         /*
         lk_instr_t *expr = error->instr;
         int i = 0;

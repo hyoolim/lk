@@ -4,21 +4,21 @@
 #include "list.h"
 
 /* ext map - types */
-static LK_OBJECT_DEFALLOCFUNC(alloc__gset) {
+static LK_OBJ_DEFALLOCFUNC(alloc__gset) {
     set_copy(SET(self), SET(proto));
 }
-static LK_OBJECT_DEFMARKFUNC(mark__gset) {
-    SET_EACH(SET(self), i, mark(LK_O(i->key)));
+static LK_OBJ_DEFMARKFUNC(mark__gset) {
+    SET_EACH(SET(self), i, mark(LK_OBJ(i->key)));
 }
-static LK_OBJECT_DEFFREEFUNC(free__gset) {
+static LK_OBJ_DEFFREEFUNC(free__gset) {
     set_fin(SET(self));
 }
 LK_EXT_DEFINIT(lk_gset_extinittypes) {
-    vm->t_gset = lk_object_allocwithsize(vm->t_object, sizeof(lk_gset_t));
-    set_init(SET(vm->t_gset), 0, lk_object_hashcode, lk_object_keycmp);
-    lk_object_setallocfunc(vm->t_gset, alloc__gset);
-    lk_object_setmarkfunc(vm->t_gset, mark__gset);
-    lk_object_setfreefunc(vm->t_gset, free__gset);
+    vm->t_gset = lk_obj_allocwithsize(vm->t_obj, sizeof(lk_gset_t));
+    set_init(SET(vm->t_gset), 0, lk_obj_hashcode, lk_obj_keycmp);
+    lk_obj_setallocfunc(vm->t_gset, alloc__gset);
+    lk_obj_setmarkfunc(vm->t_gset, mark__gset);
+    lk_obj_setfreefunc(vm->t_gset, free__gset);
 }
 
 /* ext map - funcs */
@@ -35,7 +35,7 @@ static LK_EXT_DEFCFUNC(keys__gset) {
     RETURN(keys);
 }
 LK_EXT_DEFINIT(lk_gset_extinitfuncs) {
-    lk_object_t *gset = vm->t_gset;
+    lk_obj_t *gset = vm->t_gset;
     lk_ext_global("GenericSet", gset);
     lk_ext_cfunc(gset, "clear!", clearB__gset, NULL);
     lk_ext_cfunc(gset, "count", count__gset, NULL);

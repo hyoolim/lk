@@ -12,23 +12,23 @@
 #define DIRF(self) (LK_FILE(self)->st.dir)
 
 /* ext map - types */
-static LK_OBJECT_DEFMARKFUNC(mark__file) {
-    mark(LK_O(PATH(self)));
+static LK_OBJ_DEFMARKFUNC(mark__file) {
+    mark(LK_OBJ(PATH(self)));
 }
-static LK_OBJECT_DEFFREEFUNC(free__file) {
+static LK_OBJ_DEFFREEFUNC(free__file) {
     /* TODO - account for cases when fclose fails */
     if(FILEF(self) != NULL) fclose(FILEF(self));
 }
 LK_EXT_DEFINIT(lk_file_extinittypes) {
-    vm->t_file = lk_object_allocwithsize(vm->t_object, sizeof(lk_file_t));
-    lk_object_setmarkfunc(vm->t_file, mark__file);
-    lk_object_setfreefunc(vm->t_file, free__file);
-    vm->t_dir = lk_object_alloc(vm->t_file);
-    vm->t_rf = lk_object_alloc(vm->t_file);
-    vm->t_wf = lk_object_alloc(vm->t_file);
-    vm->t_stdin = lk_object_alloc(vm->t_rf);
-    vm->t_stdout = lk_object_alloc(vm->t_wf);
-    vm->t_stderr = lk_object_alloc(vm->t_wf);
+    vm->t_file = lk_obj_allocwithsize(vm->t_obj, sizeof(lk_file_t));
+    lk_obj_setmarkfunc(vm->t_file, mark__file);
+    lk_obj_setfreefunc(vm->t_file, free__file);
+    vm->t_dir = lk_obj_alloc(vm->t_file);
+    vm->t_rf = lk_obj_alloc(vm->t_file);
+    vm->t_wf = lk_obj_alloc(vm->t_file);
+    vm->t_stdin = lk_obj_alloc(vm->t_rf);
+    vm->t_stdout = lk_obj_alloc(vm->t_wf);
+    vm->t_stderr = lk_obj_alloc(vm->t_wf);
 }
 
 /* ext map - funcs */
@@ -112,7 +112,7 @@ static LK_EXT_DEFCFUNC(read__dir) {
             if(errno != 0) lk_vm_raiseerrno(VM);
             RETURN(N);
         } else {
-            lk_object_t *f = lk_object_alloc(VM->t_file);
+            lk_obj_t *f = lk_obj_alloc(VM->t_file);
             list_t *p1, *p2, *fs = LIST(VM->str_filesep);
             PATH(f) = lk_string_newfromlist(VM, LIST(PATH(self)));
             p1 = LIST(PATH(f));
@@ -154,7 +154,7 @@ static LK_EXT_DEFCFUNC(read__rf) {
     if(f == NULL) BUG("ReadableFile->st.file should NEVER be NULL");
     else {
         list_t *c = string_allocfromfile(f);
-        RETURN(c != NULL ? LK_O(lk_string_newfromlist(VM, c)) : N);
+        RETURN(c != NULL ? LK_OBJ(lk_string_newfromlist(VM, c)) : N);
     }
 }
 static LK_EXT_DEFCFUNC(read__rf_ch) {
@@ -162,7 +162,7 @@ static LK_EXT_DEFCFUNC(read__rf_ch) {
     if(f == NULL) BUG("ReadableFile->st.file should NEVER be NULL");
     else {
         list_t *c = string_allocfromfileuntilchar(f, CHAR(ARG(0)));
-        RETURN(c != NULL ? LK_O(lk_string_newfromlist(VM, c)) : N);
+        RETURN(c != NULL ? LK_OBJ(lk_string_newfromlist(VM, c)) : N);
     }
 }
 static LK_EXT_DEFCFUNC(read__rf_cset) {
@@ -170,7 +170,7 @@ static LK_EXT_DEFCFUNC(read__rf_cset) {
     if(f == NULL) BUG("ReadableFile->st.file should NEVER be NULL");
     else {
         list_t *c = string_allocfromfileuntilcset(f, CSET(ARG(0)));
-        RETURN(c != NULL ? LK_O(lk_string_newfromlist(VM, c)) : N);
+        RETURN(c != NULL ? LK_OBJ(lk_string_newfromlist(VM, c)) : N);
     }
 }
 static LK_EXT_DEFCFUNC(read__rf_fi) {
@@ -178,8 +178,8 @@ static LK_EXT_DEFCFUNC(read__rf_fi) {
     if(f == NULL) BUG("ReadableFile->st.file should NEVER be NULL");
     else {
         list_t *c = list_allocfromfile(f, INT(ARG(0)));
-        /* RETURN(c != NULL ? LK_O(lk_buffer_newfromlist(VM, c)) : N); */
-        RETURN(c != NULL ? LK_O(lk_string_newfromlist(VM, c)) : N);
+        /* RETURN(c != NULL ? LK_OBJ(lk_buffer_newfromlist(VM, c)) : N); */
+        RETURN(c != NULL ? LK_OBJ(lk_string_newfromlist(VM, c)) : N);
     }
 }
 /* WritableFile */
@@ -209,7 +209,7 @@ static LK_EXT_DEFCFUNC(write__wf_str) {
     }
 }
 LK_EXT_DEFINIT(lk_file_extinitfuncs) {
-    lk_object_t *file = vm->t_file, *dir = vm->t_dir,
+    lk_obj_t *file = vm->t_file, *dir = vm->t_dir,
                 *rf = vm->t_rf, *wf = vm->t_wf,
                 *str = vm->t_string, *fi = vm->t_fi,
                 *ch = vm->t_char, *cset = vm->t_cset;

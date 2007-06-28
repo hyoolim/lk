@@ -11,17 +11,16 @@
 
 /* type - see further down below for actual def */
 typedef struct lk_vm lk_vm_t;
-typedef struct lk_object lk_object_t;
-#define LK_OBJECT(v) ((lk_object_t *)(v))
-#define LK_O(v) ((lk_object_t *)(v))
+typedef struct lk_obj lk_obj_t;
+#define LK_OBJ(v) ((lk_obj_t *)(v))
 
 /* common data for all lk objs */
-#define LK_OBJECT_DEFALLOCFUNC(name) void name(lk_object_t *self, lk_object_t *proto)
-typedef LK_OBJECT_DEFALLOCFUNC(lk_tagallocfunc_t);
-#define LK_OBJECT_DEFMARKFUNC(name) void name(lk_object_t *self, void (*mark)(lk_object_t *self))
-typedef LK_OBJECT_DEFMARKFUNC(lk_tagmarkfunc_t);
-#define LK_OBJECT_DEFFREEFUNC(name) void name(lk_object_t *self)
-typedef LK_OBJECT_DEFFREEFUNC(lk_tagfreefunc_t);
+#define LK_OBJ_DEFALLOCFUNC(name) void name(lk_obj_t *self, lk_obj_t *proto)
+typedef LK_OBJ_DEFALLOCFUNC(lk_tagallocfunc_t);
+#define LK_OBJ_DEFMARKFUNC(name) void name(lk_obj_t *self, void (*mark)(lk_obj_t *self))
+typedef LK_OBJ_DEFMARKFUNC(lk_tagmarkfunc_t);
+#define LK_OBJ_DEFFREEFUNC(name) void name(lk_obj_t *self)
+typedef LK_OBJ_DEFFREEFUNC(lk_tagfreefunc_t);
 struct lk_tag {
     int                refc;
     lk_vm_t           *vm;
@@ -31,17 +30,17 @@ struct lk_tag {
     lk_tagfreefunc_t  *freefunc;
 };
 struct lk_objgroup {
-    lk_object_t *first;
-    lk_object_t *last;
+    lk_obj_t *first;
+    lk_obj_t *last;
 };
 struct lk_common {
-    lk_object_t            *proto;
+    lk_obj_t            *proto;
     list_t              *ancestors;
     set_t               *slots;
     struct lk_tag          *tag;
     struct lk_mark {
-        lk_object_t        *prev;
-        lk_object_t        *next;
+        lk_obj_t        *prev;
+        lk_obj_t        *next;
         struct lk_objgroup *objgroup;
         uint8_t             isref;
     }                       mark;
@@ -50,13 +49,13 @@ struct lk_common {
 
 /* per-vm globals */
 #define LK_VM_DEFGLOBAL_PROTO(name) \
-    lk_object_t *lk_global_ ## name(lk_vm_t *vm)
+    lk_obj_t *lk_global_ ## name(lk_vm_t *vm)
 #define LK_VM_DEFGLOBAL(name) \
     static list_t *g_ ## name; \
     LK_VM_DEFGLOBAL_PROTO(name) { return list_getptr(g_ ## name, vm->id); } \
     LK_VM_DEFGLOBAL_PROTO(name) /* for ; */
 #define LK_VM_SETGLOBAL(vm, name, v) do { \
-    lk_object_t *g = (v); \
+    lk_obj_t *g = (v); \
     g_ ## name = list_allocptr(); \
     list_setptr(g_ ## name, (vm)->id, g); \
     list_pushptr((vm)->retained, g); \
@@ -73,15 +72,15 @@ typedef LK_EXT_DEFINIT(lk_extinitfunc_t);
 #include "frame.h"
 #include "gc.h"
 #include "instr.h"
-#include "object.h"
+#include "obj.h"
 #include "error.h"
 
 /* todo: figure out a way to move this before req primitives */
-#define LK_EXT_DEFCFUNC(name) void name(lk_object_t *self, lk_frame_t *env)
+#define LK_EXT_DEFCFUNC(name) void name(lk_obj_t *self, lk_frame_t *env)
 typedef LK_EXT_DEFCFUNC(lk_cfuncfunc_t);
 
 /* actual def - add header to above #include's on lk_vm_t change */
-struct lk_object {
+struct lk_obj {
     struct lk_common co;
 };
 struct lk_vm {
@@ -105,27 +104,27 @@ struct lk_vm {
     lk_frame_t *global;
 
     /* freq used primitive types */
-    /* bool     */ lk_object_t *t_unknown, *t_bool, *t_true, *t_false,
+    /* bool     */ lk_obj_t *t_unknown, *t_bool, *t_true, *t_false,
                                *t_pi, *t_ni;
-    /* buffer   */ lk_object_t *t_buffer;
-    /* char     */ lk_object_t *t_char;
-    /* cset     */ lk_object_t *t_cset;
-    /* dict     */ lk_object_t *t_dict;
-    /* error    */ lk_object_t *t_error;
-    /* file     */ lk_object_t *t_file, *t_dir, *t_rf, *t_wf,
+    /* buffer   */ lk_obj_t *t_buffer;
+    /* char     */ lk_obj_t *t_char;
+    /* cset     */ lk_obj_t *t_cset;
+    /* dict     */ lk_obj_t *t_dict;
+    /* error    */ lk_obj_t *t_error;
+    /* file     */ lk_obj_t *t_file, *t_dir, *t_rf, *t_wf,
                                *t_stdin, *t_stdout, *t_stderr;
-    /* vector   */ lk_object_t *t_vector;
-    /* fixnum   */ lk_object_t *t_number, *t_int, *t_fi, *t_real, *t_fr;
-    /* frame    */ lk_object_t *t_frame;
-    /* func     */ lk_object_t *t_func, *t_sig, *t_kfunc, *t_cfunc, *t_gfunc;
-    /* glist    */ lk_object_t *t_glist;
-    /* gset     */ lk_object_t *t_gset;
-    /* instr    */ lk_object_t *t_instr;
-    /* list     */ lk_object_t *t_list;
-    /* object   */ lk_object_t *t_object;
-    /* parser   */ lk_object_t *t_parser, *t_prec;
-    /* string   */ lk_object_t *t_string;
-    /* vm       */ lk_object_t *t_vm;
+    /* vector   */ lk_obj_t *t_vector;
+    /* fixnum   */ lk_obj_t *t_number, *t_int, *t_fi, *t_real, *t_fr;
+    /* frame    */ lk_obj_t *t_frame;
+    /* func     */ lk_obj_t *t_func, *t_sig, *t_kfunc, *t_cfunc, *t_gfunc;
+    /* glist    */ lk_obj_t *t_glist;
+    /* gset     */ lk_obj_t *t_gset;
+    /* instr    */ lk_obj_t *t_instr;
+    /* list     */ lk_obj_t *t_list;
+    /* obj      */ lk_obj_t *t_obj;
+    /* parser   */ lk_obj_t *t_parser, *t_prec;
+    /* string   */ lk_obj_t *t_string;
+    /* vm       */ lk_obj_t *t_vm;
 
     /* freq used strings */
     lk_string_t *str_type;

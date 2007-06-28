@@ -14,7 +14,7 @@ static double genrand_real3(lk_random_t *self);
 static double genrand_res53(lk_random_t *self); */
 
 /* ext map */
-static LK_OBJECT_DEFALLOCFUNC(alloc__rd) {
+static LK_OBJ_DEFALLOCFUNC(alloc__rd) {
     static int n = 0;
     struct timeval tv;
     int seed;
@@ -32,11 +32,11 @@ static LK_EXT_DEFCFUNC(fixed_integer__rd) {
 static LK_EXT_DEFCFUNC(fixed_real__rd) {
     RETURN(lk_fr_new(VM, genrand_real1(RANDOM))); }
 LK_EXT_DEFINIT(lk_random_extinit) {
-    lk_object_t *obj = vm->t_object, *fi = vm->t_fi;
-    lk_object_t *rd = lk_object_allocwithsize(obj, sizeof(lk_random_t));
+    lk_obj_t *obj = vm->t_obj, *fi = vm->t_fi;
+    lk_obj_t *rd = lk_obj_allocwithsize(obj, sizeof(lk_random_t));
     LK_RANDOM(rd)->seed = lk_fi_new(vm, 0);
     init_genrand(LK_RANDOM(rd), 0);
-    lk_object_setallocfunc(rd, alloc__rd);
+    lk_obj_setallocfunc(rd, alloc__rd);
     lk_ext_global("Random", rd);
     lk_ext_cfunc(rd, "init", init__rd_fi, fi, NULL);
     lk_ext_cfunc(rd, "fixed_integer", fixed_integer__rd, NULL);

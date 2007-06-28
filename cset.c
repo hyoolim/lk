@@ -4,17 +4,17 @@
 #include "string.h"
 
 /* ext map - types */
-static LK_OBJECT_DEFALLOCFUNC(alloc__cset) {
+static LK_OBJ_DEFALLOCFUNC(alloc__cset) {
     cset_copy(CSET(self), CSET(proto));
 }
-static LK_OBJECT_DEFFREEFUNC(free__cset) {
+static LK_OBJ_DEFFREEFUNC(free__cset) {
     cset_fin(CSET(self));
 }
 LK_EXT_DEFINIT(lk_cset_extinittypes) {
-    vm->t_cset = lk_object_allocwithsize(vm->t_object, sizeof(lk_cset_t));
+    vm->t_cset = lk_obj_allocwithsize(vm->t_obj, sizeof(lk_cset_t));
     cset_init(CSET(vm->t_cset));
-    lk_object_setallocfunc(vm->t_cset, alloc__cset);
-    lk_object_setfreefunc(vm->t_cset, free__cset);
+    lk_obj_setallocfunc(vm->t_cset, alloc__cset);
+    lk_obj_setfreefunc(vm->t_cset, free__cset);
 }
 
 /* ext map - funcs */
@@ -71,7 +71,7 @@ static LK_EXT_DEFCFUNC(negateB__cset) {
     RETURN(self);
 }
 LK_EXT_DEFINIT(lk_cset_extinitfuncs) {
-    lk_object_t *cset = vm->t_cset, *ch = vm->t_char, *str = vm->t_string;
+    lk_obj_t *cset = vm->t_cset, *ch = vm->t_char, *str = vm->t_string;
     lk_ext_global("CharacterSet", cset);
     lk_ext_cfunc(cset, "add=", addB__cset_cset, cset, NULL);
     lk_ext_cfunc(cset, "add=", addB__cset_str, str, NULL);
@@ -86,5 +86,5 @@ LK_EXT_DEFINIT(lk_cset_extinitfuncs) {
 
 /* new */
 lk_cset_t *lk_cset_new(lk_vm_t *vm) {
-    return LK_CSET(lk_object_alloc(vm->t_cset));
+    return LK_CSET(lk_obj_alloc(vm->t_cset));
 }

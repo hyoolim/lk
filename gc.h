@@ -22,11 +22,11 @@ LK_EXT_DEFINIT(lk_gc_extinitfuncs);
 
 /* update */
 void lk_objgroup_freevalues(struct lk_objgroup *self);
-void lk_objgroup_remove(lk_object_t *v);
-void lk_objgroup_insert(struct lk_objgroup *self, lk_object_t *v);
-void lk_object_markpending(lk_object_t *self);
-void lk_object_markused(lk_object_t *self);
-lk_object_t *lk_object_addref(lk_object_t *self, lk_object_t *v);
+void lk_objgroup_remove(lk_obj_t *v);
+void lk_objgroup_insert(struct lk_objgroup *self, lk_obj_t *v);
+void lk_obj_markpending(lk_obj_t *self);
+void lk_obj_markused(lk_obj_t *self);
+lk_obj_t *lk_obj_addref(lk_obj_t *self, lk_obj_t *v);
 void lk_gc_pause(lk_gc_t *self);
 void lk_gc_resume(lk_gc_t *self);
 void lk_gc_mark(lk_gc_t *self);
@@ -34,7 +34,7 @@ void lk_gc_sweep(lk_gc_t *self);
 
 /* info */
 int lk_objgroup_count(struct lk_objgroup *self);
-struct lk_objgroup *lk_object_objgroup(lk_object_t *self);
+struct lk_objgroup *lk_obj_objgroup(lk_obj_t *self);
 #define LK_GC_ISMARKUNUSED(self, v) ( \
 (v)->co.mark.objgroup == (self)->unused || (v)->co.mark.objgroup == NULL)
 #define LK_GC_ISMARKPENDING(self, v) ( \

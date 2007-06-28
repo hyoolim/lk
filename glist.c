@@ -3,22 +3,22 @@
 #include "fixnum.h"
 
 /* ext map - types */
-static LK_OBJECT_DEFALLOCFUNC(alloc__glist) {
+static LK_OBJ_DEFALLOCFUNC(alloc__glist) {
     list_copy(LIST(self), LIST(proto));
 }
-static LK_OBJECT_DEFFREEFUNC(free__glist) {
+static LK_OBJ_DEFFREEFUNC(free__glist) {
     list_fin(LIST(self));
 }
 LK_EXT_DEFINIT(lk_glist_extinittypes) {
-    vm->t_glist = lk_object_allocwithsize(vm->t_object, sizeof(lk_glist_t));
+    vm->t_glist = lk_obj_allocwithsize(vm->t_obj, sizeof(lk_glist_t));
     list_init(LIST(vm->t_glist), 1, 16);
-    lk_object_setallocfunc(vm->t_glist, alloc__glist);
-    lk_object_setfreefunc(vm->t_glist, free__glist);
+    lk_obj_setallocfunc(vm->t_glist, alloc__glist);
+    lk_obj_setfreefunc(vm->t_glist, free__glist);
 }
 
 /* ext map - funcs */
 static LK_EXT_DEFCFUNC(at__gl_vec) {
-    lk_list_t *ret = LK_LIST(lk_object_clone(self));
+    lk_list_t *ret = LK_LIST(lk_obj_clone(self));
     list_t *sl = LIST(self), *rl = LIST(ret), *indexes = LIST(ARG(0));
     list_limit(rl, LIST_COUNT(indexes));
     LIST_EACH(indexes, i, v,
@@ -60,7 +60,7 @@ static LK_EXT_DEFCFUNC(swapB__gl_fi_fi) {
     RETURN(self);
 }
 LK_EXT_DEFINIT(lk_glist_extinitfuncs) {
-    lk_object_t *gl = vm->t_glist, *fi = vm->t_fi, *vec = vm->t_vector;
+    lk_obj_t *gl = vm->t_glist, *fi = vm->t_fi, *vec = vm->t_vector;
     lk_ext_global("GenericList", gl);
     lk_ext_cfunc(gl, "at", at__gl_vec, vec, NULL);
     lk_ext_cfunc(gl, "chop!", chopB__gl, NULL);

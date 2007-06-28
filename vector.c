@@ -4,7 +4,7 @@
 
 /* ext map - types */
 LK_EXT_DEFINIT(lk_vector_extinittypes) {
-    vm->t_vector = lk_object_alloc(vm->t_glist);
+    vm->t_vector = lk_obj_alloc(vm->t_glist);
     list_fin(LIST(vm->t_vector));
     list_init(LIST(vm->t_vector), sizeof(int), 16);
 }
@@ -12,7 +12,7 @@ LK_EXT_DEFINIT(lk_vector_extinittypes) {
 /* ext map - funcs */
 static LK_EXT_DEFCFUNC(at__vec_fi) {
     int *v = list_get(LIST(self), INT(ARG(0)));
-    RETURN(v != NULL ? LK_O(lk_fi_new(VM, *v)) : N);
+    RETURN(v != NULL ? LK_OBJ(lk_fi_new(VM, *v)) : N);
 }
 #define AT(i) (*(int *)LIST_AT(values, *(int *)LIST_AT(indexes, (i))))
 #define SWAP(x, y) do { \
@@ -34,7 +34,7 @@ static void quicksort_hoare(list_t *values, list_t *indexes, int low, int hi) {
     }
 }
 static LK_EXT_DEFCFUNC(grade__vec) {
-    lk_vector_t *indexes = LK_VECTOR(lk_object_alloc(VM->t_vector));
+    lk_vector_t *indexes = LK_VECTOR(lk_obj_alloc(VM->t_vector));
     list_t *sl = LIST(self), *il = LIST(indexes);
     list_resize(il, LIST_COUNT(sl));
     LIST_EACH(il, i, v, *(int *)v = i);
@@ -49,14 +49,14 @@ static LK_EXT_DEFCFUNC(removeB__vec_fi) {
     int i = INT(ARG(0));
     int *v = list_get(LIST(self), i);
     list_remove(LIST(self), i);
-    RETURN(v != NULL ? LK_O(lk_fi_new(VM, *v)) : N);
+    RETURN(v != NULL ? LK_OBJ(lk_fi_new(VM, *v)) : N);
 }
 static LK_EXT_DEFCFUNC(setB__vec_fi_fi) {
     list_set(LIST(self), INT(ARG(0)), &INT(ARG(1)));
     RETURN(self);
 }
 LK_EXT_DEFINIT(lk_vector_extinitfuncs) {
-    lk_object_t *vec = vm->t_vector, *fi = vm->t_fi;
+    lk_obj_t *vec = vm->t_vector, *fi = vm->t_fi;
     lk_ext_global("Vector", vec);
     lk_ext_cfunc(vec, "at", at__vec_fi, fi, NULL);
     lk_ext_cfunc(vec, "grade", grade__vec, NULL);

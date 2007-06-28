@@ -25,7 +25,7 @@ struct lk_instr {
     lk_string_t      *rsrc;
     int               line;
     int               column;
-    lk_object_t      *v;
+    lk_obj_t      *v;
     lk_string_t      *comment;
     uint8_t           opts;
 };

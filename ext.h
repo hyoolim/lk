@@ -5,7 +5,7 @@
 #include "func.h"
 #include "fixnum.h"
 #include "gc.h"
-#include "object.h"
+#include "obj.h"
 
 /* type */
 typedef struct lk_ext {
@@ -17,10 +17,10 @@ typedef struct lk_ext {
 /* ext shortcuts */
 #define ARG(i) ( \
 assert(env != NULL && 0 <= (i) && (i) < env->argc), \
-LK_O(LIST_ATPTR(&env->stack, (i))))
+LK_OBJ(LIST_ATPTR(&env->stack, (i))))
 #define DONE return
 #define RETURN(v) do { \
-    lk_object_t *_r = LK_O(v); \
+    lk_obj_t *_r = LK_OBJ(v); \
     assert(_r != NULL); \
     lk_frame_stackpush(env->caller, _r); \
     DONE; \
@@ -46,9 +46,9 @@ LK_O(LIST_ATPTR(&env->stack, (i))))
 LK_EXT_DEFINIT(lk_ext_extinit);
 
 /* update */
-void lk_ext_set(lk_object_t *proto, const char *k, lk_object_t *v);
-void lk_ext_global(const char *k, lk_object_t *v);
-void lk_ext_cfield(lk_object_t *self, const char *k, lk_object_t *t,
+void lk_ext_set(lk_obj_t *proto, const char *k, lk_obj_t *v);
+void lk_ext_global(const char *k, lk_obj_t *v);
+void lk_ext_cfield(lk_obj_t *self, const char *k, lk_obj_t *t,
                    size_t offset);
-void lk_ext_cfunc(lk_object_t *obj, const char *k, lk_cfuncfunc_t *func, ...);
+void lk_ext_cfunc(lk_obj_t *obj, const char *k, lk_cfuncfunc_t *func, ...);
 #endif

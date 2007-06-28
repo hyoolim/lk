@@ -21,7 +21,7 @@ glist.c
 gset.c
 instr.c
 list.c
-object.c
+obj.c
 parser.c
 random.c
 socket.c

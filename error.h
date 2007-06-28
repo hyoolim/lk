@@ -23,11 +23,11 @@ LK_EXT_DEFINIT(lk_error_extinittypes);
 LK_EXT_DEFINIT(lk_error_extinitfuncs);
 
 /* new */
-lk_error_t *lk_error_new(lk_vm_t *vm, lk_object_t *proto, const char *text);
+lk_error_t *lk_error_new(lk_vm_t *vm, lk_obj_t *proto, const char *text);
 lk_error_t *lk_error_newc(lk_vm_t *vm);
 lk_error_t *lk_error_newgenericerror(lk_vm_t *vm, const char *text);
 lk_error_t *lk_error_newsyntaxerror(lk_vm_t *vm, const char *text);
-lk_error_t *lk_error_newmessageerror(lk_vm_t *vm, const char *text, lk_string_t *msg, lk_object_t *recv, lk_frame_t *args);
+lk_error_t *lk_error_newmessageerror(lk_vm_t *vm, const char *text, lk_string_t *msg, lk_obj_t *recv, lk_frame_t *args);
 lk_error_t *lk_error_newnameerror(lk_vm_t *vm, const char *text, lk_string_t *name);
-lk_error_t *lk_error_newtypeerror(lk_vm_t *vm, const char *text, lk_object_t *given, lk_object_t *expected);
+lk_error_t *lk_error_newtypeerror(lk_vm_t *vm, const char *text, lk_obj_t *given, lk_obj_t *expected);
 #endif

@@ -3,12 +3,12 @@
 #include "fixnum.h"
 
 /* ext map - types */
-static LK_OBJECT_DEFALLOCFUNC(alloc__ch) {
+static LK_OBJ_DEFALLOCFUNC(alloc__ch) {
     CHAR(self) = CHAR(proto);
 }
 LK_EXT_DEFINIT(lk_char_extinittypes) {
-    vm->t_char = lk_object_allocwithsize(vm->t_object, sizeof(lk_char_t));
-    lk_object_setallocfunc(vm->t_char, alloc__ch);
+    vm->t_char = lk_obj_allocwithsize(vm->t_obj, sizeof(lk_char_t));
+    lk_obj_setallocfunc(vm->t_char, alloc__ch);
 }
 
 /* ext map - funcs */
@@ -33,7 +33,7 @@ static LK_EXT_DEFCFUNC(to_string__ch) {
     RETURN(str);
 }
 LK_EXT_DEFINIT(lk_char_extinitfuncs) {
-    lk_object_t *ch = vm->t_char, *fi = vm->t_fi;
+    lk_obj_t *ch = vm->t_char, *fi = vm->t_fi;
     lk_ext_global("Character", ch);
     lk_ext_cfunc(ch, "add", add__ch_fi, fi, NULL);
     lk_ext_cfunc(ch, "cmp", subtract__ch_ch, ch, NULL);
@@ -44,7 +44,7 @@ LK_EXT_DEFINIT(lk_char_extinitfuncs) {
 
 /* new */
 lk_char_t *lk_char_new(lk_vm_t *vm, uint32_t c) {
-    lk_char_t *self = LK_CHAR(lk_object_alloc(vm->t_char));
+    lk_char_t *self = LK_CHAR(lk_obj_alloc(vm->t_char));
     self->c = c;
     return self;
 }

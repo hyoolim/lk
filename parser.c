@@ -14,18 +14,18 @@ static void setbinaryop(lk_parser_t *self, const char *op, const char *subst) {
 }
 static void setprec(lk_parser_t *self, const char *op, int level, enum lk_precassoc_t assoc) {
     lk_vm_t *vm = LK_VM(self);
-    lk_prec_t *prec = LK_PREC(lk_object_alloc(vm->t_prec));
+    lk_prec_t *prec = LK_PREC(lk_obj_alloc(vm->t_prec));
     prec->level = level;
     prec->assoc = assoc;
     *(lk_prec_t **)set_set(self->precs, lk_string_newfromcstr(vm, op)) = prec;
 }
-static LK_OBJECT_DEFALLOCFUNC(alloc__parser) {
+static LK_OBJ_DEFALLOCFUNC(alloc__parser) {
     PARSER->unaryops = set_alloc(
-    sizeof(lk_prec_t *), lk_object_hashcode, lk_object_keycmp);
+    sizeof(lk_prec_t *), lk_obj_hashcode, lk_obj_keycmp);
     PARSER->binaryops = set_alloc(
-    sizeof(lk_prec_t *), lk_object_hashcode, lk_object_keycmp);
+    sizeof(lk_prec_t *), lk_obj_hashcode, lk_obj_keycmp);
     PARSER->precs = set_alloc(
-    sizeof(lk_prec_t *), lk_object_hashcode, lk_object_keycmp);
+    sizeof(lk_prec_t *), lk_obj_hashcode, lk_obj_keycmp);
     PARSER->tokentypes = list_allocptr();
     PARSER->tokenvalues = list_allocptr();
     PARSER->words = list_allocptr();
@@ -103,24 +103,24 @@ static LK_OBJECT_DEFALLOCFUNC(alloc__parser) {
     setprec(PARSER, "!!",   19999, LK_PREC_ASSOC_RIGHT);
     setprec(PARSER, "->",  -10000, LK_PREC_ASSOC_LEFT); /* misc - low prec */
 }
-static LK_OBJECT_DEFMARKFUNC(mark__parser) {
-    mark(LK_O(PARSER->text));
+static LK_OBJ_DEFMARKFUNC(mark__parser) {
+    mark(LK_OBJ(PARSER->text));
     if(PARSER->tokenvalues != NULL
     ) LIST_EACHPTR(PARSER->tokenvalues, i, v, mark(v));
     if(PARSER->unaryops != NULL) SET_EACH(PARSER->unaryops, item,
-        mark(LK_O(item->key));
-        mark(SETITEM_VALUE(lk_object_t *, item));
+        mark(LK_OBJ(item->key));
+        mark(SETITEM_VALUE(lk_obj_t *, item));
     );
     if(PARSER->binaryops != NULL) SET_EACH(PARSER->binaryops, item,
-        mark(LK_O(item->key));
-        mark(SETITEM_VALUE(lk_object_t *, item));
+        mark(LK_OBJ(item->key));
+        mark(SETITEM_VALUE(lk_obj_t *, item));
     );
     if(PARSER->precs != NULL) SET_EACH(PARSER->precs, item,
-        mark(LK_O(item->key));
-        mark(SETITEM_VALUE(lk_object_t *, item));
+        mark(LK_OBJ(item->key));
+        mark(SETITEM_VALUE(lk_obj_t *, item));
     );
 }
-static LK_OBJECT_DEFFREEFUNC(free__parser) {
+static LK_OBJ_DEFFREEFUNC(free__parser) {
     if(PARSER->precs != NULL) set_free(PARSER->precs);
     if(PARSER->tokentypes != NULL) list_free(PARSER->tokentypes);
     if(PARSER->tokenvalues != NULL) list_free(PARSER->tokenvalues);
@@ -128,12 +128,12 @@ static LK_OBJECT_DEFFREEFUNC(free__parser) {
     if(PARSER->ops != NULL) list_free(PARSER->ops);
 }
 LK_EXT_DEFINIT(lk_parser_extinittypes) {
-    lk_object_t *obj = vm->t_object;
-    vm->t_prec = lk_object_allocwithsize(obj, sizeof(lk_prec_t));
-    vm->t_parser = lk_object_allocwithsize(obj, sizeof(lk_parser_t));
-    lk_object_setallocfunc(vm->t_parser, alloc__parser);
-    lk_object_setmarkfunc(vm->t_parser, mark__parser);
-    lk_object_setfreefunc(vm->t_parser, free__parser);
+    lk_obj_t *obj = vm->t_obj;
+    vm->t_prec = lk_obj_allocwithsize(obj, sizeof(lk_prec_t));
+    vm->t_parser = lk_obj_allocwithsize(obj, sizeof(lk_parser_t));
+    lk_obj_setallocfunc(vm->t_parser, alloc__parser);
+    lk_obj_setmarkfunc(vm->t_parser, mark__parser);
+    lk_obj_setfreefunc(vm->t_parser, free__parser);
 }
 
 /* ext map - funcs */
@@ -144,7 +144,7 @@ LK_EXT_DEFINIT(lk_parser_extinitfuncs) {
 
 /* new */
 lk_parser_t *lk_parser_new(lk_vm_t *vm) {
-    return LK_PARSER(lk_object_alloc(vm->t_parser));
+    return LK_PARSER(lk_obj_alloc(vm->t_parser));
 }
 
 /* eval */
@@ -246,7 +246,7 @@ static lk_prec_t *shiftreduce(lk_parser_t *self, lk_instr_t *op) {
             lk_instr_t *arg = list_popptr(self->words);
             lk_instr_t *last = list_peekptr(self->words);
             list_popptr(self->ops);
-            top->v = LK_O(getbinaryop(self, LK_STRING(top->v)));
+            top->v = LK_OBJ(getbinaryop(self, LK_STRING(top->v)));
             topstr = LIST(top->v);
             /* rec / arg -> rec /arg */
             if((arg->type == LK_INSTRTYPE_FRAMEMSG
@@ -468,14 +468,14 @@ static void readtoken(lk_parser_t *self) {
     || (type = readtoken_op(self))      != NONE
     || (type = readtoken_string(self))  != NONE
     || (type = readtoken_number(self))  != NONE) {
-        lk_string_t *tok = LK_STRING(lk_object_clone(LK_O(self->text)));
+        lk_string_t *tok = LK_STRING(lk_obj_clone(LK_OBJ(self->text)));
         list_slice(LIST(tok), lastpos, self->textpos - lastpos);
         if(type == OP
         &&(list_cmpcstr(LIST(tok), "---") == 0
         || list_cmpcstr(LIST(tok), "|") == 0)) type = FUNC_SEP;
         list_pushptr(self->tokentypes, (void *)type);
         list_pushptr(self->tokenvalues, tok);
-        lk_object_addref(LK_O(self), LK_O(tok));
+        lk_obj_addref(LK_OBJ(self), LK_OBJ(tok));
     }
 }
 static lk_string_t *getnexttoken(lk_parser_t *self, tokentype_t type) {
@@ -500,13 +500,13 @@ static READFUNC(readpad) {
     return 0;
 }
 
-/* expr - object /message[arguments...] +argument ... */
-static READFUNC(readobject);
+/* expr - obj /message[arguments...] +argument ... */
+static READFUNC(readobj);
 static READFUNC(readmessage);
 static READFUNC(readexpr) {
     int old_opcount = self->opcount;
     self->opcount = LIST_COUNT(self->ops);
-    if(readobject(self)) {
+    if(readobj(self)) {
         lk_instr_t *last;
         while(1) if(!readmessage(self)) break;
         shiftreduce(self, NULL);
@@ -554,7 +554,7 @@ static READFUNC(readlist) {
     else {
         lk_instr_t *list = lk_instr_new(self);
         list->type = LK_INSTRTYPE_LIST;
-        list->v = LK_O(getexprs(self));
+        list->v = LK_OBJ(getexprs(self));
         list_pushptr(self->words, list);
         if(getnexttoken(self, LIST_END) != NULL) return 1;
         else lk_vm_raisecstr(VM, "Cannot find ] to close list");
@@ -605,7 +605,7 @@ static READFUNC(readop) {
     else {
         lk_instr_t *op = lk_instr_newmessage(self, tok);
         shiftreduce(self, op);
-        if(!readobject(self)) {
+        if(!readobj(self)) {
             lk_vm_raisecstr(VM, "Cannot find expression after binary operator");
         } else {
             SETOPT(op->opts, LK_INSTROHASMSGARGS);
@@ -632,7 +632,7 @@ static READFUNC(readunaryop) {
     /* + receiver */
     lk_string_t *tok = getnexttoken(self, OP);
     if(tok == NULL) return 0;
-    if(!readobject(self)) {
+    if(!readobj(self)) {
         lk_vm_raisecstr(VM, "Cannot find expression after unary operator");
     } else {
         lk_instr_t *arg = list_peekptr(self->words);
@@ -686,7 +686,7 @@ static READFUNC(readstring) {
         return 1;
     }
 }
-static READFUNC(readobject) {
+static READFUNC(readobj) {
     while(readpad(self)) { }
     self->isterminated = 0;
     if(readchar(self)
@@ -782,7 +782,7 @@ static lk_instr_t *applymacros(lk_parser_t *self, lk_instr_t *it) {
             LK_KFUNC(it->v)->first = applymacros(self, LK_KFUNC(it->v)->first);
         } else if(it->type == LK_INSTRTYPE_APPLY
                || it->type == LK_INSTRTYPE_LIST) {
-            it->v = LK_O(applymacros(self, LK_INSTR(it->v)));
+            it->v = LK_OBJ(applymacros(self, LK_INSTR(it->v)));
             /*
         } else if(it->type == LK_INSTRTYPE_FRAMEMSG
                && list_cmpcstr(LIST(it->v), ".") == 0) {
@@ -808,13 +808,13 @@ static lk_instr_t *applymacros(lk_parser_t *self, lk_instr_t *it) {
                 else first = it;
                 name->type = LK_INSTRTYPE_STRING;
                 (name->next = LK_INSTR(args->v))->prev = name;
-                args->v = LK_O(name);
+                args->v = LK_OBJ(name);
                 /* var[] /: @[Object ] /= @[1 ] -> := @['var' Object 1 ] */
                 if(nextop != NULL
                 && nextop->type == LK_INSTRTYPE_APPLYMSG
                 && list_cmpcstr(LIST(nextop->v), "assign!") == 0) {
                     lk_instr_t *a, *nextargs = nextop->next;
-                    it->v = LK_O(lk_string_newfromcstr(
+                    it->v = LK_OBJ(lk_string_newfromcstr(
                     LK_VM(it), "define="));
                     (it->next = nextargs)->prev = it;
                     a = LK_INSTR(args->v);
@@ -828,7 +828,7 @@ static lk_instr_t *applymacros(lk_parser_t *self, lk_instr_t *it) {
                 name = name->prev;
                 name->opts &= ~LK_INSTROHASMSGARGS;
                 (name->next = it)->prev = name;
-                it->v = LK_O(lk_string_newfromcstr(LK_VM(it), "set!"));
+                it->v = LK_OBJ(lk_string_newfromcstr(LK_VM(it), "set!"));
                 a = LK_INSTR(atargs->v);
                 while(a->next != NULL) a = a->next;
                 (a->next = LK_INSTR(args->v))->prev = a;
@@ -852,7 +852,7 @@ static lk_instr_t *applymacros(lk_parser_t *self, lk_instr_t *it) {
                         b = lk_instr_newfunc(self, b);
                     }
                     (a->next = b)->prev = a;
-                    args->v = LK_O(a);
+                    args->v = LK_OBJ(a);
                 }
             }
         }

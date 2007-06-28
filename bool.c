@@ -3,10 +3,10 @@
 
 /* ext map - types */
 LK_EXT_DEFINIT(lk_bool_extinittypes) {
-    vm->t_unknown = lk_object_alloc(vm->t_object);
-    vm->t_bool = lk_object_alloc(vm->t_object);
-    vm->t_true = lk_object_alloc(vm->t_bool);
-    vm->t_false = lk_object_alloc(vm->t_bool);
+    vm->t_unknown = lk_obj_alloc(vm->t_obj);
+    vm->t_bool = lk_obj_alloc(vm->t_obj);
+    vm->t_true = lk_obj_alloc(vm->t_bool);
+    vm->t_false = lk_obj_alloc(vm->t_bool);
 }
 
 /* ext map - funcs */

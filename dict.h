@@ -16,10 +16,10 @@ lk_dict_t *lk_dict_new(lk_vm_t *vm);
 lk_dict_t *lk_dict_newfrompt(lk_vm_t *vm, set_t *ht);
 
 /* update */
-void lk_dict_set(lk_dict_t *self, lk_object_t *k, lk_object_t *v);
-void lk_dict_setbycstr(lk_dict_t *self, const char *k, lk_object_t *v);
+void lk_dict_set(lk_dict_t *self, lk_obj_t *k, lk_obj_t *v);
+void lk_dict_setbycstr(lk_dict_t *self, const char *k, lk_obj_t *v);
 
 /* info */
-lk_object_t *lk_dict_get(lk_dict_t *self, lk_object_t *k);
-lk_object_t *lk_dict_getbycstr(lk_dict_t *self, const char *k);
+lk_obj_t *lk_dict_get(lk_dict_t *self, lk_obj_t *k);
+lk_obj_t *lk_dict_getbycstr(lk_dict_t *self, const char *k);
 #endif

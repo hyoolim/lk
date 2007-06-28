@@ -12,7 +12,7 @@ typedef struct lk_socket lk_socket_t;
 #include <netinet/in.h>
 #include <arpa/inet.h>
 struct lk_socket {
-    struct lk_common  co;
+    struct lk_common  obj;
     lk_string_t      *path;
     lk_string_t      *mode;
     int               fd;
@@ -20,7 +20,7 @@ struct lk_socket {
     FILE             *out;
 };
 struct lk_ipaddr {
-    struct lk_common co;
+    struct lk_common obj;
     struct in_addr   addr;
 };
 #define LK_IPADDR(v) ((lk_ipaddr_t *)(v))

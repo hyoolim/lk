@@ -57,17 +57,17 @@ static LK_EXT_DEFCFUNC(move__file_str) {
 }
 static LK_EXT_DEFCFUNC(open__dir);
 static LK_EXT_DEFCFUNC(open_d__file) {
-    self->co.proto = VM->t_dir;
+    self->obj.proto = VM->t_dir;
     GOTO(open__dir);
 }
 static LK_EXT_DEFCFUNC(open__rf);
 static LK_EXT_DEFCFUNC(open_r__file) {
-    self->co.proto = VM->t_rf;
+    self->obj.proto = VM->t_rf;
     GOTO(open__rf);
 }
 static LK_EXT_DEFCFUNC(open__wf);
 static LK_EXT_DEFCFUNC(open_w__file) {
-    self->co.proto = VM->t_wf;
+    self->obj.proto = VM->t_wf;
     GOTO(open__wf);
 }
 static LK_EXT_DEFCFUNC(readableQ__file) {
@@ -89,7 +89,7 @@ static LK_EXT_DEFCFUNC(close__dir) {
         if(closedir(DIRF(self)) == 0) DIRF(self) = NULL;
         else lk_vm_raiseerrno(VM);
     }
-    self->co.proto = VM->t_file;
+    self->obj.proto = VM->t_file;
     RETURN(self);
 }
 static LK_EXT_DEFCFUNC(init__dir_str) {
@@ -134,7 +134,7 @@ static LK_EXT_DEFCFUNC(close__rwf) {
         if(fclose(FILEF(self)) == 0) FILEF(self) = NULL;
         else lk_vm_raiseerrno(VM);
     }
-    self->co.proto = VM->t_file;
+    self->obj.proto = VM->t_file;
     RETURN(self);
 }
 /* ReadableFile */

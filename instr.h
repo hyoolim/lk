@@ -6,7 +6,7 @@ typedef struct lk_instr lk_instr_t;
 #include "vm.h"
 #include "parser.h"
 struct lk_instr {
-    struct lk_common  co;
+    struct lk_common  obj;
     enum lk_instrtype_t {
         LK_INSTRTYPE_FUNC = 1,
         LK_INSTRTYPE_APPLY,

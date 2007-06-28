@@ -56,7 +56,7 @@ static LK_EXT_DEFCFUNC(fork__vm_f) {
         fr->receiver = fr->self = self;
         fr->func = LK_OBJ(kf);
         fr->returnto = NULL;
-        fr->co.proto = LK_OBJ(kf->frame);
+        fr->obj.proto = LK_OBJ(kf->frame);
         lk_vm_doevalfunc(VM);
         lk_vm_exit(VM);
         DONE;
@@ -300,10 +300,10 @@ lk_frame_t *lk_vm_evalstring(lk_vm_t *self, const char *code) {
 lk_frame_t *lk_vm_prepevalfunc(lk_vm_t *vm) {
     lk_frame_t *prev = vm->currframe;
     lk_frame_t *self;
-    if(prev->child != NULL && prev->child->co.mark.isref == 0) {
+    if(prev->child != NULL && prev->child->obj.mark.isref == 0) {
         self = prev->child;
-        self->co.proto = LK_OBJ(prev);
-        if(self->co.slots != NULL) set_clear(self->co.slots);
+        self->obj.proto = LK_OBJ(prev);
+        if(self->obj.slots != NULL) set_clear(self->obj.slots);
         list_clear(&self->stack);
         /* stat */ vm->cnt_recycledframe ++;
     } else {
@@ -325,7 +325,7 @@ lk_frame_t *lk_vm_prepevalfunc(lk_vm_t *vm) {
         LK_CFUNC(func)->func((args)->receiver, (args)); \
         vm->currframe = (self); \
     } else { \
-        (args)->co.proto = LK_OBJ(LK_KFUNC(func)->frame); \
+        (args)->obj.proto = LK_OBJ(LK_KFUNC(func)->frame); \
         (args)->self = LK_OBJ_ISFRAME((args)->receiver) \
         ? LK_KFUNC(func)->frame->self : (args)->receiver; \
         (args)->first = (args)->next = LK_KFUNC(func)->first; \
@@ -360,7 +360,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         args = lk_vm_prepevalfunc(vm);
         lk_frame_stackpush(args, LK_OBJ(vm->lasterror));
         for(; recv != NULL; recv = LK_OBJ(LK_FRAME(recv)->returnto)) {
-            if((slots = recv->co.slots) == NULL) continue;
+            if((slots = recv->obj.slots) == NULL) continue;
             if((si = set_get(slots, vm->str_rescue)) == NULL) continue;
             slot = LK_SLOT(SETITEM_VALUEPTR(si));
             slotv = lk_obj_getvaluefromslot(recv, slot);
@@ -475,7 +475,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         }
         ancs = NULL;
         findslot:
-        if((slots = r->co.slots) == NULL) goto proto;
+        if((slots = r->obj.slots) == NULL) goto proto;
         if((si = set_get(slots, msgn)) == NULL) goto proto;
         found:
         slot = LK_SLOT(SETITEM_VALUEPTR(si));
@@ -516,16 +516,16 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
             goto nextinstr;
         }
         proto:
-        if((ancs = r->co.ancestors) != NULL) {
+        if((ancs = r->obj.ancestors) != NULL) {
             ancc = LIST_COUNT(ancs);
             for(anci = 1; anci < ancc; anci ++) {
                 r = LIST_ATPTR(ancs, anci);
-                if((slots = r->co.slots) == NULL) continue;
+                if((slots = r->obj.slots) == NULL) continue;
                 if((si = set_get(slots, msg->v)) == NULL) continue;
                 goto found;
             }
         } else {
-            r = r->co.proto;
+            r = r->obj.proto;
             goto findslot;
         }
         /* forward: */

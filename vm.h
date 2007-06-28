@@ -45,7 +45,7 @@ struct lk_common {
         uint8_t             isref;
     }                       mark;
 };
-#define LK_VM(v) ((v)->co.tag->vm)
+#define LK_VM(v) ((v)->obj.tag->vm)
 
 /* per-vm globals */
 #define LK_VM_DEFGLOBAL_PROTO(name) \
@@ -81,7 +81,7 @@ typedef LK_EXT_DEFCFUNC(lk_cfuncfunc_t);
 
 /* actual def - add header to above #include's on lk_vm_t change */
 struct lk_obj {
-    struct lk_common co;
+    struct lk_common obj;
 };
 struct lk_vm {
     int id;

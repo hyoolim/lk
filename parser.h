@@ -7,7 +7,7 @@ typedef struct lk_prec lk_prec_t;
 #include "vm.h"
 #include "instr.h"
 struct lk_parser {
-    struct lk_common   co;
+    struct lk_common   obj;
     const lk_string_t *text;
     const char        *error;
     set_t          *unaryops;
@@ -26,7 +26,7 @@ struct lk_parser {
 };
 #define LK_PARSER(v) ((lk_parser_t *)(v))
 struct lk_prec {
-    struct lk_common co;
+    struct lk_common obj;
     int              level;
     enum lk_precassoc_t {
         LK_PREC_ASSOC_LEFT = 1,

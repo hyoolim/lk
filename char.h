@@ -5,7 +5,7 @@
 typedef struct lk_char lk_char_t;
 #include "vm.h"
 struct lk_char {
-    struct lk_common co;
+    struct lk_common obj;
     uint32_t         c;
 };
 #define LK_CHAR(v) ((lk_char_t *)(v))

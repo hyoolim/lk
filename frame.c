@@ -67,10 +67,10 @@ static LK_EXT_DEFCFUNC(include__fra_str_str) {
     lk_frame_t *fr = lk_vm_evalfile(VM,
     list_tocstr(LIST(ARG(0))), list_tocstr(LIST(ARG(1))));
     if(fr != NULL) {
-        set_t *from = fr->co.slots;
+        set_t *from = fr->obj.slots;
         if(from != NULL) {
-            set_t *to = self->co.slots;
-            if(to == NULL) to = self->co.slots = set_alloc(
+            set_t *to = self->obj.slots;
+            if(to == NULL) to = self->obj.slots = set_alloc(
             sizeof(struct lk_slot), lk_obj_hashcode, lk_obj_keycmp);
             SET_EACH(from, i,
                 *LK_SLOT(set_set(to, i->key)) = *LK_SLOT(SETITEM_VALUEPTR(i));

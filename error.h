@@ -8,7 +8,7 @@ typedef struct lk_error lk_error_t;
 #include "file.h"
 #include "string.h"
 struct lk_error {
-    struct lk_common  co;
+    struct lk_common  obj;
     lk_instr_t       *instr;
     lk_string_t      *text;
 };

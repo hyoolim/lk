@@ -5,7 +5,7 @@
 typedef struct lk_env lk_env_t;
 #include "vm.h"
 struct lk_env {
-    struct lk_common co;
+    struct lk_common obj;
 };
 #define LK_ENV(v) ((lk_env_t *)(v))
 

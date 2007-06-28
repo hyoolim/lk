@@ -9,7 +9,7 @@
 
 /* type */
 typedef struct lk_ext {
-    struct lk_common  co;
+    struct lk_common  obj;
     void             *lib;
 } lk_ext_t;
 #define LK_EXT(v) ((lk_ext_t *)(v))

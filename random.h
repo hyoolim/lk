@@ -6,7 +6,7 @@
 /* type */
 #define LK_RANDOM_N 624
 typedef struct lk_random {
-    struct lk_common  co;
+    struct lk_common  obj;
     lk_fi_t          *seed;
     int               mti;
     unsigned long     mt[LK_RANDOM_N];

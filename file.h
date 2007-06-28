@@ -9,7 +9,7 @@ typedef struct lk_file lk_file_t;
 #include <sys/stat.h>
 #include <dirent.h>
 struct lk_file {
-    struct lk_common  co;
+    struct lk_common  obj;
     lk_string_t      *path;
     union {
         FILE         *file;

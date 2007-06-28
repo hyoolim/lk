@@ -34,26 +34,26 @@ LK_EXT_DEFINIT(lk_gc_extinitfuncs) {
 void lk_objgroup_freevalues(struct lk_objgroup *self) {
     lk_obj_t *c = self->first, *n;
     for(; c != NULL; c = n) {
-        n = c->co.mark.next;
+        n = c->obj.mark.next;
         lk_obj_justfree(c);
     }
 }
 void lk_objgroup_remove(lk_obj_t *v) {
-    struct lk_objgroup *from = v->co.mark.objgroup;
-    lk_obj_t *p = v->co.mark.prev, *n = v->co.mark.next;
-    if(p != NULL) p->co.mark.next = n;
-    if(n != NULL) n->co.mark.prev = p;
+    struct lk_objgroup *from = v->obj.mark.objgroup;
+    lk_obj_t *p = v->obj.mark.prev, *n = v->obj.mark.next;
+    if(p != NULL) p->obj.mark.next = n;
+    if(n != NULL) n->obj.mark.prev = p;
     if(from != NULL) {
         if(from->first == v) from->first = n;
         if(from->last == v) from->last = p;
     }
 }
 void lk_objgroup_insert(struct lk_objgroup *self, lk_obj_t *v) {
-    v->co.mark.prev = self->last;
-    v->co.mark.next = NULL;
-    v->co.mark.objgroup = self;
+    v->obj.mark.prev = self->last;
+    v->obj.mark.next = NULL;
+    v->obj.mark.objgroup = self;
     if(self->first == NULL) self->first = v;
-    else (self->last->co.mark.next = v)->co.mark.prev = self->last;
+    else (self->last->obj.mark.next = v)->obj.mark.prev = self->last;
     self->last = v;
 }
 void lk_obj_markpending(lk_obj_t *self) {
@@ -76,26 +76,26 @@ void lk_obj_markused(lk_obj_t *self) {
                 lk_obj_markpending(LK_OBJ(v));
             );
         } else {
-            if(self->co.proto != NULL) lk_obj_markpending(self->co.proto);
+            if(self->obj.proto != NULL) lk_obj_markpending(self->obj.proto);
         }
-        if(self->co.slots != NULL) {
+        if(self->obj.slots != NULL) {
             struct lk_slot *slot;
-            SET_EACH(self->co.slots, item,
+            SET_EACH(self->obj.slots, item,
                 lk_obj_markpending(LK_OBJ(item->key));
                 slot = LK_SLOT(SETITEM_VALUEPTR(item));
                 lk_obj_markpending(slot->check);
                 lk_obj_markpending(lk_obj_getvaluefromslot(self, slot));
             );
         }
-        if(self->co.tag->markfunc != NULL) {
-            self->co.tag->markfunc(self, gc_markpendingifunused);
+        if(self->obj.tag->markfunc != NULL) {
+            self->obj.tag->markfunc(self, gc_markpendingifunused);
         }
     }
 }
 lk_obj_t *lk_obj_addref(lk_obj_t *self, lk_obj_t *v) {
     lk_gc_t *gc = LK_VM(self)->gc;
     if(LK_GC_ISMARKUSED(gc, self)) lk_obj_markpending(v);
-    v->co.mark.isref = 1;
+    v->obj.mark.isref = 1;
     return v;
 }
 void lk_gc_pause(lk_gc_t *self) {
@@ -149,6 +149,6 @@ void lk_gc_sweep(lk_gc_t *self) {
 int lk_objgroup_count(struct lk_objgroup *self) {
     int c = 0;
     lk_obj_t *i;
-    for(i = self->first; i != NULL; i = i->co.mark.next) c ++;
+    for(i = self->first; i != NULL; i = i->obj.mark.next) c ++;
     return c;
 }

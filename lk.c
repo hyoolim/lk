@@ -15,5 +15,6 @@ int main(int argc, const char **argv) {
     lk_gc_resume(vm->gc);
     lk_vm_evalfile(vm, i, "");
     lk_vm_free(vm);
+    memory_freerecycled();
     return EXIT_SUCCESS;
 }

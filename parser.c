@@ -20,12 +20,9 @@ static void setprec(lk_parser_t *self, const char *op, int level, enum lk_precas
     *(lk_prec_t **)set_set(self->precs, lk_string_newfromcstr(vm, op)) = prec;
 }
 static LK_OBJ_DEFALLOCFUNC(alloc__parser) {
-    PARSER->unaryops = set_alloc(
-    sizeof(lk_prec_t *), lk_obj_hashcode, lk_obj_keycmp);
-    PARSER->binaryops = set_alloc(
-    sizeof(lk_prec_t *), lk_obj_hashcode, lk_obj_keycmp);
-    PARSER->precs = set_alloc(
-    sizeof(lk_prec_t *), lk_obj_hashcode, lk_obj_keycmp);
+    PARSER->unaryops = set_alloc(sizeof(lk_prec_t *), lk_obj_hashcode, lk_obj_keycmp);
+    PARSER->binaryops = set_alloc(sizeof(lk_prec_t *), lk_obj_hashcode, lk_obj_keycmp);
+    PARSER->precs = set_alloc(sizeof(lk_prec_t *), lk_obj_hashcode, lk_obj_keycmp);
     PARSER->tokentypes = list_allocptr();
     PARSER->tokenvalues = list_allocptr();
     PARSER->words = list_allocptr();
@@ -105,27 +102,46 @@ static LK_OBJ_DEFALLOCFUNC(alloc__parser) {
 }
 static LK_OBJ_DEFMARKFUNC(mark__parser) {
     mark(LK_OBJ(PARSER->text));
-    if(PARSER->tokenvalues != NULL
-    ) LIST_EACHPTR(PARSER->tokenvalues, i, v, mark(v));
-    if(PARSER->unaryops != NULL) SET_EACH(PARSER->unaryops, item,
-        mark(LK_OBJ(item->key));
-        mark(SETITEM_VALUE(lk_obj_t *, item));
-    );
-    if(PARSER->binaryops != NULL) SET_EACH(PARSER->binaryops, item,
-        mark(LK_OBJ(item->key));
-        mark(SETITEM_VALUE(lk_obj_t *, item));
-    );
-    if(PARSER->precs != NULL) SET_EACH(PARSER->precs, item,
-        mark(LK_OBJ(item->key));
-        mark(SETITEM_VALUE(lk_obj_t *, item));
-    );
+    if(PARSER->unaryops != NULL) {
+        SET_EACH(PARSER->unaryops, item,
+            mark(LK_OBJ(item->key));
+            mark(SETITEM_VALUE(lk_obj_t *, item));
+        );
+    }
+    if(PARSER->binaryops != NULL) {
+        SET_EACH(PARSER->binaryops, item,
+            mark(LK_OBJ(item->key));
+            mark(SETITEM_VALUE(lk_obj_t *, item));
+        );
+    }
+    if(PARSER->precs != NULL) {
+        SET_EACH(PARSER->precs, item,
+            mark(LK_OBJ(item->key));
+            mark(SETITEM_VALUE(lk_obj_t *, item));
+        );
+    }
+    if(PARSER->tokenvalues != NULL) {
+        LIST_EACHPTR(PARSER->tokenvalues, i, v, mark(v));
+    }
+    if(PARSER->words != NULL) {
+        LIST_EACHPTR(PARSER->words, i, v, mark(v));
+    }
+    if(PARSER->ops != NULL) {
+        LIST_EACHPTR(PARSER->ops, i, v, mark(v));
+    }
+    if(PARSER->comments != NULL) {
+        LIST_EACHPTR(PARSER->comments, i, v, mark(v));
+    }
 }
 static LK_OBJ_DEFFREEFUNC(free__parser) {
+    if(PARSER->unaryops != NULL) set_free(PARSER->unaryops);
+    if(PARSER->binaryops != NULL) set_free(PARSER->binaryops);
     if(PARSER->precs != NULL) set_free(PARSER->precs);
     if(PARSER->tokentypes != NULL) list_free(PARSER->tokentypes);
     if(PARSER->tokenvalues != NULL) list_free(PARSER->tokenvalues);
     if(PARSER->words != NULL) list_free(PARSER->words);
     if(PARSER->ops != NULL) list_free(PARSER->ops);
+    if(PARSER->comments != NULL) list_free(PARSER->comments);
 }
 LK_EXT_DEFINIT(lk_parser_extinittypes) {
     lk_obj_t *obj = vm->t_obj;

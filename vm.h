@@ -47,22 +47,6 @@ struct lk_common {
 };
 #define LK_VM(v) ((v)->obj.tag->vm)
 
-/* per-vm globals */
-#define LK_VM_DEFGLOBAL_PROTO(name) \
-    lk_obj_t *lk_global_ ## name(lk_vm_t *vm)
-#define LK_VM_DEFGLOBAL(name) \
-    static list_t *g_ ## name; \
-    LK_VM_DEFGLOBAL_PROTO(name) { return list_getptr(g_ ## name, vm->id); } \
-    LK_VM_DEFGLOBAL_PROTO(name) /* for ; */
-#define LK_VM_SETGLOBAL(vm, name, v) do { \
-    lk_obj_t *g = (v); \
-    g_ ## name = list_allocptr(); \
-    list_setptr(g_ ## name, (vm)->id, g); \
-    list_pushptr((vm)->retained, g); \
-    } while(0)
-#define LK_VM_GETGLOBAL(vm, name) \
-    (lk_global_ ## name(vm))
-
 /* used by ext - can't be in ext.h due to bootstrapping issues */
 #define LK_EXT_DEFINIT(name) void name(lk_vm_t *vm)
 typedef LK_EXT_DEFINIT(lk_extinitfunc_t);
@@ -84,9 +68,6 @@ struct lk_obj {
     struct lk_common obj;
 };
 struct lk_vm {
-    int id;
-    list_t *retained;
-    set_t *symbols;
     struct lk_rsrcchain {
         uint8_t              isstring;
         lk_string_t         *rsrc;
@@ -123,6 +104,7 @@ struct lk_vm {
     /* list     */ lk_obj_t *t_list;
     /* obj      */ lk_obj_t *t_obj;
     /* parser   */ lk_obj_t *t_parser, *t_prec;
+    /* socket   */ lk_obj_t *t_socket;
     /* string   */ lk_obj_t *t_string;
     /* vm       */ lk_obj_t *t_vm;
 
@@ -146,7 +128,6 @@ LK_EXT_DEFINIT(lk_vm_extinitfuncs);
 
 /* new */
 lk_vm_t *lk_vm_new(void);
-lk_vm_t *lk_vm_newwithid(int id);
 void lk_vm_free(lk_vm_t *self);
 
 /* eval */

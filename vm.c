@@ -134,14 +134,7 @@ LK_EXT_DEFINIT(lk_vm_extinitfuncs) {
 
 /* new */
 lk_vm_t *lk_vm_new(void) {
-    static int vm_id = 0;
-    return lk_vm_newwithid(vm_id ++);
-}
-lk_vm_t *lk_vm_newwithid(int id) {
     lk_vm_t *self = memory_alloc(sizeof(lk_vm_t));
-    self->id = id;
-    self->retained = list_allocptr();
-    self->symbols = set_alloc(0, lk_obj_hashcode, lk_obj_keycmp);
 
     /* must be loaded before other primitive types */
     lk_obj_extinittypes(self);
@@ -170,18 +163,12 @@ lk_vm_t *lk_vm_newwithid(int id) {
     /* init rest of the fields in vm */
     self->global = LK_FRAME(lk_obj_alloc(self->t_frame));
     self->currframe = self->global;
-    self->str_type = lk_string_newfromcstr(self, ".CLASS");
-    self->str_forward = lk_string_newfromcstr(self, ".forward");
-    self->str_rescue = lk_string_newfromcstr(self, ".rescue");
-    self->str_onassign = lk_string_newfromcstr(self, ".on_assign");
-    self->str_at = lk_string_newfromcstr(self, "at");
-    self->str_filesep = lk_string_newfromcstr(self, "/");
-    list_pushptr(self->retained, self->str_type);
-    list_pushptr(self->retained, self->str_forward);
-    list_pushptr(self->retained, self->str_rescue);
-    list_pushptr(self->retained, self->str_onassign);
-    list_pushptr(self->retained, self->str_at);
-    list_pushptr(self->retained, self->str_filesep);
+    lk_ext_global(".string.class", LK_OBJ(self->str_type = lk_string_newfromcstr(self, ".CLASS")));
+    lk_ext_global(".string.forward", LK_OBJ(self->str_forward = lk_string_newfromcstr(self, ".forward")));
+    lk_ext_global(".string.rescue", LK_OBJ(self->str_rescue = lk_string_newfromcstr(self, ".rescue")));
+    lk_ext_global(".string.on assign", LK_OBJ(self->str_onassign = lk_string_newfromcstr(self, ".on_assign")));
+    lk_ext_global(".string.at", LK_OBJ(self->str_at = lk_string_newfromcstr(self, "at")));
+    lk_ext_global(".string.slash", LK_OBJ(self->str_filesep = lk_string_newfromcstr(self, "/")));
 
     /* attach all funcs to primitive types */
     lk_bool_extinitfuncs(self);
@@ -222,12 +209,11 @@ void lk_vm_free(lk_vm_t *self) {
     memory_free(self);
 
     /*
+    fprintf(stderr, "alloccount: %i\n", memory_alloccount());
     fprintf(stderr, "alloctotal: %i\n", memory_alloctotal());
     fprintf(stderr, "allocpeak: %i\n", memory_allocpeak());
     fprintf(stderr, "allocused: %i\n", memory_allocused());
-     */
-
-    memory_freerecycled();
+    */
 }
 
 /* eval */
@@ -270,8 +256,10 @@ lk_frame_t *lk_vm_evalfile(lk_vm_t *self, const char *file, const char *base) {
         stream = fopen(cfilename, "r");
         if(stream != NULL) {
             list_t *src = string_allocfromfile(stream);
+            fclose(stream);
             if(src != NULL) {
                 fr = eval(self, lk_string_newfromlist(self, src));
+                list_free(src);
                 self->rsrc = self->rsrc->prev;
                 return fr;
             } else {

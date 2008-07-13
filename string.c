@@ -78,7 +78,10 @@ lk_string_t *lk_string_newfromlist(lk_vm_t *vm, list_t *list) {
     return self;
 }
 lk_string_t *lk_string_newfromdata(lk_vm_t *vm, const void *data, int len) {
-    return lk_string_newfromlist(vm, string_allocfromdata(data, len));
+    list_t *l = string_allocfromdata(data, len);
+    lk_string_t *s = lk_string_newfromlist(vm, l);
+    list_free(l);
+    return s;
 }
 lk_string_t *lk_string_newfromcstr(lk_vm_t *vm, const char *cstr) {
     return lk_string_newfromdata(vm, cstr, strlen(cstr));

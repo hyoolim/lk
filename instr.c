@@ -77,18 +77,6 @@ lk_instr_t *lk_instr_newarglist(lk_parser_t *parser, lk_instr_t *func) {
     new->v = LK_OBJ(func);
     return new;
 }
-/*
-static lk_string_t *instr_newsymbol(lk_vm_t *vm, string_t *s) {
-    lk_string_t *new = lk_string_newfromlist(vm, s);
-    setitem_t *i = set_get(vm->symbols, new);
-    if(i == NULL) set_set(vm->symbols, new);
-    else {
-        lk_obj_free(LK_OBJ(new));
-        new = LK_STRING(i->key);
-    }
-    return new;
-}
- */
 lk_instr_t *lk_instr_newstring(lk_parser_t *parser, lk_string_t *s) {
     lk_instr_t *new = instr_new(parser, LK_INSTRTYPE_STRING);
     new->v = LK_OBJ(s); /* lk_string_newfromlist(LK_VM(parser), s)); */
@@ -114,7 +102,7 @@ lk_instr_t *lk_instr_newff(lk_parser_t *parser, double f) {
 }
 lk_instr_t *lk_instr_newmessage(lk_parser_t *parser, lk_string_t *name) {
     lk_instr_t *new = instr_new(parser, LK_INSTRTYPE_APPLYMSG);
-    new->v = LK_OBJ(name); /* instr_newsymbol(LK_VM(parser), name)); */
+    new->v = LK_OBJ(name);
     {
         list_t *cs = parser->comments;
         lk_string_t *c = list_removeptr(cs, 0);
@@ -127,7 +115,7 @@ lk_instr_t *lk_instr_newmessage(lk_parser_t *parser, lk_string_t *name) {
 }
 lk_instr_t *lk_instr_newframemessage(lk_parser_t *parser, lk_string_t *name) {
     lk_instr_t *new = instr_new(parser, LK_INSTRTYPE_FRAMEMSG);
-    new->v = LK_OBJ(name); /* instr_newsymbol(LK_VM(parser), name)); */
+    new->v = LK_OBJ(name);
     return new;
 }
 

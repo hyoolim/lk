@@ -27,6 +27,5 @@ struct lk_ipaddr {
 #define LK_SOCKET(v) ((lk_socket_t *)(v))
 
 /* ext map */
-LK_VM_DEFGLOBAL_PROTO(Socket);
 LK_EXT_DEFINIT(lk_socket_extinit);
 #endif

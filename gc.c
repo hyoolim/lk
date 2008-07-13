@@ -130,8 +130,6 @@ void lk_gc_sweep(lk_gc_t *self) {
         lk_objgroup_count(self->used));
          */
         lk_obj_markpending(LK_OBJ(vm->currframe));
-        LIST_EACHPTR(vm->retained, i, v, lk_obj_markpending(LK_OBJ(v)));
-        SET_EACH(vm->symbols, i, lk_obj_markpending(LK_OBJ(i->key)));
         for(; rsrc != NULL; rsrc = rsrc->prev) {
             lk_obj_markpending(LK_OBJ(rsrc->rsrc));
         }

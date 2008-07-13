@@ -1,11 +1,13 @@
 #include "_memory.h"
 
 /* new */
+static int alloccount = 0;
 static size_t alloctotal = 0;
 static size_t allocused = 0;
 static size_t allocpeak = 0;
 static void *recycled[MEMORY_MAXRECYCLED];
 void *memory_alloc(size_t size) {
+    alloccount ++;
     if(size < MEMORY_MAXRECYCLED && recycled[size] != NULL) {
         void *next = *(void **)recycled[size];
         void *new = recycled[size];
@@ -25,6 +27,7 @@ void *memory_alloc(size_t size) {
 void memory_free(void *ptr) {
     if(ptr != NULL) {
         int size = *((size_t *)ptr - 1);
+        alloccount --;
         if(size < MEMORY_MAXRECYCLED) {
             *(void **)ptr = recycled[size];
             recycled[size] = ptr;
@@ -65,6 +68,9 @@ void *memory_resize(void *old, size_t size) {
 }
 
 /* info */
+int memory_alloccount(void) {
+    return alloccount;
+}
 size_t memory_alloctotal(void) {
     return alloctotal;
 }

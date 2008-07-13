@@ -17,7 +17,9 @@ static LK_OBJ_DEFMARKFUNC(mark__file) {
 }
 static LK_OBJ_DEFFREEFUNC(free__file) {
     /* TODO - account for cases when fclose fails */
+    /*
     if(FILEF(self) != NULL) fclose(FILEF(self));
+    */
 }
 LK_EXT_DEFINIT(lk_file_extinittypes) {
     vm->t_file = lk_obj_allocwithsize(vm->t_obj, sizeof(lk_file_t));

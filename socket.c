@@ -37,7 +37,7 @@ static LK_OBJ_DEFFREEFUNC(free__sock) {
 static LK_EXT_DEFCFUNC(acce_sock) {
     struct sockaddr remote;
     socklen_t len = sizeof(struct sockaddr);
-    lk_socket_t *conn = LK_SOCKET(lk_obj_alloc(LK_VM_GETGLOBAL(VM, Socket)));
+    lk_socket_t *conn = LK_SOCKET(lk_obj_alloc(VM->t_socket));
     conn->fd = accept(SOCKET->fd, &remote, &len);
     conn->in = fdopen(conn->fd, "r");
     conn->out = fdopen(conn->fd, "w");
@@ -73,7 +73,6 @@ static LK_EXT_DEFCFUNC(listen__sock) {
     }
     RETURN(self);
 }
-LK_VM_DEFGLOBAL(Socket);
 LK_EXT_DEFINIT(lk_socket_extinit) {
     lk_obj_t *obj = vm->t_obj, *str = vm->t_string, *fi = vm->t_fi;
     lk_obj_t *ip = lk_obj_allocwithsize(obj, sizeof(lk_ipaddr_t));
@@ -86,7 +85,7 @@ LK_EXT_DEFINIT(lk_socket_extinit) {
     lk_ext_cfunc(ip, "init", alloc__ip_str, str, NULL);
     lk_ext_cfunc(ip, "to string", to_string__ip, NULL);
     /* */
-    lk_ext_global("Socket", sock); LK_VM_SETGLOBAL(vm, Socket, sock);
+    lk_ext_global("Socket", vm->t_socket = sock);
     lk_ext_cfunc(sock, "accept", acce_sock, NULL);
     lk_ext_cfunc(sock, "bind", bind__sock_ip_fi, ip, fi, NULL);
     lk_ext_cfunc(sock, "connect", connect__sock_ip_fi, ip, fi, NULL);

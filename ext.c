@@ -36,11 +36,10 @@ LK_EXT_DEFINIT(lk_ext_extinit) {
 /* update */
 void lk_ext_set(lk_obj_t *proto, const char *k, lk_obj_t *v) {
     lk_vm_t *vm = LK_VM(proto);
-    lk_string_t *type = vm->str_type;
     lk_string_t *k_kc = lk_string_newfromcstr(vm, k);
     lk_obj_setslot(proto, LK_OBJ(k_kc), vm->t_obj, v);
     /*
-    lk_obj_setslot(v, LK_OBJ(type), vm->t_string, LK_OBJ(k_kc));
+    lk_obj_setslot(v, LK_OBJ(vm->str_type), vm->t_string, LK_OBJ(k_kc));
     */
 }
 void lk_ext_global(const char *k, lk_obj_t *v) {

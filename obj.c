@@ -236,8 +236,8 @@ struct lk_slot *lk_obj_setslot(lk_obj_t *self, lk_obj_t *k,
         slot->check = check;
         if('A' <= first && first <= 'Z') {
             LK_SLOT_SETOPTION(slot, LK_SLOTOPTION_READONLY);
-            lk_obj_setslot(v, LK_VM(self)->str_type,
-                              LK_VM(self)->t_string, LK_OBJ(k));
+            lk_obj_setslot(v, LK_OBJ(LK_VM(self)->str_type),
+                              LK_OBJ(LK_VM(self)->t_string), LK_OBJ(k));
         }
     }
     lk_obj_setvalueonslot(self, slot, v);

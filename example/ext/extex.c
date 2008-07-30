@@ -15,5 +15,5 @@ LK_DEFEXTINIT(lk_extex_extinit) {
     LK_SETGLOBAL(vm, ExtensionExample, t_extex);
     lk_ext_cstructmember(t_extex, "x", t_fixint, offsetof(lk_extex_t, x));
     lk_ext_cstructmember(t_extex, "y", t_fixint, offsetof(lk_extex_t, y));
-    lk_ext_cfuncwith0arg(t_extex, "add", add);
+    lk_ext_cfuncwith0arg(t_extex, "+", add);
 }

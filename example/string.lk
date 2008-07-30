@@ -40,8 +40,8 @@ a ->to code ->println
 'hello'/set![2; 0; 'xyz'] ->to code ->println
 #
 '--- divide ---'/println
-'nows  the time'/divide[' '] ->to code ->println
-'mellow yellow'/divide['ello'] ->to code ->println
+'nows  the time' % ' ' ->to code ->println
+'mellow yellow' % 'ello' ->to code ->println
 #
 '--- char/to string --'/println
 char := Character/new[] + 48

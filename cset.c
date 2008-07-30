@@ -73,14 +73,14 @@ static LK_EXT_DEFCFUNC(negateB__cset) {
 LK_EXT_DEFINIT(lk_cset_extinitfuncs) {
     lk_obj_t *cset = vm->t_cset, *ch = vm->t_char, *str = vm->t_string;
     lk_ext_global("CharacterSet", cset);
-    lk_ext_cfunc(cset, "add=", addB__cset_cset, cset, NULL);
-    lk_ext_cfunc(cset, "add=", addB__cset_str, str, NULL);
+    lk_ext_cfunc(cset, "+=", addB__cset_cset, cset, NULL);
+    lk_ext_cfunc(cset, "+=", addB__cset_str, str, NULL);
     lk_ext_cfunc(cset, "has?", has__cset_ch, ch, NULL);
     lk_ext_cfunc(cset, "has?", has__cset_str, str, NULL);
     lk_ext_cfunc(cset, "init", init__cset_str, str, NULL);
     lk_ext_cfunc(cset, "negate!", negateB__cset, NULL);
-    lk_ext_cfunc(cset, "subtract=", subtractB__cset_cset, cset, NULL);
-    lk_ext_cfunc(cset, "subtract=", subtractB__cset_str, str, NULL);
+    lk_ext_cfunc(cset, "-=", subtractB__cset_cset, cset, NULL);
+    lk_ext_cfunc(cset, "-=", subtractB__cset_str, str, NULL);
     lk_ext_cfunc(cset, "to string", to_string__cset, NULL);
 }
 

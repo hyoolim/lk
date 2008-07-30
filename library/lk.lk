@@ -299,13 +299,13 @@ GenericSet/do {
 
 # Integer < Number
 Integer/do {
-    /add := { value : Real | /to real + value }
+    /'+' := { value : Real | /to real + value }
     /cmp := { to : Real | /to real - to }
-    /divide := { by : Real | /to real % by }
+    /'%' := { by : Real | /to real % by }
     /eq? := { to : Real | /to real == to }
     /integer? := TRUE
-    /multiply := { by : Real | /to real * by }
-    /subtract := { value : Real | /to real - value }
+    /'*' := { by : Real | /to real * by }
+    /'-' := { value : Real | /to real - value }
 
     # Always returns itself.
     /to integer := { | /. }
@@ -381,7 +381,7 @@ Number/do {
 
 # Object
 Object/do {
-    /add := { other | /clone[]/add=[other] }
+    /'+' := { other | /clone[] += other }
 
     # Returns other if the receiver evaluates
     # to true or false otherwise.
@@ -404,7 +404,7 @@ Object/do {
     /print += { to | to/write[/.]; /. }
     /println := { | /println[STDOUT] }
     /println += { to | to/write[/.; NEWLINE]; /. }
-    /subtract := { other | /clone[]/subtract=[other] }
+    /'-' := { other | /clone[] -= other }
     /to := { to | Range/new[/.; to] }
     /to boolean := TRUE
     /to code := { | '<<' ++ /to string ++ '>>' }
@@ -447,13 +447,13 @@ Range/do {
 
 # Real < Number
 Real/do {
-    /add := { value : Integer | /. + value/to real }
+    /'+' := { value : Integer | /. + value/to real }
     /ceil := { | i := /to integer; /. > 0 && /. - i != 0.0 ?? i + 1 !! i }
     /cmp := { to : Integer | /. - to/to real }
-    /divide := { by : Integer | /. % by/to real }
+    /'%' := { by : Integer | /. % by/to real }
     /eq? := { to : Integer | /. == to/to real }
     /floor := { | i := /to integer; /. > 0 || /. - i == 0.0 ?? i !! i - 1 }
-    /multiply := { by : Integer | /. * by/to real }
+    /'*' := { by : Integer | /. * by/to real }
     /real? := TRUE
     /round := { |
         i := /to integer
@@ -461,7 +461,7 @@ Real/do {
         /. - i < -0.5 ?? i - 1 !!
         i
     }
-    /subtract := { value : Integer | /. - value/to real }
+    /'-' := { value : Integer | /. - value/to real }
     /to real := { | /. }
     /to string := { | /to string['%f'] }
 }
@@ -489,10 +489,9 @@ String/do {
     /cap! := { | c := /at[0]; c/between?[0ca; 0cz] ?? /at[0] = c + (0cA - 0ca) }
 
     # Returns a list of strings separated by the delim argument.
-    /divide := { delim | /divide[delim; INF] }
-    /divide += { delim; max |
+    /'%' := { delim |
         a := [ ]
-        /each[delim; max] { v | a/push![v] }
+        /each[delim; INF] { v | a/push![v] }
         a
     }
     /each := { delim; block | /each[delim; INF; block] }
@@ -524,7 +523,7 @@ String/do {
 
     # Replaces all the occurences of from argument in the string
     # with to argument.
-    /replace! := { from; to | /divide[from]/join[to] }
+    /replace! := { from; to | /. % from ->join[to] }
     /to code := { | "'" ++ /. ++ "'" }
     /to integer := { ... }
 

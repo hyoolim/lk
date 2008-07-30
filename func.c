@@ -132,8 +132,8 @@ LK_EXT_DEFINIT(lk_func_extinitfuncs) {
     lk_obj_t *f = vm->t_func, *sig = vm->t_sig;
     /* */
     lk_ext_global("Function", vm->t_func);
-    lk_ext_cfunc(f, "add", add__f_f, f, NULL);
-    lk_ext_cfunc(f, "add=", addB__f_f, f, NULL);
+    lk_ext_cfunc(f, "+", add__f_f, f, NULL);
+    lk_ext_cfunc(f, "+=", addB__f_f, f, NULL);
     lk_ext_cfield(f, "doc", f, offsetof(lk_func_t, cf.doc));
     lk_ext_cfunc(f, "minimum_argument_count", minimum_argument_count__f, NULL);
     lk_ext_cfunc(f, "maximum_argument_count", maximum_argument_count__f, NULL);

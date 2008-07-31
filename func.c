@@ -191,6 +191,9 @@ lk_gfunc_t *lk_func_combine(lk_func_t *self, lk_func_t *other) {
     if(!LK_OBJ_ISGFUNC(LK_OBJ(self))) {
         lk_gfunc_t *gf = lk_gfunc_new(vm);
         list_pushptr(gf->funcs, self);
+        if(CHKOPT(LK_FUNC(self)->cf.opts, LK_FUNCOASSIGNED)) {
+            SETOPT(LK_FUNC(gf)->cf.opts, LK_FUNCOASSIGNED);
+        }
         self = LK_FUNC(gf);
     }
     funcs = LK_GFUNC(self)->funcs;

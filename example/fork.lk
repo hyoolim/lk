@@ -1,10 +1,10 @@
 VirtualMachine/fork {
-    1 ~ 3 ->each { v; i ---
+    1/to[3]/each { v; i ---
         'child: ' ++ v/to-s ->println
         VirtualMachine/sleep[0.5]
     }
 }
-1 ~ 3 ->each { v; i ---
+1/to[3]/each { v; i ---
     'parent: ' ++ v/to-s ->println
 }
 VirtualMachine/wait

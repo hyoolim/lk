@@ -1,6 +1,6 @@
 include['tester.lk']
 Tester/new['Enumerable']/do {
-a := 1 ~ 4
+a := 1/to[4]
 b := [3; 2; 1; 6; 10; 2; 1; 4; 2]
 c := ['albatross'; 'dog'; 'horse']
 

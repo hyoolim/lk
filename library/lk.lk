@@ -263,9 +263,9 @@ GenericList/do {
         }
         /.
     }
-    /repeat := { count |
+    /'**' := { count |
         count == 0 ?? return[/clone/clear!]
-        2 ~ count ->reduce[/clone] { a; v | a << /. }
+        2/to[count]/reduce[/clone] { a; v | a << /. }
     }
 
     # Returns all but the first item in the list.
@@ -385,7 +385,7 @@ Object/do {
 
     # Returns other if the receiver evaluates
     # to true or false otherwise.
-    /and := { other | /to boolean ?? other !! FALSE }
+    /'&&' := { other | /to boolean ?? other !! FALSE }
     /cmp := { to : POSITIVE INFINITY | -1 }
     /cmp += { to : NEGATIVE INFINITY | 1 }
     /eq? := { to | /.id == to/.id }
@@ -399,7 +399,7 @@ Object/do {
     /new := { args... | new := /alloc; new/init[*args]; new }
     /nil? := FALSE
     /nil_or := { other | /nil? ?? other !! /. }
-    /or := { other | /to boolean ?? /. !! other }
+    /'||' := { other | /to boolean ?? /. !! other }
     /print := { | /print[STDOUT] }
     /print += { to | to/write[/.]; /. }
     /println := { | /println[STDOUT] }
@@ -441,7 +441,7 @@ Range/do {
         }
     }
     /init := { /from; /to | }
-    /to code := { | /from/to code ++ ' ~ ' ++ /to/to code }
+    /to code := { | /from/to code ++ '/to[' ++ /to/to code ++ ']' }
     /also[Enumerable]
 }
 

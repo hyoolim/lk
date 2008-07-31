@@ -306,7 +306,7 @@ c date -> println
 c date/succ![2]
 c date -> println
 '--- range test b date to c date ---' -> println
-(b date ~ c date)/each { v --- v/println }
+b date/to[c date]/each { v --- v/println }
 '--- a duration (create a duration of 13 months) ---' -> println
 a duration := Duration/new[0;13;0;0;0;0.0]
 a duration -> println

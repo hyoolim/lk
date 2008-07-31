@@ -36,16 +36,10 @@ static LK_OBJ_DEFALLOCFUNC(alloc__parser) {
     setunaryop(PARSER, "-",    "negate");
     setunaryop(PARSER, "+",    "to number");
     /* binary op names */
-    setbinaryop(PARSER, "~",   "to");
     setbinaryop(PARSER, "~=",  "match?");
     setbinaryop(PARSER, "!=",  "ne?");
-    setbinaryop(PARSER, "@",   "at");
-    setbinaryop(PARSER, "@=",  "set!");
     setbinaryop(PARSER, "%%",  "modulo");
     setbinaryop(PARSER, "%%=", "modulo!");
-    setbinaryop(PARSER, "&&",  "and");
-    setbinaryop(PARSER, "**",  "repeat");
-    setbinaryop(PARSER, "**=", "repeat=");
     setbinaryop(PARSER, "$",   "to string");
     setbinaryop(PARSER, "->",  "send");
     setbinaryop(PARSER, "=",   "assign!");
@@ -55,7 +49,6 @@ static LK_OBJ_DEFALLOCFUNC(alloc__parser) {
     setbinaryop(PARSER, ":",   "define!");
     setbinaryop(PARSER, ":=",  "define=");
     setbinaryop(PARSER, "!!",  "else");
-    setbinaryop(PARSER, "||",  "or");
     setbinaryop(PARSER, "|||", "nil_or");
     setbinaryop(PARSER, "<",   "lt?");
     setbinaryop(PARSER, "<=",  "le?");

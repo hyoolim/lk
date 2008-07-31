@@ -36,7 +36,7 @@ LK_EXT_DEFINIT(lk_char_extinitfuncs) {
     lk_obj_t *ch = vm->t_char, *fi = vm->t_fi;
     lk_ext_global("Character", ch);
     lk_ext_cfunc(ch, "+", add__ch_fi, fi, NULL);
-    lk_ext_cfunc(ch, "cmp", subtract__ch_ch, ch, NULL);
+    lk_ext_cfunc(ch, "<=>", subtract__ch_ch, ch, NULL);
     lk_ext_cfunc(ch, "-", subtract__ch_ch, ch, NULL);
     lk_ext_cfunc(ch, "-", subtract__ch_fi, fi, NULL);
     lk_ext_cfunc(ch, "to string", to_string__ch, NULL);

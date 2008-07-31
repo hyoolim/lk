@@ -1,7 +1,7 @@
 include['tester.lk']
 Tester/new['Comparable']/do {
 SizeMatters := Object/new/do {
-    /cmp := /'<=>' := { other --- /str/count <=> other/str/count }
+    /'<=>' := { other --- /str/count <=> other/str/count }
     /init := { /str --- }
     /to code := { --- /str }
     /also[Comparable]

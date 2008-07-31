@@ -35,29 +35,29 @@ CharacterSet/do {
 # Comparable < Able
 Comparable/do {
 
-    # Returns true if it's in between min and max, using lt? and gt?
+    # Returns true if it's in between min and max, using < and >
     # operators for comparison, false otherwise.
     /between? := { min; max | min <= /. && /. <= max }
 
-    # Returns true if it's equal to the other, using cmp operator
+    # Returns true if it's equal to the other, using <=> operator
     # for comparison, false otherwise.
     /eq? := { other | /. <=> other ->zero? }
 
     # Returns true if it's greater than or equal to the other, using
-    # lt? operator for comparison, false otherwise.
+    # < operator for comparison, false otherwise.
     /ge? := { other | /. < other ->not? }
 
-    # Returns true if it's greater than the other, using cmp operator for
+    # Returns true if it's greater than the other, using <=> operator for
     # comparison, false otherwise.
-    /gt? := { other | /. <=> other ->positive? }
+    /'>' := { other | /. <=> other ->positive? }
 
     # Returns true if it's less than or equal to the other, using
-    # gt? operator for comparison, false otherwise.
+    # > operator for comparison, false otherwise.
     /le? := { other | /. > other ->not? }
 
-    # Returns true if it's less than the other, using cmp operator for
+    # Returns true if it's less than the other, using <=> operator for
     # comparison, false otherwise.
-    /lt? := { other | /. <=> other ->negative? }
+    /'<' := { other | /. <=> other ->negative? }
 }
 
 # Dictionary < GenericSet
@@ -127,16 +127,16 @@ Enumerable/do {
     # Returns a list of items that are returned from using argument.
     /map := { using | /reduce[[ ]] { a; v | a/push![using[v]] } }
 
-    # Returns the maximum value, using the cmp operator for comparison.
+    # Returns the maximum value, using the <=> operator for comparison.
     /max := { | /max { x; y | x <=> y } }
 
-    # Returns the maximum value, using the cmp argument for comparison.
+    # Returns the maximum value, using the <=> argument for comparison.
     /max += { cmp | /reduce[-INF] { a; v | cmp[a; v] < 0 ?? v !! a } }
 
-    # Returns the minimum value, using the cmp operator for comparison.
+    # Returns the minimum value, using the <=> operator for comparison.
     /min := { | /min { x; y | x <=> y } }
 
-    # Returns the minimum value, using the cmp argument for comparison.
+    # Returns the minimum value, using the <=> argument for comparison.
     /min += { cmp | /reduce[INF] { a; v | cmp[a; v] > 0 ?? v !! a } }
 
     # NEED DOCUMENTATION
@@ -300,7 +300,7 @@ GenericSet/do {
 # Integer < Number
 Integer/do {
     /'+' := { value : Real | /to real + value }
-    /cmp := { to : Real | /to real - to }
+    /'<=>' := { to : Real | /to real - to }
     /'%' := { by : Real | /to real % by }
     /eq? := { to : Real | /to real == to }
     /integer? := TRUE
@@ -318,7 +318,7 @@ Integer/do {
 
 # List < GenericList
 List/do {
-    /cmp := { to |
+    /'<=>' := { to |
         d := to/count - /count
         d > 0 ?? to !! /. ->each { i; v |
             d := v <=> to[i]
@@ -356,7 +356,7 @@ UNKNOWN/do {
 # NEGATIVE INFINITY (-inf)
 NEGATIVE INFINITY/do {
     /.forward := { args... | NEGATIVE INFINITY }
-    /cmp := { to | -1 }
+    /'<=>' := { to | -1 }
     /inf? := TRUE
     /negate := POSITIVE INFINITY
     /to string := '-INF'
@@ -386,8 +386,8 @@ Object/do {
     # Returns other if the receiver evaluates
     # to true or false otherwise.
     /'&&' := { other | /to boolean ?? other !! FALSE }
-    /cmp := { to : POSITIVE INFINITY | -1 }
-    /cmp += { to : NEGATIVE INFINITY | 1 }
+    /'<=>' := { to : POSITIVE INFINITY | -1 }
+    /'<=>' += { to : NEGATIVE INFINITY | 1 }
     /eq? := { to | /.id == to/.id }
     /in? := { list | list/has?[/.] }
 
@@ -414,7 +414,7 @@ Object/do {
 # POSITIVE INFINITY (inf)
 POSITIVE INFINITY/do {
     /.forward := { args... | POSITIVE INFINITY }
-    /cmp := { to | 1 }
+    /'<=>' := { to | 1 }
     /inf? := TRUE
     /negate := NEGATIVE INFINITY
     /to string := 'INF'
@@ -449,7 +449,7 @@ Range/do {
 Real/do {
     /'+' := { value : Integer | /. + value/to real }
     /ceil := { | i := /to integer; /. > 0 && /. - i != 0.0 ?? i + 1 !! i }
-    /cmp := { to : Integer | /. - to/to real }
+    /'<=>' := { to : Integer | /. - to/to real }
     /'%' := { by : Integer | /. % by/to real }
     /eq? := { to : Integer | /. == to/to real }
     /floor := { | i := /to integer; /. > 0 || /. - i == 0.0 ?? i !! i - 1 }

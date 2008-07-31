@@ -259,7 +259,7 @@ Date := Object/with {
     }
     
     # comparable
-    /cmp := { other ---
+    /'<=>' := { other ---
         d1 := /to gmt
         d2 := other/to gmt
         d cmp := d1/d var - d2/d var

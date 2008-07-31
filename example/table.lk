@@ -1,7 +1,7 @@
 Row := List/with {
     /eq? := { x --- /map { v --- v == x } }
-    /gt? := { x --- /map { v --- v > x } }
-    /lt? := { x --- /map { v --- v < x } }
+    /'>' := { x --- /map { v --- v > x } }
+    /'<' := { x --- /map { v --- v < x } }
 }
 Table := Object/with {
     /init := { /columns... ---

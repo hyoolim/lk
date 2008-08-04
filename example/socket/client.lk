@@ -8,5 +8,5 @@ loop {
     line := StandardInput/read[0c\n]/limit[-1]
     client/write[line ++ '\n']
     client/flush
-    line == 'q' ?? break
+    line == 'q' ? break
 }

@@ -10,7 +10,6 @@ struct lk_parser {
     struct lk_common   obj;
     const lk_string_t *text;
     const char        *error;
-    set_t          *unaryops;
     set_t          *binaryops;
     set_t          *precs;
     list_t         *tokentypes;

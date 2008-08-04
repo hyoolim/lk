@@ -35,8 +35,8 @@ Duration := Object/with {
         new days := second number/to integer % 86400
         second number = second number - (new days * 86400)/to real
         /day = /day + new days
-        d adj := (second number < 0.0 ?? -1 !! 1)
-        second number < 0.0 || second number >= 86400.0 ?? {
+        d adj := (second number < 0.0 ? -1 ! 1)
+        second number < 0.0 || second number >= 86400.0 ? {
             /day = /day + d adj
             second number = second number - (86400 * d adj)/to real
         }
@@ -66,14 +66,14 @@ Duration := Object/with {
         m cmp := d1/m var - d2/m var
         d cmp := d1/day - d2/day
         s cmp := d1/s var - d2/s var
-        m cmp == 0 ?? {
-            d cmp == 0 ?? {
-                s cmp > 0.0 ?? 1 !!
-                s cmp < 0.0 ?? -1 !!
+        m cmp == 0 ? {
+            d cmp == 0 ? {
+                s cmp > 0.0 ? 1 !
+                s cmp < 0.0 ? -1 !
                 0
-            } !! d cmp
-        } !! {
-            d cmp != 0 || s cmp != 0.0 ??
+            } ! d cmp
+        } ! {
+            d cmp != 0 || s cmp != 0.0 ?
                     raise['Cannot compare: Incompatible Durations']
             m cmp
         }

@@ -55,22 +55,22 @@ ConfigOptional := Object/with {
 ConfigOptional/new['mysql']/do {
     /add_c_flags![VirtualMachine/system2['mysql_config --cflags'] || '' ->chop!]
     /add_c_libs![VirtualMachine/system2['mysql_config --libs'] || '' ->chop!]
-    /c_header?['mysql.h'] ?? /finish
+    /c_header?['mysql.h'] ? /finish
 }
 ConfigOptional/new['regex']/do {
-    /c_header?['regex.h'] ?? /finish
+    /c_header?['regex.h'] ? /finish
 }
 
 ConfigOptional/new['postgres']/do {
     include_path := VirtualMachine/system2['pg_config --includedir']
-    include_path = include_path ?? '-I' ++ include_path !! ''
+    include_path = include_path ? '-I' ++ include_path ! ''
     lib_path := VirtualMachine/system2['pg_config --libdir']
-    lib_path = lib_path ?? '-L' ++ lib_path !! ''
+    lib_path = lib_path ? '-L' ++ lib_path ! ''
     include_path/chop!/concat![' -pipe']
     lib_path/chop!/concat![' -lpq']
     /add_c_flags![include_path]
     /add_c_libs![lib_path]
-    /c_header?['libpq-fe.h'] && /c_header?['libpq/libpq-fs.h'] ?? /finish
+    /c_header?['libpq-fe.h'] && /c_header?['libpq/libpq-fs.h'] ? /finish
 }
 #
 objects/writeln['optional.o']

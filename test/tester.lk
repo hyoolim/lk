@@ -6,7 +6,7 @@ Tester := Object/new/do {
     }
     /test := { name; actual; expected ---
         /index += 1
-        actual != expected ?? {
+        actual != expected ? {
             raise[/name/to string ++ ": '" ++ name/to string ++
             "' test failed: " ++ 'expected ' ++ expected/to code ++
             ' but got ' ++ actual/to code]

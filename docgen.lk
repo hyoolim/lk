@@ -33,7 +33,7 @@ DocumentGeneratorFile := WritableFile/with {
         slots := [ ]
         ancestors/each { ancestor ---
             ancestor/.slots/each { slot ---
-                slots/push![[ancestor/.id == class/.id ?? class !! ancestor; slot]]
+                slots/push![[ancestor/.id == class/.id ? class ! ancestor; slot]]
             }
         }
         slots = slots/sort { x; y --- x[1] <=> y[1] }
@@ -42,7 +42,7 @@ DocumentGeneratorFile := WritableFile/with {
         /write['<p class="slot_names">']
         slots/each { slot ---
             /write['<span class="slot_for_'; slot[0]/.CLASS; '">']
-            slot[0]/.id != class/.id ?? {
+            slot[0]/.id != class/.id ? {
                 /write['<em>'; slot[0]/.CLASS; '/</em>']
             }
             /write['<a href="#'; slot[1]/replace[non_words; '_']; '">';
@@ -58,19 +58,19 @@ DocumentGeneratorFile := WritableFile/with {
                 /write['<div class="slot_description slot_for_';
                 slot_class/.CLASS; '">']
                 /write['<h3 class="slot_name">']
-                slot_class/.id != class/.id ?? {
+                slot_class/.id != class/.id ? {
                     /write['<em>'; slot_class/.CLASS; '/</em>']
                 }
                 /write['<a name="';
                 slot_name/replace[non_words; '_']; '">'; slot_name]
-                function/ancestor?[Function] ?? {
-                    function/signature/count > 0 ?? {
+                function/ancestor?[Function] ? {
+                    function/signature/count > 0 ? {
                         /write['[']
                         function/signature/each { i; sig ---
                             sig_name := sig/name ||| 'a' ++ i/to string
                             /write['<span class="arg">'; sig_name]
                             sig_type := sig/type
-                            sig_type/nil?/not? && Object != sig_type ?? {
+                            sig_type/nil?/not? && Object != sig_type ? {
                                 /write[' : <a href="./'; sig_type/.CLASS;
                                 '.html">'; sig_type/.CLASS; '</a>']
                             }
@@ -78,9 +78,9 @@ DocumentGeneratorFile := WritableFile/with {
                         }
                         min := function/minimum_argument_count
                         max := function/maximum_argument_count
-                        max > min ?? {
+                        max > min ? {
                             last := function/last_argument
-                            /write[last/nil? ?? '_' !! last/name; '...; ']
+                            /write[last/nil? ? '_' ! last/name; '...; ']
                         }
                         /write[']']
                     }
@@ -89,18 +89,18 @@ DocumentGeneratorFile := WritableFile/with {
 
                 ## description
                 /write['<p class="slot_text">']
-                function/ancestor?[Function] ?? {
-                    function/doc/nil?/not? ?? /write[function/doc]
-                } !! {
+                function/ancestor?[Function] ? {
+                    function/doc/nil?/not? ? /write[function/doc]
+                } ! {
                     /write['Always returns '; function/to code; '.']
                 }
                 /write['</p>']
                 /write['</div>']
             }
             slot_class/.retrieve[slot_name]/do {
-                /ancestor?[GenericFunction] ?? {
+                /ancestor?[GenericFunction] ? {
                     /functions/each { f --- write_description[f] }
-                } !! {
+                } ! {
                     write_description[/.]
                 }
             }

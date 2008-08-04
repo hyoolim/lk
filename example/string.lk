@@ -3,9 +3,9 @@
 '--- ** (repetition) ---'/println
 'Ho! ' ** 3 ->to code ->println
 #
-'--- << (append) ---'/println
+'--- ++ (concat) ---'/println
 a := 'hello '
-a << 'world'
+a ++= 'world'
 a ->to code ->println
 #
 '--- <=> (comparison) ---'/println

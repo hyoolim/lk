@@ -44,14 +44,11 @@ static LK_OBJ_DEFALLOCFUNC(alloc__parser) {
     setbinaryop(PARSER, "->",  "send");
     setbinaryop(PARSER, "=",   "assign!");
     setbinaryop(PARSER, "==",  "eq?");
-    setbinaryop(PARSER, "++",  "concat");
-    setbinaryop(PARSER, "++=", "concat!");
     setbinaryop(PARSER, ":",   "define!");
     setbinaryop(PARSER, ":=",  "define=");
     setbinaryop(PARSER, "!!",  "else");
     setbinaryop(PARSER, "|||", "nil_or");
     setbinaryop(PARSER, "<=",  "le?");
-    setbinaryop(PARSER, "<<",  "concat!");
     setbinaryop(PARSER, ">=",  "ge?");
     setbinaryop(PARSER, "/",   "send");
     setbinaryop(PARSER, "??",  "then");

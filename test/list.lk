@@ -7,7 +7,7 @@ e := [ ]
 
 /test['at[index] #1'; z[2]; 10]
 /test['at[index] #2'; z[10]; UNKNOWN]
-/test['concat[other]'; x ++ y; [1; 2; 3; 4; 5]]
+/test['++[other]'; x ++ y; [1; 2; 3; 4; 5]]
 /test['eq?[other]'; x == y; FALSE]
 # /test['fill[with-value]'; y/fill[10]; [10; 10; 10]]
 /test['first'; y/first; 3]

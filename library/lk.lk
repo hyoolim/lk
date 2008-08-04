@@ -217,7 +217,7 @@ FALSE/do {
 
 # GenericList
 GenericList/do {
-    /concat := { args... | /clone/concat![*args] }
+    /'++' := { other | list := /clone; list ++= other; list }
     /each := { block |
         i := 0
         block/minimum_argument_count <= 1 ??
@@ -265,7 +265,7 @@ GenericList/do {
     }
     /'**' := { count |
         count == 0 ?? return[/clone/clear!]
-        2/to[count]/reduce[/clone] { a; v | a << /. }
+        2/to[count]/reduce[/clone] { a; v | a ++= /. }
     }
 
     # Returns all but the first item in the list.
@@ -339,7 +339,7 @@ List/do {
     /join := { | /join[''] }
     /join += { delim |
         /count < 1 ?? return['']
-        /rest/reduce[/first/clone] { a; v | a << delim << v }
+        /rest/reduce[/first/clone] { a; v | (a ++= delim) ++= v }
     }
     /to code := { | '[' ++ (/map { x | x/to code } ->join['; ']) ++ ']' }
     /to list := { | /clone }

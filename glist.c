@@ -66,7 +66,7 @@ LK_EXT_DEFINIT(lk_glist_extinitfuncs) {
     lk_ext_cfunc(gl, "chop!", chopB__gl, NULL);
     lk_ext_cfunc(gl, "clear!", clearB__gl, NULL);
     lk_ext_cfunc(gl, "<=>", cmp__gl_gl, gl, NULL);
-    lk_ext_cfunc(gl, "concat!", concatB__gl_gl, gl, NULL);
+    lk_ext_cfunc(gl, "++=", concatB__gl_gl, gl, NULL);
     lk_ext_cfunc(gl, "count", count__gl, NULL);
     lk_ext_cfunc(gl, "eq?", eq__gl_gl, gl, NULL);
     lk_ext_cfunc(gl, "limit!", limitB__gl_fi, fi, NULL);

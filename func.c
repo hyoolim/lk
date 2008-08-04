@@ -285,7 +285,7 @@ void lk_kfunc_updatesig(lk_kfunc_t *self) {
         if((isself = argdef->type == LK_INSTRTYPE_SELFMSG)
         || argdef->type == LK_INSTRTYPE_FRAMEMSG) {
             name = LK_STRING(argdef->v);
-            if(list_cmpcstr(LIST(name), "define!") == 0) {
+            if(list_cmpcstr(LIST(name), ":") == 0) {
                 argdef = argdef->next;
                 if(argdef != NULL && argdef->type == LK_INSTRTYPE_APPLY) {
                     typeinstr = LK_INSTR(argdef->v);

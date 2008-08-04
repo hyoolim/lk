@@ -100,7 +100,7 @@ Date := Object/with {
 
     #  "Day of Week" Stuff {{{
     /day of week := { ---
-        /d var %% 7
+        /d var/mod[7]
     }
     /day of week string := { day of week number ---
         days in week[day of week number]
@@ -115,10 +115,10 @@ Date := Object/with {
     }
     /days in year := { --- /leap year? ?? 366 !! 365 }
     /leap year? := { y --- 
-         y %% 4 != 0 ?? return[FALSE]
+         y/mod[4] != 0 ?? return[FALSE]
          y < 1582 ?? return[TRUE]
-         y %% 100 != 0 ?? return[TRUE]
-         y %% 400 == 0
+         y/mod[100] != 0 ?? return[TRUE]
+         y/mod[400] == 0
     } + { ---
         /leap year?[/year]
     }

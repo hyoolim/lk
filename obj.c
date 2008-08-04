@@ -140,11 +140,9 @@ LK_EXT_DEFINIT(lk_obj_extinitfuncs) {
     lk_obj_t *obj = vm->t_obj, *str = vm->t_string, *f = vm->t_func;
     lk_ext_global("Object", obj);
     lk_ext_cfunc(obj, ".", Dself__obj, NULL);
-    lk_ext_cfunc(obj, "define!", Ddefine__obj_str_obj, str, obj, NULL);
-    lk_ext_cfunc(obj, "define=",
-                 Ddefine_and_assignB__obj_str_obj, str, obj, NULL);
-    lk_ext_cfunc(obj, "define=",
-                 Ddefine_and_assignB__obj_str_obj_obj, str, obj, obj, NULL);
+    lk_ext_cfunc(obj, ":", Ddefine__obj_str_obj, str, obj, NULL);
+    lk_ext_cfunc(obj, ":=", Ddefine_and_assignB__obj_str_obj, str, obj, NULL);
+    lk_ext_cfunc(obj, ":=", Ddefine_and_assignB__obj_str_obj_obj, str, obj, obj, NULL);
     lk_ext_cfunc(obj, ".id", Did__obj, NULL);
     lk_ext_cfunc(obj, ".retrieve", Dretrieve__obj_str, str, NULL);
     lk_ext_cfunc(obj, ".self", Dself__obj, NULL);

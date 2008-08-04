@@ -36,20 +36,8 @@ static LK_OBJ_DEFALLOCFUNC(alloc__parser) {
     setunaryop(PARSER, "-",    "negate");
     setunaryop(PARSER, "+",    "to number");
     /* binary op names */
-    setbinaryop(PARSER, "~=",  "match?");
-    setbinaryop(PARSER, "!=",  "ne?");
-    setbinaryop(PARSER, "%%",  "modulo");
-    setbinaryop(PARSER, "%%=", "modulo!");
-    setbinaryop(PARSER, "$",   "to string");
     setbinaryop(PARSER, "->",  "send");
-    setbinaryop(PARSER, "=",   "assign!");
-    setbinaryop(PARSER, "==",  "eq?");
-    setbinaryop(PARSER, ":",   "define!");
-    setbinaryop(PARSER, ":=",  "define=");
     setbinaryop(PARSER, "!!",  "else");
-    setbinaryop(PARSER, "|||", "nil_or");
-    setbinaryop(PARSER, "<=",  "le?");
-    setbinaryop(PARSER, ">=",  "ge?");
     setbinaryop(PARSER, "/",   "send");
     setbinaryop(PARSER, "??",  "then");
     /* prec map */
@@ -59,7 +47,6 @@ static LK_OBJ_DEFALLOCFUNC(alloc__parser) {
     setprec(PARSER, "*",    70000, LK_PREC_ASSOC_LEFT); /* arith */
     setprec(PARSER, "**",   70000, LK_PREC_ASSOC_LEFT);
     setprec(PARSER, "%",    70000, LK_PREC_ASSOC_LEFT);
-    setprec(PARSER, "%%",   70000, LK_PREC_ASSOC_LEFT);
     setprec(PARSER, "+",    60000, LK_PREC_ASSOC_LEFT); /* add/concat/sub */
     setprec(PARSER, "++",   60000, LK_PREC_ASSOC_LEFT);
     setprec(PARSER, "-",    60000, LK_PREC_ASSOC_LEFT);
@@ -789,9 +776,9 @@ static lk_instr_t *applymacros(lk_parser_t *self, lk_instr_t *it) {
             }
             */
         } else if(it->type == LK_INSTRTYPE_APPLYMSG
-               && (list_cmpcstr(LIST(it->v), "define!") == 0
-               || list_cmpcstr(LIST(it->v), "assign!") == 0
-               || list_cmpcstr(LIST(it->v), "define=") == 0)) {
+               && (list_cmpcstr(LIST(it->v), ":") == 0
+               || list_cmpcstr(LIST(it->v), "=") == 0
+               || list_cmpcstr(LIST(it->v), ":=") == 0)) {
             lk_instr_t *name = it->prev, *args = it->next;
             if(name->type == LK_INSTRTYPE_SELFMSG
             || name->type == LK_INSTRTYPE_FRAMEMSG
@@ -807,10 +794,10 @@ static lk_instr_t *applymacros(lk_parser_t *self, lk_instr_t *it) {
                 /* var[] /: @[Object ] /= @[1 ] -> := @['var' Object 1 ] */
                 if(nextop != NULL
                 && nextop->type == LK_INSTRTYPE_APPLYMSG
-                && list_cmpcstr(LIST(nextop->v), "assign!") == 0) {
+                && list_cmpcstr(LIST(nextop->v), "=") == 0) {
                     lk_instr_t *a, *nextargs = nextop->next;
                     it->v = LK_OBJ(lk_string_newfromcstr(
-                    LK_VM(it), "define="));
+                    LK_VM(it), ":="));
                     (it->next = nextargs)->prev = it;
                     a = LK_INSTR(args->v);
                     while(a->next != NULL) a = a->next;

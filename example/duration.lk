@@ -29,7 +29,7 @@ Duration := Object/with {
         month number := /m var
         second number := /s var
         /year = month number % 12
-        /month = month number %% 12
+        /month = month number/mod[12]
 
         # time/date adjustment
         new days := second number/to integer % 86400

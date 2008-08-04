@@ -1,5 +1,5 @@
 Row := List/with {
-    /eq? := { x --- /map { v --- v == x } }
+    /'==' := { x --- /map { v --- v == x } }
     /'>' := { x --- /map { v --- v > x } }
     /'<' := { x --- /map { v --- v < x } }
 }
@@ -8,7 +8,7 @@ Table := Object/with {
         /data := Dictionary/new
         /columns/each { v; i ---
             /data/set![v; r := Row/new]
-            /define-assign![v; r]
+            /':='[v; r]
         }
     }
     /insert := { params... ---

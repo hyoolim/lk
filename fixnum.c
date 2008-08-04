@@ -48,10 +48,10 @@ static LK_EXT_DEFCFUNC(gt__fi_fi) {
 static LK_EXT_DEFCFUNC(lt__fi_fi) {
     RETURN(INT(self) < INT(ARG(0)) ? T : F);
 }
-static LK_EXT_DEFCFUNC(modulo__fi_fi) {
+static LK_EXT_DEFCFUNC(mod__fi_fi) {
     RETURN(lk_fi_new(VM, INT(self) % INT(ARG(0))));
 }
-static LK_EXT_DEFCFUNC(moduloB__fi_fi) {
+static LK_EXT_DEFCFUNC(modB__fi_fi) {
     INT(self) %= INT(ARG(0));
     RETURN(self);
 }
@@ -116,11 +116,11 @@ static LK_EXT_DEFCFUNC(gt__fr_fr) {
 static LK_EXT_DEFCFUNC(lt__fr_fr) {
     RETURN(DBL(self) < DBL(ARG(0)) ? T : F);
 }
-static LK_EXT_DEFCFUNC(modulo__fr_fr) {
+static LK_EXT_DEFCFUNC(mod__fr_fr) {
     double x = DBL(self), y = DBL(ARG(0));
     RETURN(lk_fr_new(VM, x - y * (long)(x / y)));
 }
-static LK_EXT_DEFCFUNC(moduloB__fr_fr) {
+static LK_EXT_DEFCFUNC(modB__fr_fr) {
     double x = DBL(self), y = DBL(ARG(0));
     DBL(self) = x - y * (long)(x / y);
     RETURN(self);
@@ -179,11 +179,11 @@ LK_EXT_DEFINIT(lk_fixnum_extinitfuncs) {
     lk_ext_cfunc(fi, "<=>", subtract__fi_fi, fi, NULL);
     lk_ext_cfunc(fi, "%", divide__fi_fi, fi, NULL);
     lk_ext_cfunc(fi, "%=", divideB__fi_fi, fi, NULL);
-    lk_ext_cfunc(fi, "eq?", eq__fi_fi, fi, NULL);
+    lk_ext_cfunc(fi, "==", eq__fi_fi, fi, NULL);
     lk_ext_cfunc(fi, ">", gt__fi_fi, fi, NULL);
     lk_ext_cfunc(fi, "<", lt__fi_fi, fi, NULL);
-    lk_ext_cfunc(fi, "modulo", modulo__fi_fi, fi, NULL);
-    lk_ext_cfunc(fi, "modulo!", moduloB__fi_fi, fi, NULL);
+    lk_ext_cfunc(fi, "mod", mod__fi_fi, fi, NULL);
+    lk_ext_cfunc(fi, "mod!", modB__fi_fi, fi, NULL);
     lk_ext_cfunc(fi, "*", multiply__fi_fi, fi, NULL);
     lk_ext_cfunc(fi, "*=", multiplyB__fi_fi, fi, NULL);
     lk_ext_cfunc(fi, "negate", negate__fi, NULL);
@@ -202,11 +202,11 @@ LK_EXT_DEFINIT(lk_fixnum_extinitfuncs) {
     lk_ext_cfunc(fr, "<=>", subtract__fr_fr, fr, NULL);
     lk_ext_cfunc(fr, "%", divide__fr_fr, fr, NULL);
     lk_ext_cfunc(fr, "%=", divideB__fr_fr, fr, NULL);
-    lk_ext_cfunc(fr, "eq?", eq__fr_fr, fr, NULL);
+    lk_ext_cfunc(fr, "==", eq__fr_fr, fr, NULL);
     lk_ext_cfunc(fr, ">", gt__fr_fr, fr, NULL);
     lk_ext_cfunc(fr, "<", lt__fr_fr, fr, NULL);
-    lk_ext_cfunc(fr, "modulo", modulo__fr_fr, fr, NULL);
-    lk_ext_cfunc(fr, "modulo!", moduloB__fr_fr, fr, NULL);
+    lk_ext_cfunc(fr, "mod", mod__fr_fr, fr, NULL);
+    lk_ext_cfunc(fr, "mod!", modB__fr_fr, fr, NULL);
     lk_ext_cfunc(fr, "*", multiply__fr_fr, fr, NULL);
     lk_ext_cfunc(fr, "*=", multiplyB__fr_fr, fr, NULL);
     lk_ext_cfunc(fr, "negate", negate__fr, NULL);

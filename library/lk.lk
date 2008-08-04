@@ -41,11 +41,11 @@ Comparable/do {
 
     # Returns true if it's equal to the other, using <=> operator
     # for comparison, false otherwise.
-    /eq? := { other | /. <=> other ->zero? }
+    /'==' := { other | /. <=> other ->zero? }
 
     # Returns true if it's greater than or equal to the other, using
     # < operator for comparison, false otherwise.
-    /ge? := { other | /. < other ->not? }
+    /'>=' := { other | /. < other ->not? }
 
     # Returns true if it's greater than the other, using <=> operator for
     # comparison, false otherwise.
@@ -53,7 +53,7 @@ Comparable/do {
 
     # Returns true if it's less than or equal to the other, using
     # > operator for comparison, false otherwise.
-    /le? := { other | /. > other ->not? }
+    /'<=' := { other | /. > other ->not? }
 
     # Returns true if it's less than the other, using <=> operator for
     # comparison, false otherwise.
@@ -62,7 +62,7 @@ Comparable/do {
 
 # Dictionary < GenericSet
 Dictionary/do {
-    /eq? := { ... }
+    /'==' := { ... }
 
     # Iterates over all the items and calls the block with the value.
     /each := { block | /keys/each { v | block[v; /at[v]] } }
@@ -72,7 +72,7 @@ Dictionary/do {
 Enumerable/do {
 
     # Returns true if all the items are equal to match value argument,
-    # using eq? operator for comparison, false otherwise.
+    # using == operator for comparison, false otherwise.
     /all? := { match value | /all? { v | match value == v } }
 
     # Returns true if all the items return true via match using
@@ -85,7 +85,7 @@ Enumerable/do {
     }
 
     # Returns true if any of the items are equal to match value argument,
-    # using eq? operator for comparison, false otherwise.
+    # using == operator for comparison, false otherwise.
     /any? := { match value | /any? { v | match value == v } }
 
     # Returns true if any of the items return true via match using
@@ -98,7 +98,7 @@ Enumerable/do {
     }
 
     # Returns the first item equal to match value argument,
-    # using eq? operator for comparison, nil otherwise.
+    # using == operator for comparison, nil otherwise.
     /find := { match value | /find { v | match value == v } }
 
     # Returns the first item that return true via match using argument,
@@ -114,7 +114,7 @@ Enumerable/do {
     /has? := /.retrieve['any?']
 
     # Returns a list of all items equal to match value argument,
-    # using eq? operator for comparison.
+    # using == operator for comparison.
     /keep := { match value | /keep { v | match value == v } }
 
     # Returns a list of all items that return true via match using argument.
@@ -146,7 +146,7 @@ Enumerable/do {
     }
 
     # Returns a list of all items that does not equal to the match value,
-    # using eq? operator for comparison.
+    # using == operator for comparison.
     /reject := { match value | /reject { v | match value == v } }
 
     # Returns a list of all items excluding the ones that return true
@@ -224,7 +224,7 @@ GenericList/do {
             { while[i < /count] { block[/at[i]]; i = i/succ } } !!
             { while[i < /count] { block[i; /at[i]]; i = i/succ } }
     }
-    /eq? += { to | FALSE }
+    /'==' += { to | FALSE }
     /fill! := { do | /each { i; v | /set![i; do] }; /. }
 
     # Returns the first item in the list.
@@ -302,7 +302,7 @@ Integer/do {
     /'+' := { value : Real | /to real + value }
     /'<=>' := { to : Real | /to real - to }
     /'%' := { by : Real | /to real % by }
-    /eq? := { to : Real | /to real == to }
+    /'==' := { to : Real | /to real == to }
     /integer? := TRUE
     /'*' := { by : Real | /to real * by }
     /'-' := { value : Real | /to real - value }
@@ -328,8 +328,8 @@ List/do {
     }
 
     # Returns true if each item in the list is equal to the ones in
-    # to argument, using ne? operator for comparison, false otherwise.
-    /eq? := { to |
+    # to argument, using != operator for comparison, false otherwise.
+    /'==' := { to |
         to/count - /count != 0 ?? return[FALSE]
         /each { i; v | v != to[i] ?? return[FALSE] }
         TRUE
@@ -367,7 +367,7 @@ Number/do {
 
     # Returns the absolute value of the number.
     /abs := { | /negative? ?? /negate !! /. }
-    /eq? := { to | FALSE }
+    /'==' := { to | FALSE }
     /finite? := TRUE
     /inf? := FALSE
     /integer? := FALSE
@@ -388,18 +388,18 @@ Object/do {
     /'&&' := { other | /to boolean ?? other !! FALSE }
     /'<=>' := { to : POSITIVE INFINITY | -1 }
     /'<=>' += { to : NEGATIVE INFINITY | 1 }
-    /eq? := { to | /.id == to/.id }
+    /'==' := { to | /.id == to/.id }
     /in? := { list | list/has?[/.] }
 
     # Default init function that never does anything.
     /init := { | }
-    /match? := /.retrieve['eq?']
+    /'~=' := /.retrieve['==']
     /then := { args... | /to boolean/then[*args] }
-    /ne? := { to | /. == to ->not? }
+    /'!=' := { to | /. == to ->not? }
     /new := { args... | new := /alloc; new/init[*args]; new }
     /nil? := FALSE
-    /nil_or := { other | /nil? ?? other !! /. }
     /'||' := { other | /to boolean ?? /. !! other }
+    /'|||' := { other | /nil? ?? other !! /. }
     /print := { | /print[STDOUT] }
     /print += { to | to/write[/.]; /. }
     /println := { | /println[STDOUT] }
@@ -451,7 +451,7 @@ Real/do {
     /ceil := { | i := /to integer; /. > 0 && /. - i != 0.0 ?? i + 1 !! i }
     /'<=>' := { to : Integer | /. - to/to real }
     /'%' := { by : Integer | /. % by/to real }
-    /eq? := { to : Integer | /. == to/to real }
+    /'==' := { to : Integer | /. == to/to real }
     /floor := { | i := /to integer; /. > 0 || /. - i == 0.0 ?? i !! i - 1 }
     /'*' := { by : Integer | /. * by/to real }
     /real? := TRUE

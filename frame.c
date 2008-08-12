@@ -167,8 +167,8 @@ lk_obj_t *lk_frame_stackpop(lk_frame_t *self) {
 }
 lk_obj_t *lk_frame_stackpeek(lk_frame_t *self) {
     lk_vm_t *vm = LK_VM(self);
-    if(!LIST_ISINIT(&self->stack)) return vm->t_unknown;
-    if(LIST_COUNT(&self->stack) < 1) return vm->t_unknown;
+    if(!LIST_ISINIT(&self->stack)) return vm->t_nil;
+    if(LIST_COUNT(&self->stack) < 1) return vm->t_nil;
     return list_peekptr(&self->stack);
 }
 lk_list_t *lk_frame_stacktolist(lk_frame_t *self) {

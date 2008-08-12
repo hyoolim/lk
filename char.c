@@ -39,7 +39,7 @@ LK_EXT_DEFINIT(lk_char_extinitfuncs) {
     lk_ext_cfunc(ch, "<=>", subtract__ch_ch, ch, NULL);
     lk_ext_cfunc(ch, "-", subtract__ch_ch, ch, NULL);
     lk_ext_cfunc(ch, "-", subtract__ch_fi, fi, NULL);
-    lk_ext_cfunc(ch, "to string", to_string__ch, NULL);
+    lk_ext_cfunc(ch, "toString", to_string__ch, NULL);
 }
 
 /* new */

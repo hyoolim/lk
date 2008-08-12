@@ -319,7 +319,8 @@ static READTOKENFUNC(readtoken_word) {
     /* if(ISCURR(self, "?")) CHARNEXT(self); */
     if(ISCURR(self, ALPHA)) {
         CHARNEXT(self);
-        /*CHARNEXTWHILE(self, LETTER);*/
+        CHARNEXTWHILE(self, LETTER);
+        /*
         while(ISCURR(self, LETTER " ")) {
             if(ISCURR(self, " ")) {
                 CHARNEXT(self);
@@ -331,6 +332,7 @@ static READTOKENFUNC(readtoken_word) {
                 CHARNEXT(self);
             }
         }
+        */
         if(ISCURR(self, "=!?")) CHARNEXT(self);
         return WORD;
     }

@@ -81,7 +81,7 @@ LK_EXT_DEFINIT(lk_cset_extinitfuncs) {
     lk_ext_cfunc(cset, "negate!", negateB__cset, NULL);
     lk_ext_cfunc(cset, "-=", subtractB__cset_cset, cset, NULL);
     lk_ext_cfunc(cset, "-=", subtractB__cset_str, str, NULL);
-    lk_ext_cfunc(cset, "to string", to_string__cset, NULL);
+    lk_ext_cfunc(cset, "toString", to_string__cset, NULL);
 }
 
 /* new */

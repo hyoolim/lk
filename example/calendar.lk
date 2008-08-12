@@ -1,9 +1,9 @@
 include['datetime.lk']
-write['Year? ']; year := read[0c\n]/chop!/to number
-write['Month? ']; month := read[0c\n]/chop!/to number
+write['Year? ']; year := read[0c\n]/chop!/toNumber
+write['Month? ']; month := read[0c\n]/chop!/toNumber
 d := Date/new[year; month; 1; 0; 0; 0.0]
 header := 'Sun Mon Tue Wed Thu Fri Sat'
-writeln[d/month/to string ++ '/' ++ d/year/to string ->justify right[header/count]]
+writeln[d/month/toString ++ '/' ++ d/year/toString ->justifyRight[header/count]]
 writeln['-' ** header/count]
 writeln[header]
 dow := d/day of week

@@ -1,15 +1,15 @@
 Tester := Object/new/do {
     /init := { /name --- /index := 0 }
     /finish := { ---
-        /name/to string ++ ': Ran ' ++ /index/to string ++
+        /name/toString ++ ': Ran ' ++ /index/toString ++
         ' test(s) successfully' ->println
     }
     /test := { name; actual; expected ---
         /index += 1
         actual != expected ? {
-            raise[/name/to string ++ ": '" ++ name/to string ++
-            "' test failed: " ++ 'expected ' ++ expected/to code ++
-            ' but got ' ++ actual/to code]
+            raise[/name/toString ++ ": '" ++ name/toString ++
+            "' test failed: " ++ 'expected ' ++ expected/toCode ++
+            ' but got ' ++ actual/toCode]
         }
     }
 }

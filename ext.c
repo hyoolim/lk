@@ -50,7 +50,7 @@ void lk_ext_cfield(lk_obj_t *self, const char *k, lk_obj_t *t,
     lk_vm_t *vm = LK_VM(self);
     lk_string_t *k_kc = lk_string_newfromcstr(vm, k);
     struct lk_slot *slot = lk_obj_setslot(
-    LK_OBJ(self), LK_OBJ(k_kc), t, vm->t_unknown);
+    LK_OBJ(self), LK_OBJ(k_kc), t, vm->t_nil);
     assert(offset >= sizeof(struct lk_common));
     LK_SLOT_SETTYPE(slot, LK_SLOTTYPE_CFIELDLKOBJ);
     slot->value.coffset = offset;

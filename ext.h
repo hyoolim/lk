@@ -34,7 +34,7 @@ LK_OBJ(LIST_ATPTR(&env->stack, (i))))
 #define INT(v) (LK_FI(v)->i)
 #define LIST(v) (&LK_GLIST(v)->data)
 #define CSTR(v) (list_tocstr(LIST(v)))
-#define N (VM->t_unknown)
+#define N (VM->t_nil)
 #define T (VM->t_true)
 #define VM (LK_VM(self))
 

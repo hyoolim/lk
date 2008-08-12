@@ -169,9 +169,8 @@ LK_EXT_DEFINIT(lk_fixnum_extinitfuncs) {
                 *f = vm->t_real, *fr = vm->t_fr;
     /* */
     lk_ext_global("Number", num);
-    lk_ext_global("POSITIVE INFINITY", vm->t_pi);
-    lk_ext_global("INF", vm->t_pi);
-    lk_ext_global("NEGATIVE INFINITY", vm->t_ni);
+    lk_ext_global("PositiveInfinity", vm->t_pi);
+    lk_ext_global("NegativeInfinity", vm->t_ni);
     lk_ext_global("Integer", i);
     lk_ext_global("FixedInteger", fi);
     lk_ext_cfunc(fi, "+", add__fi_fi, fi, NULL);
@@ -191,8 +190,8 @@ LK_EXT_DEFINIT(lk_fixnum_extinitfuncs) {
     lk_ext_cfunc(fi, "positive?", positive__fi, NULL);
     lk_ext_cfunc(fi, "-", subtract__fi_fi, fi, NULL);
     lk_ext_cfunc(fi, "-=", subtractB__fi_fi, fi, NULL);
-    lk_ext_cfunc(fi, "to real", to_real__fi, NULL);
-    lk_ext_cfunc(fi, "to string", to_string__fi_str, str, NULL);
+    lk_ext_cfunc(fi, "toReal", to_real__fi, NULL);
+    lk_ext_cfunc(fi, "toString", to_string__fi_str, str, NULL);
     lk_ext_cfunc(fi, "zero?", zero__fi, NULL);
     /* */
     lk_ext_global("Real", f);
@@ -214,8 +213,8 @@ LK_EXT_DEFINIT(lk_fixnum_extinitfuncs) {
     lk_ext_cfunc(fr, "positive?", positive__fr, NULL);
     lk_ext_cfunc(fr, "-", subtract__fr_fr, fr, NULL);
     lk_ext_cfunc(fr, "-=", subtractB__fr_fr, fr, NULL);
-    lk_ext_cfunc(fr, "to integer", to_integer__fr, NULL);
-    lk_ext_cfunc(fr, "to string", to_string__fr_str, str, NULL);
+    lk_ext_cfunc(fr, "toInteger", to_integer__fr, NULL);
+    lk_ext_cfunc(fr, "toString", to_string__fr_str, str, NULL);
     lk_ext_cfunc(fr, "zero?", zero__fr, NULL);
 }
 

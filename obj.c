@@ -249,11 +249,11 @@ struct lk_slot *lk_obj_setslotbycstr(lk_obj_t *self, const char *k,
 void lk_obj_setvalueonslot(lk_obj_t *self, struct lk_slot *slot,
                               lk_obj_t *v) {
     lk_vm_t *vm = LK_VM(self);
-    if(v == NULL) v = vm->t_unknown;
-    if(v == vm->t_unknown || LK_OBJ_ISTYPE(v, slot->check)) {
+    if(v == NULL) v = vm->t_nil;
+    if(v == vm->t_nil || LK_OBJ_ISTYPE(v, slot->check)) {
         lk_obj_addref(self, v);
         if(LK_SLOT_GETTYPE(slot) == LK_SLOTTYPE_CFIELDLKOBJ) {
-            if(v == vm->t_unknown) v = NULL;
+            if(v == vm->t_nil) v = NULL;
             *(lk_obj_t **)((ptrdiff_t)self + slot->value.coffset) = v;
         } else {
             slot->value.lkobj = v;
@@ -380,7 +380,7 @@ lk_obj_t *lk_obj_getvaluefromslot(lk_obj_t *self,
                                         struct lk_slot *slot) {
     if(LK_SLOT_GETTYPE(slot) == LK_SLOTTYPE_CFIELDLKOBJ) {
         lk_obj_t *v = *(lk_obj_t **)((ptrdiff_t)self + slot->value.coffset);
-        return v != NULL ? v : LK_VM(self)->t_unknown;
+        return v != NULL ? v : LK_VM(self)->t_nil;
     } else {
         return slot->value.lkobj;
     }

@@ -85,7 +85,7 @@ struct lk_vm {
     lk_frame_t *global;
 
     /* freq used primitive types */
-    /* bool     */ lk_obj_t *t_unknown, *t_bool, *t_true, *t_false,
+    /* bool     */ lk_obj_t *t_nil, *t_bool, *t_true, *t_false,
                                *t_pi, *t_ni;
     /* buffer   */ lk_obj_t *t_buffer;
     /* char     */ lk_obj_t *t_char;

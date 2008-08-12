@@ -12,21 +12,21 @@ Date := Object/with {
     days in week short := [ 'Sun'; 'Mon'; 'Tue'; 'Wed'; 'Thu'; 'Fri'; 'Sat' ]
 
     valid date? := { y; m; d --- #  {{{
-        m < 1 || m > 12 ? return[FALSE]
-        y < 1 ? return[FALSE]
+        m < 1 || m > 12 ? return[False]
+        y < 1 ? return[False]
         di := (/leap year?[y] ? days in month leap ! days in month)
-        d < 1 || d > di[m - 1] ? return[FALSE]
-        y == 1582 && m == 10 && d > 4 && d < 15 ? return[FALSE]
-        TRUE
+        d < 1 || d > di[m - 1] ? return[False]
+        y == 1582 && m == 10 && d > 4 && d < 15 ? return[False]
+        True
     }# }}}
     valid time? := { h; m; s --- #  {{{
-        h > 23 || h < 0 ? return[FALSE]
-        m > 59 || m < 0 ? return[FALSE]
-        s < 60 || s >= 0 ? return[TRUE]
-        FALSE
+        h > 23 || h < 0 ? return[False]
+        m > 59 || m < 0 ? return[False]
+        s < 60 || s >= 0 ? return[True]
+        False
     }# }}}
     make svar := { h; m; s --- #  {{{
-        (h * 3600)/to real + (m * 60)/to real + s
+        (h * 3600)/toReal + (m * 60)/toReal + s
     }# }}}
     make dvar := { y; m; d --- #  {{{
         # rata-die from http://vsg.cape.com/~pbaum/da/te/rata.htm
@@ -36,21 +36,21 @@ Date := Object/with {
     } #  }}}
     make time := { svar --- #  {{{ 
         #  -i is for "integer" as opposed to "float"/"real"
-        hour i := (svar % 3600.0)/to integer; hour := hour i/to real * 3600.0
-        minute i := ((svar - hour) % 60.0)/to integer; minute := minute i/to real * 60.0
+        hour i := (svar % 3600.0)/toInteger; hour := hour i/toReal * 3600.0
+        minute i := ((svar - hour) % 60.0)/toInteger; minute := minute i/toReal * 60.0
         second := svar - hour - minute
         [hour i; minute i; second]
     }# }}}
     make date := { dvar --- #  {{{
         # rata-die from http://vsg.cape.com/~pbaum/date/inrata.htm
         z := dvar + 306
-        g := z/to real - 0.25
-        a := (g % 36524.25)/to integer
-        b := a - ((a/to real % 4.0)/to integer)
-        year := ((b + g) % 365.25)/to integer
-        c := b + z - (365.25 * year)/to integer
-        month := ((5.0 * c/to real + 456.0) % 153.0)/floor
-        day := c - ((153.0 * month/to real - 457.0) % 5.0)/floor
+        g := z/toReal - 0.25
+        a := (g % 36524.25)/toInteger
+        b := a - ((a/toReal % 4.0)/toInteger)
+        year := ((b + g) % 365.25)/toInteger
+        c := b + z - (365.25 * year)/toInteger
+        month := ((5.0 * c/toReal + 456.0) % 153.0)/floor
+        day := c - ((153.0 * month/toReal - 457.0) % 5.0)/floor
         month > 12 ? { year = year + 1; month = month - 12 } 
         [year; month; day]
     }# }}}
@@ -115,9 +115,9 @@ Date := Object/with {
     }
     /days in year := { --- /leap year? ? 366 ! 365 }
     /leap year? := { y --- 
-         y/mod[4] != 0 ? return[FALSE]
-         y < 1582 ? return[TRUE]
-         y/mod[100] != 0 ? return[TRUE]
+         y/mod[4] != 0 ? return[False]
+         y < 1582 ? return[True]
+         y/mod[100] != 0 ? return[True]
          y/mod[400] == 0
     } + { ---
         /leap year?[/year]
@@ -146,8 +146,8 @@ Date := Object/with {
     /normalize! := { yr; mo; dy; hr; mi; sc; tz --- # {{{
         # time to seconds first
         svar := make svar[hr; mi; sc]
-        days extra := svar/to integer % 86400
-        svar = svar - (days extra * 86400)/to real
+        days extra := svar/toInteger % 86400
+        svar = svar - (days extra * 86400)/toReal
         dy = dy + days extra
         svar < 0.0 ? {
             svar = svar + 86400.0
@@ -199,7 +199,7 @@ Date := Object/with {
 
     # clone
     /clone := { ---
-        Date/new[*(/to list)]
+        Date/new[*(/toList)]
     }
 
     # Create Now
@@ -245,13 +245,13 @@ Date := Object/with {
         /to timezone![VirtualMachine/timezone]
     }
     /to localtime := { --- /clone/to localtime! } #  }}}
-    /to list := { ---
+    /toList := { ---
         [/year; /month; /day; /hour; /minute; /second; /tz]
     }
-    /to string := { ---
-        '[Date: ' ++ /year/to string ++ '-' ++ /month/to string ++ '-' ++
-                /day/to string ++ ' ' ++ /hour/to string ++ ':' ++ /minute/to string ++
-                ':' ++ /second/to string ++ ' ' ++ /tz/to integer/to string ++ ']'
+    /toString := { ---
+        '[Date: ' ++ /year/toString ++ '-' ++ /month/toString ++ '-' ++
+                /day/toString ++ ' ' ++ /hour/toString ++ ':' ++ /minute/toString ++
+                ':' ++ /second/toString ++ ' ' ++ /tz/toInteger/toString ++ ']'
     }
     /serialize := { ---
         # verify date before writing.
@@ -328,5 +328,5 @@ today := Date/now
 first of month := Date/new[today/year; today/month; 1; 12; 0; 0.0; today/tz]
 rest of month := Duration/new[0; 1; -1; 0; 0; 0.0]
 end of month := first of month + rest of month
-(first of month ~ end of month)/each { v --- v/to string ++  v/day of week string -> println }
+(first of month ~ end of month)/each { v --- v/toString ++  v/day of week string -> println }
 

@@ -21,8 +21,6 @@ hi link kcWord Normal
 syntax match kcType /[A-Z][!?]\?/
 syntax match kcType /[A-Z][ .a-zA-Z0-9]*[.a-zA-Z0-9][!?]\?/
 hi link kcType Type
-syntax match kcConstant /[A-Z][ .A-Z0-9]*[ .A-Z0-9][!?]\?/
-hi link kcConstant Constant
 syntax region kcString start=/'/ skip=/\\'/ end=/'/
 syntax region kcString start=/"/ skip=/\\"/ end=/"/
 syntax match kcString /`[^\s{}\[\]();`'".]*/

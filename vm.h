@@ -90,7 +90,6 @@ struct lk_vm {
     /* buffer   */ lk_obj_t *t_buffer;
     /* char     */ lk_obj_t *t_char;
     /* cset     */ lk_obj_t *t_cset;
-    /* dict     */ lk_obj_t *t_dict;
     /* error    */ lk_obj_t *t_error;
     /* file     */ lk_obj_t *t_file, *t_dir, *t_rf, *t_wf,
                                *t_stdin, *t_stdout, *t_stderr;
@@ -102,6 +101,7 @@ struct lk_vm {
     /* gset     */ lk_obj_t *t_gset;
     /* instr    */ lk_obj_t *t_instr;
     /* list     */ lk_obj_t *t_list;
+    /* map      */ lk_obj_t *t_map;
     /* obj      */ lk_obj_t *t_obj;
     /* parser   */ lk_obj_t *t_parser, *t_prec;
     /* socket   */ lk_obj_t *t_socket;

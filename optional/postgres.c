@@ -1,6 +1,6 @@
 #include "postgres.h"
 #include "../ext.h"
-#include "../dict.h"
+#include "../map.h"
 #define CONN(v) (LK_PGCONN(v)->data)
 #define RES(v) (LK_PGQUERY(v)->res)
 
@@ -137,9 +137,9 @@ static LK_EXT_DEFCFUNC(fetch__pgquery) {
     if( LK_PGQUERY(self)->tcurrent < LK_PGQUERY(self)->tcount ) {
         int h = LK_PGQUERY(self)->tcurrent;
         int i;
-        lk_dict_t *kcrow = lk_dict_new(VM);
+        lk_map_t *kcrow = lk_map_new(VM);
         for(i = 0; i < LK_PGQUERY(self)->fcount; i++ ) {
-            lk_dict_setbycstr( LK_DICT(kcrow),
+            lk_map_setbycstr( LK_MAP(kcrow),
                 (const char *)PQfname( RES(self), i ),
                 LK_O(lk_string_newfromdata( VM, 
                     (const char *)PQgetvalue( RES(self), h, i ),

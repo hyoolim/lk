@@ -122,7 +122,6 @@ DocumentGeneratorFile/new[root ++ '/index.html']/do {
     Character
     CharacterSet
     Comparable
-    Dictionary
     Enumerable
     Environment
     Error
@@ -137,6 +136,7 @@ DocumentGeneratorFile/new[root ++ '/index.html']/do {
     Integer
     IpAddress
     List
+    Map
     N
     NegativeInfinity
     Number

@@ -3,7 +3,6 @@
 #include "buffer.h"
 #include "char.h"
 #include "cset.h"
-#include "dict.h"
 #include "env.h"
 #include "error.h"
 #include "ext.h"
@@ -17,6 +16,7 @@
 #include "gset.h"
 #include "instr.h"
 #include "list.h"
+#include "map.h"
 #include "obj.h"
 #include "parser.h"
 #include "random.h"
@@ -149,7 +149,7 @@ lk_vm_t *lk_vm_new(void) {
     lk_buffer_extinittypes(self);
     lk_char_extinittypes(self);
     lk_cset_extinittypes(self);
-    lk_dict_extinittypes(self);
+    lk_map_extinittypes(self);
     lk_error_extinittypes(self);
     lk_file_extinittypes(self);
     lk_vector_extinittypes(self);
@@ -175,7 +175,7 @@ lk_vm_t *lk_vm_new(void) {
     lk_buffer_extinitfuncs(self);
     lk_char_extinitfuncs(self);
     lk_cset_extinitfuncs(self);
-    lk_dict_extinitfuncs(self);
+    lk_map_extinitfuncs(self);
     lk_error_extinitfuncs(self);
     lk_file_extinitfuncs(self);
     lk_vector_extinitfuncs(self);

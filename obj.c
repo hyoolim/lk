@@ -1,9 +1,9 @@
 #include "obj.h"
 #include "ext.h"
-#include "dict.h"
 #include "fixnum.h"
 #include "gc.h"
 #include "list.h"
+#include "map.h"
 
 /* ext map - types */
 LK_EXT_DEFINIT(lk_obj_extinittypes) {

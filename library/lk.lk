@@ -60,8 +60,8 @@ Comparable/do {
     /'<' := { other | /. <=> other ->negative? }
 }
 
-# Dictionary < GenericSet
-Dictionary/do {
+# Map < GenericSet
+Map/do {
     /'==' := { ... }
 
     # Iterates over all the items and calls the block with the value.

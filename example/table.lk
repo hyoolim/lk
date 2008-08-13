@@ -5,7 +5,7 @@ Row := List/with {
 }
 Table := Object/with {
     /init := { /columns... ---
-        /data := Dictionary/new
+        /data := Map/new
         /columns/each { v; i ---
             /data/set![v; r := Row/new]
             /':='[v; r]

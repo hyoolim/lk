@@ -1,98 +1,59 @@
-## required programs
-AR     = ar rcu
-CP     = cp
-MKDIR  = mkdir -p
-RANLIB = ranlib
-RM     = rm -f
-RMDIR  = rmdir
-SED    = sed
+## compiler
+COMPILER ?= cc
+COMPILER_FLAGS ?= -O2 -g -Wall -ansi -pedantic
 
-## package name and version
-NAME  = lk
-MAJOR = 0
-MINOR = 9
-PATCH = 0
+## linker
+LINKER ?= cc
+LINKER_FLAGS ?=
 
-## compiler options
-BUILD   = _build
-CFLAGS  = -O2 -g -Wall -ansi -pedantic
-DFLAGS  = -M
-LDFLAGS =
-LIBS    =
-
-## platform-specific options
-OS = $(shell uname -s)
-ifeq ($(OS),Linux)
-LDFLAGS += -rdynamic
-LIBS += -ldl
+## platform-specific
+OS := $(shell uname -s)
+ifneq (,$(findstring $(OS),Darwin Linux))
+LINKER_FLAGS +=-ldl
+endif
+ifneq (,$(findstring $(OS),Linux))
+LINKER_FLAGS += -lm
 endif
 
-## source and output files
+## output files
 sources = $(shell cat sources)
-objects = $(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(sources)))
+objects = $(addprefix tmp/,$(patsubst %.c,%.o,$(sources)))
 depends = $(patsubst %.o,%.d,$(objects))
 
 ## main targets
-.PHONY: all test install clean
-all: $(BUILD)/lk
-test: $(BUILD)/lk_mini
-	@echo
-	@echo '>>>> Testing <<<<'
-	@echo '-----------------'
-	for test in `find ./test -name '*.lk'`; \
-	do $(BUILD)/lk_mini library/lk.lk $$test; done;
-install: all
-	@echo
-	@echo '>>>> Installing <<<<'
-	@echo '--------------------'
-	$(MKDIR) $(BINDIR)
-	$(CP) $(BUILD)/lk_mini $(BINDIR)
-	$(CP) $(BUILD)/lk $(BINDIR)
-	$(MKDIR) $(LIBDIR)
-	$(CP) library/* $(LIBDIR)
+.PHONY: all clean install test
+all: tmp/lk
 clean:
-	@echo
-	@echo '>>>> Cleaning <<<<'
-	@echo '------------------'
-	$(RM) $(BUILD)/*
-	$(RMDIR) $(BUILD)
+	rm -rf tmp
+install: all
+	mkdir -p $(BINDIR)
+	cp tmp/lk_mini $(BINDIR)
+	cp tmp/lk $(BINDIR)
+	mkdir -p $(LIBDIR)
+	cp lib/* $(LIBDIR)
+test: tmp/lk_mini
+	for test in `find test -name '*.lk'`; do tmp/lk_mini lib/lk.lk $$test; done;
 
-## calc'd dep
+## calculated dependencies
 -include $(depends)
--include $(BUILD)/config
--include $(BUILD)/init
+-include tmp/configData
 
-## misc targets - how to compile various obj files
-$(BUILD)/%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
-$(BUILD)/%.d: %.c
-	@set -e; $(RM) $@; \
-	$(CC) $(DFLAGS) $< | \
-	$(SED) 's,$*\.o[ :]*,$(BUILD)/$*.o : ,g' > $@
-$(BUILD)/init:
-	@echo
-	@echo '>>>> Initializing <<<'
-	@echo '---------------------'
-	$(MKDIR) $(BUILD)
-$(BUILD)/lk_mini: $(objects) $(BUILD)/lk_mini.o
-	@echo
-	@echo '>>>> Building (lk_mini) <<<<'
-	@echo '----------------------------'
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $(BUILD)/lk_mini \
-	$(objects) $(BUILD)/lk_mini.o $(LIBS)
-$(BUILD)/config: $(BUILD)/lk_mini ./config.lk
-	@echo
-	@echo '>>>> Configuring <<<<'
-	@echo '---------------------'
-	if [ ! -e $(BUILD)/config ]; \
-    then $(BUILD)/lk_mini ./library/lk.lk ./config.lk; fi;
-$(BUILD)/lk.o: lk.c $(BUILD)/config
-	$(CC) $(CFLAGS) -c lk.c -o $(BUILD)/lk.o \
-	-DMF_PREFIX='$(PREFIX)' -DMF_BINDIR='$(BINDIR)' \
-	-DMF_LIBDIR='$(LIBDIR)'
-$(BUILD)/lk: $(BUILD)/lk_mini $(BUILD)/lk.o
-	@echo
-	@echo '>>>> Building <<<<'
-	@echo '--  --------------'
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $(BUILD)/lk \
-	$(objects) $(BUILD)/lk.o $(LIBS)
+## make sure tmp folder for build output exists
+tmp/init:
+	mkdir -p tmp
+	touch tmp/init
+$(objects) $(depends): tmp/init
+
+## how to build everything else
+tmp/%.o: %.c
+	$(COMPILER) $(COMPILER_FLAGS) -c $< -o $@
+tmp/%.d: %.c
+	$(COMPILER) -MM -MT tmp/$(patsubst %.c,%.d,$<) -MT tmp/$(patsubst %.c,%.o,$<) -MF $@ $<
+tmp/lk_mini: $(objects) tmp/lk_mini.o
+	$(COMPILER) $(LINKER_FLAGS) -o tmp/lk_mini $(objects) tmp/lk_mini.o
+tmp/configData: tmp/lk_mini config.lk
+	if [ ! -e tmp/configData ]; then tmp/lk_mini lib/lk.lk config.lk tmp/configData; fi;
+tmp/lk.o: lk.c tmp/configData
+	$(COMPILER) $(COMPILER_FLAGS) -c lk.c -o tmp/lk.o -DMF_PREFIX='$(PREFIX)' -DMF_BINDIR='$(BINDIR)' -DMF_LIBDIR='$(LIBDIR)'
+tmp/lk: tmp/lk_mini tmp/lk.o
+	$(COMPILER) $(LINKER_FLAGS) -o tmp/lk $(objects) tmp/lk.o

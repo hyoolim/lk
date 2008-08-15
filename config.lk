@@ -1,26 +1,32 @@
-prefix := bindir := libdir := yn := ''
+prefix := '/usr/local'
+bindir := libdir := Nil
+writeSeperator := {
+    write['\n']
+    write['-' ** 80; '\n']
+    write['\n']
+}
 loop {
 
-# ask.
-'\n* Please configure lk:'/println
-'  * PREFIX[/usr/local]? ' ->print; prefix = read[0c\n] ->chop!
-prefix = prefix || '/usr/local'
-'  * BINDIR[' ++ prefix ++ '/bin]? ' ->print; bindir = read[0c\n] ->chop!
-bindir = bindir || prefix ++ '/bin'
-'  * LIBDIR[' ++ prefix ++ '/lib/lk]?' ->print; libdir = read[0c\n] ->chop!
-libdir = libdir || prefix ++ '/lib/lk'
-
-# verify.
-'\n* Please confirm the following inputs:'/println
-'  * PREFIX="' ++ prefix ++ '"' ->println
-'  * BINDIR="' ++ bindir ++ '"' ->println
-'  * LIBDIR="' ++ libdir ++ '"' ->println
-'\n* Write the config file[Y/n]? ' ->print; yn = read[0c\n] ->chop!
-yn/lc != 'n' ? break;
+    ## ask and verify
+    writeSeperator
+    write['Please configure lk:\n']
+    write['\n']
+    write['Install prefix ('; prefix; ')? ']
+    prefix = read[0c\n]/trim || prefix
+    bindir = prefix ++ '/bin'
+    write['Path to binaries ('; bindir; ')? ']
+    bindir = read[0c\n]/trim || bindir
+    libdir = prefix ++ '/lib/lk'
+    write['Path to libraries ('; libdir; ')? ']
+    libdir = read[0c\n]/trim || libdir
+    write['\n']
+    write['Write the config file (Y/n)? ']
+    read[0c\n]/trim/lc != 'n' ? break
 }
 
-# save.
-WritableFile/new['_build/config']/do {
+# save
+writeSeperator
+WritableFile/new[ARGUMENTS[0]]/do {
     /writeln['PREFIX="' ++ prefix ++ '"']
     /writeln['BINDIR="' ++ bindir ++ '"']
     /writeln['LIBDIR="' ++ libdir ++ '"']

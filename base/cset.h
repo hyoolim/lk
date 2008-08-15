@@ -1,6 +1,6 @@
 #ifndef CSET_H
 #define CSET_H
-#include "_common.h"
+#include "common.h"
 
 /* type */
 typedef struct cset {
@@ -28,7 +28,7 @@ void cset_add(cset_t *self, uint32_t from, uint32_t to);
 void cset_subtract(cset_t *self, uint32_t from, uint32_t to);
 void cset_addcset(cset_t *self, cset_t *other);
 void cset_subtractcset(cset_t *self, cset_t *other);
-#include "_list.h"
+#include "list.h"
 void cset_addstring(cset_t *self, list_t *str);
 void cset_subtractstring(cset_t *self, list_t *str);
 

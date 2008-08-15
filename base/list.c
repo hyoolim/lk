@@ -1,4 +1,4 @@
-#include "_list.h"
+#include "list.h"
 
 /* new */
 static struct listdata *listdata_alloc(int ilen, int capa) {

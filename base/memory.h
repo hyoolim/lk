@@ -1,6 +1,6 @@
 #ifndef MEMORY_H
 #define MEMORY_H
-#include "_common.h"
+#include "common.h"
 #include <string.h>
 
 /* new */

@@ -2,11 +2,11 @@
 #define LK_VM_H
 
 /* generic lib for handling common types of data */
-#include "_common.h"
-#include "_number.h"
-#include "_list.h"
-#include "_set.h"
-#include "_string.h"
+#include "base/common.h"
+#include "base/number.h"
+#include "base/list.h"
+#include "base/set.h"
+#include "base/string.h"
 #include <setjmp.h>
 
 /* type - see further down below for actual def */

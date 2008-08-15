@@ -1,6 +1,6 @@
 #ifndef LIST_H
 #define LIST_H
-#include "_common.h"
+#include "common.h"
 
 /* type - contains actual list data */
 struct listdata {
@@ -80,7 +80,7 @@ int list_cmpcstr(const list_t *self, const char *other);
     LIST_COUNT(self) != LIST_COUNT(other) \
     ? 0 : list_cmp((self), (other)) == 0 \
 )
-#include "_cset.h"
+#include "cset.h"
 int list_findcset(const list_t *self, const cset_t *pat, int o);
 int list_findlist(const list_t *self, const list_t *pat, int o);
 int list_finduchar(const list_t *self, uint32_t pat, int o);

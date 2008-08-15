@@ -1,6 +1,6 @@
 #ifndef SET_H
 #define SET_H
-#include "_common.h"
+#include "common.h"
 
 /* base set item type; usually bigger to include value */
 typedef struct setitem {

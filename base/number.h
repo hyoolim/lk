@@ -1,7 +1,7 @@
 #ifndef NUMBER_H
 #define NUMBER_H
-#include "_common.h"
-#include "_string.h"
+#include "common.h"
+#include "string.h"
 
 /* type. */
 typedef enum numbertype {

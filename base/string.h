@@ -1,7 +1,7 @@
 #ifndef STRING_H
 #define STRING_H
-#include "_common.h"
-#include "_list.h"
+#include "common.h"
+#include "list.h"
 
 /* new */
 list_t *string_allocfromdata(const void *data, int len);

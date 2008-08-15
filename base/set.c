@@ -1,4 +1,4 @@
-#include "_set.h"
+#include "set.h"
 
 /* set capa needs to be primes for quadratic probing to work */
 static unsigned long primes[] = { 

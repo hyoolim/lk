@@ -15,5 +15,5 @@
 #define MEMORYERROR(cstr) ERROR("Memory error: " cstr)
 
 /* memory management */
-#include "_memory.h"
+#include "memory.h"
 #endif

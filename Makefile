@@ -16,7 +16,7 @@ LINKER_FLAGS += -lm
 endif
 
 ## output files
-sources = $(shell cat sources)
+sources = $(wildcard base/*.c) $(patsubst %.h,%.c,$(wildcard *.h))
 objects = $(addprefix tmp/,$(patsubst %.c,%.o,$(sources)))
 depends = $(patsubst %.o,%.d,$(objects))
 
@@ -41,6 +41,7 @@ test: tmp/lk_mini
 ## make sure tmp folder for build output exists
 tmp/init:
 	mkdir -p tmp
+	mkdir -p tmp/base
 	touch tmp/init
 $(objects) $(depends): tmp/init
 

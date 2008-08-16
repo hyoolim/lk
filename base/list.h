@@ -16,57 +16,57 @@ typedef struct list {
     struct listdata *data;
     char               *first;
     int                 count;
-} list_t;
+} Sequence_t;
 
 /* new */
-list_t *list_alloc(int ilen, int capa);
-list_t *list_allocptr(void);
-list_t *list_allocptrwithcapa(int capa);
-list_t *list_allocfromfile(FILE *stream, size_t rs);
-list_t *list_clone(list_t *self);
-void list_init(list_t *self, int ilen, int capa);
-void list_initptr(list_t *self);
-void list_copy(list_t *self, list_t *src);
-void list_fin(list_t *self);
-void list_free(list_t *self);
+Sequence_t *Sequence_alloc(int ilen, int capa);
+Sequence_t *Sequence_allocptr(void);
+Sequence_t *Sequence_allocptrwithcapa(int capa);
+Sequence_t *Sequence_allocfromfile(FILE *stream, size_t rs);
+Sequence_t *Sequence_clone(Sequence_t *self);
+void Sequence_init(Sequence_t *self, int ilen, int capa);
+void Sequence_initptr(Sequence_t *self);
+void Sequence_copy(Sequence_t *self, Sequence_t *src);
+void Sequence_fin(Sequence_t *self);
+void Sequence_free(Sequence_t *self);
 
 /* update */
-void list_clear(list_t *self);
-void list_concat(list_t *self, list_t *v);
-void list_insert(list_t *self, int i, void *v);
-void list_insertptr(list_t *self, int i, void *v);
-void list_insertuchar(list_t *self, int i, uint32_t v);
-void list_limit(list_t *self, int n);
-void list_offset(list_t *self, int n);
-void *list_peekptr(list_t *self);
-uint32_t list_peekuchar(list_t *self);
-void *list_popptr(list_t *self);
-uint32_t list_popuchar(list_t *self);
-void list_pushptr(list_t *self, void *v);
-void list_pushuchar(list_t *self, uint32_t v);
-void list_remove(list_t *self, int i);
-void *list_removeptr(list_t *self, int i);
-uint32_t list_removeuchar(list_t *self, int i);
-void list_resize(list_t *self, int s);
-void list_resizeitem(list_t *self, list_t *other);
-void list_reverse(list_t *self);
-void list_set(list_t *self, int i, void *v);
-void list_setptr(list_t *self, int i, void *v);
-void list_setrange(list_t *self, int b, int e, list_t *v);
-void list_setuchar(list_t *self, int i, uint32_t v);
-void *list_shiftptr(list_t *self);
-void list_slice(list_t *self, int offset, int limit);
-const char *list_tocstr(list_t *self);
-void list_unshiftptr(list_t *self, void *v);
+void Sequence_clear(Sequence_t *self);
+void Sequence_concat(Sequence_t *self, Sequence_t *v);
+void Sequence_insert(Sequence_t *self, int i, void *v);
+void Sequence_insertptr(Sequence_t *self, int i, void *v);
+void Sequence_insertuchar(Sequence_t *self, int i, uint32_t v);
+void Sequence_limit(Sequence_t *self, int n);
+void Sequence_offset(Sequence_t *self, int n);
+void *Sequence_peekptr(Sequence_t *self);
+uint32_t Sequence_peekuchar(Sequence_t *self);
+void *Sequence_popptr(Sequence_t *self);
+uint32_t Sequence_popuchar(Sequence_t *self);
+void Sequence_pushptr(Sequence_t *self, void *v);
+void Sequence_pushuchar(Sequence_t *self, uint32_t v);
+void Sequence_remove(Sequence_t *self, int i);
+void *Sequence_removeptr(Sequence_t *self, int i);
+uint32_t Sequence_removeuchar(Sequence_t *self, int i);
+void Sequence_resize(Sequence_t *self, int s);
+void Sequence_resizeitem(Sequence_t *self, Sequence_t *other);
+void Sequence_reverse(Sequence_t *self);
+void Sequence_set(Sequence_t *self, int i, void *v);
+void Sequence_setptr(Sequence_t *self, int i, void *v);
+void Sequence_setrange(Sequence_t *self, int b, int e, Sequence_t *v);
+void Sequence_setuchar(Sequence_t *self, int i, uint32_t v);
+void *Sequence_shiftptr(Sequence_t *self);
+void Sequence_slice(Sequence_t *self, int offset, int limit);
+const char *Sequence_tocstr(Sequence_t *self);
+void Sequence_unshiftptr(Sequence_t *self, void *v);
 
 /* info */
 #define LIST_AT(self, i) ((self)->first + (self)->data->ilen * i)
 #define LIST_ATPTR(self, i) (*(void **)LIST_AT(self, (i)))
-int list_cmp(const list_t *self, const list_t *other);
-int list_cmpcstr(const list_t *self, const char *other);
+int Sequence_cmp(const Sequence_t *self, const Sequence_t *other);
+int Sequence_cmpcstr(const Sequence_t *self, const char *other);
 #define LIST_COUNT(self) ((self)->count)
 #define LIST_EACH(self, i, v, block) do { \
-    list_t *_l = (self); \
+    Sequence_t *_l = (self); \
     int i, _c = LIST_COUNT(_l); \
     void *v; \
     for(i = 0; i < _c; i ++) { \
@@ -78,16 +78,16 @@ int list_cmpcstr(const list_t *self, const char *other);
     LIST_EACH(self, i, v, v = *(void **)v; block);
 #define LIST_EQ(self, other) ( \
     LIST_COUNT(self) != LIST_COUNT(other) \
-    ? 0 : list_cmp((self), (other)) == 0 \
+    ? 0 : Sequence_cmp((self), (other)) == 0 \
 )
 #include "cset.h"
-int list_findcset(const list_t *self, const cset_t *pat, int o);
-int list_findlist(const list_t *self, const list_t *pat, int o);
-int list_finduchar(const list_t *self, uint32_t pat, int o);
-void *list_get(const list_t *self, int i);
-void *list_getptr(const list_t *self, int i);
-uint32_t list_getuchar(const list_t *self, int i);
-int list_hc(const list_t *self);
+int Sequence_findcset(const Sequence_t *self, const CharacterSet_t *pat, int o);
+int Sequence_findlist(const Sequence_t *self, const Sequence_t *pat, int o);
+int Sequence_finduchar(const Sequence_t *self, uint32_t pat, int o);
+void *Sequence_get(const Sequence_t *self, int i);
+void *Sequence_getptr(const Sequence_t *self, int i);
+uint32_t Sequence_getuchar(const Sequence_t *self, int i);
+int Sequence_hc(const Sequence_t *self);
 #define LIST_ISINIT(self) ((self)->data != NULL)
-void list_write(const list_t *self, FILE *stream);
+void Sequence_write(const Sequence_t *self, FILE *stream);
 #endif

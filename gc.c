@@ -9,38 +9,38 @@ static LK_OBJ_DEFFREEFUNC(free__gc) {
     memory_free(GC->used);
     memory_free(GC->permanent);
 }
-LK_EXT_DEFINIT(lk_gc_extinittypes) {
-    vm->gc = LK_GC(lk_obj_allocwithsize(vm->t_obj, sizeof(lk_gc_t)));
-    vm->gc->unused = memory_alloc(sizeof(struct lk_objgroup));
-    vm->gc->pending = memory_alloc(sizeof(struct lk_objgroup));
-    vm->gc->used = memory_alloc(sizeof(struct lk_objgroup));
-    vm->gc->permanent = memory_alloc(sizeof(struct lk_objgroup));
-    lk_obj_setfreefunc(LK_OBJ(vm->gc), free__gc);
+LK_EXT_DEFINIT(lk_Gc_extinittypes) {
+    vm->gc = LK_GC(lk_Object_allocwithsize(vm->t_obj, sizeof(lk_Gc_t)));
+    vm->gc->unused = memory_alloc(sizeof(struct lk_Objectgroup));
+    vm->gc->pending = memory_alloc(sizeof(struct lk_Objectgroup));
+    vm->gc->used = memory_alloc(sizeof(struct lk_Objectgroup));
+    vm->gc->permanent = memory_alloc(sizeof(struct lk_Objectgroup));
+    lk_Object_setfreefunc(LK_OBJ(vm->gc), free__gc);
 }
 
 /* ext map - funcs */
-static LK_EXT_DEFCFUNC(pause__gc) {
-    lk_gc_pause(LK_GC(self)); RETURN(self); }
-static LK_EXT_DEFCFUNC(resume__gc) {
-    lk_gc_resume(LK_GC(self)); RETURN(self); }
-LK_EXT_DEFINIT(lk_gc_extinitfuncs) {
-    lk_obj_t *gc = LK_OBJ(vm->gc);
-    lk_ext_set(vm->t_vm, "GarbageCollector", gc);
-    lk_ext_cfunc(gc, "pause", pause__gc, NULL);
-    lk_ext_cfunc(gc, "resume", resume__gc, NULL);
+LK_LIBRARY_DEFINECFUNCTION(pause__gc) {
+    lk_Gc_pause(LK_GC(self)); RETURN(self); }
+LK_LIBRARY_DEFINECFUNCTION(resume__gc) {
+    lk_Gc_resume(LK_GC(self)); RETURN(self); }
+LK_EXT_DEFINIT(lk_Gc_extinitfuncs) {
+    lk_Object_t *gc = LK_OBJ(vm->gc);
+    lk_Library_set(vm->t_vm, "GarbageCollector", gc);
+    lk_Library_setCFunction(gc, "pause", pause__gc, NULL);
+    lk_Library_setCFunction(gc, "resume", resume__gc, NULL);
 }
 
 /* update */
-void lk_objgroup_freevalues(struct lk_objgroup *self) {
-    lk_obj_t *c = self->first, *n;
+void lk_Objectgroup_freevalues(struct lk_Objectgroup *self) {
+    lk_Object_t *c = self->first, *n;
     for(; c != NULL; c = n) {
         n = c->obj.mark.next;
-        lk_obj_justfree(c);
+        lk_Object_justfree(c);
     }
 }
-void lk_objgroup_remove(lk_obj_t *v) {
-    struct lk_objgroup *from = v->obj.mark.objgroup;
-    lk_obj_t *p = v->obj.mark.prev, *n = v->obj.mark.next;
+void lk_Objectgroup_remove(lk_Object_t *v) {
+    struct lk_Objectgroup *from = v->obj.mark.objgroup;
+    lk_Object_t *p = v->obj.mark.prev, *n = v->obj.mark.next;
     if(p != NULL) p->obj.mark.next = n;
     if(n != NULL) n->obj.mark.prev = p;
     if(from != NULL) {
@@ -48,7 +48,7 @@ void lk_objgroup_remove(lk_obj_t *v) {
         if(from->last == v) from->last = p;
     }
 }
-void lk_objgroup_insert(struct lk_objgroup *self, lk_obj_t *v) {
+void lk_Objectgroup_insert(struct lk_Objectgroup *self, lk_Object_t *v) {
     v->obj.mark.prev = self->last;
     v->obj.mark.next = NULL;
     v->obj.mark.objgroup = self;
@@ -56,35 +56,35 @@ void lk_objgroup_insert(struct lk_objgroup *self, lk_obj_t *v) {
     else (self->last->obj.mark.next = v)->obj.mark.prev = self->last;
     self->last = v;
 }
-void lk_obj_markpending(lk_obj_t *self) {
-    lk_gc_t *gc = LK_VM(self)->gc;
+void lk_Object_markpending(lk_Object_t *self) {
+    lk_Gc_t *gc = LK_VM(self)->gc;
     if(LK_GC_ISMARKUNUSED(gc, self)) {
-        lk_objgroup_remove(self);
-        lk_objgroup_insert(gc->pending, self);
+        lk_Objectgroup_remove(self);
+        lk_Objectgroup_insert(gc->pending, self);
     }
 }
-static void gc_markpendingifunused(lk_obj_t *v) {
-    if(v != NULL) lk_obj_markpending(v);
+static void gc_markpendingifunused(lk_Object_t *v) {
+    if(v != NULL) lk_Object_markpending(v);
 }
-void lk_obj_markused(lk_obj_t *self) {
-    lk_gc_t *gc = LK_VM(self)->gc;
+void lk_Object_markused(lk_Object_t *self) {
+    lk_Gc_t *gc = LK_VM(self)->gc;
     if(LK_GC_ISMARKPENDING(gc, self)) {
-        lk_objgroup_remove(self);
-        lk_objgroup_insert(gc->used, self);
+        lk_Objectgroup_remove(self);
+        lk_Objectgroup_insert(gc->used, self);
         if(LK_OBJ_HASPARENTS(self)) {
             LIST_EACHPTR(LK_OBJ_PARENTS(self), i, v,
-                lk_obj_markpending(LK_OBJ(v));
+                lk_Object_markpending(LK_OBJ(v));
             );
         } else {
-            if(self->obj.parent != NULL) lk_obj_markpending(self->obj.parent);
+            if(self->obj.parent != NULL) lk_Object_markpending(self->obj.parent);
         }
         if(self->obj.slots != NULL) {
-            struct lk_slot *slot;
+            struct lk_Slot *slot;
             SET_EACH(self->obj.slots, item,
-                lk_obj_markpending(LK_OBJ(item->key));
+                lk_Object_markpending(LK_OBJ(item->key));
                 slot = LK_SLOT(SETITEM_VALUEPTR(item));
-                lk_obj_markpending(slot->check);
-                lk_obj_markpending(lk_obj_getvaluefromslot(self, slot));
+                lk_Object_markpending(slot->check);
+                lk_Object_markpending(lk_Object_getvaluefromslot(self, slot));
             );
         }
         if(self->obj.tag->markfunc != NULL) {
@@ -92,51 +92,51 @@ void lk_obj_markused(lk_obj_t *self) {
         }
     }
 }
-lk_obj_t *lk_obj_addref(lk_obj_t *self, lk_obj_t *v) {
-    lk_gc_t *gc = LK_VM(self)->gc;
-    if(LK_GC_ISMARKUSED(gc, self)) lk_obj_markpending(v);
+lk_Object_t *lk_Object_addref(lk_Object_t *self, lk_Object_t *v) {
+    lk_Gc_t *gc = LK_VM(self)->gc;
+    if(LK_GC_ISMARKUSED(gc, self)) lk_Object_markpending(v);
     v->obj.mark.isref = 1;
     return v;
 }
-void lk_gc_pause(lk_gc_t *self) {
+void lk_Gc_pause(lk_Gc_t *self) {
     self->isrunning = 0;
 }
-void lk_gc_resume(lk_gc_t *self) {
+void lk_Gc_resume(lk_Gc_t *self) {
     self->isrunning = 1;
 }
-void lk_gc_mark(lk_gc_t *self) {
+void lk_Gc_mark(lk_Gc_t *self) {
     if(self->isrunning) {
         int i;
         /*
         printf("marking! - unused: %i, pending: %i, used: %i\n",
-        lk_objgroup_count(self->unused),
-        lk_objgroup_count(self->pending),
-        lk_objgroup_count(self->used));
+        lk_Objectgroup_count(self->unused),
+        lk_Objectgroup_count(self->pending),
+        lk_Objectgroup_count(self->used));
          */
         for(i = 0; i < 30000; i ++) {
-            if(self->pending->first == NULL) { lk_gc_sweep(self); break; }
-            lk_obj_markused(self->pending->first);
+            if(self->pending->first == NULL) { lk_Gc_sweep(self); break; }
+            lk_Object_markused(self->pending->first);
         }
     }
 }
-void lk_gc_sweep(lk_gc_t *self) {
+void lk_Gc_sweep(lk_Gc_t *self) {
     if(self->isrunning) {
-        lk_vm_t *vm = LK_VM(self);
-        struct lk_objgroup *unused = self->unused;
-        struct lk_rsrcchain *rsrc = vm->rsrc;
+        lk_Vm_t *vm = LK_VM(self);
+        struct lk_Objectgroup *unused = self->unused;
+        struct lk_Rsrcchain *rsrc = vm->rsrc;
         /*
         printf("sweeping! - unused: %i, used: %i\n",
-        lk_objgroup_count(self->unused),
-        lk_objgroup_count(self->used));
+        lk_Objectgroup_count(self->unused),
+        lk_Objectgroup_count(self->used));
          */
-        lk_obj_markpending(LK_OBJ(vm->currentFrame));
+        lk_Object_markpending(LK_OBJ(vm->currentFrame));
         for(; rsrc != NULL; rsrc = rsrc->prev) {
-            lk_obj_markpending(LK_OBJ(rsrc->rsrc));
+            lk_Object_markpending(LK_OBJ(rsrc->rsrc));
         }
         while(self->pending->first != NULL) {
-            lk_obj_markused(self->pending->first);
+            lk_Object_markused(self->pending->first);
         }
-        lk_objgroup_freevalues(unused);
+        lk_Objectgroup_freevalues(unused);
         unused->first = unused->last = NULL;
         self->unused = self->used;
         self->used = unused;
@@ -144,9 +144,9 @@ void lk_gc_sweep(lk_gc_t *self) {
 }
 
 /* info */
-int lk_objgroup_count(struct lk_objgroup *self) {
+int lk_Objectgroup_count(struct lk_Objectgroup *self) {
     int c = 0;
-    lk_obj_t *i;
+    lk_Object_t *i;
     for(i = self->first; i != NULL; i = i->obj.mark.next) c ++;
     return c;
 }

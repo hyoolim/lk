@@ -8,12 +8,12 @@
 static LK_OBJ_DEFFREEFUNC(free__ext) {
     if(LK_EXT(self)->lib != NULL) dlclose(LK_EXT(self)->lib);
 }
-static LK_EXT_DEFCFUNC(init__ext_str_str) {
-    const char *libpath = list_tocstr(LIST(ARG(0)));
+LK_LIBRARY_DEFINECFUNCTION(init__ext_str_str) {
+    const char *libpath = Sequence_tocstr(LIST(ARG(0)));
     void *lib = dlopen(libpath, RTLD_NOW);
     if(lib != NULL) {
-        const char *initname = list_tocstr(LIST(ARG(1)));
-        union { void *p; lk_extinitfunc_t *f; } initfunc;
+        const char *initname = Sequence_tocstr(LIST(ARG(1)));
+        union { void *p; lk_Libraryinitfunc_t *f; } initfunc;
         initfunc.p = dlsym(lib, initname);
         LK_EXT(self)->lib = lib;
         if(initfunc.f != NULL) initfunc.f(VM);
@@ -25,66 +25,66 @@ static LK_EXT_DEFCFUNC(init__ext_str_str) {
     }
     RETURN(self);
 }
-LK_EXT_DEFINIT(lk_ext_extinit) {
-    lk_obj_t *str = vm->t_string;
-    lk_obj_t *ext = lk_obj_allocwithsize(vm->t_obj, sizeof(lk_ext_t));
-    lk_obj_setfreefunc(ext, free__ext);
-    lk_ext_global("Extension", ext);
-    lk_ext_cfunc(ext, "init", init__ext_str_str, str, str, NULL);
+LK_EXT_DEFINIT(lk_Library_extinit) {
+    lk_Object_t *str = vm->t_string;
+    lk_Object_t *ext = lk_Object_allocwithsize(vm->t_obj, sizeof(lk_Library_t));
+    lk_Object_setfreefunc(ext, free__ext);
+    lk_Library_setGlobal("Extension", ext);
+    lk_Library_setCFunction(ext, "init", init__ext_str_str, str, str, NULL);
 }
 
 /* update */
-void lk_ext_set(lk_obj_t *parent, const char *k, lk_obj_t *v) {
-    lk_vm_t *vm = LK_VM(parent);
-    lk_string_t *k_kc = lk_string_newfromcstr(vm, k);
-    lk_obj_setslot(parent, LK_OBJ(k_kc), vm->t_obj, v);
+void lk_Library_set(lk_Object_t *parent, const char *k, lk_Object_t *v) {
+    lk_Vm_t *vm = LK_VM(parent);
+    lk_String_t *k_kc = lk_String_newfromcstr(vm, k);
+    lk_Object_setslot(parent, LK_OBJ(k_kc), vm->t_obj, v);
     /*
-    lk_obj_setslot(v, LK_OBJ(vm->str_type), vm->t_string, LK_OBJ(k_kc));
+    lk_Object_setslot(v, LK_OBJ(vm->str_type), vm->t_string, LK_OBJ(k_kc));
     */
 }
-void lk_ext_global(const char *k, lk_obj_t *v) {
-    lk_ext_set(LK_OBJ(LK_VM(v)->global), k, v);
+void lk_Library_setGlobal(const char *k, lk_Object_t *v) {
+    lk_Library_set(LK_OBJ(LK_VM(v)->global), k, v);
 }
-void lk_ext_cfield(lk_obj_t *self, const char *k, lk_obj_t *t,
+void lk_Library_cfield(lk_Object_t *self, const char *k, lk_Object_t *t,
                    size_t offset) {
-    lk_vm_t *vm = LK_VM(self);
-    lk_string_t *k_kc = lk_string_newfromcstr(vm, k);
-    struct lk_slot *slot = lk_obj_setslot(
+    lk_Vm_t *vm = LK_VM(self);
+    lk_String_t *k_kc = lk_String_newfromcstr(vm, k);
+    struct lk_Slot *slot = lk_Object_setslot(
     LK_OBJ(self), LK_OBJ(k_kc), t, vm->t_nil);
-    assert(offset >= sizeof(struct lk_common));
+    assert(offset >= sizeof(struct lk_Common));
     LK_SLOT_SETTYPE(slot, LK_SLOTTYPE_CFIELDLKOBJ);
     slot->value.coffset = offset;
 }
-void lk_ext_cfunc(lk_obj_t *obj, const char *k, lk_cfuncfunc_t *func, ...) {
-    lk_vm_t *vm = LK_VM(obj);
+void lk_Library_setCFunction(lk_Object_t *obj, const char *k, lk_Cfuncfunc_t *func, ...) {
+    lk_Vm_t *vm = LK_VM(obj);
     va_list args;
     int i;
-    lk_obj_t *a;
-    lk_string_t *lkk = lk_string_newfromcstr(vm, k);
-    lk_cfunc_t *cfunc = lk_cfunc_new(vm, func, 0, 0);
-    struct lk_slot *slot = lk_obj_getslot(obj, LK_OBJ(lkk));
+    lk_Object_t *a;
+    lk_String_t *lkk = lk_String_newfromcstr(vm, k);
+    lk_Cfunc_t *cfunc = lk_Cfunc_new(vm, func, 0, 0);
+    struct lk_Slot *slot = lk_Object_getslot(obj, LK_OBJ(lkk));
     if(slot != NULL) {
-        lk_obj_t *old = lk_obj_getvaluefromslot(obj, slot);
+        lk_Object_t *old = lk_Object_getvaluefromslot(obj, slot);
         if(LK_OBJ_ISFUNC(old)) {
-            old = LK_OBJ(lk_func_combine(LK_FUNC(old), LK_FUNC(cfunc)));
+            old = LK_OBJ(lk_Func_combine(LK_FUNC(old), LK_FUNC(cfunc)));
         }
-        lk_obj_setvalueonslot(obj, slot, old);
+        lk_Object_setvalueonslot(obj, slot, old);
     } else {
-        slot = lk_obj_setslot(obj, LK_OBJ(lkk), vm->t_func, LK_OBJ(cfunc));
+        slot = lk_Object_setslot(obj, LK_OBJ(lkk), vm->t_func, LK_OBJ(cfunc));
     }
     LK_SLOT_SETOPTION(slot, LK_SLOTOPTION_AUTOSEND);
     va_start(args, func);
     for(i = 0; ; i ++) {
-        a = va_arg(args, lk_obj_t *);
+        a = va_arg(args, lk_Object_t *);
         if(a == NULL) {
             cfunc->cf.minargc = cfunc->cf.maxargc = i;
             break;
         }
-        if(a == (lk_obj_t *)-1) {
+        if(a == (lk_Object_t *)-1) {
             cfunc->cf.maxargc = INT_MAX;
             break;
         }
-        list_setptr(cfunc->cf.sigs, i, lk_sig_new(vm, NULL, a));
+        Sequence_setptr(cfunc->cf.sigs, i, lk_Sig_new(vm, NULL, a));
     }
     va_end(args);
 }

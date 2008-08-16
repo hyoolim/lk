@@ -2,39 +2,39 @@
 #define LK_GC_H
 
 /* type */
-typedef struct lk_gc lk_gc_t;
+typedef struct lk_Gc lk_Gc_t;
 #include "vm.h"
 #include "frame.h"
-struct lk_gc {
-    struct lk_common    obj;
-    struct lk_objgroup *unused;
-    struct lk_objgroup *pending;
-    struct lk_objgroup *used;
-    struct lk_objgroup *permanent;
+struct lk_Gc {
+    struct lk_Common    obj;
+    struct lk_Objectgroup *unused;
+    struct lk_Objectgroup *pending;
+    struct lk_Objectgroup *used;
+    struct lk_Objectgroup *permanent;
     int                 newvalues;
     uint8_t             isrunning;
 };
-#define LK_GC(v) ((lk_gc_t *)(v))
+#define LK_GC(v) ((lk_Gc_t *)(v))
 
 /* ext map */
-LK_EXT_DEFINIT(lk_gc_extinittypes);
-LK_EXT_DEFINIT(lk_gc_extinitfuncs);
+LK_EXT_DEFINIT(lk_Gc_extinittypes);
+LK_EXT_DEFINIT(lk_Gc_extinitfuncs);
 
 /* update */
-void lk_objgroup_freevalues(struct lk_objgroup *self);
-void lk_objgroup_remove(lk_obj_t *v);
-void lk_objgroup_insert(struct lk_objgroup *self, lk_obj_t *v);
-void lk_obj_markpending(lk_obj_t *self);
-void lk_obj_markused(lk_obj_t *self);
-lk_obj_t *lk_obj_addref(lk_obj_t *self, lk_obj_t *v);
-void lk_gc_pause(lk_gc_t *self);
-void lk_gc_resume(lk_gc_t *self);
-void lk_gc_mark(lk_gc_t *self);
-void lk_gc_sweep(lk_gc_t *self);
+void lk_Objectgroup_freevalues(struct lk_Objectgroup *self);
+void lk_Objectgroup_remove(lk_Object_t *v);
+void lk_Objectgroup_insert(struct lk_Objectgroup *self, lk_Object_t *v);
+void lk_Object_markpending(lk_Object_t *self);
+void lk_Object_markused(lk_Object_t *self);
+lk_Object_t *lk_Object_addref(lk_Object_t *self, lk_Object_t *v);
+void lk_Gc_pause(lk_Gc_t *self);
+void lk_Gc_resume(lk_Gc_t *self);
+void lk_Gc_mark(lk_Gc_t *self);
+void lk_Gc_sweep(lk_Gc_t *self);
 
 /* info */
-int lk_objgroup_count(struct lk_objgroup *self);
-struct lk_objgroup *lk_obj_objgroup(lk_obj_t *self);
+int lk_Objectgroup_count(struct lk_Objectgroup *self);
+struct lk_Objectgroup *lk_Object_objgroup(lk_Object_t *self);
 #define LK_GC_ISMARKUNUSED(self, v) ( \
 (v)->obj.mark.objgroup == (self)->unused || (v)->obj.mark.objgroup == NULL)
 #define LK_GC_ISMARKPENDING(self, v) ( \

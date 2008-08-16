@@ -2,18 +2,18 @@
 #define LK_CHAR_H
 
 /* type */
-typedef struct lk_char lk_char_t;
+typedef struct lk_Char lk_Char_t;
 #include "vm.h"
-struct lk_char {
-    struct lk_common obj;
+struct lk_Char {
+    struct lk_Common obj;
     uint32_t         c;
 };
-#define LK_CHAR(v) ((lk_char_t *)(v))
+#define LK_CHAR(v) ((lk_Char_t *)(v))
 
 /* ext map */
-LK_EXT_DEFINIT(lk_char_extinittypes);
-LK_EXT_DEFINIT(lk_char_extinitfuncs);
+LK_EXT_DEFINIT(lk_Char_extinittypes);
+LK_EXT_DEFINIT(lk_Char_extinitfuncs);
 
 /* new */
-lk_char_t *lk_char_new(lk_vm_t *vm, uint32_t c);
+lk_Char_t *lk_Char_new(lk_Vm_t *vm, uint32_t c);
 #endif

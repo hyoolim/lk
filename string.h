@@ -2,21 +2,21 @@
 #define LK_STRING_H
 
 /* type */
-typedef struct lk_glist lk_string_t;
+typedef struct lk_Glist lk_String_t;
 #include "vm.h"
 #include "glist.h"
-#define LK_STRING(v) ((lk_string_t *)(v))
+#define LK_STRING(v) ((lk_String_t *)(v))
 
 /* ext map */
-LK_EXT_DEFINIT(lk_string_extinittypes);
-LK_EXT_DEFINIT(lk_string_extinitfuncs);
+LK_EXT_DEFINIT(lk_String_extinittypes);
+LK_EXT_DEFINIT(lk_String_extinitfuncs);
 
 /* new */
-lk_string_t *lk_string_new(lk_vm_t *vm);
-lk_string_t *lk_string_newfromlist(lk_vm_t *vm, list_t *list);
-lk_string_t *lk_string_newfromdata(lk_vm_t *vm, const void *data, int len);
-lk_string_t *lk_string_newfromcstr(lk_vm_t *vm, const char *cstr);
+lk_String_t *lk_String_new(lk_Vm_t *vm);
+lk_String_t *lk_String_newfromlist(lk_Vm_t *vm, Sequence_t *list);
+lk_String_t *lk_String_newfromdata(lk_Vm_t *vm, const void *data, int len);
+lk_String_t *lk_String_newfromcstr(lk_Vm_t *vm, const char *cstr);
 
 /* update */
-void lk_string_unescape(lk_string_t *self);
+void lk_String_unescape(lk_String_t *self);
 #endif

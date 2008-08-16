@@ -13,31 +13,31 @@ static LK_OBJ_DEFMARKFUNC(mark__gset) {
 static LK_OBJ_DEFFREEFUNC(free__gset) {
     set_fin(SET(self));
 }
-LK_EXT_DEFINIT(lk_gset_extinittypes) {
-    vm->t_gset = lk_obj_allocwithsize(vm->t_obj, sizeof(lk_gset_t));
-    set_init(SET(vm->t_gset), 0, lk_obj_hashcode, lk_obj_keycmp);
-    lk_obj_setallocfunc(vm->t_gset, alloc__gset);
-    lk_obj_setmarkfunc(vm->t_gset, mark__gset);
-    lk_obj_setfreefunc(vm->t_gset, free__gset);
+LK_EXT_DEFINIT(lk_Gset_extinittypes) {
+    vm->t_gset = lk_Object_allocwithsize(vm->t_obj, sizeof(lk_Gset_t));
+    set_init(SET(vm->t_gset), 0, lk_Object_hashcode, lk_Object_keycmp);
+    lk_Object_setallocfunc(vm->t_gset, alloc__gset);
+    lk_Object_setmarkfunc(vm->t_gset, mark__gset);
+    lk_Object_setfreefunc(vm->t_gset, free__gset);
 }
 
 /* ext map - funcs */
-static LK_EXT_DEFCFUNC(clearB__gset) {
+LK_LIBRARY_DEFINECFUNCTION(clearB__gset) {
     set_clear(SET(self));
     RETURN(self);
 }
-static LK_EXT_DEFCFUNC(count__gset) {
-    RETURN(lk_fi_new(VM, set_count(SET(self))));
+LK_LIBRARY_DEFINECFUNCTION(count__gset) {
+    RETURN(lk_Fi_new(VM, set_count(SET(self))));
 }
-static LK_EXT_DEFCFUNC(keys__gset) {
-    lk_list_t *keys = lk_list_new(VM);
-    SET_EACH(SET(self), i, list_pushptr(LIST(keys), (void *)i->key));
+LK_LIBRARY_DEFINECFUNCTION(keys__gset) {
+    lk_List_t *keys = lk_List_new(VM);
+    SET_EACH(SET(self), i, Sequence_pushptr(LIST(keys), (void *)i->key));
     RETURN(keys);
 }
-LK_EXT_DEFINIT(lk_gset_extinitfuncs) {
-    lk_obj_t *gset = vm->t_gset;
-    lk_ext_global("GenericSet", gset);
-    lk_ext_cfunc(gset, "clear!", clearB__gset, NULL);
-    lk_ext_cfunc(gset, "count", count__gset, NULL);
-    lk_ext_cfunc(gset, "keys", keys__gset, NULL);
+LK_EXT_DEFINIT(lk_Gset_extinitfuncs) {
+    lk_Object_t *gset = vm->t_gset;
+    lk_Library_setGlobal("GenericSet", gset);
+    lk_Library_setCFunction(gset, "clear!", clearB__gset, NULL);
+    lk_Library_setCFunction(gset, "count", count__gset, NULL);
+    lk_Library_setCFunction(gset, "keys", keys__gset, NULL);
 }

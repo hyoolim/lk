@@ -1,47 +1,47 @@
 #include "cset.h"
 
 /* new */
-cset_t *cset_alloc(void) {
-    return memory_alloc(sizeof(cset_t));
+CharacterSet_t *CharacterSet_alloc(void) {
+    return memory_alloc(sizeof(CharacterSet_t));
 }
-cset_t *cset_clone(cset_t *self) {
-    cset_t *clone = cset_alloc();
-    cset_copy(clone, self);
+CharacterSet_t *CharacterSet_clone(CharacterSet_t *self) {
+    CharacterSet_t *clone = CharacterSet_alloc();
+    CharacterSet_copy(clone, self);
     return clone;
 }
-void cset_copy(cset_t *self, cset_t *from) {
-    memcpy(self, from, sizeof(cset_t));
+void CharacterSet_copy(CharacterSet_t *self, CharacterSet_t *from) {
+    memcpy(self, from, sizeof(CharacterSet_t));
     self->data = memory_alloc(sizeof(uint32_t) * self->capa);
     memcpy(self->data, from->data, sizeof(uint32_t) * self->capa);
 }
-void cset_fin(cset_t *self) {
+void CharacterSet_fin(CharacterSet_t *self) {
     memory_free(self->data);
 }
-void cset_free(cset_t *self) {
-    cset_fin(self);
+void CharacterSet_free(CharacterSet_t *self) {
+    CharacterSet_fin(self);
     memory_free(self);
 }
-void cset_init(cset_t *self) {
+void CharacterSet_init(CharacterSet_t *self) {
     self->min = UINT32_MAX;
     self->max = 0;
     self->capa = CSET_DEFAULTCAPA;
     self->count = 0;
     self->data = memory_alloc(sizeof(uint32_t) * self->capa);
 }
-cset_t *cset_new(void) {
-    cset_t *self = cset_alloc();
-    cset_init(self);
+CharacterSet_t *CharacterSet_new(void) {
+    CharacterSet_t *self = CharacterSet_alloc();
+    CharacterSet_init(self);
     return self;
 }
 
 /* update */
-static void cset_resize(cset_t *self) {
+static void CharacterSet_resize(CharacterSet_t *self) {
     int capa = self->capa, c = self->count;
     while(c >= capa) capa *= 2;
     if(capa > self->capa) self->data = memory_resize(
     self->data, sizeof(uint32_t) * (self->capa = capa));
 }
-void cset_clear(cset_t *self) {
+void CharacterSet_clear(CharacterSet_t *self) {
     self->min = UINT32_MAX;
     self->max = 0;
     self->count = 0;
@@ -49,14 +49,14 @@ void cset_clear(cset_t *self) {
 #define GET(self, i) ((self)->data[(i)])
 #define SET(self, i, v) ((self)->data[(i)] = (v))
 #define INSERT(self, i, v) do { \
-    cset_resize(self); \
+    CharacterSet_resize(self); \
     memmove(self->data + (i) + 1, self->data + (i), \
     sizeof(uint32_t) * ((self)->count - (i))); \
     SET(self, i, v); \
     (self)->count ++; \
 } while(0)
 #define PUSH(self, v) do { \
-    cset_resize(self); \
+    CharacterSet_resize(self); \
     SET(self, (self)->count, v); \
     (self)->count ++; \
 } while(0)
@@ -65,7 +65,7 @@ void cset_clear(cset_t *self) {
     sizeof(uint32_t) * ((self)->count - (i))); \
     (self)->count --; \
 } while(0)
-static void cset_insert(cset_t *self, uint32_t from, uint32_t to) {
+static void CharacterSet_insert(CharacterSet_t *self, uint32_t from, uint32_t to) {
     int i = 0;
     uint32_t cf = UINT32_MAX, ct = 0;
     if(from > to) { uint32_t t = from; from = to; to = t; }
@@ -110,7 +110,7 @@ static void cset_insert(cset_t *self, uint32_t from, uint32_t to) {
     if(from < self->min) self->min = from;
     if(to > self->max) self->max = to;
 }
-static void cset_remove(cset_t *self, uint32_t from, uint32_t to) {
+static void CharacterSet_remove(CharacterSet_t *self, uint32_t from, uint32_t to) {
     if(from > to) { uint32_t t = from; from = to; to = t; }
     if(self->count > 0 && to >= self->min && from <= self->max) {
         int i = 0;
@@ -148,67 +148,67 @@ static void cset_remove(cset_t *self, uint32_t from, uint32_t to) {
         }
     }
 }
-void cset_add(cset_t *self, uint32_t from, uint32_t to) {
-    (self->isinverted ? cset_remove : cset_insert)(self, from, to);
+void CharacterSet_addRange(CharacterSet_t *self, uint32_t from, uint32_t to) {
+    (self->isinverted ? CharacterSet_remove : CharacterSet_insert)(self, from, to);
 }
-void cset_subtract(cset_t *self, uint32_t from, uint32_t to) {
-    (self->isinverted ? cset_insert : cset_remove)(self, from, to);
+void CharacterSet_subtractRange(CharacterSet_t *self, uint32_t from, uint32_t to) {
+    (self->isinverted ? CharacterSet_insert : CharacterSet_remove)(self, from, to);
 }
-void cset_addcset(cset_t *self, cset_t *other) {
+void CharacterSet_add(CharacterSet_t *self, CharacterSet_t *other) {
     uint32_t f, t;
     uint32_t *c = other->data, *last = c + other->count;
-    void (*func)(cset_t *, uint32_t, uint32_t
-    ) = self->isinverted ? cset_remove : cset_insert;
+    void (*func)(CharacterSet_t *, uint32_t, uint32_t
+    ) = self->isinverted ? CharacterSet_remove : CharacterSet_insert;
     for(; c < last; ) {
         f = *c ++;
         t = *c ++;
         func(self, f, t);
     }
 }
-void cset_subtractcset(cset_t *self, cset_t *other) {
+void CharacterSet_subtract(CharacterSet_t *self, CharacterSet_t *other) {
     uint32_t f, t;
     uint32_t *c = other->data, *last = c + other->count;
-    void (*func)(cset_t *, uint32_t, uint32_t
-    ) = self->isinverted ? cset_insert : cset_remove;
+    void (*func)(CharacterSet_t *, uint32_t, uint32_t
+    ) = self->isinverted ? CharacterSet_insert : CharacterSet_remove;
     for(; c < last; ) {
         f = *c ++;
         t = *c ++;
         func(self, f, t);
     }
 }
-void cset_addstring(cset_t *self, list_t *str) {
+void CharacterSet_addstring(CharacterSet_t *self, Sequence_t *str) {
     int c = str->count;
     if(c > 0) {
         int i = 0;
-        uint32_t v = list_getuchar(str, i);
-        void (*func)(cset_t *, uint32_t, uint32_t
-        ) = self->isinverted ? cset_remove : cset_insert;
+        uint32_t v = Sequence_getuchar(str, i);
+        void (*func)(CharacterSet_t *, uint32_t, uint32_t
+        ) = self->isinverted ? CharacterSet_remove : CharacterSet_insert;
         /* if(v == '^') { self->isinverted = 1; i ++; } */
         while(i < c) {
-            v = list_getuchar(str, i ++);
-            func(self, v, i < c && list_getuchar(str, i) == '-'
-            ? list_getuchar(str, (i += 2) - 1) : v);
+            v = Sequence_getuchar(str, i ++);
+            func(self, v, i < c && Sequence_getuchar(str, i) == '-'
+            ? Sequence_getuchar(str, (i += 2) - 1) : v);
         }
     }
 }
-void cset_subtractstring(cset_t *self, list_t *str) {
+void CharacterSet_subtractstring(CharacterSet_t *self, Sequence_t *str) {
     int c = str->count;
     if(c > 0) {
         int i = 0;
-        uint32_t v = list_getuchar(str, i);
-        void (*func)(cset_t *, uint32_t, uint32_t
-        ) = self->isinverted ? cset_insert : cset_remove;
+        uint32_t v = Sequence_getuchar(str, i);
+        void (*func)(CharacterSet_t *, uint32_t, uint32_t
+        ) = self->isinverted ? CharacterSet_insert : CharacterSet_remove;
         /* if(v == '^') { self->isinverted = 1; i ++; } */
         while(i < c) {
-            v = list_getuchar(str, i ++);
-            func(self, v, i < c && list_getuchar(str, i) == '-'
-            ? list_getuchar(str, (i += 2) - 1) : v);
+            v = Sequence_getuchar(str, i ++);
+            func(self, v, i < c && Sequence_getuchar(str, i) == '-'
+            ? Sequence_getuchar(str, (i += 2) - 1) : v);
         }
     }
 }
 
 /* info */
-int cset_count(const cset_t *self) {
+int CharacterSet_count(const CharacterSet_t *self) {
     int total = 0;
     uint32_t f, t;
     uint32_t *c = self->data, *last = c + self->count;
@@ -219,10 +219,10 @@ int cset_count(const cset_t *self) {
     }
     return total;
 }
-void cset_print(const cset_t *self, FILE *stream) {
+void CharacterSet_print(const CharacterSet_t *self, FILE *stream) {
     uint32_t f, t;
     uint32_t *c = self->data, *last = c + self->count;
-    fprintf(stream, "cset_t(%p", (void *)self);
+    fprintf(stream, "CharacterSet_t(%p", (void *)self);
     fprintf(stream, ", min=%i", self->min);
     fprintf(stream, ", max=%i", self->max);
     fprintf(stream, ", capa=%i", self->capa);
@@ -236,7 +236,7 @@ void cset_print(const cset_t *self, FILE *stream) {
         if(c < last) fprintf(stream, ", ");
     }
 }
-int cset_has(const cset_t *self, uint32_t n) {
+int CharacterSet_has(const CharacterSet_t *self, uint32_t n) {
     if(self->min <= n && n <= self->max) {
         uint32_t f, t;
         uint32_t *c = self->data, *last = c + self->count;

@@ -2,25 +2,25 @@
 #define LK_FIXNUM_H
 
 /* type */
-typedef struct lk_fi lk_fi_t;
-typedef struct lk_fr lk_fr_t;
+typedef struct lk_Fi lk_Fi_t;
+typedef struct lk_Fr lk_Fr_t;
 #include "vm.h"
-struct lk_fi {
-    struct lk_common obj;
+struct lk_Fi {
+    struct lk_Common obj;
     int              i;
 };
-#define LK_FI(v) ((lk_fi_t *)(v))
-struct lk_fr {
-    struct lk_common obj;
+#define LK_FI(v) ((lk_Fi_t *)(v))
+struct lk_Fr {
+    struct lk_Common obj;
     double           r;
 };
-#define LK_FR(v) ((lk_fr_t *)(v))
+#define LK_FR(v) ((lk_Fr_t *)(v))
 
 /* ext map */
-LK_EXT_DEFINIT(lk_fixnum_extinittypes);
-LK_EXT_DEFINIT(lk_fixnum_extinitfuncs);
+LK_EXT_DEFINIT(lk_Fixnum_extinittypes);
+LK_EXT_DEFINIT(lk_Fixnum_extinitfuncs);
 
 /* new */
-lk_fi_t *lk_fi_new(lk_vm_t *vm, int i);
-lk_fr_t *lk_fr_new(lk_vm_t *vm, double r);
+lk_Fi_t *lk_Fi_new(lk_Vm_t *vm, int i);
+lk_Fr_t *lk_Fr_new(lk_Vm_t *vm, double r);
 #endif

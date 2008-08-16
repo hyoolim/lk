@@ -2,18 +2,18 @@
 #define LK_CSET_H
 
 /* type */
-typedef struct lk_cset lk_cset_t;
+typedef struct lk_Cset lk_Cset_t;
 #include "vm.h"
-struct lk_cset {
-    struct lk_common obj;
-    cset_t        cs;
+struct lk_Cset {
+    struct lk_Common obj;
+    CharacterSet_t        cs;
 };
-#define LK_CSET(v) ((lk_cset_t *)(v))
+#define LK_CSET(v) ((lk_Cset_t *)(v))
 
 /* ext map */
-LK_EXT_DEFINIT(lk_cset_extinittypes);
-LK_EXT_DEFINIT(lk_cset_extinitfuncs);
+LK_EXT_DEFINIT(lk_Cset_extinittypes);
+LK_EXT_DEFINIT(lk_Cset_extinitfuncs);
 
 /* new */
-lk_cset_t *lk_cset_new(lk_vm_t *vm);
+lk_Cset_t *lk_Cset_new(lk_Vm_t *vm);
 #endif

@@ -1,6 +1,5 @@
 #include "vm.h"
 #include "bool.h"
-#include "buffer.h"
 #include "char.h"
 #include "cset.h"
 #include "env.h"
@@ -146,7 +145,6 @@ lk_vm_t *lk_vm_new(void) {
 
     /* init all other primitive types */
     lk_bool_extinittypes(self);
-    lk_buffer_extinittypes(self);
     lk_char_extinittypes(self);
     lk_cset_extinittypes(self);
     lk_map_extinittypes(self);
@@ -172,7 +170,6 @@ lk_vm_t *lk_vm_new(void) {
 
     /* attach all funcs to primitive types */
     lk_bool_extinitfuncs(self);
-    lk_buffer_extinitfuncs(self);
     lk_char_extinitfuncs(self);
     lk_cset_extinitfuncs(self);
     lk_map_extinitfuncs(self);

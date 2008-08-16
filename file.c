@@ -1,5 +1,4 @@
 #include "file.h"
-#include "buffer.h"
 #include "char.h"
 #include "cset.h"
 #include "ext.h"
@@ -180,7 +179,6 @@ static LK_EXT_DEFCFUNC(read__rf_fi) {
     if(f == NULL) BUG("ReadableFile->st.file should NEVER be NULL");
     else {
         list_t *c = list_allocfromfile(f, INT(ARG(0)));
-        /* RETURN(c != NULL ? LK_OBJ(lk_buffer_newfromlist(VM, c)) : N); */
         RETURN(c != NULL ? LK_OBJ(lk_string_newfromlist(VM, c)) : N);
     }
 }

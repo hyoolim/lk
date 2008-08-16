@@ -7,10 +7,10 @@ int snprintf(char *str, size_t size, const char *format, ...);
 
 /* ext map - types */
 static LK_OBJ_DEFALLOCFUNC(alloc__fi) {
-    INT(self) = INT(proto);
+    INT(self) = INT(parent);
 }
 static LK_OBJ_DEFALLOCFUNC(alloc__fr) {
-    DBL(self) = DBL(proto);
+    DBL(self) = DBL(parent);
 }
 LK_EXT_DEFINIT(lk_fixnum_extinittypes) {
     vm->t_number = lk_obj_alloc(vm->t_obj);

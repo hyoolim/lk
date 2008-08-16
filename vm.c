@@ -51,12 +51,12 @@ static LK_EXT_DEFCFUNC(fork__vm_f) {
     if(child > 0) RETURN(lk_fi_new(VM, (int)child));
     else {
         lk_kfunc_t *kf = LK_KFUNC(ARG(0));
-        lk_frame_t *fr = lk_vm_prepevalfunc(VM);
+        lk_frame_t *fr = lk_frame_new(VM);
         fr->first = fr->next = kf->first;
         fr->receiver = fr->self = self;
         fr->func = LK_OBJ(kf);
         fr->returnto = NULL;
-        fr->obj.proto = LK_OBJ(kf->frame);
+        fr->obj.parent = LK_OBJ(kf->frame);
         lk_vm_doevalfunc(VM);
         lk_vm_exit(VM);
         DONE;
@@ -162,7 +162,7 @@ lk_vm_t *lk_vm_new(void) {
 
     /* init rest of the fields in vm */
     self->global = LK_FRAME(lk_obj_alloc(self->t_frame));
-    self->currframe = self->global;
+    self->currentFrame = self->global;
     lk_ext_global(".string.class", LK_OBJ(self->str_type = lk_string_newfromcstr(self, ".CLASS")));
     lk_ext_global(".string.forward", LK_OBJ(self->str_forward = lk_string_newfromcstr(self, ".forward")));
     lk_ext_global(".string.rescue", LK_OBJ(self->str_rescue = lk_string_newfromcstr(self, ".rescue")));
@@ -220,7 +220,7 @@ void lk_vm_free(lk_vm_t *self) {
 static lk_frame_t *eval(lk_vm_t *self, lk_string_t *code) {
     lk_parser_t *p = lk_parser_new(self);
     lk_instr_t *func = lk_parser_parse(p, code);
-    lk_frame_t *fr = lk_vm_prepevalfunc(self);
+    lk_frame_t *fr = lk_frame_new(self);
     fr->first = fr->next = func;
     fr->returnto = NULL;
     lk_vm_doevalfunc(self);
@@ -285,35 +285,14 @@ lk_frame_t *lk_vm_evalstring(lk_vm_t *self, const char *code) {
     self->rsrc = self->rsrc->prev;
     return fr;
 }
-lk_frame_t *lk_vm_prepevalfunc(lk_vm_t *vm) {
-    lk_frame_t *prev = vm->currframe;
-    lk_frame_t *self;
-    if(prev->child != NULL && prev->child->obj.mark.isref == 0) {
-        self = prev->child;
-        self->obj.proto = LK_OBJ(prev);
-        if(self->obj.slots != NULL) set_clear(self->obj.slots);
-        list_clear(&self->stack);
-        /* stat */ vm->cnt_recycledframe ++;
-    } else {
-        self = prev->child = LK_FRAME(lk_obj_alloc(LK_OBJ(prev)));
-    }
-    vm->currframe = self;
-    self->type = LK_FRAMETYPE_RETURN;
-    self->frame = self;
-    self->receiver = LK_OBJ(self);
-    self->self = prev != NULL ? prev->self : NULL;
-    self->caller = self->returnto = prev;
-    /* stat */ vm->cnt_frame ++;
-    return self;
-}
 #define CALLFUNC(self, func, args) do { \
     (args)->argc = LIST_ISINIT(&(args)->stack) \
     ? LIST_COUNT(&(args)->stack) : 0; \
     if(LK_OBJ_ISCFUNC(LK_OBJ(func))) { \
         LK_CFUNC(func)->func((args)->receiver, (args)); \
-        vm->currframe = (self); \
+        vm->currentFrame = (self); \
     } else { \
-        (args)->obj.proto = LK_OBJ(LK_KFUNC(func)->frame); \
+        (args)->obj.parent = LK_OBJ(LK_KFUNC(func)->frame); \
         (args)->self = LK_OBJ_ISFRAME((args)->receiver) \
         ? LK_KFUNC(func)->frame->self : (args)->receiver; \
         (args)->first = (args)->next = LK_KFUNC(func)->first; \
@@ -322,7 +301,7 @@ lk_frame_t *lk_vm_prepevalfunc(lk_vm_t *vm) {
     goto nextinstr; \
 } while(0)
 void lk_vm_doevalfunc(lk_vm_t *vm) {
-    lk_frame_t *self = vm->currframe;
+    lk_frame_t *self = vm->currentFrame;
     lk_gc_t *gc = vm->gc;
     lk_instr_t *instr;
     lk_frame_t *args;
@@ -345,7 +324,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
     vm->rescue = &rescue;
     if(setjmp(rescue.buf)) {
         recv = LK_OBJ(self->frame);
-        args = lk_vm_prepevalfunc(vm);
+        args = lk_frame_new(vm);
         lk_frame_stackpush(args, LK_OBJ(vm->lasterror));
         for(; recv != NULL; recv = LK_OBJ(LK_FRAME(recv)->returnto)) {
             if((slots = recv->obj.slots) == NULL) continue;
@@ -373,7 +352,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
     }
     /* like how cpu execs instrs by following a program counter */
     if((instr = self->next) == NULL) goto prevframe;
-    vm->cnt_instr ++;
+    vm->stat.totalInstructions ++;
     vm->currinstr = self->current = instr;
     self->next = instr->next;
     switch(instr->type) {
@@ -393,7 +372,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         goto apply;
     case LK_INSTRTYPE_APPLY:
     case LK_INSTRTYPE_LIST:
-        args = lk_vm_prepevalfunc(vm);
+        args = lk_frame_new(vm);
         args->first = args->next = LK_INSTR(instr->v);
         args->type = instr->type == LK_INSTRTYPE_APPLY
         ? LK_FRAMETYPE_APPLY : LK_FRAMETYPE_LIST;
@@ -430,19 +409,19 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
     self = self->returnto;
     if(self == NULL) {
         vm->rescue = vm->rescue->prev;
-        vm->currframe = vm->currframe->caller;
+        vm->currentFrame = vm->currentFrame->caller;
         return;
     }
     switch(args->type) {
     /* take the frame and return last val */
     case LK_FRAMETYPE_RETURN:
         lk_frame_stackpush(self, lk_frame_stackpeek(args));
-        vm->currframe = self;
+        vm->currentFrame = self;
         goto nextinstr;
     /* take the frame and convert to list */
     case LK_FRAMETYPE_LIST:
         lk_frame_stackpush(self, LK_OBJ(lk_frame_stacktolist(args)));
-        vm->currframe = self;
+        vm->currentFrame = self;
         goto nextinstr;
     /* take the frame and use as args for msg */
     case LK_FRAMETYPE_APPLY:
@@ -463,8 +442,8 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         }
         ancs = NULL;
         findslot:
-        if((slots = r->obj.slots) == NULL) goto proto;
-        if((si = set_get(slots, msgn)) == NULL) goto proto;
+        if((slots = r->obj.slots) == NULL) goto parent;
+        if((si = set_get(slots, msgn)) == NULL) goto parent;
         found:
         slot = LK_SLOT(SETITEM_VALUEPTR(si));
         slotv = lk_obj_getvaluefromslot(recv, slot);
@@ -476,9 +455,9 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         || instr->next->type != LK_INSTRTYPE_APPLYMSG
         || list_cmpcstr(LIST(instr->next->v), "+=") != 0)) {
             callfunc:
-            if(args == NULL) args = lk_vm_prepevalfunc(vm);
+            if(args == NULL) args = lk_frame_new(vm);
             func = lk_func_match(LK_FUNC(slotv), args, recv);
-            if(func == NULL) goto proto;
+            if(func == NULL) goto parent;
             args->type = LK_FRAMETYPE_RETURN;
             args->frame = args;
             args->receiver = recv;
@@ -503,7 +482,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
             lk_frame_stackpush(self, slotv);
             goto nextinstr;
         }
-        proto:
+        parent:
         if((ancs = r->obj.ancestors) != NULL) {
             ancc = LIST_COUNT(ancs);
             for(anci = 1; anci < ancc; anci ++) {
@@ -513,7 +492,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
                 goto found;
             }
         } else {
-            r = r->obj.proto;
+            r = r->obj.parent;
             goto findslot;
         }
         /* forward: */

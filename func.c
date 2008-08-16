@@ -5,13 +5,13 @@
 /* ext map - types */
 /* */
 static LK_OBJ_DEFALLOCFUNC(alloc__f) {
-    LK_FUNC(self)->cf.sigdef = LK_FUNC(proto)->cf.sigdef;
-    LK_FUNC(self)->cf.minargc = LK_FUNC(proto)->cf.minargc;
-    LK_FUNC(self)->cf.maxargc = LK_FUNC(proto)->cf.maxargc;
+    LK_FUNC(self)->cf.sigdef = LK_FUNC(parent)->cf.sigdef;
+    LK_FUNC(self)->cf.minargc = LK_FUNC(parent)->cf.minargc;
+    LK_FUNC(self)->cf.maxargc = LK_FUNC(parent)->cf.maxargc;
     if(LK_FUNC(self)->cf.sigs != NULL
-    ) LK_FUNC(self)->cf.sigs = list_clone(LK_FUNC(proto)->cf.sigs);
-    LK_FUNC(self)->cf.rest = LK_FUNC(proto)->cf.rest;
-    LK_FUNC(self)->cf.opts = LK_FUNC(proto)->cf.opts;
+    ) LK_FUNC(self)->cf.sigs = list_clone(LK_FUNC(parent)->cf.sigs);
+    LK_FUNC(self)->cf.rest = LK_FUNC(parent)->cf.rest;
+    LK_FUNC(self)->cf.opts = LK_FUNC(parent)->cf.opts;
 }
 static LK_OBJ_DEFMARKFUNC(mark__f) {
     mark(LK_OBJ(LK_FUNC(self)->cf.sigdef));
@@ -25,14 +25,14 @@ static LK_OBJ_DEFFREEFUNC(free__f) {
 
 /* */
 static LK_OBJ_DEFALLOCFUNC(alloc__cf) {
-    alloc__f(self, proto);
-    LK_CFUNC(self)->func = LK_CFUNC(proto)->func;
+    alloc__f(self, parent);
+    LK_CFUNC(self)->func = LK_CFUNC(parent)->func;
 }
 
 /* */
 static LK_OBJ_DEFALLOCFUNC(alloc__gf) {
-    alloc__f(self, proto);
-    LK_GFUNC(self)->funcs = list_clone(LK_GFUNC(proto)->funcs);
+    alloc__f(self, parent);
+    LK_GFUNC(self)->funcs = list_clone(LK_GFUNC(parent)->funcs);
 }
 static LK_OBJ_DEFMARKFUNC(mark__gf) {
     mark__f(self, mark);
@@ -45,9 +45,9 @@ static LK_OBJ_DEFFREEFUNC(free__gf) {
 
 /* */
 static LK_OBJ_DEFALLOCFUNC(alloc__kf) {
-    alloc__f(self, proto);
-    LK_KFUNC(self)->frame = LK_KFUNC(proto)->frame;
-    LK_KFUNC(self)->first = LK_KFUNC(proto)->first;
+    alloc__f(self, parent);
+    LK_KFUNC(self)->frame = LK_KFUNC(parent)->frame;
+    LK_KFUNC(self)->first = LK_KFUNC(parent)->first;
 }
 static LK_OBJ_DEFMARKFUNC(mark__kf) {
     mark__f(self, mark);
@@ -57,9 +57,9 @@ static LK_OBJ_DEFMARKFUNC(mark__kf) {
 
 /* */
 static LK_OBJ_DEFALLOCFUNC(alloc__sig) {
-    LK_SIG(self)->name = LK_SIG(proto)->name;
-    LK_SIG(self)->check = LK_SIG(proto)->check;
-    LK_SIG(self)->isself = LK_SIG(proto)->isself;
+    LK_SIG(self)->name = LK_SIG(parent)->name;
+    LK_SIG(self)->check = LK_SIG(parent)->check;
+    LK_SIG(self)->isself = LK_SIG(parent)->isself;
 }
 static LK_OBJ_DEFMARKFUNC(mark__sig) {
     mark(LK_OBJ(LK_SIG(self)->name));
@@ -291,9 +291,9 @@ void lk_kfunc_updatesig(lk_kfunc_t *self) {
                     typeinstr = LK_INSTR(argdef->v);
                     name = LK_STRING(typeinstr->v);
                     typeinstr = typeinstr->next;
-                    slot = lk_obj_getslotfromany(LK_OBJ(VM->currframe), typeinstr->v);
+                    slot = lk_obj_getslotfromany(LK_OBJ(VM->currentFrame), typeinstr->v);
                     if(slot != NULL) {
-                        type = lk_obj_getvaluefromslot(LK_OBJ(VM->currframe), slot);
+                        type = lk_obj_getvaluefromslot(LK_OBJ(VM->currentFrame), slot);
                     } else {
                         printf("Invalid sig, invalid type\n");
                         exit(EXIT_FAILURE);

@@ -19,6 +19,6 @@ LK_EXT_DEFINIT(lk_error_extinittypes);
 LK_EXT_DEFINIT(lk_error_extinitfuncs);
 
 /* new */
-lk_error_t *lk_error_new(lk_vm_t *vm, lk_obj_t *proto, const char *text);
+lk_error_t *lk_error_new(lk_vm_t *vm, lk_obj_t *parent, const char *text);
 lk_error_t *lk_error_newc(lk_vm_t *vm);
 #endif

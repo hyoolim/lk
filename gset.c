@@ -5,7 +5,7 @@
 
 /* ext map - types */
 static LK_OBJ_DEFALLOCFUNC(alloc__gset) {
-    set_copy(SET(self), SET(proto));
+    set_copy(SET(self), SET(parent));
 }
 static LK_OBJ_DEFMARKFUNC(mark__gset) {
     SET_EACH(SET(self), i, mark(LK_OBJ(i->key)));

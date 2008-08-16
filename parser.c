@@ -119,7 +119,7 @@ typedef enum tokentype_t {
 } tokentype_t;
 
 /* parse helpers */
-/* helper func proto */
+/* helper func parent */
 #define READTOKENFUNC(name) tokentype_t name(lk_parser_t *self)
 #define READFUNC(name) int name(lk_parser_t *self)
 typedef READFUNC(readfunc_t);

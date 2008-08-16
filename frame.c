@@ -154,12 +154,41 @@ LK_EXT_DEFINIT(lk_frame_extinitfuncs) {
     lk_ext_cfunc(fra, "return", return__fra, -1);
 }
 
-/* update */
+/* create a new frame based on the current one set in vm */
+lk_frame_t *lk_frame_new(lk_vm_t *vm) {
+    lk_frame_t *parent = vm->currentFrame;
+    lk_frame_t *self;
+
+    /* optimization to reduce the number of frames created */
+    if(parent->child != NULL && parent->child->obj.mark.isref == 0) {
+        vm->stat.recycledFrames ++;
+        self = parent->child;
+        self->obj.parent = LK_OBJ(parent);
+        list_clear(&self->stack);
+        if(self->obj.slots != NULL) {
+            set_clear(self->obj.slots);
+        }
+    } else {
+        self = parent->child = LK_FRAME(lk_obj_alloc(LK_OBJ(parent)));
+    }
+
+    /* init frame struct */
+    vm->stat.totalFrames ++;
+    vm->currentFrame = self;
+    self->type = LK_FRAMETYPE_RETURN;
+    self->frame = self;
+    self->receiver = LK_OBJ(self);
+    self->self = parent != NULL ? parent->self : NULL;
+    self->caller = self->returnto = parent;
+    return self;
+}
 void lk_frame_stackpush(lk_frame_t *self, lk_obj_t *v) {
     assert(v != NULL);
     if(!LIST_ISINIT(&self->stack)) list_initptr(&self->stack);
     list_pushptr(&self->stack, lk_obj_addref(LK_OBJ(self), v));
 }
+
+/* update */
 lk_obj_t *lk_frame_stackpop(lk_frame_t *self) {
     assert(LIST_ISINIT(&self->stack));
     assert(LIST_COUNT(&self->stack) > 0);

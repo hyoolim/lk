@@ -5,7 +5,7 @@
 
 /* ext map - types */
 static LK_OBJ_DEFALLOCFUNC(alloc__cset) {
-    cset_copy(CSET(self), CSET(proto));
+    cset_copy(CSET(self), CSET(parent));
 }
 static LK_OBJ_DEFFREEFUNC(free__cset) {
     cset_fin(CSET(self));

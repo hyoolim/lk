@@ -4,7 +4,7 @@
 
 /* ext map - types */
 static LK_OBJ_DEFALLOCFUNC(alloc__glist) {
-    list_copy(LIST(self), LIST(proto));
+    list_copy(LIST(self), LIST(parent));
 }
 static LK_OBJ_DEFFREEFUNC(free__glist) {
     list_fin(LIST(self));

@@ -12,7 +12,7 @@ LK_EXT_DEFINIT(lk_obj_extinittypes) {
     o->obj.tag->refc = 1;
     o->obj.tag->vm = vm;
     o->obj.tag->size = sizeof(lk_obj_t);
-    o->obj.proto = NULL;
+    o->obj.parent = NULL;
     list_pushptr(o->obj.ancestors = list_allocptr(), o);
 }
 
@@ -71,8 +71,8 @@ static LK_EXT_DEFCFUNC(also__obj_obj) {
         pars = LK_OBJ_PARENTS(self);
     } else {
         pars = list_allocptr();
-        list_pushptr(pars, self->obj.proto);
-        self->obj.proto = LK_OBJ((ptrdiff_t)pars | 1);
+        list_pushptr(pars, self->obj.parent);
+        self->obj.parent = LK_OBJ((ptrdiff_t)pars | 1);
     }
     list_unshiftptr(pars, ARG(0));
     if(lk_obj_calcancestors(self)) {
@@ -96,12 +96,12 @@ static LK_EXT_DEFCFUNC(clone__obj) {
     RETURN(lk_obj_clone(self)); }
 static LK_EXT_DEFCFUNC(do__obj_f) {
     lk_kfunc_t *kf = LK_KFUNC(ARG(0));
-    lk_frame_t *fr = lk_vm_prepevalfunc(VM);
+    lk_frame_t *fr = lk_frame_new(VM);
     fr->first = fr->next = kf->first;
     fr->receiver = fr->self = self;
     fr->func = LK_OBJ(kf);
     fr->returnto = NULL;
-    fr->obj.proto = LK_OBJ(kf->frame);
+    fr->obj.parent = LK_OBJ(kf->frame);
     lk_vm_doevalfunc(VM);
     RETURN(self);
 }
@@ -122,16 +122,16 @@ static LK_EXT_DEFCFUNC(parents__obj) {
         RETURN(lk_list_newfromlist(VM, LK_OBJ_PARENTS(self)));
     } else {
         lk_list_t *ret = lk_list_new(VM);
-        list_pushptr(LIST(ret), self->obj.proto);
+        list_pushptr(LIST(ret), self->obj.parent);
         RETURN(ret);
     }
 }
-static LK_EXT_DEFCFUNC(proto__obj) {
+static LK_EXT_DEFCFUNC(parent__obj) {
     if(LK_OBJ_HASPARENTS(self)) {
         list_t *pars = LK_OBJ_PARENTS(self);
         RETURN(LIST_COUNT(pars) > 0 ? list_getptr(pars, -1) : N);
     }
-    RETURN(self->obj.proto);
+    RETURN(self->obj.parent);
 }
 static LK_EXT_DEFCFUNC(with__obj_f) {
     do__obj_f(lk_obj_addref(LK_OBJ(env), lk_obj_alloc(self)), env);
@@ -155,7 +155,7 @@ LK_EXT_DEFINIT(lk_obj_extinitfuncs) {
     lk_ext_cfunc(obj, "do", do__obj_f, f, NULL);
     lk_ext_cfunc(obj, "import", import__obj_obj, obj, NULL);
     lk_ext_cfunc(obj, "parents", parents__obj, NULL);
-    lk_ext_cfunc(obj, "proto", proto__obj, NULL);
+    lk_ext_cfunc(obj, "parent", parent__obj, NULL);
     lk_ext_cfunc(obj, "with", with__obj_f, f, NULL);
 }
 
@@ -166,23 +166,23 @@ static struct lk_tag *tag_clone(struct lk_tag *self) {
     clone->refc = 1;
     return clone;
 }
-lk_obj_t *lk_obj_allocwithsize(lk_obj_t *proto, size_t s) {
-    lk_gc_t *gc = LK_VM(proto)->gc;
+lk_obj_t *lk_obj_allocwithsize(lk_obj_t *parent, size_t s) {
+    lk_gc_t *gc = LK_VM(parent)->gc;
     lk_obj_t *self = memory_alloc(s);
-    struct lk_tag *tag = proto->obj.tag;
+    struct lk_tag *tag = parent->obj.tag;
     if(tag->size == s) tag->refc ++;
     else (tag = tag_clone(tag))->size = s;
-    self->obj.proto = proto;
+    self->obj.parent = parent;
     self->obj.tag = tag;
-    if(tag->allocfunc != NULL) tag->allocfunc(self, proto);
+    if(tag->allocfunc != NULL) tag->allocfunc(self, parent);
     if(gc != NULL) {
         gc->newvalues ++;
         lk_objgroup_insert(gc->unused, self);
     }
     return self;
 }
-lk_obj_t *lk_obj_alloc(lk_obj_t *proto) {
-    return lk_obj_allocwithsize(proto, proto->obj.tag->size);
+lk_obj_t *lk_obj_alloc(lk_obj_t *parent) {
+    return lk_obj_allocwithsize(parent, parent->obj.tag->size);
 }
 lk_obj_t *lk_obj_clone(lk_obj_t *self) {
     lk_obj_t *c = lk_obj_alloc(LK_OBJ_PROTO(self));
@@ -282,7 +282,7 @@ int lk_obj_calcancestors(lk_obj_t *self) {
             list_pushptr(ol, il);
         }
     } else {
-        cand = self->obj.proto;
+        cand = self->obj.parent;
         if(cand != NULL) {
             il = list_allocptr();
             if(cand->obj.ancestors == NULL) lk_obj_calcancestors(cand);
@@ -296,9 +296,9 @@ int lk_obj_calcancestors(lk_obj_t *self) {
         list_concat(il, LK_OBJ_PARENTS(self));
         list_pushptr(ol, il);
     } else {
-        if(self->obj.proto != NULL) {
+        if(self->obj.parent != NULL) {
             il = list_allocptr();
-            list_pushptr(il, self->obj.proto);
+            list_pushptr(il, self->obj.parent);
             list_pushptr(ol, il);
         }
     }
@@ -342,7 +342,7 @@ int lk_obj_calcancestors(lk_obj_t *self) {
     while(1) { \
         check \
         if(self->obj.ancestors != NULL) goto checkancestors; \
-        self = self->obj.proto; \
+        self = self->obj.parent; \
     } \
     checkancestors: { \
         list_t *ancs = self->obj.ancestors; \

@@ -4,7 +4,7 @@
 
 /* ext map - types */
 static LK_OBJ_DEFALLOCFUNC(alloc__ch) {
-    CHAR(self) = CHAR(proto);
+    CHAR(self) = CHAR(parent);
 }
 LK_EXT_DEFINIT(lk_char_extinittypes) {
     vm->t_char = lk_obj_allocwithsize(vm->t_obj, sizeof(lk_char_t));

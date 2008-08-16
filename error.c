@@ -24,8 +24,8 @@ LK_EXT_DEFINIT(lk_error_extinitfuncs) {
 }
 
 /* new */
-lk_error_t *lk_error_new(lk_vm_t *vm, lk_obj_t *proto, const char *text) {
-    lk_error_t *self = LK_ERROR(lk_obj_alloc(proto));
+lk_error_t *lk_error_new(lk_vm_t *vm, lk_obj_t *parent, const char *text) {
+    lk_error_t *self = LK_ERROR(lk_obj_alloc(parent));
     self->instr = vm->currinstr;
     if(text != NULL) self->text = lk_string_newfromcstr(vm, text);
     return self;

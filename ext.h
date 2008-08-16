@@ -46,7 +46,7 @@ LK_OBJ(LIST_ATPTR(&env->stack, (i))))
 LK_EXT_DEFINIT(lk_ext_extinit);
 
 /* update */
-void lk_ext_set(lk_obj_t *proto, const char *k, lk_obj_t *v);
+void lk_ext_set(lk_obj_t *parent, const char *k, lk_obj_t *v);
 void lk_ext_global(const char *k, lk_obj_t *v);
 void lk_ext_cfield(lk_obj_t *self, const char *k, lk_obj_t *t,
                    size_t offset);

@@ -76,7 +76,7 @@ void lk_obj_markused(lk_obj_t *self) {
                 lk_obj_markpending(LK_OBJ(v));
             );
         } else {
-            if(self->obj.proto != NULL) lk_obj_markpending(self->obj.proto);
+            if(self->obj.parent != NULL) lk_obj_markpending(self->obj.parent);
         }
         if(self->obj.slots != NULL) {
             struct lk_slot *slot;
@@ -129,7 +129,7 @@ void lk_gc_sweep(lk_gc_t *self) {
         lk_objgroup_count(self->unused),
         lk_objgroup_count(self->used));
          */
-        lk_obj_markpending(LK_OBJ(vm->currframe));
+        lk_obj_markpending(LK_OBJ(vm->currentFrame));
         for(; rsrc != NULL; rsrc = rsrc->prev) {
             lk_obj_markpending(LK_OBJ(rsrc->rsrc));
         }

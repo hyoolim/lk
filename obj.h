@@ -33,8 +33,8 @@ LK_EXT_DEFINIT(lk_obj_extinitfuncs);
 
 /* new */
 #define LK_OBJ_MAXRECYCLED 1000
-lk_obj_t *lk_obj_allocwithsize(lk_obj_t *proto, size_t s);
-lk_obj_t *lk_obj_alloc(lk_obj_t *proto);
+lk_obj_t *lk_obj_allocwithsize(lk_obj_t *parent, size_t s);
+lk_obj_t *lk_obj_alloc(lk_obj_t *parent);
 lk_obj_t *lk_obj_clone(lk_obj_t *self);
 void lk_obj_justfree(lk_obj_t *self);
 void lk_obj_free(lk_obj_t *self);
@@ -81,16 +81,16 @@ lk_obj_isa((self), (t)))
 #define LK_OBJ_PROTO(self) LK_OBJ_HASONEPARENT((self)->obj.parents) \
 ? LK_OBJ_ONEPARENT((self)->obj.parents) : LIST_ATPTR((self)->obj.parents, 0)
  */
-#define LK_OBJ_HASPARENTS(self) ((ptrdiff_t)((self)->obj.proto) & 1)
-#define LK_OBJ_PARENTS(self) ((list_t *)((ptrdiff_t)((self)->obj.proto) & ~1))
+#define LK_OBJ_HASPARENTS(self) ((ptrdiff_t)((self)->obj.parent) & 1)
+#define LK_OBJ_PARENTS(self) ((list_t *)((ptrdiff_t)((self)->obj.parent) & ~1))
 #define LK_OBJ_PROTO(self) ( \
     LK_OBJ_HASPARENTS(self) \
     ? list_getptr(LK_OBJ_PARENTS(self), -1) \
-    : (self)->obj.proto \
+    : (self)->obj.parent \
 )
 #define LK_OBJ_ISA(self, t) ( \
     (self) == (t) ? 1 : \
-    !LK_OBJ_HASPARENTS(self) && (self)->obj.proto == (t) ? 2 : \
+    !LK_OBJ_HASPARENTS(self) && (self)->obj.parent == (t) ? 2 : \
     lk_obj_isa((self), (t)) \
 )
 #define LK_OBJ_ISCFUNC(self) ( \

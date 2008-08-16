@@ -34,6 +34,7 @@ LK_EXT_DEFINIT(lk_frame_extinittypes);
 LK_EXT_DEFINIT(lk_frame_extinitfuncs);
 
 /* update */
+lk_frame_t *lk_frame_new(lk_vm_t *vm);
 void lk_frame_stackpush(lk_frame_t *self, lk_obj_t *v);
 lk_obj_t *lk_frame_stackpop(lk_frame_t *self);
 lk_obj_t *lk_frame_stackpeek(lk_frame_t *self);

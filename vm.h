@@ -15,7 +15,7 @@ typedef struct lk_obj lk_obj_t;
 #define LK_OBJ(v) ((lk_obj_t *)(v))
 
 /* common data for all lk objs */
-#define LK_OBJ_DEFALLOCFUNC(name) void name(lk_obj_t *self, lk_obj_t *proto)
+#define LK_OBJ_DEFALLOCFUNC(name) void name(lk_obj_t *self, lk_obj_t *parent)
 typedef LK_OBJ_DEFALLOCFUNC(lk_tagallocfunc_t);
 #define LK_OBJ_DEFMARKFUNC(name) void name(lk_obj_t *self, void (*mark)(lk_obj_t *self))
 typedef LK_OBJ_DEFMARKFUNC(lk_tagmarkfunc_t);
@@ -34,7 +34,7 @@ struct lk_objgroup {
     lk_obj_t *last;
 };
 struct lk_common {
-    lk_obj_t            *proto;
+    lk_obj_t            *parent;
     list_t              *ancestors;
     set_t               *slots;
     struct lk_tag          *tag;
@@ -79,7 +79,7 @@ struct lk_vm {
         struct lk_rsrcchain *rsrc;
     } *rescue;
     lk_instr_t *currinstr;
-    lk_frame_t *currframe;
+    lk_frame_t *currentFrame;
     lk_error_t *lasterror;
     lk_gc_t *gc;
     lk_frame_t *global;
@@ -116,10 +116,12 @@ struct lk_vm {
     lk_string_t *str_at;
     lk_string_t *str_filesep;
 
-    /* simple vm stat */
-    int cnt_instr;
-    int cnt_frame;
-    int cnt_recycledframe;
+    /* statistics */
+    struct {
+        long totalInstructions;
+        long totalFrames;
+        long recycledFrames;
+    } stat;
 };
 
 /* ext map */
@@ -133,7 +135,6 @@ void lk_vm_free(lk_vm_t *self);
 /* eval */
 lk_frame_t *lk_vm_evalfile(lk_vm_t *self, const char *file, const char *base);
 lk_frame_t *lk_vm_evalstring(lk_vm_t *self, const char *code);
-lk_frame_t *lk_vm_prepevalfunc(lk_vm_t *vm);
 void lk_vm_doevalfunc(lk_vm_t *vm);
 void lk_vm_raisecstr(lk_vm_t *self, const char *message,
                      ...) __attribute__((noreturn));

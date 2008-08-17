@@ -1,7 +1,7 @@
 #ifndef NUMBER_H
 #define NUMBER_H
 #include "common.h"
-#include "string.h"
+#include "darray.h"
 
 /* type. */
 typedef enum numbertype {
@@ -20,6 +20,6 @@ typedef union numberifn {
 } numberifn_t;
 
 /* new. */
-numbertype_t number_new(int is_big, array_t *str, numberifn_t *res);
+numbertype_t number_new(int is_big, darray_t *str, numberifn_t *res);
 void number_free(number_t *self);
 #endif

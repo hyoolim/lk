@@ -5,13 +5,13 @@
 /* ext map - types */
 LK_EXT_DEFINIT(lk_vector_extinittypes) {
     vm->t_vector = lk_object_alloc(vm->t_seq);
-    array_fin(LIST(vm->t_vector));
-    array_init(LIST(vm->t_vector), sizeof(int), 16);
+    darray_fin(LIST(vm->t_vector));
+    darray_init(LIST(vm->t_vector), sizeof(int), 16);
 }
 
 /* ext map - funcs */
 LK_LIBRARY_DEFINECFUNCTION(at__vec_fi) {
-    int *v = array_get(LIST(self), INT(ARG(0)));
+    int *v = darray_get(LIST(self), INT(ARG(0)));
     RETURN(v != NULL ? LK_OBJ(lk_fi_new(VM, *v)) : N);
 }
 #define AT(i) (*(int *)LIST_AT(values, *(int *)LIST_AT(indexes, (i))))
@@ -20,7 +20,7 @@ LK_LIBRARY_DEFINECFUNCTION(at__vec_fi) {
     *(int *)LIST_AT(indexes, (x)) = *(int *)LIST_AT(indexes, (y)); \
     *(int *)LIST_AT(indexes, (y)) = t; \
 } while(0)
-static void quicksort_hoare(array_t *values, array_t *indexes, int low, int hi) {
+static void quicksort_hoare(darray_t *values, darray_t *indexes, int low, int hi) {
     if(low < hi) {
         int l = low, h = hi, p = AT(hi), t;
         do {
@@ -35,24 +35,24 @@ static void quicksort_hoare(array_t *values, array_t *indexes, int low, int hi) 
 }
 LK_LIBRARY_DEFINECFUNCTION(grade__vec) {
     lk_vector_t *indexes = LK_VECTOR(lk_object_alloc(VM->t_vector));
-    array_t *sl = LIST(self), *il = LIST(indexes);
-    array_resize(il, LIST_COUNT(sl));
+    darray_t *sl = LIST(self), *il = LIST(indexes);
+    darray_resize(il, LIST_COUNT(sl));
     LIST_EACH(il, i, v, *(int *)v = i);
     quicksort_hoare(sl, il, 0, LIST_COUNT(il) - 1);
     RETURN(indexes);
 }
 LK_LIBRARY_DEFINECFUNCTION(insertB__vec_fi_fi) {
-    array_insert(LIST(self), INT(ARG(0)), &INT(ARG(1)));
+    darray_insert(LIST(self), INT(ARG(0)), &INT(ARG(1)));
     RETURN(self);
 }
 LK_LIBRARY_DEFINECFUNCTION(removeB__vec_fi) {
     int i = INT(ARG(0));
-    int *v = array_get(LIST(self), i);
-    array_remove(LIST(self), i);
+    int *v = darray_get(LIST(self), i);
+    darray_remove(LIST(self), i);
     RETURN(v != NULL ? LK_OBJ(lk_fi_new(VM, *v)) : N);
 }
 LK_LIBRARY_DEFINECFUNCTION(setB__vec_fi_fi) {
-    array_set(LIST(self), INT(ARG(0)), &INT(ARG(1)));
+    darray_set(LIST(self), INT(ARG(0)), &INT(ARG(1)));
     RETURN(self);
 }
 LK_EXT_DEFINIT(lk_vector_extinitfuncs) {

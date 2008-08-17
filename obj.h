@@ -61,7 +61,7 @@ struct lk_slot *lk_object_getslot(lk_object_t *self, lk_object_t *k);
 struct lk_slot *lk_object_getslotfromany(lk_object_t *self, lk_object_t *k);
 lk_object_t *lk_object_getvaluefromslot(lk_object_t *self,
                                         struct lk_slot *slot);
-int lk_object_hashcode(const void *k, int capa);
+int lk_object_hashcode(const void *k, int capacity);
 int lk_object_keycmp(const void *self, const void *other);
 #define LK_OBJ_ISTYPE(self, t) \
 (  (self) == (t) \
@@ -82,10 +82,10 @@ lk_object_isa((self), (t)))
 ? LK_OBJ_ONEPARENT((self)->obj.parents) : LIST_ATPTR((self)->obj.parents, 0)
  */
 #define LK_OBJ_HASPARENTS(self) ((ptrdiff_t)((self)->obj.parent) & 1)
-#define LK_OBJ_PARENTS(self) ((array_t *)((ptrdiff_t)((self)->obj.parent) & ~1))
+#define LK_OBJ_PARENTS(self) ((darray_t *)((ptrdiff_t)((self)->obj.parent) & ~1))
 #define LK_OBJ_PROTO(self) ( \
     LK_OBJ_HASPARENTS(self) \
-    ? array_getptr(LK_OBJ_PARENTS(self), -1) \
+    ? darray_getptr(LK_OBJ_PARENTS(self), -1) \
     : (self)->obj.parent \
 )
 #define LK_OBJ_ISA(self, t) ( \

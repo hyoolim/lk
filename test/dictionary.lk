@@ -7,7 +7,7 @@ d1 := Map/new/do {
     /set!('z', 40)
 }
 /test('at', d1/at('y'), 20)
-/test('count', d1/count, 3)
+/test('size', d1/size, 3)
 /test('keys', d1/keys/sort, [ 'x', 'y', 'z' ])
 /test('values', d1/values/sort, [ 20, 30, 40 ])
 /finish

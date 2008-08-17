@@ -28,14 +28,14 @@ LK_LIBRARY_DEFINECFUNCTION(items__Folder) {
         errno = 0;
         if((dirEntry = readdir(dir)) == NULL) break;
         else {
-            array_t *filename = array_allocFromCString(dirEntry->d_name);
-            array_clear(LIST(fullPath));
-            array_concat(LIST(fullPath), LIST(LK_FOLDER(self)->path));
-            array_concat(LIST(fullPath), LIST(VM->str_filesep));
-            array_concat(LIST(fullPath), filename);
-            array_pushptr(LIST(items), fullPath);
+            darray_t *filename = darray_allocFromCString(dirEntry->d_name);
+            darray_clear(LIST(fullPath));
+            darray_concat(LIST(fullPath), LIST(LK_FOLDER(self)->path));
+            darray_concat(LIST(fullPath), LIST(VM->str_filesep));
+            darray_concat(LIST(fullPath), filename);
+            darray_pushptr(LIST(items), fullPath);
             fullPath = lk_string_new(VM);
-            array_free(filename);
+            darray_free(filename);
         }
     }
     if(errno == 0) {

@@ -11,7 +11,7 @@ int inet_aton(const char *cp, struct in_addr *pin);
 
 /* ext map - ip addr */
 LK_LIBRARY_DEFINECFUNCTION(alloc__ip_str) {
-    inet_aton(array_tocstr(LIST(ARG(0))), &IPADDR->addr);
+    inet_aton(darray_toCString(LIST(ARG(0))), &IPADDR->addr);
     RETURN(self);
 }
 LK_LIBRARY_DEFINECFUNCTION(to_string__ip) {

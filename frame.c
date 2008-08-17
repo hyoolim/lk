@@ -24,7 +24,7 @@ static LK_OBJ_DEFMARKFUNC(mark__fra) {
     mark(LK_OBJ(FRAME->func));
 }
 static LK_OBJ_DEFFREEFUNC(free__fra) {
-    if(LIST_ISINIT(FRAMESTACK)) array_fin(FRAMESTACK);
+    if(LIST_ISINIT(FRAMESTACK)) darray_fin(FRAMESTACK);
 }
 LK_EXT_DEFINIT(lk_frame_extinittypes) {
     vm->t_frame = lk_object_allocwithsize(vm->t_obj, sizeof(lk_frame_t));
@@ -37,7 +37,7 @@ LK_LIBRARY_DEFINECFUNCTION(Dargs__fra) {
     if(!LIST_ISINIT(FRAMESTACK)) RETURN(lk_list_new(VM));
     else {
         lk_list_t *args = lk_list_newfromlist(VM, FRAMESTACK);
-        array_limit(LIST(args), FRAME->argc);
+        darray_limit(LIST(args), FRAME->argc);
         RETURN(args);
     }
 }
@@ -65,22 +65,22 @@ LK_LIBRARY_DEFINECFUNCTION(DassignB__fra_str_obj) {
 }
 LK_LIBRARY_DEFINECFUNCTION(include__fra_str_str) {
     lk_frame_t *fr = lk_vm_evalfile(VM,
-    array_tocstr(LIST(ARG(0))), array_tocstr(LIST(ARG(1))));
+    darray_toCString(LIST(ARG(0))), darray_toCString(LIST(ARG(1))));
     if(fr != NULL) {
-        set_t *from = fr->obj.slots;
+        qphash_t *from = fr->obj.slots;
         if(from != NULL) {
-            set_t *to = self->obj.slots;
-            if(to == NULL) to = self->obj.slots = set_alloc(
+            qphash_t *to = self->obj.slots;
+            if(to == NULL) to = self->obj.slots = qphash_alloc(
             sizeof(struct lk_slot), lk_object_hashcode, lk_object_keycmp);
             SET_EACH(from, i,
-                *LK_SLOT(set_set(to, i->key)) = *LK_SLOT(SETITEM_VALUEPTR(i));
+                *LK_SLOT(qphash_set(to, i->key)) = *LK_SLOT(SETITEM_VALUEPTR(i));
             );
         }
     }
     RETURN(self);
 }
 LK_LIBRARY_DEFINECFUNCTION(raise__fra_err) {
-    lk_vm_raiseerror(VM, LK_ERROR(ARG(0)));
+    lk_vm_raiseerror(VM, LK_ERR(ARG(0)));
 }
 LK_LIBRARY_DEFINECFUNCTION(raise__fra_str) {
     lk_error_t *err = lk_error_new(VM, VM->t_error, NULL);
@@ -88,13 +88,13 @@ LK_LIBRARY_DEFINECFUNCTION(raise__fra_str) {
     lk_vm_raiseerror(VM, err);
 }
 LK_LIBRARY_DEFINECFUNCTION(redo__fra) {
-    if(LIST_ISINIT(FRAMESTACK)) array_clear(FRAMESTACK);
+    if(LIST_ISINIT(FRAMESTACK)) darray_clear(FRAMESTACK);
     FRAME->next = FRAME->first;
     DONE;
 }
 LK_LIBRARY_DEFINECFUNCTION(require__fra_str_str) {
     RETURN(lk_vm_evalfile(VM,
-    array_tocstr(LIST(ARG(0))), array_tocstr(LIST(ARG(1)))));
+    darray_toCString(LIST(ARG(0))), darray_toCString(LIST(ARG(1)))));
 }
 LK_LIBRARY_DEFINECFUNCTION(rescue__fra_f) {
     RETURN(lk_object_getvaluefromslot(self, lk_object_setslot(
@@ -123,8 +123,8 @@ LK_LIBRARY_DEFINECFUNCTION(return__fra) {
     FRAME->next = NULL;
     FRAME->returnto = f;
     if(LIST_ISINIT(&env->stack)) {
-        if(!LIST_ISINIT(FRAMESTACK)) array_initptr(FRAMESTACK);
-        array_concat(FRAMESTACK, &env->stack);
+        if(!LIST_ISINIT(FRAMESTACK)) darray_initptr(FRAMESTACK);
+        darray_concat(FRAMESTACK, &env->stack);
     }
     DONE;
 }
@@ -164,9 +164,9 @@ lk_frame_t *lk_frame_new(lk_vm_t *vm) {
         vm->stat.recycledFrames ++;
         self = parent->child;
         self->obj.parent = LK_OBJ(parent);
-        array_clear(&self->stack);
+        darray_clear(&self->stack);
         if(self->obj.slots != NULL) {
-            set_clear(self->obj.slots);
+            qphash_clear(self->obj.slots);
         }
     } else {
         self = parent->child = LK_FRAME(lk_object_alloc(LK_OBJ(parent)));
@@ -184,24 +184,24 @@ lk_frame_t *lk_frame_new(lk_vm_t *vm) {
 }
 void lk_frame_stackpush(lk_frame_t *self, lk_object_t *v) {
     assert(v != NULL);
-    if(!LIST_ISINIT(&self->stack)) array_initptr(&self->stack);
-    array_pushptr(&self->stack, lk_object_addref(LK_OBJ(self), v));
+    if(!LIST_ISINIT(&self->stack)) darray_initptr(&self->stack);
+    darray_pushptr(&self->stack, lk_object_addref(LK_OBJ(self), v));
 }
 
 /* update */
 lk_object_t *lk_frame_stackpop(lk_frame_t *self) {
     assert(LIST_ISINIT(&self->stack));
     assert(LIST_COUNT(&self->stack) > 0);
-    return array_popptr(&self->stack);
+    return darray_popptr(&self->stack);
 }
 lk_object_t *lk_frame_stackpeek(lk_frame_t *self) {
     lk_vm_t *vm = LK_VM(self);
     if(!LIST_ISINIT(&self->stack)) return vm->t_nil;
     if(LIST_COUNT(&self->stack) < 1) return vm->t_nil;
-    return array_peekptr(&self->stack);
+    return darray_peekptr(&self->stack);
 }
 lk_list_t *lk_frame_stacktolist(lk_frame_t *self) {
     lk_list_t *stack = lk_list_new(LK_VM(self));
-    if(LIST_ISINIT(&self->stack)) array_copy(LIST(stack), &self->stack);
+    if(LIST_ISINIT(&self->stack)) darray_copy(LIST(stack), &self->stack);
     return stack;
 }

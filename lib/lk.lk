@@ -16,13 +16,13 @@ Boolean/do {
 
 # Character
 Character/do {
-    /count := 1
+    /size := 1
     /also(Comparable)
 }
 
 # CharacterSet
 CharacterSet/do {
-    /count := 1
+    /size := 1
 
     # Returns an inverted copy of itself.
     /negate := { args... | /clone/negate!(*args) }
@@ -218,9 +218,9 @@ Sequence/do {
     /'++' := { other | list := /clone; list ++= other; list }
     /each := { block |
         i := 0
-        block/minimum_argument_count <= 1 ?
-            { while(i < /count) { block(/at(i)); i = i/succ } } !
-            { while(i < /count) { block(i, /at(i)); i = i/succ } }
+        block/minimum_argument_size <= 1 ?
+            { while(i < /size) { block(/at(i)); i = i/succ } } !
+            { while(i < /size) { block(i, /at(i)); i = i/succ } }
     }
     /'==' += { to | False }
     /fill! := { do | /each { i, v | /set!(i, do) }; /. }
@@ -241,9 +241,9 @@ Sequence/do {
     /pop! := { | value := /at(-1); /limit!(-1); value }
 
     # Inserts the value argument to the end of the list.
-    /push! := { value | /set!(/count, value); /. }
+    /push! := { value | /set!(/size, value); /. }
     /quicksort! := { | /quicksort! { x, y | x <=> y } }
-    /quicksort! += { cmp | /quicksort!(cmp, 0, /count - 1) }
+    /quicksort! += { cmp | /quicksort!(cmp, 0, /size - 1) }
     /quicksort! += { cmp, low, hi |
         low < hi ? {
             l := low/clone
@@ -261,9 +261,9 @@ Sequence/do {
         }
         /.
     }
-    /'**' := { count |
-        count == 0 ? return(/clone/clear!)
-        2/to(count)/reduce(/clone) { a, v | a ++= /. }
+    /'**' := { size |
+        size == 0 ? return(/clone/clear!)
+        2/to(size)/reduce(/clone) { a, v | a ++= /. }
     }
 
     # Returns all but the first item in the list.
@@ -277,7 +277,7 @@ Sequence/do {
     /sort! := /.retrieve('quicksort!')
 
     # Returns true if there are any items in the list, false otherwise.
-    /toBoolean := { | /count != 0 }
+    /toBoolean := { | /size != 0 }
 
     # Inserts the value argument before the first item in the list.
     /unshift! := { value | /insert!(0, value); /. }
@@ -310,7 +310,7 @@ Integer/do {
 # List < Sequence
 List/do {
     /'<=>' := { to |
-        d := to/count - /count
+        d := to/size - /size
         d > 0 ? to ! /. ->each { i, v |
             d := v <=> to(i)
             d/zero?/not? ? return(d)
@@ -321,7 +321,7 @@ List/do {
     # Returns true if each item in the list is equal to the ones in
     # to argument, using != operator for comparison, false otherwise.
     /'==' := { to |
-        to/count - /count != 0 ? return(False)
+        to/size - /size != 0 ? return(False)
         /each { i, v | v != to(i) ? return(False) }
         True
     }
@@ -329,7 +329,7 @@ List/do {
     /flatten! := { ... }
     /join := { | /join('') }
     /join += { delim |
-        /count < 1 ? return('')
+        /size < 1 ? return('')
         /rest/reduce(/first/clone) { a, v | (a ++= delim) ++= v }
     }
     /toCode := { | '(' ++ (/map { x | x/toCode } ->join('; ')) ++ ')' }
@@ -340,7 +340,7 @@ List/do {
 Map/do {
 
     # Returns true if there are any items in the set, false otherwise.
-    /toBoolean := { | /count != 0 }
+    /toBoolean := { | /size != 0 }
 }
 
 # N (nil) < Boolean
@@ -429,7 +429,7 @@ PositiveInfinity/do {
 Range/do {
     /each := { block |
         rv := /from
-        block/minimum_argument_count <= 1 ? {
+        block/minimum_argument_size <= 1 ? {
             while(rv <=> /to ->positive? ->not?) {
                 block(rv)
                 rv = rv/succ
@@ -497,7 +497,7 @@ String/do {
     }
     /each := { delim, block | /each(delim, PositiveInfinity, block) }
     /each += { delim, max, block |
-        t := /.; i := 0; pos := 0; dl := delim/count || 1
+        t := /.; i := 0; pos := 0; dl := delim/size || 1
         loop {
             e := /find(delim, pos)
             e/nil? || i >= max ?
@@ -509,13 +509,13 @@ String/do {
     }
     /format := { ... }
     /justifyCenter := { len |
-        len < /count ? /. ! {
-            len = len - /count
+        len < /size ? /. ! {
+            len = len - /size
             (' ' ** (len % 2)) ++ /. ++ (' ' ** (len - (len % 2)))
         }
     }
-    /justifyLeft := { len | len < /count ? /. ! /. ++ (' ' ** (len - /count)) }
-    /justifyRight := { len | len < /count ? /. ! (' ' ** (len - /count)) ++ /. }
+    /justifyLeft := { len | len < /size ? /. ! /. ++ (' ' ** (len - /size)) }
+    /justifyRight := { len | len < /size ? /. ! (' ' ** (len - /size)) ++ /. }
     /lc := { args... | /clone/lc!(*args) }
 
     # Lowercases all the letters in the string.
@@ -539,7 +539,7 @@ String/do {
     /trimLeft! := { |
         [ ' ', '\n', '\r', '\t' ]/each { v |
             /slice(0, 1) == v ?
-                { /slice!(1, /count - 1); /trimLeft! }
+                { /slice!(1, /size - 1); /trimLeft! }
         }
         /.
     }
@@ -547,8 +547,8 @@ String/do {
     # Removes all the whitespaces from end of the string.
     /trimRight! := { |
         [ ' ', '\n', '\r', '\t' ]/each { v |
-            /slice(/count - 1, 1) == v ?
-                { /slice!(0, /count - 1); /trimRight!  }
+            /slice(/size - 1, 1) == v ?
+                { /slice!(0, /size - 1); /trimRight!  }
         }
         /.
     }

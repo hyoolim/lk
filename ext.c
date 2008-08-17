@@ -9,10 +9,10 @@ static LK_OBJ_DEFFREEFUNC(free__ext) {
     if(LK_EXT(self)->lib != NULL) dlclose(LK_EXT(self)->lib);
 }
 LK_LIBRARY_DEFINECFUNCTION(init__ext_str_str) {
-    const char *libpath = array_tocstr(LIST(ARG(0)));
+    const char *libpath = darray_toCString(LIST(ARG(0)));
     void *lib = dlopen(libpath, RTLD_NOW);
     if(lib != NULL) {
-        const char *initname = array_tocstr(LIST(ARG(1)));
+        const char *initname = darray_toCString(LIST(ARG(1)));
         union { void *p; lk_libraryinitfunc_t *f; } initfunc;
         initfunc.p = dlsym(lib, initname);
         LK_EXT(self)->lib = lib;
@@ -84,7 +84,7 @@ void lk_library_setCFunction(lk_object_t *obj, const char *k, lk_cfuncfunc_t *fu
             cfunc->cf.maxargc = INT_MAX;
             break;
         }
-        array_setptr(cfunc->cf.sigs, i, lk_sig_new(vm, NULL, a));
+        darray_setptr(cfunc->cf.sigs, i, lk_sig_new(vm, NULL, a));
     }
     va_end(args);
 }

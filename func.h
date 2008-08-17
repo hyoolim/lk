@@ -16,7 +16,7 @@ struct lk_func {
         lk_instr_t  *sigdef;
         int          minargc;
         int          maxargc;
-        array_t   *sigs;
+        darray_t   *sigs;
         lk_sig_t    *rest;
         lk_string_t *doc;
         uint8_t      opts;
@@ -34,7 +34,7 @@ struct lk_cfunc {
 struct lk_gfunc {
     struct lk_common      obj;
     struct lk_commonfunc  cf;
-    array_t            *funcs;
+    darray_t            *funcs;
 };
 #define LK_GFUNC(v) ((lk_gfunc_t *)(v))
 struct lk_kfunc {

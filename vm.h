@@ -3,10 +3,9 @@
 
 /* generic lib for handling common types of data */
 #include "base/common.h"
-#include "base/array.h"
+#include "base/darray.h"
 #include "base/number.h"
-#include "base/set.h"
-#include "base/string.h"
+#include "base/qphash.h"
 #include <setjmp.h>
 
 /* type - see further down below for actual def */
@@ -35,8 +34,8 @@ struct lk_objectgroup {
 };
 struct lk_common {
     lk_object_t            *parent;
-    array_t              *ancestors;
-    set_t               *slots;
+    darray_t              *ancestors;
+    qphash_t               *slots;
     struct lk_tag          *tag;
     struct lk_mark {
         lk_object_t        *prev;

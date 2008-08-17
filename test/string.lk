@@ -1,7 +1,7 @@
 include('tester.lk')
 Tester/new('String')/do {
 
-/test('repeat(count) #1', 'x' ** 3, 'xxx')
-/test('repeat(count) #2', 'x' ** 0, '')
+/test('repeat(size) #1', 'x' ** 3, 'xxx')
+/test('repeat(size) #2', 'x' ** 0, '')
 /finish
 }

@@ -1,13 +1,13 @@
 #include "memory.h"
 
 /* new */
-static int alloccount = 0;
+static int allocsize = 0;
 static size_t alloctotal = 0;
 static size_t allocused = 0;
 static size_t allocpeak = 0;
 static void *recycled[MEMORY_MAXRECYCLED];
 void *memory_alloc(size_t size) {
-    alloccount ++;
+    allocsize ++;
     if(size < MEMORY_MAXRECYCLED && recycled[size] != NULL) {
         void *next = *(void **)recycled[size];
         void *new = recycled[size];
@@ -16,7 +16,7 @@ void *memory_alloc(size_t size) {
         return new;
     } else {
         size_t *new = calloc(1, size + sizeof(size_t));
-        if(new == NULL) MEMORYERROR("Unable to allocate");
+        if(new == NULL) ERR("Unable to allocate memory!");
         *new = size;
         alloctotal += size;
         allocused += size;
@@ -27,7 +27,7 @@ void *memory_alloc(size_t size) {
 void memory_free(void *ptr) {
     if(ptr != NULL) {
         int size = *((size_t *)ptr - 1);
-        alloccount --;
+        allocsize --;
         if(size < MEMORY_MAXRECYCLED) {
             *(void **)ptr = recycled[size];
             recycled[size] = ptr;
@@ -58,7 +58,7 @@ void *memory_resize(void *old, size_t size) {
     else {
         int old_size = *(size_t *)(old = (size_t *)old - 1);
         size_t *new = realloc(old, size + sizeof(size_t));
-        if(new == NULL) MEMORYERROR("Unable to resize");
+        if(new == NULL) ERR("Unable to resize memory!");
         *new = size;
         alloctotal += size - old_size;
         allocused += size - old_size;
@@ -68,8 +68,8 @@ void *memory_resize(void *old, size_t size) {
 }
 
 /* info */
-int memory_alloccount(void) {
-    return alloccount;
+int memory_allocsize(void) {
+    return allocsize;
 }
 size_t memory_alloctotal(void) {
     return alloctotal;

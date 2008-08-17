@@ -29,7 +29,7 @@ LK_LIBRARY_DEFINECFUNCTION(subtract__ch_fi) {
 }
 LK_LIBRARY_DEFINECFUNCTION(to_string__ch) {
     lk_string_t *str = lk_string_new(VM);
-    array_setuchar(LIST(str), 0, CHAR(self));
+    darray_setuchar(LIST(str), 0, CHAR(self));
     RETURN(str);
 }
 LK_EXT_DEFINIT(lk_char_extinitfuncs) {

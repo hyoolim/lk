@@ -19,49 +19,49 @@ LK_EXT_DEFINIT(lk_charset_extinittypes) {
 
 /* ext map - funcs */
 LK_LIBRARY_DEFINECFUNCTION(addB__charset_charset) {
-    charset_add(CHARSET(self), CHARSET(ARG(0)));
+    charset_addCharSet(CHARSET(self), CHARSET(ARG(0)));
     RETURN(self);
 }
 LK_LIBRARY_DEFINECFUNCTION(addB__charset_str) {
-    charset_addArray(CHARSET(self), LIST(ARG(0)));
+    charset_addDArray(CHARSET(self), LIST(ARG(0)));
     RETURN(self);
 }
 LK_LIBRARY_DEFINECFUNCTION(has__charset_ch) {
     RETURN(charset_has(CHARSET(self), CHAR(ARG(0))) ? T : F);
 }
 LK_LIBRARY_DEFINECFUNCTION(has__charset_str) {
-    array_t *str = LIST(ARG(0));
+    darray_t *str = LIST(ARG(0));
     LIST_EACH(str, i, v, {
-        if(!charset_has(CHARSET(self), array_getuchar(str, i))) RETURN(F);
+        if(!charset_has(CHARSET(self), darray_getuchar(str, i))) RETURN(F);
     });
     RETURN(T);
 }
 LK_LIBRARY_DEFINECFUNCTION(init__charset_str) {
-    charset_addArray(CHARSET(self), LIST(ARG(0)));
+    charset_addDArray(CHARSET(self), LIST(ARG(0)));
     RETURN(self);
 }
 LK_LIBRARY_DEFINECFUNCTION(subtractB__charset_charset) {
-    charset_subtract(CHARSET(self), CHARSET(ARG(0)));
+    charset_subtractCharSet(CHARSET(self), CHARSET(ARG(0)));
     RETURN(self);
 }
 LK_LIBRARY_DEFINECFUNCTION(subtractB__charset_str) {
-    charset_subtractArray(CHARSET(self), LIST(ARG(0)));
+    charset_subtractDArray(CHARSET(self), LIST(ARG(0)));
     RETURN(self);
 }
 LK_LIBRARY_DEFINECFUNCTION(to_string__charset) {
     lk_string_t *str = lk_string_new(VM);
-    array_t *s = LIST(str);
+    darray_t *s = LIST(str);
     uint32_t f, t;
-    uint32_t *c = CHARSET(self)->data, *last = c + CHARSET(self)->count;
-    if(CHARSET(self)->isinverted) array_setuchar(s, s->count, '^');
+    uint32_t *c = CHARSET(self)->data, *last = c + CHARSET(self)->size;
+    if(CHARSET(self)->isinverted) darray_setuchar(s, s->size, '^');
     for(; c < last; ) {
         f = *c ++;
         t = *c ++;
-        if(f == t) array_setuchar(s, s->count, f);
+        if(f == t) darray_setuchar(s, s->size, f);
         else {
-            array_setuchar(s, s->count, f);
-            array_setuchar(s, s->count, '-');
-            array_setuchar(s, s->count, t);
+            darray_setuchar(s, s->size, f);
+            darray_setuchar(s, s->size, '-');
+            darray_setuchar(s, s->size, t);
         }
     }
     RETURN(str);

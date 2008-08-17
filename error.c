@@ -5,8 +5,8 @@
 
 /* ext map - types */
 static LK_OBJ_DEFMARKFUNC(error__mark) {
-    mark(LK_OBJ(LK_ERROR(self)->instr));
-    mark(LK_OBJ(LK_ERROR(self)->text));
+    mark(LK_OBJ(LK_ERR(self)->instr));
+    mark(LK_OBJ(LK_ERR(self)->text));
 }
 LK_EXT_DEFINIT(lk_error_extinittypes) {
     vm->t_error = lk_object_allocwithsize(vm->t_obj, sizeof(lk_error_t));
@@ -25,7 +25,7 @@ LK_EXT_DEFINIT(lk_error_extinitfuncs) {
 
 /* new */
 lk_error_t *lk_error_new(lk_vm_t *vm, lk_object_t *parent, const char *text) {
-    lk_error_t *self = LK_ERROR(lk_object_alloc(parent));
+    lk_error_t *self = LK_ERR(lk_object_alloc(parent));
     self->instr = vm->currinstr;
     if(text != NULL) self->text = lk_string_newfromcstr(vm, text);
     return self;

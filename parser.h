@@ -11,17 +11,17 @@ struct lk_parser {
     struct lk_common   obj;
     const lk_string_t *text;
     const char        *error;
-    set_t          *binaryops;
-    set_t          *precs;
-    array_t         *tokentypes;
-    array_t         *tokenvalues;
-    array_t         *words;
-    array_t         *ops;
-    array_t         *comments;
+    qphash_t          *binaryops;
+    qphash_t          *precs;
+    darray_t         *tokentypes;
+    darray_t         *tokenvalues;
+    darray_t         *words;
+    darray_t         *ops;
+    darray_t         *comments;
     int                textpos;
     int                line;
     int                column;
-    int                opcount;
+    int                opsize;
     int                isterminated;
 };
 struct lk_prec {

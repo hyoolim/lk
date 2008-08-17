@@ -11,7 +11,7 @@ void memory_freerecycled(void);
 void *memory_resize(void *old, size_t size);
 
 /* info */
-int memory_alloccount(void);
+int memory_allocsize(void);
 size_t memory_alloctotal(void);
 size_t memory_allocused(void);
 size_t memory_allocpeak(void);

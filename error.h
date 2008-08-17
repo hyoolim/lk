@@ -3,7 +3,7 @@
 
 /* type */
 typedef struct lk_error lk_error_t;
-#define LK_ERROR(v) ((lk_error_t *)(v))
+#define LK_ERR(v) ((lk_error_t *)(v))
 #include "vm.h"
 #include "instr.h"
 #include "file.h"

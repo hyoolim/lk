@@ -7,7 +7,7 @@ typedef struct lk_seq lk_seq_t;
 #include "vm.h"
 struct lk_seq {
     struct lk_common obj;
-    array_t        data;
+    darray_t        data;
 };
 
 /* ext map */

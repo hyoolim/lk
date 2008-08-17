@@ -109,9 +109,9 @@ void lk_gc_mark(lk_gc_t *self) {
         int i;
         /*
         printf("marking! - unused: %i, pending: %i, used: %i\n",
-        lk_objectgroup_count(self->unused),
-        lk_objectgroup_count(self->pending),
-        lk_objectgroup_count(self->used));
+        lk_objectgroup_size(self->unused),
+        lk_objectgroup_size(self->pending),
+        lk_objectgroup_size(self->used));
          */
         for(i = 0; i < 30000; i ++) {
             if(self->pending->first == NULL) { lk_gc_sweep(self); break; }
@@ -126,8 +126,8 @@ void lk_gc_sweep(lk_gc_t *self) {
         struct lk_rsrcchain *rsrc = vm->rsrc;
         /*
         printf("sweeping! - unused: %i, used: %i\n",
-        lk_objectgroup_count(self->unused),
-        lk_objectgroup_count(self->used));
+        lk_objectgroup_size(self->unused),
+        lk_objectgroup_size(self->used));
          */
         lk_object_markpending(LK_OBJ(vm->currentFrame));
         for(; rsrc != NULL; rsrc = rsrc->prev) {
@@ -144,7 +144,7 @@ void lk_gc_sweep(lk_gc_t *self) {
 }
 
 /* info */
-int lk_objectgroup_count(struct lk_objectgroup *self) {
+int lk_objectgroup_size(struct lk_objectgroup *self) {
     int c = 0;
     lk_object_t *i;
     for(i = self->first; i != NULL; i = i->obj.mark.next) c ++;

@@ -8,14 +8,14 @@ typedef struct setitem {
 } setitem_t;
 
 /* set data so that cloning isn't so expensive */
-typedef int sethashfunc_t(const void *key, int capa);
+typedef int sethashfunc_t(const void *key, int capacity);
 typedef int setkeycmpfunc_t(const void *self, const void *other);
 struct setdata {
     int               ci;
-    int               capa;
+    int               capacity;
     int               ivlen; /* length of item value */
     int               refc;
-    int               count;
+    int               size;
     sethashfunc_t *hashfunc;
     setkeycmpfunc_t  *cmpfunc;
     setitem_t      items; /* placeholder for the first item */
@@ -24,28 +24,28 @@ struct setdata {
 /* the actual set */
 typedef struct set {
     struct setdata *data;
-} set_t;
+} qphash_t;
 
 /* for set construction/destruction */
-set_t *set_alloc(int ivlen, sethashfunc_t *hashfunc,
+qphash_t *qphash_alloc(int ivlen, sethashfunc_t *hashfunc,
                        setkeycmpfunc_t *cmpfunc);
-set_t *set_clone(set_t *self);
-void set_copy(set_t *self, set_t *src);
-void set_fin(set_t *self);
-void set_free(set_t *self);
-void set_init(set_t *self, int ivlen, sethashfunc_t *hashfunc,
+qphash_t *qphash_clone(qphash_t *self);
+void qphash_copy(qphash_t *self, qphash_t *src);
+void qphash_fin(qphash_t *self);
+void qphash_free(qphash_t *self);
+void qphash_init(qphash_t *self, int ivlen, sethashfunc_t *hashfunc,
                  setkeycmpfunc_t *cmpfunc);
 
 /* set manipulation */
-void set_clear(set_t *self);
-int set_count(set_t *self);
-setitem_t *set_get(const set_t *self, const void *key);
-void *set_set(set_t *self, const void *key);
-void set_unset(set_t *self, const void *key);
+void qphash_clear(qphash_t *self);
+int qphash_size(qphash_t *self);
+setitem_t *qphash_get(const qphash_t *self, const void *key);
+void *qphash_set(qphash_t *self, const void *key);
+void qphash_unset(qphash_t *self, const void *key);
 
 /* default hash and keycmp */
-int set_keycmp(const void *self, const void *other);
-int set_hash(const void *key, int capa);
+int qphash_keycmp(const void *self, const void *other);
+int qphash_hash(const void *key, int capacity);
 
 /* set item pointer math */
 #define SETITEM_ADD(data, item, delta) ((setitem_t *)((char *)(item) + SETITEM_SIZE(data) * (delta)))
@@ -63,7 +63,7 @@ int set_hash(const void *key, int capa);
     int _i, _isize = SETITEM_SIZE(_data); \
     setitem_t *item = (setitem_t *)&_data->items; \
     item = (setitem_t *)((char *)item - _isize); \
-    for(_i = 0; _i < _data->capa; _i ++) { \
+    for(_i = 0; _i < _data->capacity; _i ++) { \
         item = (setitem_t *)((char *)item + _isize); \
         if(item->key == NULL || item->key == SETITEM_SKIPKEY) continue; \
         { block; } \

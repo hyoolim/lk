@@ -7,7 +7,7 @@ typedef struct lk_map lk_map_t;
 #include "vm.h"
 struct lk_map {
     struct lk_common obj;
-    set_t            set;
+    qphash_t            set;
 };
 
 /* ext map */
@@ -16,7 +16,7 @@ LK_EXT_DEFINIT(lk_map_extinitfuncs);
 
 /* new */
 lk_map_t *lk_map_new(lk_vm_t *vm);
-lk_map_t *lk_map_newfrompt(lk_vm_t *vm, set_t *ht);
+lk_map_t *lk_map_newfrompt(lk_vm_t *vm, qphash_t *ht);
 
 /* update */
 void lk_map_set(lk_map_t *self, lk_object_t *k, lk_object_t *v);

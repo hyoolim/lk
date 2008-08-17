@@ -95,14 +95,14 @@ LK_LIBRARY_DEFINECFUNCTION(system__vm) {
         int i, c = env->argc;
         char **args = memory_alloc(sizeof(char *) * (c + 1));
         for(i = 0; i < c; i ++) {
-            args[i] = (char *)array_tocstr(LIST(ARG(i)));
+            args[i] = (char *)darray_toCString(LIST(ARG(i)));
         }
         execvp(args[0], args);
         lk_vm_raiseerrno(VM);
     }
 }
 LK_LIBRARY_DEFINECFUNCTION(system2__vm_str) {
-    FILE *out = popen(array_tocstr(LIST(ARG(0))), "r");
+    FILE *out = popen(darray_toCString(LIST(ARG(0))), "r");
     if(out != NULL) {
         char ret[4096];
         char *line = fgets(ret, 4096, out);
@@ -205,7 +205,7 @@ void lk_vm_free(lk_vm_t *self) {
     memory_free(self);
 
     /*
-    fprintf(stderr, "alloccount: %i\n", memory_alloccount());
+    fprintf(stderr, "allocsize: %i\n", memory_allocsize());
     fprintf(stderr, "alloctotal: %i\n", memory_alloctotal());
     fprintf(stderr, "allocpeak: %i\n", memory_allocpeak());
     fprintf(stderr, "allocused: %i\n", memory_allocused());
@@ -227,16 +227,16 @@ lk_frame_t *lk_vm_evalfile(lk_vm_t *self, const char *file, const char *base) {
     if(base != NULL) {
         lk_string_t *root = lk_string_newfromcstr(self, base);
         int pos, i, pslen = LIST_COUNT(LIST(self->str_filesep));
-        pos = array_findlist(LIST(root), LIST(self->str_filesep), 0);
+        pos = darray_findDArray(LIST(root), LIST(self->str_filesep), 0);
         if(pos > 0) {
             lk_string_t *orig = filename;
             root = lk_string_newfromlist(self, LIST(root));
             pos += pslen;
-            while((i = array_findlist(
+            while((i = darray_findDArray(
             LIST(root), LIST(self->str_filesep), pos)) > 0) pos = i + pslen;
-            array_slice(LIST(root), 0, pos);
-            array_resizeitem(LIST(root), LIST(orig));
-            array_concat(LIST(root), LIST(orig));
+            darray_slice(LIST(root), 0, pos);
+            darray_resizeitem(LIST(root), LIST(orig));
+            darray_concat(LIST(root), LIST(orig));
             filename = root;
         }
     }
@@ -244,18 +244,18 @@ lk_frame_t *lk_vm_evalfile(lk_vm_t *self, const char *file, const char *base) {
         lk_frame_t *fr;
         struct lk_rsrcchain rsrc;
         FILE *stream;
-        const char *cfilename = array_tocstr(LIST(filename));
+        const char *cfilename = darray_toCString(LIST(filename));
         rsrc.isstring = 0;
         rsrc.rsrc = filename;
         rsrc.prev = self->rsrc;
         self->rsrc = &rsrc;
         stream = fopen(cfilename, "r");
         if(stream != NULL) {
-            array_t *src = string_allocfromfile(stream);
+            darray_t *src = string_allocfromfile(stream);
             fclose(stream);
             if(src != NULL) {
                 fr = eval(self, lk_string_newfromlist(self, src));
-                array_free(src);
+                darray_free(src);
                 self->rsrc = self->rsrc->prev;
                 return fr;
             } else {
@@ -306,10 +306,10 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
     /* used in slot resolution */
     lk_instr_t *msg;
     lk_string_t *msgn;
-    set_t *slots;
+    qphash_t *slots;
     setitem_t *si;
     struct lk_slot *slot;
-    array_t *ancs;
+    darray_t *ancs;
     int anci, ancc;
     lk_object_t *recv, *r, *slotv;
     lk_func_t *func;
@@ -324,7 +324,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         lk_frame_stackpush(args, LK_OBJ(vm->lasterror));
         for(; recv != NULL; recv = LK_OBJ(LK_FRAME(recv)->returnto)) {
             if((slots = recv->obj.slots) == NULL) continue;
-            if((si = set_get(slots, vm->str_rescue)) == NULL) continue;
+            if((si = qphash_get(slots, vm->str_rescue)) == NULL) continue;
             slot = LK_SLOT(SETITEM_VALUEPTR(si));
             slotv = lk_object_getvaluefromslot(recv, slot);
             if(!LK_OBJ_ISFUNC(slot->check)
@@ -346,7 +346,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         lk_gc_mark(gc);
         gc->newvalues = 0;
     }
-    /* like how cpu execs instrs by following a program counter */
+    /* like how cpu execs instrs by following a program sizeer */
     if((instr = self->next) == NULL) goto prevframe;
     vm->stat.totalInstructions ++;
     vm->currinstr = self->current = instr;
@@ -439,7 +439,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         ancs = NULL;
         findslot:
         if((slots = r->obj.slots) == NULL) goto parent;
-        if((si = set_get(slots, msgn)) == NULL) goto parent;
+        if((si = qphash_get(slots, msgn)) == NULL) goto parent;
         found:
         slot = LK_SLOT(SETITEM_VALUEPTR(si));
         slotv = lk_object_getvaluefromslot(recv, slot);
@@ -449,7 +449,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         && (instr == NULL
         || instr->next == NULL
         || instr->next->type != LK_INSTRTYPE_APPLYMSG
-        || array_cmpcstr(LIST(instr->next->v), "+=") != 0)) {
+        || darray_compareToCString(LIST(instr->next->v), "+=") != 0)) {
             callfunc:
             if(args == NULL) args = lk_frame_new(vm);
             func = lk_func_match(LK_FUNC(slotv), args, recv);
@@ -484,7 +484,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
             for(anci = 1; anci < ancc; anci ++) {
                 r = LIST_ATPTR(ancs, anci);
                 if((slots = r->obj.slots) == NULL) continue;
-                if((si = set_get(slots, msg->v)) == NULL) continue;
+                if((si = qphash_get(slots, msg->v)) == NULL) continue;
                 goto found;
             }
         } else {
@@ -505,7 +505,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
     }
 }
 void lk_vm_raisecstr(lk_vm_t *self, const char *message, ...) {
-    lk_error_t *error = LK_ERROR(lk_object_alloc(self->t_error));
+    lk_error_t *error = LK_ERR(lk_object_alloc(self->t_error));
     va_list ap;
     error->instr = self->currinstr;
     error->text = LK_STRING(lk_object_alloc(self->t_string));
@@ -515,18 +515,18 @@ void lk_vm_raisecstr(lk_vm_t *self, const char *message, ...) {
             message ++;
             switch(*message) {
             case 's':
-                array_concat(LIST(error->text), LIST(va_arg(ap, lk_string_t *)));
+                darray_concat(LIST(error->text), LIST(va_arg(ap, lk_string_t *)));
                 break;
             }
         } else {
-            array_pushuchar(LIST(error->text), *message);
+            darray_pushuchar(LIST(error->text), *message);
         }
     }
     va_end(ap);
     lk_vm_raiseerror(self, error);
 }
 void lk_vm_raiseerrno(lk_vm_t *self) {
-    lk_error_t *error = LK_ERROR(lk_object_alloc(self->t_error));
+    lk_error_t *error = LK_ERR(lk_object_alloc(self->t_error));
     error->text = lk_string_newfromcstr(self, strerror(errno));
     lk_vm_raiseerror(self, error);
 }
@@ -548,15 +548,15 @@ void lk_vm_abort(lk_vm_t *self, lk_error_t *error) {
         lk_string_t *type = LK_STRING(lk_object_getvaluefromslot(LK_OBJ(error), slot));
         lk_instr_t *expr = error->instr;
         int i = 0;
-        string_print(LIST(type), stdout);
+        darray_printToStream(LIST(type), stdout);
         fprintf(stdout, "\n* rsrc: ");
-        string_print(LIST(expr->rsrc), stdout);
+        darray_printToStream(LIST(expr->rsrc), stdout);
         fprintf(stdout, "\n* line: %i", expr->line);
         while(expr->prev != NULL) { expr = expr->prev; i ++; }
         fprintf(stdout, "\n* instruction(%i): ", i);
         lk_instr_print(expr);
         fprintf(stdout, "\n* text: ");
-        if(error->text != NULL) string_print(LIST(error->text), stdout);
+        if(error->text != NULL) darray_printToStream(LIST(error->text), stdout);
         printf("\n");
     } else {
         printf("Unknown error!\n");

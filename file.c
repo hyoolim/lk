@@ -14,7 +14,7 @@ static LK_OBJ_DEFMARKFUNC(mark__file) {
     mark(LK_OBJ(PATH(self)));
 }
 static LK_OBJ_DEFFREEFUNC(free__file) {
-    /* TODO - account for cases when fclose fails */
+    /* TODO - acsize for cases when fclose fails */
     /*
     if(FILEF(self) != NULL) fclose(FILEF(self));
     */
@@ -103,7 +103,7 @@ LK_LIBRARY_DEFINECFUNCTION(read__rf) {
     FILE *f = FILEF(self);
     if(f == NULL) BUG("ReadableFile->st.file should NEVER be NULL");
     else {
-        array_t *c = string_allocfromfile(f);
+        darray_t *c = string_allocfromfile(f);
         RETURN(c != NULL ? LK_OBJ(lk_string_newfromlist(VM, c)) : N);
     }
 }
@@ -111,7 +111,7 @@ LK_LIBRARY_DEFINECFUNCTION(read__rf_ch) {
     FILE *f = FILEF(self);
     if(f == NULL) BUG("ReadableFile->st.file should NEVER be NULL");
     else {
-        array_t *c = array_allocFromFileUntilChar(f, CHAR(ARG(0)));
+        darray_t *c = darray_allocFromFileUntilChar(f, CHAR(ARG(0)));
         RETURN(c != NULL ? LK_OBJ(lk_string_newfromlist(VM, c)) : N);
     }
 }
@@ -119,7 +119,7 @@ LK_LIBRARY_DEFINECFUNCTION(read__rf_charset) {
     FILE *f = FILEF(self);
     if(f == NULL) BUG("ReadableFile->st.file should NEVER be NULL");
     else {
-        array_t *c = array_allocFromFileUntilCSet(f, CHARSET(ARG(0)));
+        darray_t *c = darray_allocFromFileUntilCharSet(f, CHARSET(ARG(0)));
         RETURN(c != NULL ? LK_OBJ(lk_string_newfromlist(VM, c)) : N);
     }
 }
@@ -127,7 +127,7 @@ LK_LIBRARY_DEFINECFUNCTION(read__rf_fi) {
     FILE *f = FILEF(self);
     if(f == NULL) BUG("ReadableFile->st.file should NEVER be NULL");
     else {
-        array_t *c = array_allocfromfile(f, INT(ARG(0)));
+        darray_t *c = darray_allocfromfile(f, INT(ARG(0)));
         RETURN(c != NULL ? LK_OBJ(lk_string_newfromlist(VM, c)) : N);
     }
 }
@@ -153,7 +153,7 @@ LK_LIBRARY_DEFINECFUNCTION(write__wf_str) {
     FILE *f = FILEF(self);
     if(f == NULL) BUG("WritableFile->st.file should NEVER be NULL");
     else {
-        string_print(LIST(ARG(0)), f);
+        darray_printToStream(LIST(ARG(0)), f);
         RETURN(self);
     }
 }

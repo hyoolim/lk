@@ -104,10 +104,10 @@ lk_instr_t *lk_instr_newmessage(lk_parser_t *parser, lk_string_t *name) {
     lk_instr_t *new = instr_new(parser, LK_INSTRTYPE_APPLYMSG);
     new->v = LK_OBJ(name);
     {
-        array_t *cs = parser->comments;
-        lk_string_t *c = array_removeptr(cs, 0);
-        while(cs->count > 0) {
-            array_concat(LIST(c), LIST(array_removeptr(cs, 0)));
+        darray_t *cs = parser->comments;
+        lk_string_t *c = darray_removeptr(cs, 0);
+        while(cs->size > 0) {
+            darray_concat(LIST(c), LIST(darray_removeptr(cs, 0)));
         }
         new->comment = c;
     }
@@ -140,7 +140,7 @@ void lk_instr_print(lk_instr_t *self) {
         break;
     case LK_INSTRTYPE_STRING:
         printf("'");
-        string_print(LIST(self->v), stdout);
+        darray_printToStream(LIST(self->v), stdout);
         printf("'");
         break;
     case LK_INSTRTYPE_FIXINT:
@@ -154,16 +154,16 @@ void lk_instr_print(lk_instr_t *self) {
         break;
     case LK_INSTRTYPE_APPLYMSG:
         printf("/");
-        string_print(LIST(self->v), stdout);
+        darray_printToStream(LIST(self->v), stdout);
         if(!(self->opts & LK_INSTROHASMSGARGS)) printf("[]");
         break;
     case LK_INSTRTYPE_FRAMEMSG:
-        string_print(LIST(self->v), stdout);
+        darray_printToStream(LIST(self->v), stdout);
         if(!(self->opts & LK_INSTROHASMSGARGS)) printf("[]");
         break;
     case LK_INSTRTYPE_SELFMSG:
         printf("./");
-        string_print(LIST(self->v), stdout);
+        darray_printToStream(LIST(self->v), stdout);
         if(!(self->opts & LK_INSTROHASMSGARGS)) printf("[]");
         break;
     case LK_INSTRTYPE_MORE:
@@ -174,7 +174,7 @@ void lk_instr_print(lk_instr_t *self) {
     }
     if(self->comment != NULL) {
         printf(" #*");
-        string_print(LIST(self->comment), stdout);
+        darray_printToStream(LIST(self->comment), stdout);
         printf(" *#");
     }
     printf(self->opts & LK_INSTROEND ? "; " : " ");

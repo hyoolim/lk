@@ -33,7 +33,7 @@ void lk_gc_mark(lk_gc_t *self);
 void lk_gc_sweep(lk_gc_t *self);
 
 /* info */
-int lk_objectgroup_count(struct lk_objectgroup *self);
+int lk_objectgroup_size(struct lk_objectgroup *self);
 struct lk_objectgroup *lk_object_objgroup(lk_object_t *self);
 #define LK_GC_ISMARKUNUSED(self, v) ( \
 (v)->obj.mark.objgroup == (self)->unused || (v)->obj.mark.objgroup == NULL)

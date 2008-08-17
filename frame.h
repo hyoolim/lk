@@ -3,6 +3,7 @@
 
 /* type */
 typedef struct lk_frame lk_frame_t;
+#define LK_FRAME(v) ((lk_frame_t *)(v))
 #include "vm.h"
 #include "instr.h"
 #include "list.h"
@@ -27,7 +28,6 @@ struct lk_frame {
     struct lk_slot      *lastslot;
     int                  argc;
 };
-#define LK_FRAME(v) ((lk_frame_t *)(v))
 
 /* ext map */
 LK_EXT_DEFINIT(lk_frame_extinittypes);

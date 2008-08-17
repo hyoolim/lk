@@ -11,7 +11,7 @@
 #include "frame.h"
 #include "func.h"
 #include "gc.h"
-#include "glist.h"
+#include "seq.h"
 #include "gset.h"
 #include "instr.h"
 #include "list.h"
@@ -139,7 +139,7 @@ lk_vm_t *lk_vm_new(void) {
     lk_object_extinittypes(self);
     lk_gc_extinittypes(self);
     lk_vm_extinittypes(self);
-    lk_garray_extinittypes(self);
+    lk_seq_extinittypes(self);
     lk_gset_extinittypes(self);
     lk_string_extinittypes(self);
 
@@ -188,7 +188,7 @@ lk_vm_t *lk_vm_new(void) {
     lk_parser_extinitfuncs(self);
     lk_string_extinitfuncs(self);
     lk_vm_extinitfuncs(self);
-    lk_garray_extinitfuncs(self);
+    lk_seq_extinitfuncs(self);
     lk_gset_extinitfuncs(self);
 
     /* extra libs */

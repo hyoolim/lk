@@ -4,6 +4,8 @@
 /* type */
 typedef struct lk_ipaddr lk_ipaddr_t;
 typedef struct lk_socket lk_socket_t;
+#define LK_IPADDR(v) ((lk_ipaddr_t *)(v))
+#define LK_SOCKET(v) ((lk_socket_t *)(v))
 #include "vm.h"
 #include "file.h"
 #include "string.h"
@@ -23,8 +25,6 @@ struct lk_ipaddr {
     struct lk_common obj;
     struct in_addr   addr;
 };
-#define LK_IPADDR(v) ((lk_ipaddr_t *)(v))
-#define LK_SOCKET(v) ((lk_socket_t *)(v))
 
 /* ext map */
 LK_EXT_DEFINIT(lk_socket_extinit);

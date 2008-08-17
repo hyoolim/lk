@@ -1,14 +1,14 @@
-#ifndef LK_CSET_H
-#define LK_CSET_H
+#ifndef LK_CHARSET_H
+#define LK_CHARSET_H
 
 /* type */
 typedef struct lk_charset lk_charset_t;
+#define LK_CHARSET(v) ((lk_charset_t *)(v))
 #include "vm.h"
 struct lk_charset {
     struct lk_common obj;
     charset_t        cs;
 };
-#define LK_CSET(v) ((lk_charset_t *)(v))
 
 /* ext map */
 LK_EXT_DEFINIT(lk_charset_extinittypes);

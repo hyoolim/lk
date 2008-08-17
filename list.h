@@ -2,10 +2,10 @@
 #define LK_LIST_H
 
 /* type */
-typedef struct lk_glist lk_list_t;
-#include "vm.h"
-#include "glist.h"
+typedef struct lk_seq lk_list_t;
 #define LK_LIST(v) ((lk_list_t *)(v))
+#include "vm.h"
+#include "seq.h"
 
 /* ext map */
 LK_EXT_DEFINIT(lk_list_extinittypes);

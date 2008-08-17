@@ -3,6 +3,9 @@
 
 /* type */
 typedef struct lk_instr lk_instr_t;
+#define LK_INSTR(v) ((lk_instr_t *)(v))
+#define LK_INSTROHASMSGARGS (1 << 0)
+#define LK_INSTROEND        (1 << 1)
 #include "vm.h"
 #include "parser.h"
 struct lk_instr {
@@ -30,9 +33,6 @@ struct lk_instr {
     lk_string_t      *comment;
     uint8_t           opts;
 };
-#define LK_INSTR(v) ((lk_instr_t *)(v))
-#define LK_INSTROHASMSGARGS (1 << 0)
-#define LK_INSTROEND        (1 << 1)
 
 /* ext map */
 LK_EXT_DEFINIT(lk_instr_extinittypes);

@@ -1,19 +1,19 @@
-#include "glist.h"
+#include "seq.h"
 #include "ext.h"
 #include "fixnum.h"
 
 /* ext map - types */
-static LK_OBJ_DEFALLOCFUNC(alloc__glist) {
+static LK_OBJ_DEFALLOCFUNC(alloc__seq) {
     array_copy(LIST(self), LIST(parent));
 }
-static LK_OBJ_DEFFREEFUNC(free__glist) {
+static LK_OBJ_DEFFREEFUNC(free__seq) {
     array_fin(LIST(self));
 }
-LK_EXT_DEFINIT(lk_garray_extinittypes) {
-    vm->t_glist = lk_object_allocwithsize(vm->t_obj, sizeof(lk_garray_t));
-    array_init(LIST(vm->t_glist), 1, 16);
-    lk_object_setallocfunc(vm->t_glist, alloc__glist);
-    lk_object_setfreefunc(vm->t_glist, free__glist);
+LK_EXT_DEFINIT(lk_seq_extinittypes) {
+    vm->t_seq = lk_object_allocwithsize(vm->t_obj, sizeof(lk_seq_t));
+    array_init(LIST(vm->t_seq), 1, 16);
+    lk_object_setallocfunc(vm->t_seq, alloc__seq);
+    lk_object_setfreefunc(vm->t_seq, free__seq);
 }
 
 /* ext map - funcs */
@@ -26,8 +26,6 @@ LK_LIBRARY_DEFINECFUNCTION(at__gl_vec) {
     );
     RETURN(ret);
 }
-LK_LIBRARY_DEFINECFUNCTION(chopB__gl) {
-    array_limit(LIST(self), -1); RETURN(self); }
 LK_LIBRARY_DEFINECFUNCTION(clearB__gl) {
     array_clear(LIST(self)); RETURN(self); }
 LK_LIBRARY_DEFINECFUNCTION(cmp__gl_gl) {
@@ -59,11 +57,10 @@ LK_LIBRARY_DEFINECFUNCTION(swapB__gl_fi_fi) {
     memory_free(t);
     RETURN(self);
 }
-LK_EXT_DEFINIT(lk_garray_extinitfuncs) {
-    lk_object_t *gl = vm->t_glist, *fi = vm->t_fi, *vec = vm->t_vector;
-    lk_library_setGlobal("GenericList", gl);
+LK_EXT_DEFINIT(lk_seq_extinitfuncs) {
+    lk_object_t *gl = vm->t_seq, *fi = vm->t_fi, *vec = vm->t_vector;
+    lk_library_setGlobal("Sequence", gl);
     lk_library_setCFunction(gl, "at", at__gl_vec, vec, NULL);
-    lk_library_setCFunction(gl, "chop!", chopB__gl, NULL);
     lk_library_setCFunction(gl, "clear!", clearB__gl, NULL);
     lk_library_setCFunction(gl, "<=>", cmp__gl_gl, gl, NULL);
     lk_library_setCFunction(gl, "++=", concatB__gl_gl, gl, NULL);

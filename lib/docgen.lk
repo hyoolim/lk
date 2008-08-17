@@ -131,7 +131,7 @@ DocumentGeneratorFile/new[root ++ '/index.html']/do {
     FixedInteger
     FixedReal
     Function
-    GenericList
+    Sequence
     GenericSet
     Integer
     IpAddress

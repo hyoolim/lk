@@ -7,7 +7,7 @@ static LK_OBJ_DEFMARKFUNC(mark__list) {
     LIST_EACHPTR(LIST(self), i, v, mark(v));
 }
 LK_EXT_DEFINIT(lk_list_extinittypes) {
-    vm->t_list = lk_object_alloc(vm->t_glist);
+    vm->t_list = lk_object_alloc(vm->t_seq);
     array_fin(LIST(vm->t_list));
     array_init(LIST(vm->t_list), sizeof(lk_object_t *), 16);
     lk_object_setmarkfunc(vm->t_list, mark__list);

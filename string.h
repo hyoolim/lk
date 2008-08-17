@@ -2,10 +2,10 @@
 #define LK_STRING_H
 
 /* type */
-typedef struct lk_glist lk_string_t;
-#include "vm.h"
-#include "glist.h"
+typedef struct lk_seq lk_string_t;
 #define LK_STRING(v) ((lk_string_t *)(v))
+#include "vm.h"
+#include "seq.h"
 
 /* ext map */
 LK_EXT_DEFINIT(lk_string_extinittypes);

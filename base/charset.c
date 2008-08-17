@@ -24,7 +24,7 @@ void charset_free(charset_t *self) {
 void charset_init(charset_t *self) {
     self->min = UINT32_MAX;
     self->max = 0;
-    self->capa = CSET_DEFAULTCAPA;
+    self->capa = CHARSET_DEFAULTCAPA;
     self->count = 0;
     self->data = memory_alloc(sizeof(uint32_t) * self->capa);
 }

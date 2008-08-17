@@ -14,8 +14,6 @@ Boolean/do {
     /toCode := { | /toString }
 }
 
-# Buffer < GenericList
-
 # Character
 Character/do {
     /count := 1
@@ -215,8 +213,8 @@ False/do {
 
 # GenericFunction < Function
 
-# GenericList
-GenericList/do {
+# Sequence
+Sequence/do {
     /'++' := { other | list := /clone; list ++= other; list }
     /each := { block |
         i := 0
@@ -316,7 +314,7 @@ Integer/do {
 
 # KineticFunction < Function
 
-# List < GenericList
+# List < Sequence
 List/do {
     /'<=>' := { to |
         d := to/count - /count
@@ -574,7 +572,7 @@ True/do {
     /toString := 'True'
 }
 
-# Vector < GenericList
+# Vector < Sequence
 
 # VirtualMachine
 VM := VirtualMachine

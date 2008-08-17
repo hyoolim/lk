@@ -6,7 +6,7 @@
 
 /* ext map - types */
 LK_EXT_DEFINIT(lk_string_extinittypes) {
-    vm->t_string = lk_object_alloc(vm->t_glist);
+    vm->t_string = lk_object_alloc(vm->t_seq);
     array_fin(LIST(vm->t_string));
     array_init(LIST(vm->t_string), sizeof(uint8_t), 16);
 }
@@ -21,7 +21,7 @@ LK_LIBRARY_DEFINECFUNCTION(find__str_ch_fi) {
     RETURN(N);
 }
 LK_LIBRARY_DEFINECFUNCTION(find__str_charset_fi) {
-    int i = array_findCharset(LIST(self), CSET(ARG(0)), INT(ARG(1)));
+    int i = array_findCharset(LIST(self), CHARSET(ARG(0)), INT(ARG(1)));
     if(i >= 0) RETURN(lk_fi_new(VM, i));
     RETURN(N);
 }
@@ -42,7 +42,7 @@ LK_LIBRARY_DEFINECFUNCTION(setB__str_fi_fi_str) {
 }
 LK_LIBRARY_DEFINECFUNCTION(to_character_set__str) {
     lk_charset_t *cs = lk_charset_new(VM);
-    charset_addArray(CSET(cs), LIST(self));
+    charset_addArray(CHARSET(cs), LIST(self));
     RETURN(cs);
 }
 LK_LIBRARY_DEFINECFUNCTION(to_number__str) {

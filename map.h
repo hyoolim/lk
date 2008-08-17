@@ -3,9 +3,9 @@
 
 /* type */
 typedef struct lk_gset lk_map_t;
+#define LK_MAP(v) ((lk_map_t *)(v))
 #include "vm.h"
 #include "gset.h"
-#define LK_MAP(v) ((lk_map_t *)(v))
 
 /* ext map */
 LK_EXT_DEFINIT(lk_map_extinittypes);

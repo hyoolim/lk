@@ -4,7 +4,7 @@
 
 /* ext map - types */
 LK_EXT_DEFINIT(lk_vector_extinittypes) {
-    vm->t_vector = lk_object_alloc(vm->t_glist);
+    vm->t_vector = lk_object_alloc(vm->t_seq);
     array_fin(LIST(vm->t_vector));
     array_init(LIST(vm->t_vector), sizeof(int), 16);
 }

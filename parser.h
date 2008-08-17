@@ -4,6 +4,7 @@
 /* type */
 typedef struct lk_parser lk_parser_t;
 typedef struct lk_prec lk_prec_t;
+#define LK_PARSER(v) ((lk_parser_t *)(v))
 #include "vm.h"
 #include "instr.h"
 struct lk_parser {
@@ -23,7 +24,6 @@ struct lk_parser {
     int                opcount;
     int                isterminated;
 };
-#define LK_PARSER(v) ((lk_parser_t *)(v))
 struct lk_prec {
     struct lk_common obj;
     int              level;

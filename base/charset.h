@@ -1,5 +1,5 @@
-#ifndef CSET_H
-#define CSET_H
+#ifndef CHARSET_H
+#define CHARSET_H
 #include "common.h"
 
 /* type */
@@ -13,7 +13,7 @@ typedef struct charset {
 } charset_t;
 
 /* new */
-#define CSET_DEFAULTCAPA 8
+#define CHARSET_DEFAULTCAPA 8
 charset_t *charset_alloc(void);
 charset_t *charset_clone(charset_t *self);
 void charset_copy(charset_t *self, charset_t *from);

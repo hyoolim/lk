@@ -28,7 +28,7 @@ LK_OBJ(LIST_ATPTR(&env->stack, (i))))
 #define GOTO(name) (name(self, env))
 
 #define CHAR(v) (LK_CHAR(v)->c)
-#define CSET(v) (&LK_CSET(v)->cs)
+#define CHARSET(v) (&LK_CHARSET(v)->cs)
 #define DBL(v) (LK_FR(v)->r)
 #define F (VM->t_false)
 #define INT(v) (LK_FI(v)->i)

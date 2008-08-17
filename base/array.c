@@ -344,16 +344,16 @@ int array_finduchar(const array_t *self, uint32_t pat, int o) {
     }
     return -1;
 }
-#define MATCHCSET(type) do { \
+#define MATCHCHARSET(type) do { \
     for(; o < c; o ++) if(charset_has(pat, ((type *)buf)[o])) return o; \
 } while(0)
 int array_findCharset(const array_t *self, const charset_t *pat, int o) {
     void *buf = self->first;
     int c = self->count;
     switch(self->data->ilen) {
-    case sizeof(uint8_t ): MATCHCSET(uint8_t ); break;
-    case sizeof(uint16_t): MATCHCSET(uint16_t); break;
-    case sizeof(uint32_t): MATCHCSET(uint32_t); break;
+    case sizeof(uint8_t ): MATCHCHARSET(uint8_t ); break;
+    case sizeof(uint16_t): MATCHCHARSET(uint16_t); break;
+    case sizeof(uint32_t): MATCHCHARSET(uint32_t); break;
     default: BUG("Invalid array item length!");
     }
     return -1;

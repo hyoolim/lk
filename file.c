@@ -119,7 +119,7 @@ LK_LIBRARY_DEFINECFUNCTION(read__rf_charset) {
     FILE *f = FILEF(self);
     if(f == NULL) BUG("ReadableFile->st.file should NEVER be NULL");
     else {
-        array_t *c = array_allocFromFileUntilCSet(f, CSET(ARG(0)));
+        array_t *c = array_allocFromFileUntilCSet(f, CHARSET(ARG(0)));
         RETURN(c != NULL ? LK_OBJ(lk_string_newfromlist(VM, c)) : N);
     }
 }

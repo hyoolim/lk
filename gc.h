@@ -3,6 +3,7 @@
 
 /* type */
 typedef struct lk_gc lk_gc_t;
+#define LK_GC(v) ((lk_gc_t *)(v))
 #include "vm.h"
 #include "frame.h"
 struct lk_gc {
@@ -14,7 +15,6 @@ struct lk_gc {
     int                 newvalues;
     uint8_t             isrunning;
 };
-#define LK_GC(v) ((lk_gc_t *)(v))
 
 /* ext map */
 LK_EXT_DEFINIT(lk_gc_extinittypes);

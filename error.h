@@ -3,6 +3,7 @@
 
 /* type */
 typedef struct lk_error lk_error_t;
+#define LK_ERROR(v) ((lk_error_t *)(v))
 #include "vm.h"
 #include "instr.h"
 #include "file.h"
@@ -12,7 +13,6 @@ struct lk_error {
     lk_instr_t       *instr;
     lk_string_t      *text;
 };
-#define LK_ERROR(v) ((lk_error_t *)(v))
 
 /* ext map */
 LK_EXT_DEFINIT(lk_error_extinittypes);

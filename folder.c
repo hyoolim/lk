@@ -15,13 +15,13 @@ LK_EXT_DEFINIT(lk_folder_extinittypes) {
 }
 
 /* ext map - funcs */
-LK_LIBRARY_DEFINECFUNCTION(init__Folder_str) {
+LK_LIB_DEFINECFUNC(init__Folder_str) {
     LK_FOLDER(self)->path = LK_STRING(ARG(0));
 }
-LK_LIBRARY_DEFINECFUNCTION(items__Folder) {
+LK_LIB_DEFINECFUNC(items__Folder) {
     lk_list_t *items = lk_list_new(VM);
     lk_string_t *fullPath = lk_string_new(VM);
-    DIR *dir = opendir(CSTR(LK_FOLDER(self)->path));
+    DIR *dir = opendir(CSTRING(LK_FOLDER(self)->path));
     struct dirent *dirEntry;
     struct stat fileInfo;
     while(dir != NULL) {
@@ -29,11 +29,11 @@ LK_LIBRARY_DEFINECFUNCTION(items__Folder) {
         if((dirEntry = readdir(dir)) == NULL) break;
         else {
             darray_t *filename = darray_allocFromCString(dirEntry->d_name);
-            darray_clear(LIST(fullPath));
-            darray_concat(LIST(fullPath), LIST(LK_FOLDER(self)->path));
-            darray_concat(LIST(fullPath), LIST(VM->str_filesep));
-            darray_concat(LIST(fullPath), filename);
-            darray_pushptr(LIST(items), fullPath);
+            darray_clear(DARRAY(fullPath));
+            darray_concat(DARRAY(fullPath), DARRAY(LK_FOLDER(self)->path));
+            darray_concat(DARRAY(fullPath), DARRAY(VM->str_filesep));
+            darray_concat(DARRAY(fullPath), filename);
+            darray_pushptr(DARRAY(items), fullPath);
             fullPath = lk_string_new(VM);
             darray_free(filename);
         }
@@ -46,7 +46,7 @@ LK_LIBRARY_DEFINECFUNCTION(items__Folder) {
 }
 LK_EXT_DEFINIT(lk_folder_extinitfuncs) {
     lk_object_t *folder = vm->t_folder, *str = vm->t_string;
-    lk_library_setGlobal("Folder", folder);
-    lk_library_setCFunction(folder, "init", init__Folder_str, str, NULL);
-    lk_library_setCFunction(folder, "items", items__Folder, NULL);
+    lk_lib_setGlobal("Folder", folder);
+    lk_lib_setCFunc(folder, "init", init__Folder_str, str, NULL);
+    lk_lib_setCFunc(folder, "items", items__Folder, NULL);
 }

@@ -34,16 +34,16 @@ LK_EXT_DEFINIT(lk_vm_extinittypes) {
 }
 
 /* ext map - funcs */
-LK_LIBRARY_DEFINECFUNCTION(exit__vm) {
+LK_LIB_DEFINECFUNC(exit__vm) {
     lk_vm_exit(VM);
     DONE;
 }
-LK_LIBRARY_DEFINECFUNCTION(fork__vm) {
+LK_LIB_DEFINECFUNC(fork__vm) {
     pid_t child = fork();
     if(child == -1) lk_vm_raiseerrno(VM);
     RETURN(lk_fi_new(VM, (int)child));
 }
-LK_LIBRARY_DEFINECFUNCTION(fork__vm_f) {
+LK_LIB_DEFINECFUNC(fork__vm_f) {
     pid_t child = fork();
     if(child == -1) lk_vm_raiseerrno(VM);
     if(child > 0) RETURN(lk_fi_new(VM, (int)child));
@@ -60,16 +60,16 @@ LK_LIBRARY_DEFINECFUNCTION(fork__vm_f) {
         DONE;
     }
 }
-LK_LIBRARY_DEFINECFUNCTION(sleep_vm_fr) {
-    usleep((unsigned long)(DBL(ARG(0)) * 1000000));
+LK_LIB_DEFINECFUNC(sleep_vm_fr) {
+    usleep((unsigned long)(DOUBLE(ARG(0)) * 1000000));
     RETURN(self);
 }
-LK_LIBRARY_DEFINECFUNCTION(seconds_since_epoch__vm) {
+LK_LIB_DEFINECFUNC(seconds_since_epoch__vm) {
     struct timeval now;
     gettimeofday(&now, NULL);
     RETURN(lk_fr_new(VM, now.tv_sec + now.tv_usec / 1000000.0));
 }
-LK_LIBRARY_DEFINECFUNCTION(seconds_west_of_utc__vm) {
+LK_LIB_DEFINECFUNC(seconds_west_of_utc__vm) {
     struct timeval now;
     time_t t;
     struct tm gm, local;
@@ -84,7 +84,7 @@ LK_LIBRARY_DEFINECFUNCTION(seconds_west_of_utc__vm) {
     || local.tm_mon < gm.tm_mon
     || local.tm_mday < gm.tm_mday ? 86400 : 0)));
 }
-LK_LIBRARY_DEFINECFUNCTION(system__vm) {
+LK_LIB_DEFINECFUNC(system__vm) {
     pid_t child = fork();
     if(child == -1) lk_vm_raiseerrno(VM);
     if(child > 0) {
@@ -95,22 +95,22 @@ LK_LIBRARY_DEFINECFUNCTION(system__vm) {
         int i, c = env->argc;
         char **args = memory_alloc(sizeof(char *) * (c + 1));
         for(i = 0; i < c; i ++) {
-            args[i] = (char *)darray_toCString(LIST(ARG(i)));
+            args[i] = (char *)darray_toCString(DARRAY(ARG(i)));
         }
         execvp(args[0], args);
         lk_vm_raiseerrno(VM);
     }
 }
-LK_LIBRARY_DEFINECFUNCTION(system2__vm_str) {
-    FILE *out = popen(darray_toCString(LIST(ARG(0))), "r");
+LK_LIB_DEFINECFUNC(system2__vm_str) {
+    FILE *out = popen(darray_toCString(DARRAY(ARG(0))), "r");
     if(out != NULL) {
         char ret[4096];
         char *line = fgets(ret, 4096, out);
-        if(line != NULL) RETURN(lk_string_newfromcstr(VM, line));
+        if(line != NULL) RETURN(lk_string_newFromCString(VM, line));
     }
-    RETURN(N);
+    RETURN(NIL);
 }
-LK_LIBRARY_DEFINECFUNCTION(wait__vm) {
+LK_LIB_DEFINECFUNC(wait__vm) {
     int status;
     pid_t child = wait(&status);
     RETURN(lk_fi_new(VM, (int)child));
@@ -118,16 +118,16 @@ LK_LIBRARY_DEFINECFUNCTION(wait__vm) {
 LK_EXT_DEFINIT(lk_vm_extinitfuncs) {
     lk_object_t *tvm = vm->t_vm, *f = vm->t_func, *fr = vm->t_fr,
                 *str = vm->t_string;
-    lk_library_setGlobal("VirtualMachine", tvm);
-    lk_library_setCFunction(tvm, "exit", exit__vm, NULL);
-    lk_library_setCFunction(tvm, "fork", fork__vm, NULL);
-    lk_library_setCFunction(tvm, "fork", fork__vm_f, f, NULL);
-    lk_library_setCFunction(tvm, "sleep", sleep_vm_fr, fr, NULL);
-    lk_library_setCFunction(tvm, "seconds since epoch", seconds_since_epoch__vm, NULL);
-    lk_library_setCFunction(tvm, "seconds west of utc", seconds_west_of_utc__vm, NULL);
-    lk_library_setCFunction(tvm, "system", system__vm, -1);
-    lk_library_setCFunction(tvm, "system2", system2__vm_str, str, NULL);
-    lk_library_setCFunction(tvm, "wait", wait__vm, NULL);
+    lk_lib_setGlobal("VirtualMachine", tvm);
+    lk_lib_setCFunc(tvm, "exit", exit__vm, NULL);
+    lk_lib_setCFunc(tvm, "fork", fork__vm, NULL);
+    lk_lib_setCFunc(tvm, "fork", fork__vm_f, f, NULL);
+    lk_lib_setCFunc(tvm, "sleep", sleep_vm_fr, fr, NULL);
+    lk_lib_setCFunc(tvm, "seconds since epoch", seconds_since_epoch__vm, NULL);
+    lk_lib_setCFunc(tvm, "seconds west of utc", seconds_west_of_utc__vm, NULL);
+    lk_lib_setCFunc(tvm, "system", system__vm, -1);
+    lk_lib_setCFunc(tvm, "system2", system2__vm_str, str, NULL);
+    lk_lib_setCFunc(tvm, "wait", wait__vm, NULL);
 }
 
 /* new */
@@ -160,12 +160,12 @@ lk_vm_t *lk_vm_new(void) {
     /* init rest of the fields in vm */
     self->global = LK_FRAME(lk_object_alloc(self->t_frame));
     self->currentFrame = self->global;
-    lk_library_setGlobal(".string.class", LK_OBJ(self->str_type = lk_string_newfromcstr(self, ".CLASS")));
-    lk_library_setGlobal(".string.forward", LK_OBJ(self->str_forward = lk_string_newfromcstr(self, ".forward")));
-    lk_library_setGlobal(".string.rescue", LK_OBJ(self->str_rescue = lk_string_newfromcstr(self, ".rescue")));
-    lk_library_setGlobal(".string.on assign", LK_OBJ(self->str_onassign = lk_string_newfromcstr(self, ".on_assign")));
-    lk_library_setGlobal(".string.at", LK_OBJ(self->str_at = lk_string_newfromcstr(self, "at")));
-    lk_library_setGlobal(".string.slash", LK_OBJ(self->str_filesep = lk_string_newfromcstr(self, "/")));
+    lk_lib_setGlobal(".string.class", LK_OBJ(self->str_type = lk_string_newFromCString(self, ".CLASS")));
+    lk_lib_setGlobal(".string.forward", LK_OBJ(self->str_forward = lk_string_newFromCString(self, ".forward")));
+    lk_lib_setGlobal(".string.rescue", LK_OBJ(self->str_rescue = lk_string_newFromCString(self, ".rescue")));
+    lk_lib_setGlobal(".string.on assign", LK_OBJ(self->str_onassign = lk_string_newFromCString(self, ".on_assign")));
+    lk_lib_setGlobal(".string.at", LK_OBJ(self->str_at = lk_string_newFromCString(self, "at")));
+    lk_lib_setGlobal(".string.slash", LK_OBJ(self->str_filesep = lk_string_newFromCString(self, "/")));
 
     /* attach all funcs to primitive types */
     lk_boolean_extinitfuncs(self);
@@ -223,20 +223,20 @@ static lk_frame_t *eval(lk_vm_t *self, lk_string_t *code) {
     return fr;
 }
 lk_frame_t *lk_vm_evalfile(lk_vm_t *self, const char *file, const char *base) {
-    lk_string_t *filename = lk_string_newfromcstr(self, file);
+    lk_string_t *filename = lk_string_newFromCString(self, file);
     if(base != NULL) {
-        lk_string_t *root = lk_string_newfromcstr(self, base);
-        int pos, i, pslen = LIST_COUNT(LIST(self->str_filesep));
-        pos = darray_findDArray(LIST(root), LIST(self->str_filesep), 0);
+        lk_string_t *root = lk_string_newFromCString(self, base);
+        int pos, i, pslen = LIST_COUNT(DARRAY(self->str_filesep));
+        pos = darray_findDArray(DARRAY(root), DARRAY(self->str_filesep), 0);
         if(pos > 0) {
             lk_string_t *orig = filename;
-            root = lk_string_newfromlist(self, LIST(root));
+            root = lk_string_newFromDArray(self, DARRAY(root));
             pos += pslen;
             while((i = darray_findDArray(
-            LIST(root), LIST(self->str_filesep), pos)) > 0) pos = i + pslen;
-            darray_slice(LIST(root), 0, pos);
-            darray_resizeitem(LIST(root), LIST(orig));
-            darray_concat(LIST(root), LIST(orig));
+            DARRAY(root), DARRAY(self->str_filesep), pos)) > 0) pos = i + pslen;
+            darray_slice(DARRAY(root), 0, pos);
+            darray_resizeitem(DARRAY(root), DARRAY(orig));
+            darray_concat(DARRAY(root), DARRAY(orig));
             filename = root;
         }
     }
@@ -244,7 +244,7 @@ lk_frame_t *lk_vm_evalfile(lk_vm_t *self, const char *file, const char *base) {
         lk_frame_t *fr;
         struct lk_rsrcchain rsrc;
         FILE *stream;
-        const char *cfilename = darray_toCString(LIST(filename));
+        const char *cfilename = darray_toCString(DARRAY(filename));
         rsrc.isstring = 0;
         rsrc.rsrc = filename;
         rsrc.prev = self->rsrc;
@@ -254,7 +254,7 @@ lk_frame_t *lk_vm_evalfile(lk_vm_t *self, const char *file, const char *base) {
             darray_t *src = string_allocfromfile(stream);
             fclose(stream);
             if(src != NULL) {
-                fr = eval(self, lk_string_newfromlist(self, src));
+                fr = eval(self, lk_string_newFromDArray(self, src));
                 darray_free(src);
                 self->rsrc = self->rsrc->prev;
                 return fr;
@@ -274,7 +274,7 @@ lk_frame_t *lk_vm_evalstring(lk_vm_t *self, const char *code) {
     lk_frame_t *fr;
     struct lk_rsrcchain rsrc;
     rsrc.isstring = 1;
-    rsrc.rsrc = lk_string_newfromcstr(self, code);
+    rsrc.rsrc = lk_string_newFromCString(self, code);
     rsrc.prev = self->rsrc;
     self->rsrc = &rsrc;
     fr = eval(self, rsrc.rsrc);
@@ -355,7 +355,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
     /* skip comments */
     /* msg represents a possiblity, a function to be exec'd */
     case LK_INSTRTYPE_SELFMSG:
-        lk_frame_stackpush(self, self->self != NULL ? self->self : N);
+        lk_frame_stackpush(self, self->self != NULL ? self->self : NIL);
         goto sendmsg;
     case LK_INSTRTYPE_FRAMEMSG:
         lk_frame_stackpush(self, LK_OBJ(self->frame));
@@ -449,7 +449,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         && (instr == NULL
         || instr->next == NULL
         || instr->next->type != LK_INSTRTYPE_APPLYMSG
-        || darray_compareToCString(LIST(instr->next->v), "+=") != 0)) {
+        || darray_compareToCString(DARRAY(instr->next->v), "+=") != 0)) {
             callfunc:
             if(args == NULL) args = lk_frame_new(vm);
             func = lk_func_match(LK_FUNC(slotv), args, recv);
@@ -492,7 +492,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
             goto findslot;
         }
         /* forward: */
-        if(LIST_EQ(LIST(msgn), LIST(vm->str_forward))) {
+        if(LIST_EQ(DARRAY(msgn), DARRAY(vm->str_forward))) {
             lk_vm_raisecstr(vm, "Cannot find slot named %s", msg->v);
         } else {
             msgn = vm->str_forward;
@@ -515,11 +515,11 @@ void lk_vm_raisecstr(lk_vm_t *self, const char *message, ...) {
             message ++;
             switch(*message) {
             case 's':
-                darray_concat(LIST(error->text), LIST(va_arg(ap, lk_string_t *)));
+                darray_concat(DARRAY(error->text), DARRAY(va_arg(ap, lk_string_t *)));
                 break;
             }
         } else {
-            darray_pushuchar(LIST(error->text), *message);
+            darray_pushuchar(DARRAY(error->text), *message);
         }
     }
     va_end(ap);
@@ -527,7 +527,7 @@ void lk_vm_raisecstr(lk_vm_t *self, const char *message, ...) {
 }
 void lk_vm_raiseerrno(lk_vm_t *self) {
     lk_error_t *error = LK_ERR(lk_object_alloc(self->t_error));
-    error->text = lk_string_newfromcstr(self, strerror(errno));
+    error->text = lk_string_newFromCString(self, strerror(errno));
     lk_vm_raiseerror(self, error);
 }
 void lk_vm_raiseerror(lk_vm_t *self, lk_error_t *error) {
@@ -548,15 +548,15 @@ void lk_vm_abort(lk_vm_t *self, lk_error_t *error) {
         lk_string_t *type = LK_STRING(lk_object_getvaluefromslot(LK_OBJ(error), slot));
         lk_instr_t *expr = error->instr;
         int i = 0;
-        darray_printToStream(LIST(type), stdout);
+        darray_printToStream(DARRAY(type), stdout);
         fprintf(stdout, "\n* rsrc: ");
-        darray_printToStream(LIST(expr->rsrc), stdout);
+        darray_printToStream(DARRAY(expr->rsrc), stdout);
         fprintf(stdout, "\n* line: %i", expr->line);
         while(expr->prev != NULL) { expr = expr->prev; i ++; }
         fprintf(stdout, "\n* instruction(%i): ", i);
         lk_instr_print(expr);
         fprintf(stdout, "\n* text: ");
-        if(error->text != NULL) darray_printToStream(LIST(error->text), stdout);
+        if(error->text != NULL) darray_printToStream(DARRAY(error->text), stdout);
         printf("\n");
     } else {
         printf("Unknown error!\n");

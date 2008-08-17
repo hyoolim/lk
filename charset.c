@@ -18,39 +18,39 @@ LK_EXT_DEFINIT(lk_charset_extinittypes) {
 }
 
 /* ext map - funcs */
-LK_LIBRARY_DEFINECFUNCTION(addB__charset_charset) {
+LK_LIB_DEFINECFUNC(addB__charset_charset) {
     charset_addCharSet(CHARSET(self), CHARSET(ARG(0)));
     RETURN(self);
 }
-LK_LIBRARY_DEFINECFUNCTION(addB__charset_str) {
-    charset_addDArray(CHARSET(self), LIST(ARG(0)));
+LK_LIB_DEFINECFUNC(addB__charset_str) {
+    charset_addDArray(CHARSET(self), DARRAY(ARG(0)));
     RETURN(self);
 }
-LK_LIBRARY_DEFINECFUNCTION(has__charset_ch) {
-    RETURN(charset_has(CHARSET(self), CHAR(ARG(0))) ? T : F);
+LK_LIB_DEFINECFUNC(has__charset_ch) {
+    RETURN(charset_has(CHARSET(self), CHAR(ARG(0))) ? TRUE : FALSE);
 }
-LK_LIBRARY_DEFINECFUNCTION(has__charset_str) {
-    darray_t *str = LIST(ARG(0));
+LK_LIB_DEFINECFUNC(has__charset_str) {
+    darray_t *str = DARRAY(ARG(0));
     LIST_EACH(str, i, v, {
-        if(!charset_has(CHARSET(self), darray_getuchar(str, i))) RETURN(F);
+        if(!charset_has(CHARSET(self), darray_getuchar(str, i))) RETURN(FALSE);
     });
-    RETURN(T);
+    RETURN(TRUE);
 }
-LK_LIBRARY_DEFINECFUNCTION(init__charset_str) {
-    charset_addDArray(CHARSET(self), LIST(ARG(0)));
+LK_LIB_DEFINECFUNC(init__charset_str) {
+    charset_addDArray(CHARSET(self), DARRAY(ARG(0)));
     RETURN(self);
 }
-LK_LIBRARY_DEFINECFUNCTION(subtractB__charset_charset) {
+LK_LIB_DEFINECFUNC(subtractB__charset_charset) {
     charset_subtractCharSet(CHARSET(self), CHARSET(ARG(0)));
     RETURN(self);
 }
-LK_LIBRARY_DEFINECFUNCTION(subtractB__charset_str) {
-    charset_subtractDArray(CHARSET(self), LIST(ARG(0)));
+LK_LIB_DEFINECFUNC(subtractB__charset_str) {
+    charset_subtractDArray(CHARSET(self), DARRAY(ARG(0)));
     RETURN(self);
 }
-LK_LIBRARY_DEFINECFUNCTION(to_string__charset) {
+LK_LIB_DEFINECFUNC(to_string__charset) {
     lk_string_t *str = lk_string_new(VM);
-    darray_t *s = LIST(str);
+    darray_t *s = DARRAY(str);
     uint32_t f, t;
     uint32_t *c = CHARSET(self)->data, *last = c + CHARSET(self)->size;
     if(CHARSET(self)->isinverted) darray_setuchar(s, s->size, '^');
@@ -66,22 +66,22 @@ LK_LIBRARY_DEFINECFUNCTION(to_string__charset) {
     }
     RETURN(str);
 }
-LK_LIBRARY_DEFINECFUNCTION(negateB__charset) {
+LK_LIB_DEFINECFUNC(negateB__charset) {
     CHARSET(self)->isinverted = !CHARSET(self)->isinverted;
     RETURN(self);
 }
 LK_EXT_DEFINIT(lk_charset_extinitfuncs) {
     lk_object_t *charset = vm->t_charset, *ch = vm->t_char, *str = vm->t_string;
-    lk_library_setGlobal("CharacterSet", charset);
-    lk_library_setCFunction(charset, "+=", addB__charset_charset, charset, NULL);
-    lk_library_setCFunction(charset, "+=", addB__charset_str, str, NULL);
-    lk_library_setCFunction(charset, "has?", has__charset_ch, ch, NULL);
-    lk_library_setCFunction(charset, "has?", has__charset_str, str, NULL);
-    lk_library_setCFunction(charset, "init", init__charset_str, str, NULL);
-    lk_library_setCFunction(charset, "negate!", negateB__charset, NULL);
-    lk_library_setCFunction(charset, "-=", subtractB__charset_charset, charset, NULL);
-    lk_library_setCFunction(charset, "-=", subtractB__charset_str, str, NULL);
-    lk_library_setCFunction(charset, "toString", to_string__charset, NULL);
+    lk_lib_setGlobal("CharacterSet", charset);
+    lk_lib_setCFunc(charset, "+=", addB__charset_charset, charset, NULL);
+    lk_lib_setCFunc(charset, "+=", addB__charset_str, str, NULL);
+    lk_lib_setCFunc(charset, "has?", has__charset_ch, ch, NULL);
+    lk_lib_setCFunc(charset, "has?", has__charset_str, str, NULL);
+    lk_lib_setCFunc(charset, "init", init__charset_str, str, NULL);
+    lk_lib_setCFunc(charset, "negate!", negateB__charset, NULL);
+    lk_lib_setCFunc(charset, "-=", subtractB__charset_charset, charset, NULL);
+    lk_lib_setCFunc(charset, "-=", subtractB__charset_str, str, NULL);
+    lk_lib_setCFunc(charset, "toString", to_string__charset, NULL);
 }
 
 /* new */

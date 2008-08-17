@@ -10,12 +10,12 @@ FILE *fdopen(int fildes, const char *mode);
 int inet_aton(const char *cp, struct in_addr *pin);
 
 /* ext map - ip addr */
-LK_LIBRARY_DEFINECFUNCTION(alloc__ip_str) {
-    inet_aton(darray_toCString(LIST(ARG(0))), &IPADDR->addr);
+LK_LIB_DEFINECFUNC(alloc__ip_str) {
+    inet_aton(darray_toCString(DARRAY(ARG(0))), &IPADDR->addr);
     RETURN(self);
 }
-LK_LIBRARY_DEFINECFUNCTION(to_string__ip) {
-    RETURN(lk_string_newfromcstr(VM, inet_ntoa(IPADDR->addr)));
+LK_LIB_DEFINECFUNC(to_string__ip) {
+    RETURN(lk_string_newFromCString(VM, inet_ntoa(IPADDR->addr)));
 }
 
 /* ext map - socket */
@@ -34,7 +34,7 @@ static LK_OBJ_DEFFREEFUNC(free__sock) {
     if(LK_SOCKET(self)->in != NULL) fclose(LK_SOCKET(self)->in);
     if(LK_SOCKET(self)->out != NULL) fclose(LK_SOCKET(self)->out);
 }
-LK_LIBRARY_DEFINECFUNCTION(acce_sock) {
+LK_LIB_DEFINECFUNC(acce_sock) {
     struct sockaddr remote;
     socklen_t len = sizeof(struct sockaddr);
     lk_socket_t *conn = LK_SOCKET(lk_object_alloc(VM->t_socket));
@@ -43,7 +43,7 @@ LK_LIBRARY_DEFINECFUNCTION(acce_sock) {
     conn->out = fdopen(conn->fd, "w");
     RETURN(conn);
 }
-LK_LIBRARY_DEFINECFUNCTION(bind__sock_ip_fi) {
+LK_LIB_DEFINECFUNC(bind__sock_ip_fi) {
     struct sockaddr_in my;
     my.sin_family = AF_INET;
     my.sin_port = htons((uint16_t)INT(ARG(1)));
@@ -55,7 +55,7 @@ LK_LIBRARY_DEFINECFUNCTION(bind__sock_ip_fi) {
     }
     RETURN(self);
 }
-LK_LIBRARY_DEFINECFUNCTION(connect__sock_ip_fi) {
+LK_LIB_DEFINECFUNC(connect__sock_ip_fi) {
     struct sockaddr_in remote;
     remote.sin_family = AF_INET;
     remote.sin_port = htons((uint16_t)INT(ARG(1)));
@@ -67,7 +67,7 @@ LK_LIBRARY_DEFINECFUNCTION(connect__sock_ip_fi) {
     }
     RETURN(self);
 }
-LK_LIBRARY_DEFINECFUNCTION(listen__sock) {
+LK_LIB_DEFINECFUNC(listen__sock) {
     if(listen(SOCKET->fd, 10) == -1) {
         lk_vm_raisecstr(VM, "Cannot listen");
     }
@@ -80,14 +80,14 @@ LK_EXT_DEFINIT(lk_socket_extinit) {
     lk_object_setallocfunc(sock, alloc__sock);
     lk_object_setfreefunc(sock, free__sock);
     /* */
-    lk_library_setGlobal("IpAddress", ip);
-    lk_library_set(ip, "ANY", lk_object_alloc(ip));
-    lk_library_setCFunction(ip, "init", alloc__ip_str, str, NULL);
-    lk_library_setCFunction(ip, "toString", to_string__ip, NULL);
+    lk_lib_setGlobal("IpAddress", ip);
+    lk_lib_setObject(ip, "ANY", lk_object_alloc(ip));
+    lk_lib_setCFunc(ip, "init", alloc__ip_str, str, NULL);
+    lk_lib_setCFunc(ip, "toString", to_string__ip, NULL);
     /* */
-    lk_library_setGlobal("Socket", vm->t_socket = sock);
-    lk_library_setCFunction(sock, "accept", acce_sock, NULL);
-    lk_library_setCFunction(sock, "bind", bind__sock_ip_fi, ip, fi, NULL);
-    lk_library_setCFunction(sock, "connect", connect__sock_ip_fi, ip, fi, NULL);
-    lk_library_setCFunction(sock, "listen", listen__sock, NULL);
+    lk_lib_setGlobal("Socket", vm->t_socket = sock);
+    lk_lib_setCFunc(sock, "accept", acce_sock, NULL);
+    lk_lib_setCFunc(sock, "bind", bind__sock_ip_fi, ip, fi, NULL);
+    lk_lib_setCFunc(sock, "connect", connect__sock_ip_fi, ip, fi, NULL);
+    lk_lib_setCFunc(sock, "listen", listen__sock, NULL);
 }

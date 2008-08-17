@@ -19,15 +19,15 @@ LK_EXT_DEFINIT(lk_gc_extinittypes) {
 }
 
 /* ext map - funcs */
-LK_LIBRARY_DEFINECFUNCTION(pause__gc) {
+LK_LIB_DEFINECFUNC(pause__gc) {
     lk_gc_pause(LK_GC(self)); RETURN(self); }
-LK_LIBRARY_DEFINECFUNCTION(resume__gc) {
+LK_LIB_DEFINECFUNC(resume__gc) {
     lk_gc_resume(LK_GC(self)); RETURN(self); }
 LK_EXT_DEFINIT(lk_gc_extinitfuncs) {
     lk_object_t *gc = LK_OBJ(vm->gc);
-    lk_library_set(vm->t_vm, "GarbageCollector", gc);
-    lk_library_setCFunction(gc, "pause", pause__gc, NULL);
-    lk_library_setCFunction(gc, "resume", resume__gc, NULL);
+    lk_lib_setObject(vm->t_vm, "GarbageCollector", gc);
+    lk_lib_setCFunc(gc, "pause", pause__gc, NULL);
+    lk_lib_setCFunc(gc, "resume", resume__gc, NULL);
 }
 
 /* update */

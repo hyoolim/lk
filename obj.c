@@ -17,18 +17,18 @@ LK_EXT_DEFINIT(lk_object_extinittypes) {
 }
 
 /* ext map - funcs */
-LK_LIBRARY_DEFINECFUNCTION(Ddefine_and_assignB__obj_str_obj_obj);
-LK_LIBRARY_DEFINECFUNCTION(Ddefine__obj_str_obj) {
+LK_LIB_DEFINECFUNC(Ddefine_and_assignB__obj_str_obj_obj);
+LK_LIB_DEFINECFUNC(Ddefine__obj_str_obj) {
     env->argc ++;
-    darray_pushptr(&env->stack, N);
+    darray_pushptr(&env->stack, NIL);
     GOTO(Ddefine_and_assignB__obj_str_obj_obj);
 }
-LK_LIBRARY_DEFINECFUNCTION(Ddefine_and_assignB__obj_str_obj) {
+LK_LIB_DEFINECFUNC(Ddefine_and_assignB__obj_str_obj) {
     env->argc ++;
     darray_insertptr(&env->stack, 1, VM->t_obj);
     GOTO(Ddefine_and_assignB__obj_str_obj_obj);
 }
-LK_LIBRARY_DEFINECFUNCTION(Ddefine_and_assignB__obj_str_obj_obj) {
+LK_LIB_DEFINECFUNC(Ddefine_and_assignB__obj_str_obj_obj) {
     lk_object_t *k = ARG(0);
     lk_object_t *v = ARG(2);
     struct lk_slot *slot;
@@ -44,28 +44,28 @@ LK_LIBRARY_DEFINECFUNCTION(Ddefine_and_assignB__obj_str_obj_obj) {
     }
     RETURN(v);
 }
-LK_LIBRARY_DEFINECFUNCTION(Did__obj) {
+LK_LIB_DEFINECFUNC(Did__obj) {
     RETURN(lk_fi_new(VM, (int)self)); }
-LK_LIBRARY_DEFINECFUNCTION(Dretrieve__obj_str) {
+LK_LIB_DEFINECFUNC(Dretrieve__obj_str) {
     struct lk_slot *slot = lk_object_getslotfromany(self, ARG(0));
     if(slot != NULL) RETURN(lk_object_getvaluefromslot(self, slot));
-    else RETURN(N);
+    else RETURN(NIL);
 
 }
-LK_LIBRARY_DEFINECFUNCTION(Dself__obj) {
+LK_LIB_DEFINECFUNC(Dself__obj) {
     RETURN(self); }
-LK_LIBRARY_DEFINECFUNCTION(Dslots__obj) {
+LK_LIB_DEFINECFUNC(Dslots__obj) {
     lk_list_t *slots = lk_list_new(VM);
     if(self->obj.slots != NULL) {
         SET_EACH(self->obj.slots, i,
-            darray_pushptr(LIST(slots), (void *)i->key);
+            darray_pushptr(DARRAY(slots), (void *)i->key);
         );
     }
     RETURN(slots);
 }
-LK_LIBRARY_DEFINECFUNCTION(alloc__obj) {
+LK_LIB_DEFINECFUNC(alloc__obj) {
     RETURN(lk_object_alloc(self)); }
-LK_LIBRARY_DEFINECFUNCTION(also__obj_obj) {
+LK_LIB_DEFINECFUNC(also__obj_obj) {
     darray_t *pars;
     if(LK_OBJ_HASPARENTS(self)) {
         pars = LK_OBJ_PARENTS(self);
@@ -82,9 +82,9 @@ LK_LIBRARY_DEFINECFUNCTION(also__obj_obj) {
         exit(EXIT_FAILURE);
     }
 }
-LK_LIBRARY_DEFINECFUNCTION(ancestor__obj_obj) {
+LK_LIB_DEFINECFUNC(ancestor__obj_obj) {
     RETURN(LK_OBJ_ISTYPE(self, ARG(0)) ? VM->t_true : VM->t_false); }
-LK_LIBRARY_DEFINECFUNCTION(ancestors__obj) {
+LK_LIB_DEFINECFUNC(ancestors__obj) {
     if(self->obj.ancestors != NULL || lk_object_calcancestors(self)) {
         RETURN(lk_list_newfromlist(VM, self->obj.ancestors));
     } else {
@@ -92,9 +92,9 @@ LK_LIBRARY_DEFINECFUNCTION(ancestors__obj) {
         exit(EXIT_FAILURE);
     }
 }
-LK_LIBRARY_DEFINECFUNCTION(clone__obj) {
+LK_LIB_DEFINECFUNC(clone__obj) {
     RETURN(lk_object_clone(self)); }
-LK_LIBRARY_DEFINECFUNCTION(do__obj_f) {
+LK_LIB_DEFINECFUNC(do__obj_f) {
     lk_kfunc_t *kf = LK_KFUNC(ARG(0));
     lk_frame_t *fr = lk_frame_new(VM);
     fr->first = fr->next = kf->first;
@@ -105,7 +105,7 @@ LK_LIBRARY_DEFINECFUNCTION(do__obj_f) {
     lk_vm_doevalfunc(VM);
     RETURN(self);
 }
-LK_LIBRARY_DEFINECFUNCTION(import__obj_obj) {
+LK_LIB_DEFINECFUNC(import__obj_obj) {
     qphash_t *from = ARG(0)->obj.slots;
     if(from != NULL) {
         qphash_t *to = self->obj.slots;
@@ -117,47 +117,47 @@ LK_LIBRARY_DEFINECFUNCTION(import__obj_obj) {
     }
     RETURN(self);
 }
-LK_LIBRARY_DEFINECFUNCTION(parents__obj) {
+LK_LIB_DEFINECFUNC(parents__obj) {
     if(LK_OBJ_HASPARENTS(self)) {
         RETURN(lk_list_newfromlist(VM, LK_OBJ_PARENTS(self)));
     } else {
         lk_list_t *ret = lk_list_new(VM);
-        darray_pushptr(LIST(ret), self->obj.parent);
+        darray_pushptr(DARRAY(ret), self->obj.parent);
         RETURN(ret);
     }
 }
-LK_LIBRARY_DEFINECFUNCTION(parent__obj) {
+LK_LIB_DEFINECFUNC(parent__obj) {
     if(LK_OBJ_HASPARENTS(self)) {
         darray_t *pars = LK_OBJ_PARENTS(self);
-        RETURN(LIST_COUNT(pars) > 0 ? darray_getptr(pars, -1) : N);
+        RETURN(LIST_COUNT(pars) > 0 ? darray_getptr(pars, -1) : NIL);
     }
     RETURN(self->obj.parent);
 }
-LK_LIBRARY_DEFINECFUNCTION(with__obj_f) {
+LK_LIB_DEFINECFUNC(with__obj_f) {
     do__obj_f(lk_object_addref(LK_OBJ(env), lk_object_alloc(self)), env);
 }
 LK_EXT_DEFINIT(lk_object_extinitfuncs) {
     lk_object_t *obj = vm->t_obj, *str = vm->t_string, *f = vm->t_func;
-    lk_library_setGlobal("Object", obj);
-    lk_library_setCFunction(obj, ".", Dself__obj, NULL);
-    lk_library_setCFunction(obj, ":", Ddefine__obj_str_obj, str, obj, NULL);
-    lk_library_setCFunction(obj, ":=", Ddefine_and_assignB__obj_str_obj, str, obj, NULL);
-    lk_library_setCFunction(obj, ":=", Ddefine_and_assignB__obj_str_obj_obj, str, obj, obj, NULL);
-    lk_library_setCFunction(obj, ".id", Did__obj, NULL);
-    lk_library_setCFunction(obj, ".retrieve", Dretrieve__obj_str, str, NULL);
-    lk_library_setCFunction(obj, ".self", Dself__obj, NULL);
-    lk_library_setCFunction(obj, ".slots", Dslots__obj, NULL);
-    lk_library_setCFunction(obj, "alloc", alloc__obj, NULL);
-    lk_library_setCFunction(obj, "also", also__obj_obj, obj, NULL);
-    lk_library_setCFunction(obj, "ancestor?", ancestor__obj_obj, obj, NULL);
-    lk_library_setCFunction(obj, "ancestors", ancestors__obj, NULL);
-    lk_library_setCFunction(obj, "clone", clone__obj, NULL);
-    lk_library_setCFunction(obj, "do", do__obj_f, f, NULL);
-    lk_library_setCFunction(obj, "extend", do__obj_f, f, NULL);
-    lk_library_setCFunction(obj, "import", import__obj_obj, obj, NULL);
-    lk_library_setCFunction(obj, "parents", parents__obj, NULL);
-    lk_library_setCFunction(obj, "parent", parent__obj, NULL);
-    lk_library_setCFunction(obj, "with", with__obj_f, f, NULL);
+    lk_lib_setGlobal("Object", obj);
+    lk_lib_setCFunc(obj, ".", Dself__obj, NULL);
+    lk_lib_setCFunc(obj, ":", Ddefine__obj_str_obj, str, obj, NULL);
+    lk_lib_setCFunc(obj, ":=", Ddefine_and_assignB__obj_str_obj, str, obj, NULL);
+    lk_lib_setCFunc(obj, ":=", Ddefine_and_assignB__obj_str_obj_obj, str, obj, obj, NULL);
+    lk_lib_setCFunc(obj, ".id", Did__obj, NULL);
+    lk_lib_setCFunc(obj, ".retrieve", Dretrieve__obj_str, str, NULL);
+    lk_lib_setCFunc(obj, ".self", Dself__obj, NULL);
+    lk_lib_setCFunc(obj, ".slots", Dslots__obj, NULL);
+    lk_lib_setCFunc(obj, "alloc", alloc__obj, NULL);
+    lk_lib_setCFunc(obj, "also", also__obj_obj, obj, NULL);
+    lk_lib_setCFunc(obj, "ancestor?", ancestor__obj_obj, obj, NULL);
+    lk_lib_setCFunc(obj, "ancestors", ancestors__obj, NULL);
+    lk_lib_setCFunc(obj, "clone", clone__obj, NULL);
+    lk_lib_setCFunc(obj, "do", do__obj_f, f, NULL);
+    lk_lib_setCFunc(obj, "extend", do__obj_f, f, NULL);
+    lk_lib_setCFunc(obj, "import", import__obj_obj, obj, NULL);
+    lk_lib_setCFunc(obj, "parents", parents__obj, NULL);
+    lk_lib_setCFunc(obj, "parent", parent__obj, NULL);
+    lk_lib_setCFunc(obj, "with", with__obj_f, f, NULL);
 }
 
 /* new */
@@ -225,7 +225,7 @@ struct lk_slot *lk_object_setslot(lk_object_t *self, lk_object_t *k,
                                   lk_object_t *check, lk_object_t *v) {
     struct lk_slot *slot = lk_object_getslot(self, k);
     if(slot == NULL) {
-        uint32_t first = darray_getuchar(LIST(k), 0);
+        uint32_t first = darray_getuchar(DARRAY(k), 0);
         if(self->obj.slots == NULL) {
             self->obj.slots = qphash_alloc(sizeof(struct lk_slot),
                                        lk_object_hashcode,
@@ -245,7 +245,7 @@ struct lk_slot *lk_object_setslot(lk_object_t *self, lk_object_t *k,
 struct lk_slot *lk_object_setslotbycstr(lk_object_t *self, const char *k,
                                         lk_object_t *check, lk_object_t *v) {
     return lk_object_setslot(self,
-    LK_OBJ(lk_string_newfromcstr(LK_VM(self), k)), check, v);
+    LK_OBJ(lk_string_newFromCString(LK_VM(self), k)), check, v);
 }
 void lk_object_setvalueonslot(lk_object_t *self, struct lk_slot *slot,
                               lk_object_t *v) {
@@ -387,9 +387,9 @@ lk_object_t *lk_object_getvaluefromslot(lk_object_t *self,
     }
 }
 int lk_object_hashcode(const void *k, int capacity) {
-    return darray_hc(LIST(k)) % capacity;
+    return darray_hc(DARRAY(k)) % capacity;
 }
 int lk_object_keycmp(const void *self, const void *other) {
     if(self == other) return 0;
-    return !LIST_EQ(LIST(self), LIST(other));
+    return !LIST_EQ(DARRAY(self), DARRAY(other));
 }

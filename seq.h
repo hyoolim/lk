@@ -1,9 +1,9 @@
-#ifndef LK_GLIST_H
-#define LK_GLIST_H
+#ifndef LK_SEQ_H
+#define LK_SEQ_H
 
 /* type */
 typedef struct lk_seq lk_seq_t;
-#define LK_GLIST(v) ((lk_seq_t *)(v))
+#define LK_SEQ(v) ((lk_seq_t *)(v))
 #include "vm.h"
 struct lk_seq {
     struct lk_common obj;

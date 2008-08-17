@@ -19,11 +19,11 @@ LK_EXT_DEFINIT(lk_instr_extinittypes) {
 }
 
 /* ext map - funcs */
-LK_LIBRARY_DEFINECFUNCTION(column) {
+LK_LIB_DEFINECFUNC(column) {
     RETURN(lk_fi_new(VM, INSTR->column)); }
-LK_LIBRARY_DEFINECFUNCTION(line) {
+LK_LIB_DEFINECFUNC(line) {
     RETURN(lk_fi_new(VM, INSTR->line)); }
-LK_LIBRARY_DEFINECFUNCTION(message) {
+LK_LIB_DEFINECFUNC(message) {
     lk_instr_t *instr = INSTR;
     do {
         switch(instr->type) {
@@ -33,19 +33,19 @@ LK_LIBRARY_DEFINECFUNCTION(message) {
         default: instr = instr->prev;
         }
     } while(instr != NULL);
-    RETURN(N);
+    RETURN(NIL);
 }
-LK_LIBRARY_DEFINECFUNCTION(resource) {
+LK_LIB_DEFINECFUNC(resource) {
     RETURN(INSTR->rsrc); }
 LK_EXT_DEFINIT(lk_instr_extinitfuncs) {
     lk_object_t *instr = vm->t_instr;
-    lk_library_set(vm->t_vm, "Instruction", instr);
-    lk_library_cfield(instr, ".next", instr, offsetof(lk_instr_t, next));
-    lk_library_cfield(instr, ".previous", instr, offsetof(lk_instr_t, prev));
-    lk_library_setCFunction(instr, "COLUMN", column, NULL);
-    lk_library_setCFunction(instr, "LINE", line, NULL);
-    lk_library_setCFunction(instr, "MESSAGE", message, NULL);
-    lk_library_setCFunction(instr, "RESOURCE", resource, NULL);
+    lk_lib_setObject(vm->t_vm, "Instruction", instr);
+    lk_lib_setCField(instr, ".next", instr, offsetof(lk_instr_t, next));
+    lk_lib_setCField(instr, ".previous", instr, offsetof(lk_instr_t, prev));
+    lk_lib_setCFunc(instr, "COLUMN", column, NULL);
+    lk_lib_setCFunc(instr, "LINE", line, NULL);
+    lk_lib_setCFunc(instr, "MESSAGE", message, NULL);
+    lk_lib_setCFunc(instr, "RESOURCE", resource, NULL);
 }
 
 /* new */
@@ -79,7 +79,7 @@ lk_instr_t *lk_instr_newarglist(lk_parser_t *parser, lk_instr_t *func) {
 }
 lk_instr_t *lk_instr_newstring(lk_parser_t *parser, lk_string_t *s) {
     lk_instr_t *new = instr_new(parser, LK_INSTRTYPE_STRING);
-    new->v = LK_OBJ(s); /* lk_string_newfromlist(LK_VM(parser), s)); */
+    new->v = LK_OBJ(s); /* lk_string_newFromDArray(LK_VM(parser), s)); */
     return new;
 }
 lk_instr_t *lk_instr_newfi(lk_parser_t *parser, int i) {
@@ -107,7 +107,7 @@ lk_instr_t *lk_instr_newmessage(lk_parser_t *parser, lk_string_t *name) {
         darray_t *cs = parser->comments;
         lk_string_t *c = darray_removeptr(cs, 0);
         while(cs->size > 0) {
-            darray_concat(LIST(c), LIST(darray_removeptr(cs, 0)));
+            darray_concat(DARRAY(c), DARRAY(darray_removeptr(cs, 0)));
         }
         new->comment = c;
     }
@@ -140,30 +140,30 @@ void lk_instr_print(lk_instr_t *self) {
         break;
     case LK_INSTRTYPE_STRING:
         printf("'");
-        darray_printToStream(LIST(self->v), stdout);
+        darray_printToStream(DARRAY(self->v), stdout);
         printf("'");
         break;
     case LK_INSTRTYPE_FIXINT:
         printf("%i", INT(self->v));
         break;
     case LK_INSTRTYPE_FIXF:
-        printf("%f", DBL(self->v));
+        printf("%f", DOUBLE(self->v));
         break;
     case LK_INSTRTYPE_CHAR:
         printf("%c", CHAR(self->v));
         break;
     case LK_INSTRTYPE_APPLYMSG:
         printf("/");
-        darray_printToStream(LIST(self->v), stdout);
+        darray_printToStream(DARRAY(self->v), stdout);
         if(!(self->opts & LK_INSTROHASMSGARGS)) printf("[]");
         break;
     case LK_INSTRTYPE_FRAMEMSG:
-        darray_printToStream(LIST(self->v), stdout);
+        darray_printToStream(DARRAY(self->v), stdout);
         if(!(self->opts & LK_INSTROHASMSGARGS)) printf("[]");
         break;
     case LK_INSTRTYPE_SELFMSG:
         printf("./");
-        darray_printToStream(LIST(self->v), stdout);
+        darray_printToStream(DARRAY(self->v), stdout);
         if(!(self->opts & LK_INSTROHASMSGARGS)) printf("[]");
         break;
     case LK_INSTRTYPE_MORE:
@@ -174,7 +174,7 @@ void lk_instr_print(lk_instr_t *self) {
     }
     if(self->comment != NULL) {
         printf(" #*");
-        darray_printToStream(LIST(self->comment), stdout);
+        darray_printToStream(DARRAY(self->comment), stdout);
         printf(" *#");
     }
     printf(self->opts & LK_INSTROEND ? "; " : " ");

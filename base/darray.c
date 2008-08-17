@@ -360,7 +360,7 @@ int darray_compareTo(const darray_t *self, const darray_t *other) {
                 abort();
     }   }   }
 }
-#define COMPARECSTR(type) do { \
+#define COMPARECSTRING(type) do { \
     for(; sb < sbend; sb += ilen, other ++) { \
         cd = *(type *)sb - *other; \
         if(cd != 0) return cd; \
@@ -372,9 +372,9 @@ int darray_compareToCString(const darray_t *self, const char *other) {
     uint8_t ilen = self->data->ilen;
     uint8_t *sb = (uint8_t *)self->first, *sbend = sb + len * ilen;
     int cd;
-    if(     ilen == sizeof(uint8_t )) COMPARECSTR(uint8_t );
-    else if(ilen == sizeof(uint16_t)) COMPARECSTR(uint16_t);
-    else if(ilen == sizeof(uint32_t)) COMPARECSTR(uint16_t);
+    if(     ilen == sizeof(uint8_t )) COMPARECSTRING(uint8_t );
+    else if(ilen == sizeof(uint16_t)) COMPARECSTRING(uint16_t);
+    else if(ilen == sizeof(uint32_t)) COMPARECSTRING(uint16_t);
     else BUG("Invalid ilen in darray_compareToCString\n");
     return d;
 }

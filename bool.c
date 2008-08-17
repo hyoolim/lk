@@ -11,8 +11,8 @@ LK_EXT_DEFINIT(lk_boolean_extinittypes) {
 
 /* ext map - funcs */
 LK_EXT_DEFINIT(lk_boolean_extinitfuncs) {
-    lk_library_setGlobal("Nil", vm->t_nil);
-    lk_library_setGlobal("Boolean", vm->t_bool);
-    lk_library_setGlobal("True", vm->t_true);
-    lk_library_setGlobal("False", vm->t_false);
+    lk_lib_setGlobal("Nil", vm->t_nil);
+    lk_lib_setGlobal("Boolean", vm->t_bool);
+    lk_lib_setGlobal("True", vm->t_true);
+    lk_lib_setGlobal("False", vm->t_false);
 }

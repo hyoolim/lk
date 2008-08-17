@@ -23,13 +23,13 @@ static LK_OBJ_DEFALLOCFUNC(alloc__rd) {
     RANDOM->seed = lk_fi_new(LK_VM(self), seed);
     init_genrand(RANDOM, seed);
 }
-LK_LIBRARY_DEFINECFUNCTION(init__rd_fi) {
+LK_LIB_DEFINECFUNC(init__rd_fi) {
     init_genrand(RANDOM, INT(RANDOM->seed = LK_FI(ARG(0))));
     RETURN(self);
 }
-LK_LIBRARY_DEFINECFUNCTION(fixed_integer__rd) {
+LK_LIB_DEFINECFUNC(fixed_integer__rd) {
     RETURN(lk_fi_new(VM, (int)genrand_int32(RANDOM))); }
-LK_LIBRARY_DEFINECFUNCTION(fixed_real__rd) {
+LK_LIB_DEFINECFUNC(fixed_real__rd) {
     RETURN(lk_fr_new(VM, genrand_real1(RANDOM))); }
 LK_EXT_DEFINIT(lk_random_extinit) {
     lk_object_t *obj = vm->t_obj, *fi = vm->t_fi;
@@ -37,11 +37,11 @@ LK_EXT_DEFINIT(lk_random_extinit) {
     LK_RANDOM(rd)->seed = lk_fi_new(vm, 0);
     init_genrand(LK_RANDOM(rd), 0);
     lk_object_setallocfunc(rd, alloc__rd);
-    lk_library_setGlobal("Random", rd);
-    lk_library_setCFunction(rd, "init", init__rd_fi, fi, NULL);
-    lk_library_setCFunction(rd, "fixed_integer", fixed_integer__rd, NULL);
-    lk_library_setCFunction(rd, "fixed_real", fixed_real__rd, NULL);
-    lk_library_cfield(rd, "seed", fi, offsetof(lk_random_t, seed));
+    lk_lib_setGlobal("Random", rd);
+    lk_lib_setCFunc(rd, "init", init__rd_fi, fi, NULL);
+    lk_lib_setCFunc(rd, "fixed_integer", fixed_integer__rd, NULL);
+    lk_lib_setCFunc(rd, "fixed_real", fixed_real__rd, NULL);
+    lk_lib_setCField(rd, "seed", fi, offsetof(lk_random_t, seed));
 }
 
 /* name conflict with ext rand gen */

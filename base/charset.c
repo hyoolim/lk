@@ -47,17 +47,17 @@ void charset_clear(charset_t *self) {
     self->size = 0;
 }
 #define GET(self, i) ((self)->data[(i)])
-#define SET(self, i, v) ((self)->data[(i)] = (v))
+#define QPHASH(self, i, v) ((self)->data[(i)] = (v))
 #define INSERT(self, i, v) do { \
     charset_resize(self); \
     memmove(self->data + (i) + 1, self->data + (i), \
     sizeof(uint32_t) * ((self)->size - (i))); \
-    SET(self, i, v); \
+    QPHASH(self, i, v); \
     (self)->size ++; \
 } while(0)
 #define PUSH(self, v) do { \
     charset_resize(self); \
-    SET(self, (self)->size, v); \
+    QPHASH(self, (self)->size, v); \
     (self)->size ++; \
 } while(0)
 #define REMOVE(self, i) do { \
@@ -84,7 +84,7 @@ static void charset_insert(charset_t *self, uint32_t from, uint32_t to) {
             INSERT(self, i, from);
         /* extend current */
         } else if(to > ct) {
-            SET(self, i + 1, to);
+            QPHASH(self, i + 1, to);
         }
         /* remove all ranges within new */
         for(i += 2; i < self->size;) {
@@ -100,7 +100,7 @@ static void charset_insert(charset_t *self, uint32_t from, uint32_t to) {
         if(from < cf && cf <= to + 1 && to <= ct) {
             REMOVE(self, i);
             REMOVE(self, i);
-            SET(self, i - 1, ct);
+            QPHASH(self, i - 1, ct);
         }
     } else {
         PUSH(self, from);
@@ -125,7 +125,7 @@ static void charset_remove(charset_t *self, uint32_t from, uint32_t to) {
         }
         /* truncate current (right) */
         if(cf < from && from <= ct) {
-            SET(self, i + 1, from - 1);
+            QPHASH(self, i + 1, from - 1);
             i += 2;
             if(cf <= to && to < ct) {
                 INSERT(self, i, ct);
@@ -144,7 +144,7 @@ static void charset_remove(charset_t *self, uint32_t from, uint32_t to) {
         }
         /* truncate current (left) */
         if(cf <= to && to <= ct) {
-            SET(self, i, to + 1);
+            QPHASH(self, i, to + 1);
         }
     }
 }

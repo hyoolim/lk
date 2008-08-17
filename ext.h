@@ -29,14 +29,14 @@ LK_OBJ(LIST_ATPTR(&env->stack, (i))))
 
 #define CHAR(v) (LK_CHAR(v)->c)
 #define CHARSET(v) (&LK_CHARSET(v)->cs)
-#define DBL(v) (LK_FR(v)->r)
-#define F (VM->t_false)
+#define CSTRING(v) (darray_toCString(DARRAY(v)))
+#define DARRAY(v) (&LK_SEQ(v)->data)
+#define DOUBLE(v) (LK_FR(v)->r)
+#define FALSE (VM->t_false)
 #define INT(v) (LK_FI(v)->i)
-#define LIST(v) (&LK_GLIST(v)->data)
-#define SET(v) (&LK_MAP(v)->set)
-#define CSTR(v) (darray_toCString(LIST(v)))
-#define N (VM->t_nil)
-#define T (VM->t_true)
+#define NIL (VM->t_nil)
+#define QPHASH(v) (&LK_MAP(v)->set)
+#define TRUE (VM->t_true)
 #define VM (LK_VM(self))
 
 #define CHKOPT(v, o) ((v) & (o))
@@ -47,9 +47,8 @@ LK_OBJ(LIST_ATPTR(&env->stack, (i))))
 LK_EXT_DEFINIT(lk_library_extinit);
 
 /* update */
-void lk_library_set(lk_object_t *parent, const char *k, lk_object_t *v);
-void lk_library_setGlobal(const char *k, lk_object_t *v);
-void lk_library_cfield(lk_object_t *self, const char *k, lk_object_t *t,
-                   size_t offset);
-void lk_library_setCFunction(lk_object_t *obj, const char *k, lk_cfuncfunc_t *func, ...);
+void lk_lib_setObject(lk_object_t *parent, const char *k, lk_object_t *v);
+void lk_lib_setGlobal(const char *k, lk_object_t *v);
+void lk_lib_setCField(lk_object_t *self, const char *k, lk_object_t *t, size_t offset);
+void lk_lib_setCFunc(lk_object_t *obj, const char *k, lk_cfuncfunc_t *func, ...);
 #endif

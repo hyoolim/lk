@@ -33,15 +33,15 @@ LK_EXT_DEFINIT(lk_frame_extinittypes) {
 }
 
 /* ext map - funcs */
-LK_LIBRARY_DEFINECFUNCTION(Dargs__fra) {
+LK_LIB_DEFINECFUNC(Dargs__fra) {
     if(!LIST_ISINIT(FRAMESTACK)) RETURN(lk_list_new(VM));
     else {
         lk_list_t *args = lk_list_newfromlist(VM, FRAMESTACK);
-        darray_limit(LIST(args), FRAME->argc);
+        darray_limit(DARRAY(args), FRAME->argc);
         RETURN(args);
     }
 }
-LK_LIBRARY_DEFINECFUNCTION(DassignB__fra_str_obj) {
+LK_LIB_DEFINECFUNC(DassignB__fra_str_obj) {
     lk_string_t *k = LK_STRING(ARG(0));
     lk_object_t *v = ARG(1);
     struct lk_slot *slot = lk_object_getslotfromany(self, LK_OBJ(k));
@@ -63,9 +63,9 @@ LK_LIBRARY_DEFINECFUNCTION(DassignB__fra_str_obj) {
         RETURN(v);
     }
 }
-LK_LIBRARY_DEFINECFUNCTION(include__fra_str_str) {
+LK_LIB_DEFINECFUNC(include__fra_str_str) {
     lk_frame_t *fr = lk_vm_evalfile(VM,
-    darray_toCString(LIST(ARG(0))), darray_toCString(LIST(ARG(1))));
+    darray_toCString(DARRAY(ARG(0))), darray_toCString(DARRAY(ARG(1))));
     if(fr != NULL) {
         qphash_t *from = fr->obj.slots;
         if(from != NULL) {
@@ -79,32 +79,32 @@ LK_LIBRARY_DEFINECFUNCTION(include__fra_str_str) {
     }
     RETURN(self);
 }
-LK_LIBRARY_DEFINECFUNCTION(raise__fra_err) {
+LK_LIB_DEFINECFUNC(raise__fra_err) {
     lk_vm_raiseerror(VM, LK_ERR(ARG(0)));
 }
-LK_LIBRARY_DEFINECFUNCTION(raise__fra_str) {
+LK_LIB_DEFINECFUNC(raise__fra_str) {
     lk_error_t *err = lk_error_new(VM, VM->t_error, NULL);
     err->text = LK_STRING(ARG(0));
     lk_vm_raiseerror(VM, err);
 }
-LK_LIBRARY_DEFINECFUNCTION(redo__fra) {
+LK_LIB_DEFINECFUNC(redo__fra) {
     if(LIST_ISINIT(FRAMESTACK)) darray_clear(FRAMESTACK);
     FRAME->next = FRAME->first;
     DONE;
 }
-LK_LIBRARY_DEFINECFUNCTION(require__fra_str_str) {
+LK_LIB_DEFINECFUNC(require__fra_str_str) {
     RETURN(lk_vm_evalfile(VM,
-    darray_toCString(LIST(ARG(0))), darray_toCString(LIST(ARG(1)))));
+    darray_toCString(DARRAY(ARG(0))), darray_toCString(DARRAY(ARG(1)))));
 }
-LK_LIBRARY_DEFINECFUNCTION(rescue__fra_f) {
+LK_LIB_DEFINECFUNC(rescue__fra_f) {
     RETURN(lk_object_getvaluefromslot(self, lk_object_setslot(
     self, LK_OBJ(VM->str_rescue), VM->t_func, ARG(0))));
 }
-LK_LIBRARY_DEFINECFUNCTION(RESOURCE__fra) {
+LK_LIB_DEFINECFUNC(RESOURCE__fra) {
     RETURN(VM->rsrc != NULL && !VM->rsrc->isstring
-    ? LK_OBJ(VM->rsrc->rsrc) : N);
+    ? LK_OBJ(VM->rsrc->rsrc) : NIL);
 }
-LK_LIBRARY_DEFINECFUNCTION(retry__fra) {
+LK_LIB_DEFINECFUNC(retry__fra) {
     lk_frame_t *caller = FRAME->caller;
     lk_instr_t *i = caller->current->prev;
     FRAME->next = NULL;
@@ -113,7 +113,7 @@ LK_LIBRARY_DEFINECFUNCTION(retry__fra) {
     caller->next = i;
     DONE;
 }
-LK_LIBRARY_DEFINECFUNCTION(return__fra) {
+LK_LIB_DEFINECFUNC(return__fra) {
     lk_frame_t *f = FRAME;
     for(; ; f = LK_OBJ_PROTO(f)) {
         if(f == NULL) lk_vm_abort(VM, NULL);
@@ -131,27 +131,27 @@ LK_LIBRARY_DEFINECFUNCTION(return__fra) {
 LK_EXT_DEFINIT(lk_frame_extinitfuncs) {
     lk_object_t *fra = vm->t_frame, *obj = vm->t_obj, *instr = vm->t_instr,
                 *str = vm->t_string, *err = vm->t_error, *f = vm->t_func;
-    lk_library_set(vm->t_vm, "Frame", fra);
-    lk_library_setCFunction(fra, ".args", Dargs__fra, NULL);
-    lk_library_setCFunction(fra, "=", DassignB__fra_str_obj, str, obj, NULL);
-    lk_library_cfield(fra, ".caller", fra, offsetof(lk_frame_t, caller));
-    lk_library_cfield(fra, ".current", instr, offsetof(lk_frame_t, current));
-    lk_library_cfield(fra, ".first", instr, offsetof(lk_frame_t, first));
-    lk_library_cfield(fra, ".frame", obj, offsetof(lk_frame_t, frame));
-    lk_library_cfield(fra, ".function", obj, offsetof(lk_frame_t, func));
-    lk_library_cfield(fra, ".next", instr, offsetof(lk_frame_t, next));
-    lk_library_cfield(fra, ".receiver", obj, offsetof(lk_frame_t, receiver));
-    lk_library_cfield(fra, ".return_to", fra, offsetof(lk_frame_t, returnto));
-    lk_library_setCFunction(fra, "include", include__fra_str_str, str, str, NULL);
-    lk_library_setCFunction(fra, "raise", raise__fra_err, err, NULL);
-    lk_library_setCFunction(fra, "raise", raise__fra_str, str, NULL);
-    lk_library_cfield(fra, "receiver", obj, offsetof(lk_frame_t, receiver));
-    lk_library_setCFunction(fra, "redo", redo__fra, NULL);
-    lk_library_setCFunction(fra, "require", require__fra_str_str, str, str, NULL);
-    lk_library_setCFunction(fra, "rescue", rescue__fra_f, f, NULL);
-    lk_library_setCFunction(fra, "RESOURCE", RESOURCE__fra, NULL);
-    lk_library_setCFunction(fra, "retry", retry__fra, NULL);
-    lk_library_setCFunction(fra, "return", return__fra, -1);
+    lk_lib_setObject(vm->t_vm, "Frame", fra);
+    lk_lib_setCFunc(fra, ".args", Dargs__fra, NULL);
+    lk_lib_setCFunc(fra, "=", DassignB__fra_str_obj, str, obj, NULL);
+    lk_lib_setCField(fra, ".caller", fra, offsetof(lk_frame_t, caller));
+    lk_lib_setCField(fra, ".current", instr, offsetof(lk_frame_t, current));
+    lk_lib_setCField(fra, ".first", instr, offsetof(lk_frame_t, first));
+    lk_lib_setCField(fra, ".frame", obj, offsetof(lk_frame_t, frame));
+    lk_lib_setCField(fra, ".function", obj, offsetof(lk_frame_t, func));
+    lk_lib_setCField(fra, ".next", instr, offsetof(lk_frame_t, next));
+    lk_lib_setCField(fra, ".receiver", obj, offsetof(lk_frame_t, receiver));
+    lk_lib_setCField(fra, ".return_to", fra, offsetof(lk_frame_t, returnto));
+    lk_lib_setCFunc(fra, "include", include__fra_str_str, str, str, NULL);
+    lk_lib_setCFunc(fra, "raise", raise__fra_err, err, NULL);
+    lk_lib_setCFunc(fra, "raise", raise__fra_str, str, NULL);
+    lk_lib_setCField(fra, "receiver", obj, offsetof(lk_frame_t, receiver));
+    lk_lib_setCFunc(fra, "redo", redo__fra, NULL);
+    lk_lib_setCFunc(fra, "require", require__fra_str_str, str, str, NULL);
+    lk_lib_setCFunc(fra, "rescue", rescue__fra_f, f, NULL);
+    lk_lib_setCFunc(fra, "RESOURCE", RESOURCE__fra, NULL);
+    lk_lib_setCFunc(fra, "retry", retry__fra, NULL);
+    lk_lib_setCFunc(fra, "return", return__fra, -1);
 }
 
 /* create a new frame based on the current one set in vm */
@@ -202,6 +202,6 @@ lk_object_t *lk_frame_stackpeek(lk_frame_t *self) {
 }
 lk_list_t *lk_frame_stacktolist(lk_frame_t *self) {
     lk_list_t *stack = lk_list_new(LK_VM(self));
-    if(LIST_ISINIT(&self->stack)) darray_copy(LIST(stack), &self->stack);
+    if(LIST_ISINIT(&self->stack)) darray_copy(DARRAY(stack), &self->stack);
     return stack;
 }

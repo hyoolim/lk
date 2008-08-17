@@ -6,14 +6,14 @@
 /* ext map - types */
 static void setbinaryop(lk_parser_t *self, const char *op, const char *subst) {
     lk_vm_t *vm = LK_VM(self);
-    *(lk_string_t **)qphash_set(self->binaryops, lk_string_newfromcstr(vm, op)) = lk_string_newfromcstr(vm, subst);
+    *(lk_string_t **)qphash_set(self->binaryops, lk_string_newFromCString(vm, op)) = lk_string_newFromCString(vm, subst);
 }
 static void setprec(lk_parser_t *self, const char *op, int level, enum lk_precassoc_t assoc) {
     lk_vm_t *vm = LK_VM(self);
     lk_prec_t *prec = LK_PREC(lk_object_alloc(vm->t_prec));
     prec->level = level;
     prec->assoc = assoc;
-    *(lk_prec_t **)qphash_set(self->precs, lk_string_newfromcstr(vm, op)) = prec;
+    *(lk_prec_t **)qphash_set(self->precs, lk_string_newFromCString(vm, op)) = prec;
 }
 static LK_OBJ_DEFALLOCFUNC(alloc__parser) {
     PARSER->binaryops = qphash_alloc(sizeof(lk_prec_t *), lk_object_hashcode, lk_object_keycmp);
@@ -99,8 +99,8 @@ LK_EXT_DEFINIT(lk_parser_extinittypes) {
 
 /* ext map - funcs */
 LK_EXT_DEFINIT(lk_parser_extinitfuncs) {
-    lk_library_set(vm->t_vm, "Precedence", vm->t_prec);
-    lk_library_set(vm->t_vm, "Parser", vm->t_parser);
+    lk_lib_setObject(vm->t_vm, "Precedence", vm->t_prec);
+    lk_lib_setObject(vm->t_vm, "Parser", vm->t_parser);
 }
 
 /* new */
@@ -124,13 +124,13 @@ typedef enum tokentype_t {
 #define READFUNC(name) int name(lk_parser_t *self)
 typedef READFUNC(readfunc_t);
 /* common calc on text */
-#define CHARAT(self, at) (darray_getuchar(LIST((self)->text), (at)))
+#define CHARAT(self, at) (darray_getuchar(DARRAY((self)->text), (at)))
 #define CHARCURR(self) (CHARAT((self), (self)->textpos))
 #define CHARNEXT(self) (CHARAT((self), ++ (self)->textpos))
 #define CHARPREV(self) (CHARAT((self), -- (self)->textpos))
 #define CHARIN(c, s) (strchr((s), (c)))
 #define ISINSIDE(self) (0 <= (self)->textpos \
-&& (self)->textpos < LIST_COUNT(LIST((self)->text)))
+&& (self)->textpos < LIST_COUNT(DARRAY((self)->text)))
 #define CHARCURRIN(self, s) (CHARIN(CHARCURR(self), (s)))
 #define ISCURR(self, s) (ISINSIDE(self) && CHARCURRIN((self), (s)))
 #define ISNOTCURR(self, s) (ISINSIDE(self) && !CHARCURRIN((self), (s)))
@@ -168,7 +168,7 @@ static lk_prec_t *shiftreduce(lk_parser_t *self, lk_instr_t *op) {
     while(LIST_COUNT(self->ops) > self->opsize) {
         int is_break = 1;
         lk_instr_t *top = darray_peekptr(self->ops);
-        darray_t *topstr = LIST(top->v);
+        darray_t *topstr = DARRAY(top->v);
         lk_prec_t *prev = getprec(self, top);
         if(op == NULL) is_break = 0;
         else {
@@ -204,7 +204,7 @@ static lk_prec_t *shiftreduce(lk_parser_t *self, lk_instr_t *op) {
             lk_instr_t *last = darray_peekptr(self->words);
             darray_popptr(self->ops);
             top->v = LK_OBJ(getbinaryop(self, LK_STRING(top->v)));
-            topstr = LIST(top->v);
+            topstr = DARRAY(top->v);
             /* rec / arg -> rec /arg */
             if((arg->type == LK_INSTRTYPE_FRAMEMSG
             || arg->type == LK_INSTRTYPE_STRING)
@@ -428,10 +428,10 @@ static void readtoken(lk_parser_t *self) {
     || (type = readtoken_string(self))  != NONE
     || (type = readtoken_number(self))  != NONE) {
         lk_string_t *tok = LK_STRING(lk_object_clone(LK_OBJ(self->text)));
-        darray_slice(LIST(tok), lastpos, self->textpos - lastpos);
+        darray_slice(DARRAY(tok), lastpos, self->textpos - lastpos);
         if(type == OP
-        &&(darray_compareToCString(LIST(tok), "---") == 0
-        || darray_compareToCString(LIST(tok), "|") == 0)) type = FUNC_SEP;
+        &&(darray_compareToCString(DARRAY(tok), "---") == 0
+        || darray_compareToCString(DARRAY(tok), "|") == 0)) type = FUNC_SEP;
         darray_pushptr(self->tokentypes, (void *)type);
         darray_pushptr(self->tokenvalues, tok);
         lk_object_addref(LK_OBJ(self), LK_OBJ(tok));
@@ -452,7 +452,7 @@ static READFUNC(readpad) {
     lk_string_t *tok;
     if((tok = getnexttoken(self, WS2)) != NULL) return 1;
     else if((tok = getnexttoken(self, COMMENT)) != NULL) {
-        darray_remove(LIST(tok), 0);
+        darray_remove(DARRAY(tok), 0);
         darray_pushptr(self->comments, tok);
         return 1;
     }
@@ -598,7 +598,7 @@ static READFUNC(readunaryop) {
     } else {
         lk_instr_t *arg = darray_peekptr(self->words);
         /* /arg[] -> /arg[] */
-        if(darray_compareToCString(LIST(tok), "/") == 0) {
+        if(darray_compareToCString(DARRAY(tok), "/") == 0) {
             arg->type = LK_INSTRTYPE_SELFMSG;
         /* +arg[] -> arg[] /+[] */
         } else {
@@ -615,7 +615,7 @@ static READFUNC(readchar) {
     else {
         lk_string_unescape(tok);
         darray_pushptr(self->words,
-        lk_instr_newchar(self, darray_getuchar(LIST(tok), 2)));
+        lk_instr_newchar(self, darray_getuchar(DARRAY(tok), 2)));
         return 1;
     }
 }
@@ -624,7 +624,7 @@ static READFUNC(readnumber) {
     if(tok == NULL) return 0;
     else {
         numberifn_t num;
-        switch(number_new(0, LIST(tok), &num)) {
+        switch(number_new(0, DARRAY(tok), &num)) {
         case NUMBERTYPE_INT:
             darray_pushptr(self->words, lk_instr_newfi(self, num.i));
             break;
@@ -641,7 +641,7 @@ static READFUNC(readstring) {
     lk_string_t *tok = getnexttoken(self, STRING);
     if(tok == NULL) return 0;
     else {
-        darray_slice(LIST(tok), 1, -1);
+        darray_slice(DARRAY(tok), 1, -1);
         lk_string_unescape(tok);
         darray_pushptr(self->words, lk_instr_newstring(self, tok));
         return 1;
@@ -766,7 +766,7 @@ static lk_instr_t *applymacros(lk_parser_t *self, lk_instr_t *it) {
             it->v = LK_OBJ(applymacros(self, LK_INSTR(it->v)));
             /*
         } else if(it->type == LK_INSTRTYPE_FRAMEMSG
-               && darray_compareToCString(LIST(it->v), ".") == 0) {
+               && darray_compareToCString(DARRAY(it->v), ".") == 0) {
             lk_instr_t *msg = it->next;
             if(msg != NULL && msg->type == LK_INSTRTYPE_APPLYMSG) {
                 msg->type = LK_INSTRTYPE_SELFMSG;
@@ -775,9 +775,9 @@ static lk_instr_t *applymacros(lk_parser_t *self, lk_instr_t *it) {
             }
             */
         } else if(it->type == LK_INSTRTYPE_APPLYMSG
-               && (darray_compareToCString(LIST(it->v), ":") == 0
-               || darray_compareToCString(LIST(it->v), "=") == 0
-               || darray_compareToCString(LIST(it->v), ":=") == 0)) {
+               && (darray_compareToCString(DARRAY(it->v), ":") == 0
+               || darray_compareToCString(DARRAY(it->v), "=") == 0
+               || darray_compareToCString(DARRAY(it->v), ":=") == 0)) {
             lk_instr_t *name = it->prev, *args = it->next;
             if(name->type == LK_INSTRTYPE_SELFMSG
             || name->type == LK_INSTRTYPE_FRAMEMSG
@@ -793,9 +793,9 @@ static lk_instr_t *applymacros(lk_parser_t *self, lk_instr_t *it) {
                 /* var[] /: @[Object ] /= @[1 ] -> := @['var' Object 1 ] */
                 if(nextop != NULL
                 && nextop->type == LK_INSTRTYPE_APPLYMSG
-                && darray_compareToCString(LIST(nextop->v), "=") == 0) {
+                && darray_compareToCString(DARRAY(nextop->v), "=") == 0) {
                     lk_instr_t *a, *nextargs = nextop->next;
-                    it->v = LK_OBJ(lk_string_newfromcstr(
+                    it->v = LK_OBJ(lk_string_newFromCString(
                     LK_VM(it), ":="));
                     (it->next = nextargs)->prev = it;
                     a = LK_INSTR(args->v);
@@ -809,14 +809,14 @@ static lk_instr_t *applymacros(lk_parser_t *self, lk_instr_t *it) {
                 name = name->prev;
                 name->opts &= ~LK_INSTROHASMSGARGS;
                 (name->next = it)->prev = name;
-                it->v = LK_OBJ(lk_string_newfromcstr(LK_VM(it), "set!"));
+                it->v = LK_OBJ(lk_string_newFromCString(LK_VM(it), "set!"));
                 a = LK_INSTR(atargs->v);
                 while(a->next != NULL) a = a->next;
                 (a->next = LK_INSTR(args->v))->prev = a;
                 args->v = atargs->v;
             }
         } else if(it->type == LK_INSTRTYPE_APPLYMSG
-               && darray_compareToCString(LIST(it->v), "!") == 0) {
+               && darray_compareToCString(DARRAY(it->v), "!") == 0) {
             /* 1 /? @[2 ]  /! @[3 ]   -> 1 /? @[2 3 ] */
             /*   op  add(a) it  args(b) ->   op  args    */
             lk_instr_t *args = it->next;
@@ -829,7 +829,7 @@ static lk_instr_t *applymacros(lk_parser_t *self, lk_instr_t *it) {
                     while(a->next != NULL) a = a->next;
                     /* convert b to func if op is ? for short-circuiting */
                     if(b->type != LK_INSTRTYPE_FUNC
-                    && darray_compareToCString(LIST(op->v), "?") == 0) {
+                    && darray_compareToCString(DARRAY(op->v), "?") == 0) {
                         b = lk_instr_newfunc(self, b);
                     }
                     (a->next = b)->prev = a;

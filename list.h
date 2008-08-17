@@ -3,7 +3,7 @@
 
 /* type */
 typedef struct lk_seq lk_list_t;
-#define LK_LIST(v) ((lk_list_t *)(v))
+#define LK_DARRAY(v) ((lk_list_t *)(v))
 #include "vm.h"
 #include "seq.h"
 

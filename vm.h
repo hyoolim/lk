@@ -59,7 +59,7 @@ typedef LK_EXT_DEFINIT(lk_libraryinitfunc_t);
 #include "error.h"
 
 /* todo: figure out a way to move this before req primitives */
-#define LK_LIBRARY_DEFINECFUNCTION(name) static void name(lk_object_t *self, lk_frame_t *env)
+#define LK_LIB_DEFINECFUNC(name) static void name(lk_object_t *self, lk_frame_t *env)
 typedef void lk_cfuncfunc_t(lk_object_t *self, lk_frame_t *env);
 
 /* actual def - add header to above #include's on lk_vm_t change */

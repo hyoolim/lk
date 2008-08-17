@@ -1,31 +1,31 @@
-include['tester.lk']
-Tester/new['Enumerable']/do {
-a := 1/to[4]
-b := [3; 2; 1; 6; 10; 2; 1; 4; 2]
-c := ['albatross'; 'dog'; 'horse']
+include('tester.lk')
+Tester/new('Enumerable')/do {
+a := 1/to(4)
+b := [ 3, 2, 1, 6, 10, 2, 1, 4, 2 ]
+c := [ 'albatross', 'dog', 'horse' ]
 
-/test['all?[match_value]'; a/all?[3]; False]
-/test['all?[match_using : Function] #1'; a/all? { x --- x > 0 }; True]
-/test['all?[match_using : Function] #2'; a/all? { x --- x > 3 }; False]
-/test['any?[match_value]'; a/any?[3]; True]
-/test['any?[match_using : Function] #1'; a/any? { x --- x > 2 }; True]
-/test['any?[match_using : Function] #2'; a/any? { x --- x > 10 }; False]
-/test['find[value]'; a/find[3]; 3]
-/test['find[using : Function] #1'; b/find { x --- x > 5 }; 6]
-/test['find[using : Function] #2'; b/find { x --- x > 20 }; Nil]
-/test['reduce[initial_value; using]'; a/reduce[1] { a; v --- a + v }; 11]
-/test['keep[value]'; b/keep[2]; [2; 2; 2]]
-/test['keep[if : Function]'; b/keep { x --- x > 3 }; [6; 10; 4]]
-/test['map[using]'; a/map { x --- x * x }; [1; 4; 9; 16]]
-/test['max'; c/max; 'horse']
-/test['max[compare_using]'; c/max { x; y --- x/count <=> y/count }; 'albatross']
-/test['min'; c/min; 'albatross']
-/test['min[compare_using]'; c/min { x; y --- x/count <=> y/count }; 'dog']
-/test['reject[value]'; b/reject[1]; [3; 2; 6; 10; 2; 4; 2]]
-/test['reject[if : Function]'; a/reject { x --- x < 3 }; [3; 4]]
-/test['sort[using] #1'; b/sort; [1; 1; 2; 2; 2; 3; 4; 6; 10]]
-/test['sort[using] #2'; b/sort { a; b --- b <=> a }; [10; 6; 4; 3; 2; 2; 2; 1; 1]]
-/test['toList'; a/toList; [1; 2; 3; 4]]
-/test['toString'; a/toString; '1 2 3 4 ']
+/test('all?(match_value)', a/all?(3), False)
+/test('all?(match_using : Function) #1', a/all? { x --- x > 0 }, True)
+/test('all?(match_using : Function) #2', a/all? { x --- x > 3 }, False)
+/test('any?(match_value)', a/any?(3), True)
+/test('any?(match_using : Function) #1', a/any? { x --- x > 2 }, True)
+/test('any?(match_using : Function) #2', a/any? { x --- x > 10 }, False)
+/test('find(value)', a/find(3), 3)
+/test('find(using : Function) #1', b/find { x --- x > 5 }, 6)
+/test('find(using : Function) #2', b/find { x --- x > 20 }, Nil)
+/test('reduce(initial_value, using)', a/reduce(1) { a, v --- a + v }, 11)
+/test('keep(value)', b/keep(2), [ 2, 2, 2 ])
+/test('keep(if : Function)', b/keep { x --- x > 3 }, [ 6, 10, 4 ])
+/test('map(using)', a/map { x --- x * x }, [ 1, 4, 9, 16 ])
+/test('max', c/max, 'horse')
+/test('max(compare_using)', c/max { x, y --- x/count <=> y/count }, 'albatross')
+/test('min', c/min, 'albatross')
+/test('min(compare_using)', c/min { x, y --- x/count <=> y/count }, 'dog')
+/test('reject(value)', b/reject(1), [ 3, 2, 6, 10, 2, 4, 2 ])
+/test('reject(if : Function)', a/reject { x --- x < 3 }, [ 3, 4 ])
+/test('sort(using) #1', b/sort, [ 1, 1, 2, 2, 2, 3, 4, 6, 10 ])
+/test('sort(using) #2', b/sort { a, b --- b <=> a }, [ 10, 6, 4, 3, 2, 2, 2, 1, 1 ])
+/test('toList', a/toList, [ 1, 2, 3, 4 ])
+/test('toString', a/toString, '1 2 3 4 ')
 /finish
 }

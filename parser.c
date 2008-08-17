@@ -235,7 +235,7 @@ static const tokentype_t miscmap[] = {
     /*  16 */ NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE,
     /*  24 */ NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE,
     /*  32 */ NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE,
-    /*  40 */ GROUP_BEGIN, GROUP_END, NONE, NONE, NONE, NONE, NONE, NONE,
+    /*  40 */ GROUP_BEGIN, GROUP_END, NONE, NONE, TERMINATOR, NONE, NONE, NONE,
     /*  48 */ NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE,
     /*  56 */ NONE, NONE, NONE, TERMINATOR, NONE, NONE, NONE, NONE,
     /*  64 */ NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE,
@@ -481,7 +481,7 @@ static READFUNC(readexpr) {
 }
 
 /* receiver - part 1 */
-static lk_Instr_t *getexprs(lk_Parser_t *self) {
+static lk_Instr_t *getexprs(lk_Parser_t *self, tokentype_t separator) {
     lk_Instr_t *first, *last, *expr;
     first = last = lk_Instr_newempty(self);
     while(readexpr(self)) {
@@ -490,20 +490,22 @@ static lk_Instr_t *getexprs(lk_Parser_t *self) {
         (last->next = expr)->prev = last;
         last = expr;
         if(!(self->isterminated
-        || getnexttoken(self, TERMINATOR)) != NONE) break;
+        || getnexttoken(self, separator)) != NONE) break;
     }
     if(first->next != NULL) first->next->prev = NULL;
     return first->next;
 }
 
-/* ( expr ) */
+/* ( expr1, expr2, expr3, ... ) */
 static READFUNC(readgroup) {
     if(getnexttoken(self, GROUP_BEGIN) == NULL) return 0;
-    if(readexpr(self)) {
-        if(getnexttoken(self, GROUP_END)!= NULL) return 1;
+    else {
+        lk_Instr_t *list = lk_Instr_new(self);
+        list->type = LK_INSTRTYPE_GROUP;
+        list->v = LK_OBJ(getexprs(self, TERMINATOR));
+        Sequence_pushptr(self->words, list);
+        if(getnexttoken(self, GROUP_END) != NULL) return 1;
         else lk_Vm_raisecstr(VM, "Cannot find ) to close group");
-    } else {
-        lk_Vm_raisecstr(VM, "Cannot find an expression following (");
     }
 }
 
@@ -513,7 +515,7 @@ static READFUNC(readlist) {
     else {
         lk_Instr_t *list = lk_Instr_new(self);
         list->type = LK_INSTRTYPE_LIST;
-        list->v = LK_OBJ(getexprs(self));
+        list->v = LK_OBJ(getexprs(self, TERMINATOR));
         Sequence_pushptr(self->words, list);
         if(getnexttoken(self, LIST_END) != NULL) return 1;
         else lk_Vm_raisecstr(VM, "Cannot find ] to close list");
@@ -657,11 +659,31 @@ static READFUNC(readobj) {
     || readmsg(self)
     || readunaryop(self)
     ) {
+        if(LIST_COUNT(self->words) > 0) {
+            lk_Instr_t *o = LK_INSTR(Sequence_peekptr(self->words));
+            if(o->type == LK_INSTRTYPE_GROUP) {
+                o = LK_INSTR(LK_INSTR(Sequence_popptr(self->words))->v);
+                if(o == NULL) {
+                    lk_Vm_raisecstr(VM, "Group must contain at least one expression");
+                } else {
+                    lk_Instr_t *l = o;
+                    while(l->next != NULL) {
+                        if(l->opts & LK_INSTROEND) break;
+                        l = l->next;
+                    }
+                    if(l->next != NULL) {
+                        lk_Vm_raisecstr(VM, "Group cannot contain more than one expression");
+                    } else {
+                        Sequence_pushptr(self->words, o);
+                    }
+                }
+            }
+        }
         while(1) {
             while(readpad(self)) { }
             if(!self->isterminated) {
                 lk_Instr_t *args;
-                if(!readlist(self)) args = NULL;
+                if(!readgroup(self)) args = NULL;
                 else args = Sequence_popptr(self->words);
                 while(readpad(self)) { }
                 if(!self->isterminated && readfunc(self)) {

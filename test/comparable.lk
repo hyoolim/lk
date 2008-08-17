@@ -1,24 +1,24 @@
-include['tester.lk']
-Tester/new['Comparable']/do {
+include('tester.lk')
+Tester/new('Comparable')/do {
 SizeMatters := Object/new/do {
     /'<=>' := { other --- /str/count <=> other/str/count }
     /init := { /str --- }
     /toCode := { --- /str }
-    /also[Comparable]
+    /also(Comparable)
 }
-s1 := SizeMatters/new['Z']
-s2 := SizeMatters/new['YY']
-s3 := SizeMatters/new['XXX']
-s4 := SizeMatters/new['WWWW']
-s5 := SizeMatters/new['VVVVV']
+s1 := SizeMatters/new('Z')
+s2 := SizeMatters/new('YY')
+s3 := SizeMatters/new('XXX')
+s4 := SizeMatters/new('WWWW')
+s5 := SizeMatters/new('VVVVV')
 
-/test['s1 < s2'; s1 < s2; True]
-/test['s4/between?[s1; s3]'; s4/between?[s1; s3]; False]
-/test['s4/between?[s3; s5]'; s4/between?[s3; s5]; True]
-/test['[s3; s2; s5; s4; s1]/sort'; [s3; s2; s5; s4; s1]/sort; [s1; s2; s3; s4; s5]]
-/test['3/between?[1; 5]'; 3/between?[1; 5]; True]
-/test['6/between?[1; 5]'; 6/between?[1; 5]; False]
-/test["'cat'/between?['ant'; 'dog']"; 'cat'/between?['ant'; 'dog']; True]
-/test["'gnu'/between?['ant'; 'dog']"; 'gnu'/between?['ant'; 'dog']; False]
+/test('s1 < s2', s1 < s2, True)
+/test('s4/between?(s1, s3)', s4/between?(s1, s3), False)
+/test('s4/between?(s3, s5)', s4/between?(s3, s5), True)
+/test('[ s3, s2, s5, s4, s1 ]/sort', [ s3, s2, s5, s4, s1 ]/sort, [ s1, s2, s3, s4, s5 ])
+/test('3/between?(1, 5)', 3/between?(1, 5), True)
+/test('6/between?(1, 5)', 6/between?(1, 5), False)
+/test("'cat'/between?('ant', 'dog')", 'cat'/between?('ant', 'dog'), True)
+/test("'gnu'/between?('ant', 'dog')", 'gnu'/between?('ant', 'dog'), False)
 /finish
 }

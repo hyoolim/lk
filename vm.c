@@ -547,19 +547,15 @@ void lk_Vm_abort(lk_Vm_t *self, lk_Error_t *error) {
         struct lk_Slot *slot = lk_Object_getslotfromany(
         LK_OBJ(error), LK_OBJ(self->str_type));
         lk_String_t *type = LK_STRING(lk_Object_getvaluefromslot(LK_OBJ(error), slot));
-        /*
         lk_Instr_t *expr = error->instr;
         int i = 0;
-        */
         string_print(LIST(type), stdout);
-        /*
         fprintf(stdout, "\n* rsrc: ");
         string_print(LIST(expr->rsrc), stdout);
         fprintf(stdout, "\n* line: %i", expr->line);
         while(expr->prev != NULL) { expr = expr->prev; i ++; }
         fprintf(stdout, "\n* instruction(%i): ", i);
         lk_Instr_print(expr);
-        */
         fprintf(stdout, "\n* text: ");
         if(error->text != NULL) string_print(LIST(error->text), stdout);
         printf("\n");

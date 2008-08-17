@@ -11,6 +11,7 @@ struct lk_Instr {
         LK_INSTRTYPE_FUNC = 1,
         LK_INSTRTYPE_APPLY,
         LK_INSTRTYPE_LIST,
+        LK_INSTRTYPE_GROUP,
         LK_INSTRTYPE_STRING,
         LK_INSTRTYPE_CHAR,
         LK_INSTRTYPE_FIXINT,

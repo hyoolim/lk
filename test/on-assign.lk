@@ -1,11 +1,11 @@
-include['tester.lk']
-Tester/new['Trigger (on_assign)']/do {
+include('tester.lk')
+Tester/new('Trigger (on_assign)')/do {
 #*x := 0
 x.on_assign := { nv --- nv + 1 }
 y := 0
 y.on_assign := { nv --- nv * 3 }
 
-/test['x = 1'; x = 1; 2]
-/test['y = 3'; y = 3; 9]*#
+/test('x = 1', x = 1, 2)
+/test('y = 3', y = 3, 9)*#
 /finish
 }

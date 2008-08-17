@@ -1,8 +1,8 @@
-include['tester.lk']
-Tester/new['Random']/do {
+include('tester.lk')
+Tester/new('Random')/do {
 
-/test['Random/fixed_integer #1'; Random/fixed_integer; -1937831252]
-/test['Random/fixed_integer #2'; Random/fixed_integer; -1748719057]
-/test['Random/fixed_integer #3'; Random/fixed_integer; -1223252363]
+/test('Random/fixed_integer #1', Random/fixed_integer, -1937831252)
+/test('Random/fixed_integer #2', Random/fixed_integer, -1748719057)
+/test('Random/fixed_integer #3', Random/fixed_integer, -1223252363)
 /finish
 }

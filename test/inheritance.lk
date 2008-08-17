@@ -1,5 +1,5 @@
-include['tester.lk']
-Tester/new['Inheritance']/do {
+include('tester.lk')
+Tester/new('Inheritance')/do {
 O := Object/new
 O/toString := { /.CLASS }
 A := O/new
@@ -8,18 +8,18 @@ C := O/new
 D := O/new
 E := O/new
 K1 := C/new
-K1/also[B]
-K1/also[A]
+K1/also(B)
+K1/also(A)
 K2 := E/new
-K2/also[B]
-K2/also[D]
+K2/also(B)
+K2/also(D)
 K3 := A/new
-K3/also[D]
+K3/also(D)
 Z := K3/new
-Z/also[K2]
-Z/also[K1]
+Z/also(K2)
+Z/also(K1)
 
-/test['Z/ancestors'; Z/ancestors; [Z; K1; K2; K3; D; A; B; C; E; O; Object]]
-/test['Z/ancestor?[D]'; Z/ancestor?[D]; True]
+/test('Z/ancestors', Z/ancestors, [ Z, K1, K2, K3, D, A, B, C, E, O, Object ])
+/test('Z/ancestor?(D)', Z/ancestor?(D), True)
 /finish
 }

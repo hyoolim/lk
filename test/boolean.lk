@@ -1,10 +1,10 @@
-include['tester.lk']
-Tester/new['Boolean']/do {
+include('tester.lk')
+Tester/new('Boolean')/do {
 
-/test['? #1'; True ? 1 ! 2; 1]
-/test['? #2'; False ? 1 ! 2; 2]
-/test['not? #1'; True/not?; False]
-/test['not? #2'; False/not?; True]
-/test['toString'; True/toString; 'True']
+/test('? #1', True ? 1 ! 2, 1)
+/test('? #2', False ? 1 ! 2, 2)
+/test('not? #1', True/not?, False)
+/test('not? #2', False/not?, True)
+/test('toString', True/toString, 'True')
 /finish
 }

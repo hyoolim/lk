@@ -1,85 +1,85 @@
-include['tester.lk']
-Tester/new['CharacterSet']/do {
+include('tester.lk')
+Tester/new('CharacterSet')/do {
 
 #
-/test['ab'; 'ab'/toCharacterSet/toString; 'a-b']
-/test['a-cc-e'; 'a-cc-e'/toCharacterSet/toString; 'a-e']
-/test['ac'; 'ac'/toCharacterSet/toString; 'ac']
-/test['a-ce-g'; 'a-ce-g'/toCharacterSet/toString; 'a-ce-g']
-/test['dca'; 'dca'/toCharacterSet/toString; 'ac-d']
-/test['a-zd-x'; 'a-zd-x'/toCharacterSet/toString; 'a-z']
-/test['a-fc-tx-z'; 'a-fc-tx-z'/toCharacterSet/toString; 'a-tx-z']
-/test['a-z - d-q'; 'a-z'/toCharacterSet - 'd-q' ->toString; 'a-cr-z']
+/test('ab', 'ab'/toCharacterSet/toString, 'a-b')
+/test('a-cc-e', 'a-cc-e'/toCharacterSet/toString, 'a-e')
+/test('ac', 'ac'/toCharacterSet/toString, 'ac')
+/test('a-ce-g', 'a-ce-g'/toCharacterSet/toString, 'a-ce-g')
+/test('dca', 'dca'/toCharacterSet/toString, 'ac-d')
+/test('a-zd-x', 'a-zd-x'/toCharacterSet/toString, 'a-z')
+/test('a-fc-tx-z', 'a-fc-tx-z'/toCharacterSet/toString, 'a-tx-z')
+/test('a-z - d-q', 'a-z'/toCharacterSet - 'd-q' ->toString, 'a-cr-z')
 
 #
 # ABCD EFG HIJK LMN OPQR STU VWXYZ
 cs := 'A-DH-KO-RV-Z'/toCharacterSet
-/test['cs (A-DH-KO-RV-Z)'; cs/toString; 'A-DH-KO-RV-Z']
-/test['cs + C'  ; cs + 'C'   ->toString; 'A-DH-KO-RV-Z']
-/test['cs + C-P'; cs + 'C-P' ->toString; 'A-RV-Z']
-/test['cs + C-S'; cs + 'C-S' ->toString; 'A-SV-Z']
-/test['cs + C-T'; cs + 'C-T' ->toString; 'A-TV-Z']
-/test['cs + C-U'; cs + 'C-U' ->toString; 'A-Z']
-/test['cs + E'  ; cs + 'E'   ->toString; 'A-EH-KO-RV-Z']
-/test['cs + E-P'; cs + 'E-P' ->toString; 'A-RV-Z']
-/test['cs + E-S'; cs + 'E-S' ->toString; 'A-SV-Z']
-/test['cs + E-T'; cs + 'E-T' ->toString; 'A-TV-Z']
-/test['cs + E-U'; cs + 'E-U' ->toString; 'A-Z']
-/test['cs + F'  ; cs + 'F'   ->toString; 'A-DFH-KO-RV-Z']
-/test['cs + F-P'; cs + 'F-P' ->toString; 'A-DF-RV-Z']
-/test['cs + F-S'; cs + 'F-S' ->toString; 'A-DF-SV-Z']
-/test['cs + F-T'; cs + 'F-T' ->toString; 'A-DF-TV-Z']
-/test['cs + F-U'; cs + 'F-U' ->toString; 'A-DF-Z']
-/test['cs + G'  ; cs + 'G'   ->toString; 'A-DG-KO-RV-Z']
-/test['cs + G-P'; cs + 'G-P' ->toString; 'A-DG-RV-Z']
-/test['cs + G-S'; cs + 'G-S' ->toString; 'A-DG-SV-Z']
-/test['cs + G-T'; cs + 'G-T' ->toString; 'A-DG-TV-Z']
-/test['cs + G-U'; cs + 'G-U' ->toString; 'A-DG-Z']
-/test['cs + 0-9'; cs + '0-9' ->toString; '0-9A-DH-KO-RV-Z']
-/test['cs + 0-C'; cs + '0-C' ->toString; '0-DH-KO-RV-Z']
-/test['cs + 0-E'; cs + '0-E' ->toString; '0-EH-KO-RV-Z']
-/test['cs + 0-F'; cs + '0-F' ->toString; '0-FH-KO-RV-Z']
-/test['cs + 0-G'; cs + '0-G' ->toString; '0-KO-RV-Z']
-/test['cs + a-z'; cs + 'a-z' ->toString; 'A-DH-KO-RV-Za-z']
-/test['cs + P-z'; cs + 'P-z' ->toString; 'A-DH-KO-z']
-/test['cs + S-z'; cs + 'S-z' ->toString; 'A-DH-KO-z']
-/test['cs + T-z'; cs + 'T-z' ->toString; 'A-DH-KO-RT-z']
-/test['cs + U-z'; cs + 'U-z' ->toString; 'A-DH-KO-RU-z']
+/test('cs (A-DH-KO-RV-Z)', cs/toString, 'A-DH-KO-RV-Z')
+/test('cs + C'  , cs + 'C'   ->toString, 'A-DH-KO-RV-Z')
+/test('cs + C-P', cs + 'C-P' ->toString, 'A-RV-Z')
+/test('cs + C-S', cs + 'C-S' ->toString, 'A-SV-Z')
+/test('cs + C-T', cs + 'C-T' ->toString, 'A-TV-Z')
+/test('cs + C-U', cs + 'C-U' ->toString, 'A-Z')
+/test('cs + E'  , cs + 'E'   ->toString, 'A-EH-KO-RV-Z')
+/test('cs + E-P', cs + 'E-P' ->toString, 'A-RV-Z')
+/test('cs + E-S', cs + 'E-S' ->toString, 'A-SV-Z')
+/test('cs + E-T', cs + 'E-T' ->toString, 'A-TV-Z')
+/test('cs + E-U', cs + 'E-U' ->toString, 'A-Z')
+/test('cs + F'  , cs + 'F'   ->toString, 'A-DFH-KO-RV-Z')
+/test('cs + F-P', cs + 'F-P' ->toString, 'A-DF-RV-Z')
+/test('cs + F-S', cs + 'F-S' ->toString, 'A-DF-SV-Z')
+/test('cs + F-T', cs + 'F-T' ->toString, 'A-DF-TV-Z')
+/test('cs + F-U', cs + 'F-U' ->toString, 'A-DF-Z')
+/test('cs + G'  , cs + 'G'   ->toString, 'A-DG-KO-RV-Z')
+/test('cs + G-P', cs + 'G-P' ->toString, 'A-DG-RV-Z')
+/test('cs + G-S', cs + 'G-S' ->toString, 'A-DG-SV-Z')
+/test('cs + G-T', cs + 'G-T' ->toString, 'A-DG-TV-Z')
+/test('cs + G-U', cs + 'G-U' ->toString, 'A-DG-Z')
+/test('cs + 0-9', cs + '0-9' ->toString, '0-9A-DH-KO-RV-Z')
+/test('cs + 0-C', cs + '0-C' ->toString, '0-DH-KO-RV-Z')
+/test('cs + 0-E', cs + '0-E' ->toString, '0-EH-KO-RV-Z')
+/test('cs + 0-F', cs + '0-F' ->toString, '0-FH-KO-RV-Z')
+/test('cs + 0-G', cs + '0-G' ->toString, '0-KO-RV-Z')
+/test('cs + a-z', cs + 'a-z' ->toString, 'A-DH-KO-RV-Za-z')
+/test('cs + P-z', cs + 'P-z' ->toString, 'A-DH-KO-z')
+/test('cs + S-z', cs + 'S-z' ->toString, 'A-DH-KO-z')
+/test('cs + T-z', cs + 'T-z' ->toString, 'A-DH-KO-RT-z')
+/test('cs + U-z', cs + 'U-z' ->toString, 'A-DH-KO-RU-z')
 
 #
 # ABCD EFG HIJK LMN OPQR STU VWXYZ
-/test['cs - A-B'; cs - 'A-B' ->toString; 'C-DH-KO-RV-Z']
-/test['cs - B-C'; cs - 'B-C' ->toString; 'ADH-KO-RV-Z']
-/test['cs - C-D'; cs - 'C-D' ->toString; 'A-BH-KO-RV-Z']
-/test['cs - C'  ; cs - 'C'   ->toString; 'A-BDH-KO-RV-Z']
-/test['cs - C-P'; cs - 'C-P' ->toString; 'A-BQ-RV-Z']
-/test['cs - C-S'; cs - 'C-S' ->toString; 'A-BV-Z']
-/test['cs - C-T'; cs - 'C-T' ->toString; 'A-BV-Z']
-/test['cs - C-U'; cs - 'C-U' ->toString; 'A-BV-Z']
-/test['cs - E'  ; cs - 'E'   ->toString; 'A-DH-KO-RV-Z']
-/test['cs - E-P'; cs - 'E-P' ->toString; 'A-DQ-RV-Z']
-/test['cs - E-S'; cs - 'E-S' ->toString; 'A-DV-Z']
-/test['cs - E-T'; cs - 'E-T' ->toString; 'A-DV-Z']
-/test['cs - E-U'; cs - 'E-U' ->toString; 'A-DV-Z']
-/test['cs - F'  ; cs - 'F'   ->toString; 'A-DH-KO-RV-Z']
-/test['cs - F-P'; cs - 'F-P' ->toString; 'A-DQ-RV-Z']
-/test['cs - F-S'; cs - 'F-S' ->toString; 'A-DV-Z']
-/test['cs - F-T'; cs - 'F-T' ->toString; 'A-DV-Z']
-/test['cs - F-U'; cs - 'F-U' ->toString; 'A-DV-Z']
-/test['cs - G'  ; cs - 'G'   ->toString; 'A-DH-KO-RV-Z']
-/test['cs - G-P'; cs - 'G-P' ->toString; 'A-DQ-RV-Z']
-/test['cs - G-S'; cs - 'G-S' ->toString; 'A-DV-Z']
-/test['cs - G-T'; cs - 'G-T' ->toString; 'A-DV-Z']
-/test['cs - G-U'; cs - 'G-U' ->toString; 'A-DV-Z']
-/test['cs - 0-9'; cs - '0-9' ->toString; 'A-DH-KO-RV-Z']
-/test['cs - 0-C'; cs - '0-C' ->toString; 'DH-KO-RV-Z']
-/test['cs - 0-E'; cs - '0-E' ->toString; 'H-KO-RV-Z']
-/test['cs - 0-F'; cs - '0-F' ->toString; 'H-KO-RV-Z']
-/test['cs - 0-G'; cs - '0-G' ->toString; 'H-KO-RV-Z']
-/test['cs - a-z'; cs - 'a-z' ->toString; 'A-DH-KO-RV-Z']
-/test['cs - P-z'; cs - 'P-z' ->toString; 'A-DH-KO']
-/test['cs - S-z'; cs - 'S-z' ->toString; 'A-DH-KO-R']
-/test['cs - T-z'; cs - 'T-z' ->toString; 'A-DH-KO-R']
-/test['cs - U-z'; cs - 'U-z' ->toString; 'A-DH-KO-R']
+/test('cs - A-B', cs - 'A-B' ->toString, 'C-DH-KO-RV-Z')
+/test('cs - B-C', cs - 'B-C' ->toString, 'ADH-KO-RV-Z')
+/test('cs - C-D', cs - 'C-D' ->toString, 'A-BH-KO-RV-Z')
+/test('cs - C'  , cs - 'C'   ->toString, 'A-BDH-KO-RV-Z')
+/test('cs - C-P', cs - 'C-P' ->toString, 'A-BQ-RV-Z')
+/test('cs - C-S', cs - 'C-S' ->toString, 'A-BV-Z')
+/test('cs - C-T', cs - 'C-T' ->toString, 'A-BV-Z')
+/test('cs - C-U', cs - 'C-U' ->toString, 'A-BV-Z')
+/test('cs - E'  , cs - 'E'   ->toString, 'A-DH-KO-RV-Z')
+/test('cs - E-P', cs - 'E-P' ->toString, 'A-DQ-RV-Z')
+/test('cs - E-S', cs - 'E-S' ->toString, 'A-DV-Z')
+/test('cs - E-T', cs - 'E-T' ->toString, 'A-DV-Z')
+/test('cs - E-U', cs - 'E-U' ->toString, 'A-DV-Z')
+/test('cs - F'  , cs - 'F'   ->toString, 'A-DH-KO-RV-Z')
+/test('cs - F-P', cs - 'F-P' ->toString, 'A-DQ-RV-Z')
+/test('cs - F-S', cs - 'F-S' ->toString, 'A-DV-Z')
+/test('cs - F-T', cs - 'F-T' ->toString, 'A-DV-Z')
+/test('cs - F-U', cs - 'F-U' ->toString, 'A-DV-Z')
+/test('cs - G'  , cs - 'G'   ->toString, 'A-DH-KO-RV-Z')
+/test('cs - G-P', cs - 'G-P' ->toString, 'A-DQ-RV-Z')
+/test('cs - G-S', cs - 'G-S' ->toString, 'A-DV-Z')
+/test('cs - G-T', cs - 'G-T' ->toString, 'A-DV-Z')
+/test('cs - G-U', cs - 'G-U' ->toString, 'A-DV-Z')
+/test('cs - 0-9', cs - '0-9' ->toString, 'A-DH-KO-RV-Z')
+/test('cs - 0-C', cs - '0-C' ->toString, 'DH-KO-RV-Z')
+/test('cs - 0-E', cs - '0-E' ->toString, 'H-KO-RV-Z')
+/test('cs - 0-F', cs - '0-F' ->toString, 'H-KO-RV-Z')
+/test('cs - 0-G', cs - '0-G' ->toString, 'H-KO-RV-Z')
+/test('cs - a-z', cs - 'a-z' ->toString, 'A-DH-KO-RV-Z')
+/test('cs - P-z', cs - 'P-z' ->toString, 'A-DH-KO')
+/test('cs - S-z', cs - 'S-z' ->toString, 'A-DH-KO-R')
+/test('cs - T-z', cs - 'T-z' ->toString, 'A-DH-KO-R')
+/test('cs - U-z', cs - 'U-z' ->toString, 'A-DH-KO-R')
 /finish
 }

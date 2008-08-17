@@ -1,20 +1,20 @@
-include['tester.lk']
-Tester/new['List']/do {
-x := [1; 2]
-y := [3; 4; 5]
-z := [5; 1; 10; 2; 4; 3]
+include('tester.lk')
+Tester/new('List')/do {
+x := [ 1, 2 ]
+y := [ 3, 4, 5 ]
+z := [ 5, 1, 10, 2, 4, 3 ]
 e := [ ]
 
-/test['at[index] #1'; z[2]; 10]
-/test['at[index] #2'; z[10]; Nil]
-/test['++[other]'; x ++ y; [1; 2; 3; 4; 5]]
-/test['==[other]'; x == y; False]
-# /test['fill[with-value]'; y/fill[10]; [10; 10; 10]]
-/test['first'; y/first; 3]
-# /test['join'; y/join; '345']
-# /test['join[delimiter]'; y/join['; ']; '3; 4; 5']
-/test['last'; y/last; 5]
-/test['repeat[count] #1'; x ** 3; [1; 2; 1; 2; 1; 2]]
-/test['repeat[count] #2'; x ** 0; [ ]]
+/test('at(index) #1', z(2), 10)
+/test('at(index) #2', z(10), Nil)
+/test('++(other)', x ++ y, [ 1, 2, 3, 4, 5 ])
+/test('==(other)', x == y, False)
+# /test('fill(with-value)', y/fill(10), [ 10, 10, 10 ])
+/test('first', y/first, 3)
+# /test('join', y/join, '345')
+# /test('join(delimiter)', y/join(', '), '3, 4, 5')
+/test('last', y/last, 5)
+/test('repeat(count) #1', x ** 3, [ 1, 2, 1, 2, 1, 2 ])
+/test('repeat(count) #2', x ** 0, [ ])
 /finish
 }

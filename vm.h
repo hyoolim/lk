@@ -90,7 +90,7 @@ struct lk_Vm {
     /* char     */ lk_Object_t *t_char;
     /* cset     */ lk_Object_t *t_cset;
     /* error    */ lk_Object_t *t_error;
-    /* file     */ lk_Object_t *t_file, *t_dir, *t_rf, *t_wf,
+    /* file     */ lk_Object_t *t_file, *t_folder, *t_rf, *t_wf,
                                *t_stdin, *t_stdout, *t_stderr;
     /* vector   */ lk_Object_t *t_vector;
     /* fixnum   */ lk_Object_t *t_number, *t_int, *t_fi, *t_real, *t_fr;

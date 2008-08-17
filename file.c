@@ -7,8 +7,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #define PATH(self) (LK_FILE(self)->path)
-#define FILEF(self) (LK_FILE(self)->st.file)
-#define DIRF(self) (LK_FILE(self)->st.dir)
+#define FILEF(self) (LK_FILE(self)->file)
 
 /* ext map - types */
 static LK_OBJ_DEFMARKFUNC(mark__file) {
@@ -24,7 +23,6 @@ LK_EXT_DEFINIT(lk_File_extinittypes) {
     vm->t_file = lk_Object_allocwithsize(vm->t_obj, sizeof(lk_File_t));
     lk_Object_setmarkfunc(vm->t_file, mark__file);
     lk_Object_setfreefunc(vm->t_file, free__file);
-    vm->t_dir = lk_Object_alloc(vm->t_file);
     vm->t_rf = lk_Object_alloc(vm->t_file);
     vm->t_wf = lk_Object_alloc(vm->t_file);
     vm->t_stdin = lk_Object_alloc(vm->t_rf);
@@ -57,10 +55,6 @@ LK_LIBRARY_DEFINECFUNCTION(move__file_str) {
     else lk_Vm_raiseerrno(VM);
 }
 LK_LIBRARY_DEFINECFUNCTION(open__dir);
-LK_LIBRARY_DEFINECFUNCTION(open_d__file) {
-    self->obj.parent = VM->t_dir;
-    GOTO(open__dir);
-}
 LK_LIBRARY_DEFINECFUNCTION(open__rf);
 LK_LIBRARY_DEFINECFUNCTION(open_r__file) {
     self->obj.parent = VM->t_rf;
@@ -81,51 +75,6 @@ LK_LIBRARY_DEFINECFUNCTION(size__file) {
 }
 LK_LIBRARY_DEFINECFUNCTION(writableQ__file) {
     RETURN(access(CSTR(PATH(self)), W_OK) == 0 ? T : F);
-}
-/* Directory */
-LK_LIBRARY_DEFINECFUNCTION(close__dir) {
-    DIR *d = DIRF(self);
-    if(d == NULL) BUG("Directory->st.dir should NEVER be NULL");
-    else {
-        if(closedir(DIRF(self)) == 0) DIRF(self) = NULL;
-        else lk_Vm_raiseerrno(VM);
-    }
-    self->obj.parent = VM->t_file;
-    RETURN(self);
-}
-LK_LIBRARY_DEFINECFUNCTION(init__dir_str) {
-    PATH(self) = LK_STRING(ARG(0));
-    GOTO(open__dir);
-}
-LK_LIBRARY_DEFINECFUNCTION(open__dir) {
-    const char *path = CSTR(PATH(self));
-    if(DIRF(self) != NULL) BUG("Directory->st.dir should be NULL");
-    DIRF(self) = opendir(path);
-    if(DIRF(self) == NULL) lk_Vm_raiseerrno(VM);
-    else RETURN(self);
-}
-LK_LIBRARY_DEFINECFUNCTION(read__dir) {
-    DIR *d = DIRF(self);
-    if(d == NULL) BUG("Directory->st.dir should NEVER be NULL");
-    else {
-        struct dirent *e = readdir(d);
-        if(e == NULL) {
-            if(errno != 0) lk_Vm_raiseerrno(VM);
-            RETURN(N);
-        } else {
-            lk_Object_t *f = lk_Object_alloc(VM->t_file);
-            Sequence_t *p1, *p2, *fs = LIST(VM->str_filesep);
-            PATH(f) = lk_String_newfromlist(VM, LIST(PATH(self)));
-            p1 = LIST(PATH(f));
-            p2 = string_allocfromcstr(e->d_name);
-            if(Sequence_findlist(p1, fs, p1->count - fs->count) < 0) {
-                Sequence_concat(p1, fs);
-            }
-            Sequence_concat(p1, p2);
-            Sequence_free(p2);
-            RETURN(f);
-        }
-    }
 }
 /* ReadableFile + WritableFile */
 LK_LIBRARY_DEFINECFUNCTION(close__rwf) {
@@ -209,7 +158,7 @@ LK_LIBRARY_DEFINECFUNCTION(write__wf_str) {
     }
 }
 LK_EXT_DEFINIT(lk_File_extinitfuncs) {
-    lk_Object_t *file = vm->t_file, *dir = vm->t_dir,
+    lk_Object_t *file = vm->t_file,
                 *rf = vm->t_rf, *wf = vm->t_wf,
                 *str = vm->t_string, *fi = vm->t_fi,
                 *ch = vm->t_char, *cset = vm->t_cset;
@@ -222,19 +171,12 @@ LK_EXT_DEFINIT(lk_File_extinitfuncs) {
     lk_Library_setCFunction(file, "init", init__file_str, str, NULL);
     lk_Library_setCFunction(file, "move", move__file_str, str, NULL);
     lk_Library_setCFunction(file, "open", open_r__file, NULL);
-    lk_Library_setCFunction(file, "open_d", open_d__file, NULL);
     lk_Library_setCFunction(file, "open_r", open_r__file, NULL);
     lk_Library_setCFunction(file, "open_w", open_w__file, NULL);
     lk_Library_cfield(file, "path", str, offsetof(lk_File_t, path));
     lk_Library_setCFunction(file, "readable?", readableQ__file, NULL);
     lk_Library_setCFunction(file, "size", size__file, NULL);
     lk_Library_setCFunction(file, "writable?", writableQ__file, NULL);
-    /* Directory */
-    lk_Library_setGlobal("Directory", dir);
-    lk_Library_setCFunction(dir, "close", close__dir, NULL);
-    lk_Library_setCFunction(dir, "init", init__dir_str, str, NULL);
-    lk_Library_setCFunction(dir, "open", open__dir, NULL);
-    lk_Library_setCFunction(dir, "read", read__dir, NULL);
     /* ReadableFile */
     lk_Library_setGlobal("ReadableFile", rf);
     lk_Library_setCFunction(rf, "close", close__rwf, NULL);

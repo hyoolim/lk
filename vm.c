@@ -150,6 +150,7 @@ lk_Vm_t *lk_Vm_new(void) {
     lk_Map_extinittypes(self);
     lk_Error_extinittypes(self);
     lk_File_extinittypes(self);
+    lk_Folder_extinittypes(self);
     lk_Vector_extinittypes(self);
     lk_Fixnum_extinittypes(self);
     lk_Frame_extinittypes(self);
@@ -175,6 +176,7 @@ lk_Vm_t *lk_Vm_new(void) {
     lk_Map_extinitfuncs(self);
     lk_Error_extinitfuncs(self);
     lk_File_extinitfuncs(self);
+    lk_Folder_extinitfuncs(self);
     lk_Vector_extinitfuncs(self);
     lk_Fixnum_extinitfuncs(self);
     lk_Frame_extinitfuncs(self);

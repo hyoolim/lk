@@ -97,7 +97,6 @@ struct lk_vm {
     /* frame    */ lk_object_t *t_frame;
     /* func     */ lk_object_t *t_func, *t_sig, *t_kfunc, *t_cfunc, *t_gfunc;
     /* seq      */ lk_object_t *t_seq;
-    /* gset     */ lk_object_t *t_gset;
     /* instr    */ lk_object_t *t_instr;
     /* list     */ lk_object_t *t_list;
     /* map      */ lk_object_t *t_map;

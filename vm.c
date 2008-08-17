@@ -12,7 +12,6 @@
 #include "func.h"
 #include "gc.h"
 #include "seq.h"
-#include "gset.h"
 #include "instr.h"
 #include "list.h"
 #include "map.h"
@@ -140,14 +139,13 @@ lk_vm_t *lk_vm_new(void) {
     lk_gc_extinittypes(self);
     lk_vm_extinittypes(self);
     lk_seq_extinittypes(self);
-    lk_gset_extinittypes(self);
+    lk_map_extinittypes(self);
     lk_string_extinittypes(self);
 
     /* init all other primitive types */
     lk_boolean_extinittypes(self);
     lk_char_extinittypes(self);
     lk_charset_extinittypes(self);
-    lk_map_extinittypes(self);
     lk_error_extinittypes(self);
     lk_file_extinittypes(self);
     lk_folder_extinittypes(self);
@@ -189,7 +187,6 @@ lk_vm_t *lk_vm_new(void) {
     lk_string_extinitfuncs(self);
     lk_vm_extinitfuncs(self);
     lk_seq_extinitfuncs(self);
-    lk_gset_extinitfuncs(self);
 
     /* extra libs */
     lk_env_extinit(self);

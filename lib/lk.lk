@@ -58,7 +58,7 @@ Comparable/do {
     /'<' := { other | /. <=> other ->negative? }
 }
 
-# Map < GenericSet
+# Map
 Map/do {
     /'==' := { ... }
 
@@ -288,13 +288,6 @@ Sequence/do {
     /also(Enumerable)
 }
 
-# GenericSet
-GenericSet/do {
-
-    # Returns true if there are any items in the set, false otherwise.
-    /toBoolean := { | /count != 0 }
-}
-
 # Integer < Number
 Integer/do {
     /'+' := { value : Real | /toReal + value }
@@ -341,6 +334,13 @@ List/do {
     }
     /toCode := { | '(' ++ (/map { x | x/toCode } ->join('; ')) ++ ')' }
     /toList := { | /clone }
+}
+
+# Map
+Map/do {
+
+    # Returns true if there are any items in the set, false otherwise.
+    /toBoolean := { | /count != 0 }
 }
 
 # N (nil) < Boolean
@@ -468,8 +468,6 @@ Real/do {
     /toReal := { | /. }
     /toString := { | /toString('%f') }
 }
-
-# Set < GenericSet
 
 # Socket
 

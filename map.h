@@ -2,10 +2,13 @@
 #define LK_MAP_H
 
 /* type */
-typedef struct lk_gset lk_map_t;
+typedef struct lk_map lk_map_t;
 #define LK_MAP(v) ((lk_map_t *)(v))
 #include "vm.h"
-#include "gset.h"
+struct lk_map {
+    struct lk_common obj;
+    set_t            set;
+};
 
 /* ext map */
 LK_EXT_DEFINIT(lk_map_extinittypes);

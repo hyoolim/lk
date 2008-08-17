@@ -153,6 +153,7 @@ LK_EXT_DEFINIT(lk_object_extinitfuncs) {
     lk_library_setCFunction(obj, "ancestors", ancestors__obj, NULL);
     lk_library_setCFunction(obj, "clone", clone__obj, NULL);
     lk_library_setCFunction(obj, "do", do__obj_f, f, NULL);
+    lk_library_setCFunction(obj, "extend", do__obj_f, f, NULL);
     lk_library_setCFunction(obj, "import", import__obj_obj, obj, NULL);
     lk_library_setCFunction(obj, "parents", parents__obj, NULL);
     lk_library_setCFunction(obj, "parent", parent__obj, NULL);

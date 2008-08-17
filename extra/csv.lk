@@ -1,4 +1,4 @@
-Enumerable/do {
+Enumerable/extend {
     /to csv := {
         /map { line |
             line/map { item ---

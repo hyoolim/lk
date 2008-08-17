@@ -5,7 +5,7 @@ Enumerable := Able/with { }
 Range      := Object/with { }
 
 # Boolean
-Boolean/do {
+Boolean/extend {
 
     # Always returns itself.
     /toBoolean := { | /. }
@@ -15,13 +15,13 @@ Boolean/do {
 }
 
 # Character
-Character/do {
+Character/extend {
     /size := 1
     /also(Comparable)
 }
 
 # CharacterSet
-CharacterSet/do {
+CharacterSet/extend {
     /size := 1
 
     # Returns an inverted copy of itself.
@@ -31,7 +31,7 @@ CharacterSet/do {
 # CFunction < Function
 
 # Comparable < Able
-Comparable/do {
+Comparable/extend {
 
     # Returns true if it's in between min and max, using < and >
     # operators for comparison, false otherwise.
@@ -59,7 +59,7 @@ Comparable/do {
 }
 
 # Map
-Map/do {
+Map/extend {
     /'==' := { ... }
 
     # Iterates over all the items and calls the block with the value.
@@ -67,7 +67,7 @@ Map/do {
 }
 
 # Enumerable < Able
-Enumerable/do {
+Enumerable/extend {
 
     # Returns true if all the items are equal to matchValue argument,
     # using == operator for comparison, false otherwise.
@@ -167,7 +167,7 @@ Enumerable/do {
 
 # Environment
 ENV := Environment
-ENV/do {
+ENV/extend {
 
     # Iterates over all the environment items and calls the block
     # with the value.
@@ -175,24 +175,24 @@ ENV/do {
 }
 
 # Error
-Error/do {
+Error/extend {
     /init := { /message : String | }
     /toString := { | /message/toString }
 }
-MessageError/do {
+MessageError/extend {
     /toString := { |
         'Unable to send ' ++ /message ++ /args/toCode ++
         ' message to ' ++ /receiver/toCode
     }
 }
-NameError/do {
+NameError/extend {
     /toString := { | "Unable to access '" ++ /name ++ "'" }
 }
 
 # Extension
 
 # F (false) < Boolean
-False/do {
+False/extend {
 
     # Never does anything.
     /'?' := { ifTrue | }
@@ -214,7 +214,7 @@ False/do {
 # GenericFunction < Function
 
 # Sequence
-Sequence/do {
+Sequence/extend {
     /'++' := { other | list := /clone; list ++= other; list }
     /each := { block |
         i := 0
@@ -289,7 +289,7 @@ Sequence/do {
 }
 
 # Integer < Number
-Integer/do {
+Integer/extend {
     /'+' := { value : Real | /toReal + value }
     /'<=>' := { to : Real | /toReal - to }
     /'%' := { by : Real | /toReal % by }
@@ -308,7 +308,7 @@ Integer/do {
 # KineticFunction < Function
 
 # List < Sequence
-List/do {
+List/extend {
     /'<=>' := { to |
         d := to/size - /size
         d > 0 ? to ! /. ->each { i, v |
@@ -337,14 +337,14 @@ List/do {
 }
 
 # Map
-Map/do {
+Map/extend {
 
     # Returns true if there are any items in the set, false otherwise.
     /toBoolean := { | /size != 0 }
 }
 
 # N (nil) < Boolean
-Nil/do {
+Nil/extend {
     /nil? := True
     /toBoolean := False
     /toCode := { | /toString }
@@ -352,7 +352,7 @@ Nil/do {
 }
 
 # NegativeInfinity (-inf)
-NegativeInfinity/do {
+NegativeInfinity/extend {
     /.forward := { args... | NegativeInfinity }
     /'<=>' := { to | -1 }
     /inf? := True
@@ -361,7 +361,7 @@ NegativeInfinity/do {
 }
 
 # Number
-Number/do {
+Number/extend {
 
     # Returns the absolute value of the number.
     /abs := { | /negative? ? /negate ! /. }
@@ -378,7 +378,7 @@ Number/do {
 }
 
 # Object
-Object/do {
+Object/extend {
     /'!' := { | /not? }
     /'@' := { | /toList }
     /'$' := { | /toString }
@@ -415,7 +415,7 @@ Object/do {
 }
 
 # PositiveInfinity (inf)
-PositiveInfinity/do {
+PositiveInfinity/extend {
     /.forward := { args... | PositiveInfinity }
     /'<=>' := { to | 1 }
     /inf? := True
@@ -426,7 +426,7 @@ PositiveInfinity/do {
 # Random
 
 # Range
-Range/do {
+Range/extend {
     /each := { block |
         rv := /from
         block/minimum_argument_size <= 1 ? {
@@ -449,7 +449,7 @@ Range/do {
 }
 
 # Real < Number
-Real/do {
+Real/extend {
     /'+' := { value : Integer | /. + value/toReal }
     /ceil := { | i := /toInteger; /. > 0 && /. - i != 0.0 ? i + 1 ! i }
     /'<=>' := { to : Integer | /. - to/toReal }
@@ -480,7 +480,7 @@ Real/do {
 # Stream
 
 # String
-String/do {
+String/extend {
 
     # Returns a copy of the String with the
     # first letter capitalized.
@@ -559,7 +559,7 @@ String/do {
 }
 
 # T (true) < Boolean
-True/do {
+True/extend {
 
     # Always calls ifTrue argument.
     /'?' := { ifTrue | ifTrue() }
@@ -576,7 +576,7 @@ True/do {
 VM := VirtualMachine
 
 # VirtualMachine/Frame
-VM/Frame/do {
+VM/Frame/extend {
     breaker := Error/alloc
     /break := { | raise(breaker) }
 
@@ -611,7 +611,7 @@ VM/Frame/do {
 # VirtualMachine/Parser
 
 # WritableFile
-WritableFile/do {
+WritableFile/extend {
 
     # Convert each of the arguments into Strings
     # and calls write on them.

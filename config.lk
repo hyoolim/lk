@@ -1,33 +1,33 @@
 prefix := '/usr/local'
 bindir := libdir := Nil
 writeSeperator := {
-    write['\n']
-    write['-' ** 80; '\n']
-    write['\n']
+    write('\n')
+    write('-' ** 80; '\n')
+    write('\n')
 }
 loop {
 
     ## ask and verify
     writeSeperator
-    write['Please configure lk:\n']
-    write['\n']
-    write['Install prefix ('; prefix; ')? ']
-    prefix = read[0c\n]/trim || prefix
+    write('Please configure lk:\n')
+    write('\n')
+    write('Install prefix ('; prefix; ')? ')
+    prefix = read(0c\n)/trim || prefix
     bindir = prefix ++ '/bin'
-    write['Path to binaries ('; bindir; ')? ']
-    bindir = read[0c\n]/trim || bindir
+    write('Path to binaries ('; bindir; ')? ')
+    bindir = read(0c\n)/trim || bindir
     libdir = prefix ++ '/lib/lk'
-    write['Path to libraries ('; libdir; ')? ']
-    libdir = read[0c\n]/trim || libdir
-    write['\n']
-    write['Write the config file (Y/n)? ']
-    read[0c\n]/trim/lc != 'n' ? break
+    write('Path to libraries ('; libdir; ')? ')
+    libdir = read(0c\n)/trim || libdir
+    write('\n')
+    write('Write the config file (Y/n)? ')
+    read(0c\n)/trim/lc != 'n' ? break
 }
 
 # save
 writeSeperator
-WritableFile/new[ARGUMENTS[0]]/do {
-    /writeln['PREFIX="' ++ prefix ++ '"']
-    /writeln['BINDIR="' ++ bindir ++ '"']
-    /writeln['LIBDIR="' ++ libdir ++ '"']
+WritableFile/new(ARGUMENTS(0))/do {
+    /writeln('PREFIX="' ++ prefix ++ '"')
+    /writeln('BINDIR="' ++ bindir ++ '"')
+    /writeln('LIBDIR="' ++ libdir ++ '"')
 }

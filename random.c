@@ -5,13 +5,13 @@
 #define RANDOM (LK_RANDOM(self))
 
 /* private func - see below for real impl */
-static void init_genrand(lk_Random_t *self, unsigned long s);
-static unsigned long genrand_int32(lk_Random_t *self);
-/* static long genrand_int31(lk_Random_t *self); */
-static double genrand_real1(lk_Random_t *self);
-/* static double genrand_real2(lk_Random_t *self);
-static double genrand_real3(lk_Random_t *self);
-static double genrand_res53(lk_Random_t *self); */
+static void init_genrand(lk_random_t *self, unsigned long s);
+static unsigned long genrand_int32(lk_random_t *self);
+/* static long genrand_int31(lk_random_t *self); */
+static double genrand_real1(lk_random_t *self);
+/* static double genrand_real2(lk_random_t *self);
+static double genrand_real3(lk_random_t *self);
+static double genrand_res53(lk_random_t *self); */
 
 /* ext map */
 static LK_OBJ_DEFALLOCFUNC(alloc__rd) {
@@ -20,7 +20,7 @@ static LK_OBJ_DEFALLOCFUNC(alloc__rd) {
     int seed;
     gettimeofday(&tv, 0);
     seed = tv.tv_sec ^ tv.tv_usec ^ n ++;
-    RANDOM->seed = lk_Fi_new(LK_VM(self), seed);
+    RANDOM->seed = lk_fi_new(LK_VM(self), seed);
     init_genrand(RANDOM, seed);
 }
 LK_LIBRARY_DEFINECFUNCTION(init__rd_fi) {
@@ -28,20 +28,20 @@ LK_LIBRARY_DEFINECFUNCTION(init__rd_fi) {
     RETURN(self);
 }
 LK_LIBRARY_DEFINECFUNCTION(fixed_integer__rd) {
-    RETURN(lk_Fi_new(VM, (int)genrand_int32(RANDOM))); }
+    RETURN(lk_fi_new(VM, (int)genrand_int32(RANDOM))); }
 LK_LIBRARY_DEFINECFUNCTION(fixed_real__rd) {
-    RETURN(lk_Fr_new(VM, genrand_real1(RANDOM))); }
-LK_EXT_DEFINIT(lk_Random_extinit) {
-    lk_Object_t *obj = vm->t_obj, *fi = vm->t_fi;
-    lk_Object_t *rd = lk_Object_allocwithsize(obj, sizeof(lk_Random_t));
-    LK_RANDOM(rd)->seed = lk_Fi_new(vm, 0);
+    RETURN(lk_fr_new(VM, genrand_real1(RANDOM))); }
+LK_EXT_DEFINIT(lk_random_extinit) {
+    lk_object_t *obj = vm->t_obj, *fi = vm->t_fi;
+    lk_object_t *rd = lk_object_allocwithsize(obj, sizeof(lk_random_t));
+    LK_RANDOM(rd)->seed = lk_fi_new(vm, 0);
     init_genrand(LK_RANDOM(rd), 0);
-    lk_Object_setallocfunc(rd, alloc__rd);
-    lk_Library_setGlobal("Random", rd);
-    lk_Library_setCFunction(rd, "init", init__rd_fi, fi, NULL);
-    lk_Library_setCFunction(rd, "fixed_integer", fixed_integer__rd, NULL);
-    lk_Library_setCFunction(rd, "fixed_real", fixed_real__rd, NULL);
-    lk_Library_cfield(rd, "seed", fi, offsetof(lk_Random_t, seed));
+    lk_object_setallocfunc(rd, alloc__rd);
+    lk_library_setGlobal("Random", rd);
+    lk_library_setCFunction(rd, "init", init__rd_fi, fi, NULL);
+    lk_library_setCFunction(rd, "fixed_integer", fixed_integer__rd, NULL);
+    lk_library_setCFunction(rd, "fixed_real", fixed_real__rd, NULL);
+    lk_library_cfield(rd, "seed", fi, offsetof(lk_random_t, seed));
 }
 
 /* name conflict with ext rand gen */
@@ -102,7 +102,7 @@ LK_EXT_DEFINIT(lk_Random_extinit) {
 #define mti self->mti
 
 /* initializes mt[N] with a seed */
-static void init_genrand(lk_Random_t *self, unsigned long s) {
+static void init_genrand(lk_random_t *self, unsigned long s) {
     mt[0]= s & 0xffffffffUL;
     for (mti=1; mti<N; mti++) {
         mt[mti] = 
@@ -117,7 +117,7 @@ static void init_genrand(lk_Random_t *self, unsigned long s) {
 }
 
 /* generates a random number on [0,0xffffffff]-interval */
-static unsigned long genrand_int32(lk_Random_t *self) {
+static unsigned long genrand_int32(lk_random_t *self) {
     unsigned long y;
     static unsigned long mag01[2]={0x0UL, MATRIX_A};
     /* mag01[x] = x * MATRIX_A  for x=0,1 */
@@ -154,30 +154,30 @@ static unsigned long genrand_int32(lk_Random_t *self) {
 }
 
 /* generates a random number on [0,0x7fffffff]-interval */
-/* static long genrand_int31(lk_Random_t *self) {
+/* static long genrand_int31(lk_random_t *self) {
     return (long)(genrand_int32(self)>>1);
 } */
 
 /* generates a random number on [0,1]-real-interval */
-static double genrand_real1(lk_Random_t *self) {
+static double genrand_real1(lk_random_t *self) {
     return genrand_int32(self)*(1.0/4294967295.0); 
     /* divided by 2^32-1 */ 
 }
 
 /* generates a random number on [0,1)-real-interval */
-/* static double genrand_real2(lk_Random_t *self) {
+/* static double genrand_real2(lk_random_t *self) {
     return genrand_int32(self)*(1.0/4294967296.0); 
     * divided by 2^32 *
 } */
 
 /* generates a random number on (0,1)-real-interval */
-/* static double genrand_real3(lk_Random_t *self) {
+/* static double genrand_real3(lk_random_t *self) {
     return (((double)genrand_int32(self)) + 0.5)*(1.0/4294967296.0); 
     * divided by 2^32 *
 } */
 
 /* generates a random number on [0,1) with 53-bit resolution*/
-/* static double genrand_res53(lk_Random_t *self) { 
+/* static double genrand_res53(lk_random_t *self) { 
     unsigned long a=genrand_int32(self)>>5, b=genrand_int32(self)>>6; 
     return(a*67108864.0+b)*(1.0/9007199254740992.0); 
 }  */

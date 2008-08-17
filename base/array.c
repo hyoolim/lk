@@ -1,4 +1,4 @@
-#include "list.h"
+#include "array.h"
 
 /* new */
 static struct listdata *listdata_alloc(int ilen, int capa) {
@@ -16,45 +16,45 @@ static void listdata_free(struct listdata *self) {
     if(self->refc > 0) self->refc --;
     if(self->refc < 1) memory_free(self);
 }
-Sequence_t *Sequence_alloc(int ilen, int capa) {
-    Sequence_t *self = memory_alloc(sizeof(Sequence_t));
-    Sequence_init(self, ilen, capa);
+array_t *array_alloc(int ilen, int capa) {
+    array_t *self = memory_alloc(sizeof(array_t));
+    array_init(self, ilen, capa);
     return self;
 }
-Sequence_t *Sequence_allocptr(void) {
-    return Sequence_allocptrwithcapa(10);
+array_t *array_allocptr(void) {
+    return array_allocptrwithcapa(10);
 }
-Sequence_t *Sequence_allocptrwithcapa(int capa) {
-    return Sequence_alloc(sizeof(void *), capa);
+array_t *array_allocptrwithcapa(int capa) {
+    return array_alloc(sizeof(void *), capa);
 }
-Sequence_t *Sequence_allocfromfile(FILE *stream, size_t rs) {
-    Sequence_t *self = Sequence_alloc(1, rs);
+array_t *array_allocfromfile(FILE *stream, size_t rs) {
+    array_t *self = array_alloc(1, rs);
     self->count =
     self->data->used = fread(self->first, 1, rs, stream);
     return self;
 }
-Sequence_t *Sequence_clone(Sequence_t *self) {
-    Sequence_t *clone = memory_alloc(sizeof(Sequence_t));
-    Sequence_copy(clone, self);
+array_t *array_clone(array_t *self) {
+    array_t *clone = memory_alloc(sizeof(array_t));
+    array_copy(clone, self);
     return clone;
 }
-void Sequence_init(Sequence_t *self, int ilen, int capa) {
+void array_init(array_t *self, int ilen, int capa) {
     self->data = listdata_alloc(ilen, capa);
     self->first = &self->data->item;
     self->count = 0;
 }
-void Sequence_initptr(Sequence_t *self) {
-    Sequence_init(self, sizeof(void *), 10);
+void array_initptr(array_t *self) {
+    array_init(self, sizeof(void *), 10);
 }
-void Sequence_copy(Sequence_t *self, Sequence_t *src) {
+void array_copy(array_t *self, array_t *src) {
     (self->data = src->data)->refc ++;
     self->first = src->first;
     self->count = src->count;
 }
-void Sequence_fin(Sequence_t *self) {
+void array_fin(array_t *self) {
     listdata_free(self->data);
 }
-void Sequence_free(Sequence_t *self) {
+void array_free(array_t *self) {
     listdata_free(self->data);
     memory_free(self);
 }
@@ -72,7 +72,7 @@ void Sequence_free(Sequence_t *self) {
     self, i), (v), (self)->data->ilen); break; \
     } \
 } while(0)
-static void Sequence_prepupdate(Sequence_t *self, int i, int newcount) {
+static void array_prepupdate(array_t *self, int i, int newcount) {
     struct listdata *bd = self->data;
     int newcapa = bd->capa, ilen = bd->ilen;
     if(newcount > newcapa) {
@@ -99,49 +99,49 @@ static void Sequence_prepupdate(Sequence_t *self, int i, int newcount) {
     bd->used = newcount + (self->first - &bd->item);
     self->count = newcount;
 }
-void Sequence_clear(Sequence_t *self) {
-    Sequence_limit(self, 0);
+void array_clear(array_t *self) {
+    array_limit(self, 0);
 }
-void Sequence_concat(Sequence_t *self, Sequence_t *v) {
+void array_concat(array_t *self, array_t *v) {
     int sc = self->count, vc = v->count;
     int sl = self->data->ilen, vl = self->data->ilen;
-    Sequence_prepupdate(self, sc, sc + vc);
+    array_prepupdate(self, sc, sc + vc);
     if(sl == vl) memcpy(self->first + sl * sc, v->first, vl * vc);
     else NOIMPL("Cannot concat differently sized buffers");
 }
-void Sequence_insert(Sequence_t *self, int i, void *v) {
+void array_insert(array_t *self, int i, void *v) {
     int count = self->count;
     if(i < 0) i += count;
-    if(i < 0) Sequence_set(self, i - count - 1, v);
-    else if(i > count) Sequence_set(self, i, v);
+    if(i < 0) array_set(self, i - count - 1, v);
+    else if(i > count) array_set(self, i, v);
     else {
         int ilen = self->data->ilen;
-        Sequence_prepupdate(self, i, count + 1);
+        array_prepupdate(self, i, count + 1);
         memmove(self->first + ilen * (i + 1),
         self->first + ilen * i, ilen * (count - i));
     }
     SETANYITEM(self, i, v);
 }
-void Sequence_insertptr(Sequence_t *self, int i, void *v) {
-    Sequence_insert(self, i, (void *)&v);
+void array_insertptr(array_t *self, int i, void *v) {
+    array_insert(self, i, (void *)&v);
 }
 #define INSERTUINT(self, t, i, v) do { \
     t nv = (v); \
-    Sequence_insert(self, (i), (void *)&nv); \
+    array_insert(self, (i), (void *)&nv); \
 } while(0);
-void Sequence_insertuchar(Sequence_t *self, int i, uint32_t v) {
+void array_insertuchar(array_t *self, int i, uint32_t v) {
     switch(self->data->ilen) {
     case sizeof(uint8_t ): INSERTUINT(self, uint8_t,  i, v); break;
     case sizeof(uint16_t): INSERTUINT(self, uint16_t, i, v); break;
     case sizeof(uint32_t): INSERTUINT(self, uint32_t, i, v); break;
-    default: BUG("Invalid ilen in Sequence_insertuchar\n");
+    default: BUG("Invalid ilen in array_insertuchar\n");
     }
 }
-void Sequence_limit(Sequence_t *self, int n) {
+void array_limit(array_t *self, int n) {
     if(n < 0) n += self->count;
     if(n >= 0 && n < self->count) self->count = n;
 }
-void Sequence_offset(Sequence_t *self, int n) {
+void array_offset(array_t *self, int n) {
     if(n < 0) n += self->count;
     if(n == 0) return;
     if(n < 0 || n >= self->count) self->count = 0;
@@ -150,50 +150,50 @@ void Sequence_offset(Sequence_t *self, int n) {
         self->count -= n;
     }
 }
-void *Sequence_peekptr(Sequence_t *self) {
-    return Sequence_getptr((self), (self)->count - 1);
+void *array_peekptr(array_t *self) {
+    return array_getptr((self), (self)->count - 1);
 }
-uint32_t Sequence_peekuchar(Sequence_t *self) {
-    return Sequence_getuchar((self), (self)->count - 1);
+uint32_t array_peekuchar(array_t *self) {
+    return array_getuchar((self), (self)->count - 1);
 }
-void *Sequence_popptr(Sequence_t *self) {
-    return Sequence_removeptr(self, self->count - 1);
+void *array_popptr(array_t *self) {
+    return array_removeptr(self, self->count - 1);
 }
-uint32_t Sequence_popuchar(Sequence_t *self) {
-    return Sequence_removeuchar(self, self->count - 1);
+uint32_t array_popuchar(array_t *self) {
+    return array_removeuchar(self, self->count - 1);
 }
-void Sequence_pushptr(Sequence_t *self, void *v) {
-    Sequence_setptr(self, self->count, v);
+void array_pushptr(array_t *self, void *v) {
+    array_setptr(self, self->count, v);
 }
-void Sequence_pushuchar(Sequence_t *self, uint32_t v) {
-    Sequence_setuchar(self, self->count, v);
+void array_pushuchar(array_t *self, uint32_t v) {
+    array_setuchar(self, self->count, v);
 }
-void Sequence_remove(Sequence_t *self, int i) {
+void array_remove(array_t *self, int i) {
     int count = self->count;
     if(i < 0) i += count;
     if(i < 0 || i >= count) return;
     else {
         int ilen = self->data->ilen, newcount = count - 1;
-        Sequence_prepupdate(self, i, newcount);
+        array_prepupdate(self, i, newcount);
         if(i < newcount) memmove(self->first + ilen * i,
         self->first + ilen * (i + 1), ilen * (count - i));
     }
 }
-void *Sequence_removeptr(Sequence_t *self, int i) {
-    void *item = Sequence_getptr(self, i);
-    Sequence_remove(self, i);
+void *array_removeptr(array_t *self, int i) {
+    void *item = array_getptr(self, i);
+    array_remove(self, i);
     return item;
 }
-uint32_t Sequence_removeuchar(Sequence_t *self, int i) {
-    uint32_t v = Sequence_getuchar(self, i);
-    Sequence_remove(self, i);
+uint32_t array_removeuchar(array_t *self, int i) {
+    uint32_t v = array_getuchar(self, i);
+    array_remove(self, i);
     return v;
 }
-void Sequence_resize(Sequence_t *self, int s) {
+void array_resize(array_t *self, int s) {
     if(s <= self->count) return;
-    Sequence_prepupdate(self, s - 1, s);
+    array_prepupdate(self, s - 1, s);
 }
-void Sequence_resizeitem(Sequence_t *self, Sequence_t *other) {
+void array_resizeitem(array_t *self, array_t *other) {
     if(self->data->ilen != other->data->ilen) {
         NOIMPL("Cannot resize item");
     }
@@ -208,7 +208,7 @@ void Sequence_resizeitem(Sequence_t *self, Sequence_t *other) {
         *((t *)to + c - i - 1) = a; \
     } \
 } while(0)
-void Sequence_reverse(Sequence_t *self) {
+void array_reverse(array_t *self) {
     struct listdata *bd = self->data;
     int ilen = bd->ilen, i = 0, c = self->count, c2 = (c + 1) / 2;
     char *from = self->first, *to;
@@ -237,60 +237,60 @@ void Sequence_reverse(Sequence_t *self) {
     }
     }
 }
-void Sequence_set(Sequence_t *self, int i, void *v) {
+void array_set(array_t *self, int i, void *v) {
     int count = self->count;
     if(i < 0) i += count;
     if(i < 0) {
     } else {
-        Sequence_prepupdate(self, i, i >= count ? i + 1 : count);
+        array_prepupdate(self, i, i >= count ? i + 1 : count);
     }
     SETANYITEM(self, i, v);
 }
-void Sequence_setptr(Sequence_t *self, int i, void *v) {
-    Sequence_set(self, i, (void *)&v);
+void array_setptr(array_t *self, int i, void *v) {
+    array_set(self, i, (void *)&v);
 }
-void Sequence_setrange(Sequence_t *self, int b, int e, Sequence_t *v) {
+void array_setrange(array_t *self, int b, int e, array_t *v) {
     int i, d, sc = self->count, vc = v->count;
     if(b < 0) b += sc;
     if(e < 0) e += vc;
     d = e - b - vc + 1;
-    if(d > 0) for(; d > 0; d --) Sequence_remove(self, b);
+    if(d > 0) for(; d > 0; d --) array_remove(self, b);
     else if(d < 0) {
         void *t = NULL;
-        for(; d < 0; d ++) Sequence_insert(self, b, (void *)&t);
+        for(; d < 0; d ++) array_insert(self, b, (void *)&t);
     }
-    for(i = 0; i < vc; i ++) Sequence_set(self, b ++, Sequence_get(v, i));
+    for(i = 0; i < vc; i ++) array_set(self, b ++, array_get(v, i));
 }
 #define SETUINT(self, t, i, v) do { \
     t nv = (v); \
-    Sequence_set(self, (i), (void *)&nv); \
+    array_set(self, (i), (void *)&nv); \
 } while(0);
-void Sequence_setuchar(Sequence_t *self, int i, uint32_t v) {
+void array_setuchar(array_t *self, int i, uint32_t v) {
     switch(self->data->ilen) {
     case sizeof(uint8_t ): SETUINT(self, uint8_t,  i, v); break;
     case sizeof(uint16_t): SETUINT(self, uint16_t, i, v); break;
     case sizeof(uint32_t): SETUINT(self, uint32_t, i, v); break;
-    default: BUG("Invalid ilen in Sequence_setuchar\n");
+    default: BUG("Invalid ilen in array_setuchar\n");
     }
 }
-void *Sequence_shiftptr(Sequence_t *self) {
-    return Sequence_removeptr(self, 0);
+void *array_shiftptr(array_t *self) {
+    return array_removeptr(self, 0);
 }
-void Sequence_slice(Sequence_t *self, int offset, int limit) {
-    Sequence_offset(self, offset);
-    Sequence_limit(self, limit);
+void array_slice(array_t *self, int offset, int limit) {
+    array_offset(self, offset);
+    array_limit(self, limit);
 }
-const char *Sequence_tocstr(Sequence_t *self) {
-    Sequence_setuchar(self, self->count, '\0');
+const char *array_tocstr(array_t *self) {
+    array_setuchar(self, self->count, '\0');
     self->count --;
     return self->first;
 }
-void Sequence_unshiftptr(Sequence_t *self, void *v) {
-    Sequence_insertptr(self, 0, v);
+void array_unshiftptr(array_t *self, void *v) {
+    array_insertptr(self, 0, v);
 }
 
 /* info */
-int Sequence_cmp(const Sequence_t *self, const Sequence_t *other) {
+int array_cmp(const array_t *self, const array_t *other) {
     if(self == other) return 0;
     else {
         int sc = self->count, oc = other->count, d = sc - oc;
@@ -318,7 +318,7 @@ int Sequence_cmp(const Sequence_t *self, const Sequence_t *other) {
         if(cd != 0) return cd; \
     } \
 } while(0)
-int Sequence_cmpcstr(const Sequence_t *self, const char *other) {
+int array_cmpcstr(const array_t *self, const char *other) {
     int sc = self->count, oc = strlen(other), d = sc - oc;
     int len = d > 0 ? oc : sc;
     uint8_t ilen = self->data->ilen;
@@ -327,42 +327,42 @@ int Sequence_cmpcstr(const Sequence_t *self, const char *other) {
     if(     ilen == sizeof(uint8_t )) COMPARECSTR(uint8_t );
     else if(ilen == sizeof(uint16_t)) COMPARECSTR(uint16_t);
     else if(ilen == sizeof(uint32_t)) COMPARECSTR(uint16_t);
-    else BUG("Invalid ilen in Sequence_cmpcstr\n");
+    else BUG("Invalid ilen in array_cmpcstr\n");
     return d;
 }
 #define MATCHCHAR(type) do { \
     for(; o < c; o ++) if(((type *)buf)[o] == pat) return o; \
 } while(0)
-int Sequence_finduchar(const Sequence_t *self, uint32_t pat, int o) {
+int array_finduchar(const array_t *self, uint32_t pat, int o) {
     void *buf = self->first;
     int c = self->count;
     switch(self->data->ilen) {
     case sizeof(uint8_t ): MATCHCHAR(uint8_t ); break;
     case sizeof(uint16_t): MATCHCHAR(uint16_t); break;
     case sizeof(uint32_t): MATCHCHAR(uint32_t); break;
-    default: BUG("Invalid ilen in Sequence_finduchar\n");
+    default: BUG("Invalid ilen in array_finduchar\n");
     }
     return -1;
 }
 #define MATCHCSET(type) do { \
-    for(; o < c; o ++) if(CharacterSet_has(pat, ((type *)buf)[o])) return o; \
+    for(; o < c; o ++) if(charset_has(pat, ((type *)buf)[o])) return o; \
 } while(0)
-int Sequence_findcset(const Sequence_t *self, const CharacterSet_t *pat, int o) {
+int array_findCharset(const array_t *self, const charset_t *pat, int o) {
     void *buf = self->first;
     int c = self->count;
     switch(self->data->ilen) {
     case sizeof(uint8_t ): MATCHCSET(uint8_t ); break;
     case sizeof(uint16_t): MATCHCSET(uint16_t); break;
     case sizeof(uint32_t): MATCHCSET(uint32_t); break;
-    default: BUG("Invalid ilen in Sequence_findcset\n");
+    default: BUG("Invalid array item length!");
     }
     return -1;
 }
-int Sequence_findlist(const Sequence_t *self, const Sequence_t *pat, int o) {
+int array_findlist(const array_t *self, const array_t *pat, int o) {
     int self_c = self->count, pat_c = pat->count;
     if(pat_c == 0) return o < self_c ? o : -1;
     if(pat_c > self_c) return -1;
-    if(pat_c == 1) return Sequence_finduchar(self, Sequence_getuchar(pat, 0), o);
+    if(pat_c == 1) return array_finduchar(self, array_getuchar(pat, 0), o);
     else {
         switch(self->data->ilen) {
         case sizeof(uint8_t): {
@@ -383,31 +383,31 @@ int Sequence_findlist(const Sequence_t *self, const Sequence_t *pat, int o) {
             }
             break; }
         default:
-            BUG("Invalid ilen in Sequence_findlist\n");
+            BUG("Invalid ilen in array_findlist\n");
         }
         return -1;
     }
 }
-void *Sequence_get(const Sequence_t *self, int i) {
+void *array_get(const array_t *self, int i) {
     int count = self->count;
     if(i < 0) i += count;
     return i < 0 || i >= count ? NULL : LIST_AT(self, i);
 }
-void *Sequence_getptr(const Sequence_t *self, int i) {
-    void **vptr = (void **)Sequence_get(self, i);
+void *array_getptr(const array_t *self, int i) {
+    void **vptr = (void **)array_get(self, i);
     return vptr != NULL ? *vptr : NULL;
 }
-uint32_t Sequence_getuchar(const Sequence_t *self, int i) {
-    void *vptr = Sequence_get(self, i);
+uint32_t array_getuchar(const array_t *self, int i) {
+    void *vptr = array_get(self, i);
     if(vptr == NULL) return 0;
     switch(self->data->ilen) {
     case sizeof(uint8_t ): return *(uint8_t  *)vptr;
     case sizeof(uint16_t): return *(uint16_t *)vptr;
     case sizeof(uint32_t): return *(uint32_t *)vptr;
-    default: BUG("Invalid ilen in Sequence_getuchar\n");
+    default: BUG("Invalid ilen in array_getuchar\n");
     }
 }
-int Sequence_hc(const Sequence_t *self) {
+int array_hc(const array_t *self) {
     register const uint8_t *beg = (uint8_t *)self->first;
     register const uint8_t *end = beg + self->data->ilen * self->count;
     int hc = 5381;
@@ -422,11 +422,11 @@ int Sequence_hc(const Sequence_t *self) {
     for(; i < end; i ++) fprintf((stream), " " f, (t)*i); \
     fprintf((stream), "\n"); \
 } while(0)
-void Sequence_write(const Sequence_t *self, FILE *stream) {
+void array_write(const array_t *self, FILE *stream) {
     struct listdata *bd = self->data;
     int ilen = bd->ilen;
     char *first = self->first;
-    fprintf(stream, "Sequence_t(%p", (void *)self);
+    fprintf(stream, "array_t(%p", (void *)self);
     fprintf(stream, ", first=%p", (void *)first);
     fprintf(stream, "(%i)", (first - &bd->item) / ilen);
     fprintf(stream, ", count=%i", self->count);

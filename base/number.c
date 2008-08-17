@@ -1,7 +1,7 @@
 #include "number.h"
 
 /* new. */
-numbertype_t number_new(int is_big, Sequence_t *str, numberifn_t *res) {
+numbertype_t number_new(int is_big, array_t *str, numberifn_t *res) {
     static char underscore = '_' - '0', dot = '.' - '0';
     char digit = '\0';
     int i;
@@ -11,7 +11,7 @@ numbertype_t number_new(int is_big, Sequence_t *str, numberifn_t *res) {
     /* try the number as native int. */
     i = 0;
     for(; idx < len; idx ++) {
-        digit = Sequence_getuchar(str, idx) - '0';
+        digit = array_getuchar(str, idx) - '0';
         if(digit == underscore) continue;
         if(digit < 0 || digit > 9) break;
         if(i > INT_MAX / 10) break; else i *= 10;
@@ -27,7 +27,7 @@ numbertype_t number_new(int is_big, Sequence_t *str, numberifn_t *res) {
     f = i;
     if(digit == dot) goto point;
     for(; idx < len; idx ++) {
-        digit = Sequence_getuchar(str, idx) - '0';
+        digit = array_getuchar(str, idx) - '0';
         if(digit == underscore) continue;
         if(digit < 0 || digit > 9) break;
         if(f > DBL_MAX / 10) break; else f *= 10;
@@ -36,7 +36,7 @@ numbertype_t number_new(int is_big, Sequence_t *str, numberifn_t *res) {
     if(digit == dot) {
         point:
             for(idx ++; idx < len; idx ++) {
-                digit = Sequence_getuchar(str, idx) - '0';
+                digit = array_getuchar(str, idx) - '0';
                 if(digit == underscore) continue;
                 if(digit < 0 || digit > 9) break;
                 if(f > DBL_MAX / 10) { idx = len; break; } else f *= 10;

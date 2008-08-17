@@ -2,23 +2,23 @@
 #define LK_ERROR_H
 
 /* type */
-typedef struct lk_Error lk_Error_t;
+typedef struct lk_error lk_error_t;
 #include "vm.h"
 #include "instr.h"
 #include "file.h"
 #include "string.h"
-struct lk_Error {
-    struct lk_Common  obj;
-    lk_Instr_t       *instr;
-    lk_String_t      *text;
+struct lk_error {
+    struct lk_common  obj;
+    lk_instr_t       *instr;
+    lk_string_t      *text;
 };
-#define LK_ERROR(v) ((lk_Error_t *)(v))
+#define LK_ERROR(v) ((lk_error_t *)(v))
 
 /* ext map */
-LK_EXT_DEFINIT(lk_Error_extinittypes);
-LK_EXT_DEFINIT(lk_Error_extinitfuncs);
+LK_EXT_DEFINIT(lk_error_extinittypes);
+LK_EXT_DEFINIT(lk_error_extinitfuncs);
 
 /* new */
-lk_Error_t *lk_Error_new(lk_Vm_t *vm, lk_Object_t *parent, const char *text);
-lk_Error_t *lk_Error_newc(lk_Vm_t *vm);
+lk_error_t *lk_error_new(lk_vm_t *vm, lk_object_t *parent, const char *text);
+lk_error_t *lk_error_newc(lk_vm_t *vm);
 #endif

@@ -2,15 +2,15 @@
 #define LK_GLIST_H
 
 /* type */
-typedef struct lk_Glist lk_GSequence_t;
+typedef struct lk_glist lk_garray_t;
 #include "vm.h"
-struct lk_Glist {
-    struct lk_Common obj;
-    Sequence_t        data;
+struct lk_glist {
+    struct lk_common obj;
+    array_t        data;
 };
-#define LK_GLIST(v) ((lk_GSequence_t *)(v))
+#define LK_GLIST(v) ((lk_garray_t *)(v))
 
 /* ext map */
-LK_EXT_DEFINIT(lk_GSequence_extinittypes);
-LK_EXT_DEFINIT(lk_GSequence_extinitfuncs);
+LK_EXT_DEFINIT(lk_garray_extinittypes);
+LK_EXT_DEFINIT(lk_garray_extinitfuncs);
 #endif

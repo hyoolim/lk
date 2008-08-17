@@ -2,68 +2,68 @@
 #define LK_FUNC_H
 
 /* type */
-typedef struct lk_Func lk_Func_t;
-typedef struct lk_Cfunc lk_Cfunc_t;
-typedef struct lk_Gfunc lk_Gfunc_t;
-typedef struct lk_Kfunc lk_Kfunc_t;
-typedef struct lk_Sig lk_Sig_t;
+typedef struct lk_func lk_func_t;
+typedef struct lk_cfunc lk_cfunc_t;
+typedef struct lk_gfunc lk_gfunc_t;
+typedef struct lk_kfunc lk_kfunc_t;
+typedef struct lk_sig lk_sig_t;
 #include "vm.h"
 #include "frame.h"
 #include "instr.h"
-struct lk_Func {
-    struct lk_Common obj;
-    struct lk_Commonfunc {
-        lk_Instr_t  *sigdef;
+struct lk_func {
+    struct lk_common obj;
+    struct lk_commonfunc {
+        lk_instr_t  *sigdef;
         int          minargc;
         int          maxargc;
-        Sequence_t   *sigs;
-        lk_Sig_t    *rest;
-        lk_String_t *doc;
+        array_t   *sigs;
+        lk_sig_t    *rest;
+        lk_string_t *doc;
         uint8_t      opts;
     }                cf;
 };
-#define LK_FUNC(v) ((lk_Func_t *)(v))
+#define LK_FUNC(v) ((lk_func_t *)(v))
 #define LK_FUNCORUNNING  (1 << 0)
 #define LK_FUNCOASSIGNED (1 << 1)
-struct lk_Cfunc {
-    struct lk_Common      obj;
-    struct lk_Commonfunc cf;
-    lk_Cfuncfunc_t       *func;
+struct lk_cfunc {
+    struct lk_common      obj;
+    struct lk_commonfunc cf;
+    lk_cfuncfunc_t       *func;
 };
-#define LK_CFUNC(v) ((lk_Cfunc_t *)(v))
-struct lk_Gfunc {
-    struct lk_Common      obj;
-    struct lk_Commonfunc  cf;
-    Sequence_t            *funcs;
+#define LK_CFUNC(v) ((lk_cfunc_t *)(v))
+struct lk_gfunc {
+    struct lk_common      obj;
+    struct lk_commonfunc  cf;
+    array_t            *funcs;
 };
-#define LK_GFUNC(v) ((lk_Gfunc_t *)(v))
-struct lk_Kfunc {
-    struct lk_Common      obj;
-    struct lk_Commonfunc  cf;
-    lk_Frame_t           *frame;
-    lk_Instr_t           *first;
+#define LK_GFUNC(v) ((lk_gfunc_t *)(v))
+struct lk_kfunc {
+    struct lk_common      obj;
+    struct lk_commonfunc  cf;
+    lk_frame_t           *frame;
+    lk_instr_t           *first;
 };
-#define LK_KFUNC(v) ((lk_Kfunc_t *)(v))
-struct lk_Sig {
-    struct lk_Common  obj;
-    lk_String_t      *name;
-    lk_Object_t      *check;
+#define LK_KFUNC(v) ((lk_kfunc_t *)(v))
+struct lk_sig {
+    struct lk_common  obj;
+    lk_string_t      *name;
+    lk_object_t      *check;
     uint8_t           isself;
 };
-#define LK_SIG(v) ((lk_Sig_t *)(v))
+#define LK_SIG(v) ((lk_sig_t *)(v))
 
 /* ext map */
-LK_EXT_DEFINIT(lk_Func_extinittypes);
-LK_EXT_DEFINIT(lk_Func_extinitfuncs);
+LK_EXT_DEFINIT(lk_func_extinittypes);
+LK_EXT_DEFINIT(lk_func_extinitfuncs);
 
 /* new */
-lk_Cfunc_t *lk_Cfunc_new(lk_Vm_t * vm, lk_Cfuncfunc_t *func, int minargc, int maxargc);
-lk_Kfunc_t *lk_Kfunc_new(lk_Vm_t *vm, lk_Frame_t *frame, lk_Instr_t *first);
-lk_Gfunc_t *lk_Gfunc_new(lk_Vm_t *vm);
-lk_Sig_t *lk_Sig_new(lk_Vm_t *vm, lk_String_t *name, lk_Object_t *type);
+lk_cfunc_t *lk_cfunc_new(lk_vm_t * vm, lk_cfuncfunc_t *func, int minargc, int maxargc);
+lk_kfunc_t *lk_kfunc_new(lk_vm_t *vm, lk_frame_t *frame, lk_instr_t *first);
+lk_gfunc_t *lk_gfunc_new(lk_vm_t *vm);
+lk_sig_t *lk_sig_new(lk_vm_t *vm, lk_string_t *name, lk_object_t *type);
 
 /* update */
-lk_Gfunc_t *lk_Func_combine(lk_Func_t *self, lk_Func_t *other);
-lk_Func_t *lk_Func_match(lk_Func_t *self, lk_Frame_t *args, lk_Object_t *recv);
-void lk_Kfunc_updatesig(lk_Kfunc_t *self);
+lk_gfunc_t *lk_func_combine(lk_func_t *self, lk_func_t *other);
+lk_func_t *lk_func_match(lk_func_t *self, lk_frame_t *args, lk_object_t *recv);
+void lk_kfunc_updatesig(lk_kfunc_t *self);
 #endif

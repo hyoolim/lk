@@ -2,17 +2,17 @@
 #define LK_LIST_H
 
 /* type */
-typedef struct lk_Glist lk_List_t;
+typedef struct lk_glist lk_list_t;
 #include "vm.h"
 #include "glist.h"
-#define LK_LIST(v) ((lk_List_t *)(v))
+#define LK_LIST(v) ((lk_list_t *)(v))
 
 /* ext map */
-LK_EXT_DEFINIT(lk_List_extinittypes);
-LK_EXT_DEFINIT(lk_List_extinitfuncs);
+LK_EXT_DEFINIT(lk_list_extinittypes);
+LK_EXT_DEFINIT(lk_list_extinitfuncs);
 
 /* new */
-lk_List_t *lk_List_new(lk_Vm_t *vm);
-lk_List_t *lk_List_newfromlist(lk_Vm_t *vm, Sequence_t *from);
-lk_List_t *lk_List_newfromargv(lk_Vm_t *vm, int argc, const char **argv);
+lk_list_t *lk_list_new(lk_vm_t *vm);
+lk_list_t *lk_list_newfromlist(lk_vm_t *vm, array_t *from);
+lk_list_t *lk_list_newfromargv(lk_vm_t *vm, int argc, const char **argv);
 #endif

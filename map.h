@@ -2,24 +2,24 @@
 #define LK_MAP_H
 
 /* type */
-typedef struct lk_Gset lk_Map_t;
+typedef struct lk_gset lk_map_t;
 #include "vm.h"
 #include "gset.h"
-#define LK_MAP(v) ((lk_Map_t *)(v))
+#define LK_MAP(v) ((lk_map_t *)(v))
 
 /* ext map */
-LK_EXT_DEFINIT(lk_Map_extinittypes);
-LK_EXT_DEFINIT(lk_Map_extinitfuncs);
+LK_EXT_DEFINIT(lk_map_extinittypes);
+LK_EXT_DEFINIT(lk_map_extinitfuncs);
 
 /* new */
-lk_Map_t *lk_Map_new(lk_Vm_t *vm);
-lk_Map_t *lk_Map_newfrompt(lk_Vm_t *vm, set_t *ht);
+lk_map_t *lk_map_new(lk_vm_t *vm);
+lk_map_t *lk_map_newfrompt(lk_vm_t *vm, set_t *ht);
 
 /* update */
-void lk_Map_set(lk_Map_t *self, lk_Object_t *k, lk_Object_t *v);
-void lk_Map_setbycstr(lk_Map_t *self, const char *k, lk_Object_t *v);
+void lk_map_set(lk_map_t *self, lk_object_t *k, lk_object_t *v);
+void lk_map_setbycstr(lk_map_t *self, const char *k, lk_object_t *v);
 
 /* info */
-lk_Object_t *lk_Map_get(lk_Map_t *self, lk_Object_t *k);
-lk_Object_t *lk_Map_getbycstr(lk_Map_t *self, const char *k);
+lk_object_t *lk_map_get(lk_map_t *self, lk_object_t *k);
+lk_object_t *lk_map_getbycstr(lk_map_t *self, const char *k);
 #endif

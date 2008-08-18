@@ -11,7 +11,7 @@ typedef struct lk_sig lk_sig_t;
 #include "frame.h"
 #include "instr.h"
 struct lk_func {
-    struct lk_common obj;
+    struct lk_common o;
     struct lk_commonfunc {
         lk_instr_t  *sigdef;
         int          minargc;
@@ -26,26 +26,26 @@ struct lk_func {
 #define LK_FUNCORUNNING  (1 << 0)
 #define LK_FUNCOASSIGNED (1 << 1)
 struct lk_cfunc {
-    struct lk_common      obj;
+    struct lk_common o;
     struct lk_commonfunc cf;
     lk_cfuncfunc_t       *func;
 };
 #define LK_CFUNC(v) ((lk_cfunc_t *)(v))
 struct lk_gfunc {
-    struct lk_common      obj;
+    struct lk_common o;
     struct lk_commonfunc  cf;
     darray_t            *funcs;
 };
 #define LK_GFUNC(v) ((lk_gfunc_t *)(v))
 struct lk_kfunc {
-    struct lk_common      obj;
+    struct lk_common o;
     struct lk_commonfunc  cf;
     lk_frame_t           *frame;
     lk_instr_t           *first;
 };
 #define LK_KFUNC(v) ((lk_kfunc_t *)(v))
 struct lk_sig {
-    struct lk_common  obj;
+    struct lk_common o;
     lk_string_t      *name;
     lk_object_t      *check;
     uint8_t           isself;

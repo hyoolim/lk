@@ -8,12 +8,12 @@
 /* ext map - types */
 LK_EXT_DEFINIT(lk_object_extinittypes) {
     lk_object_t *o = vm->t_obj = memory_alloc(sizeof(lk_object_t));
-    o->obj.tag = memory_alloc(sizeof(struct lk_tag));
-    o->obj.tag->refc = 1;
-    o->obj.tag->vm = vm;
-    o->obj.tag->size = sizeof(lk_object_t);
-    o->obj.parent = NULL;
-    darray_pushptr(o->obj.ancestors = darray_allocptr(), o);
+    o->o.tag = memory_alloc(sizeof(struct lk_tag));
+    o->o.tag->refc = 1;
+    o->o.tag->vm = vm;
+    o->o.tag->size = sizeof(lk_object_t);
+    o->o.parent = NULL;
+    darray_pushptr(o->o.ancestors = darray_allocptr(), o);
 }
 
 /* ext map - funcs */
@@ -32,7 +32,7 @@ LK_LIB_DEFINECFUNC(Ddefine_and_assignB__obj_str_obj_obj) {
     lk_object_t *k = ARG(0);
     lk_object_t *v = ARG(2);
     struct lk_slot *slot;
-    if(self->obj.slots != NULL && qphash_get(self->obj.slots, k) != NULL) {
+    if(self->o.slots != NULL && qphash_get(self->o.slots, k) != NULL) {
         lk_vm_raisecstr(VM, "Cannot redefine %s", k);
     }
     slot = lk_object_setslot(self, k, ARG(1), v);
@@ -56,8 +56,8 @@ LK_LIB_DEFINECFUNC(Dself__obj) {
     RETURN(self); }
 LK_LIB_DEFINECFUNC(Dslots__obj) {
     lk_list_t *slots = lk_list_new(VM);
-    if(self->obj.slots != NULL) {
-        SET_EACH(self->obj.slots, i,
+    if(self->o.slots != NULL) {
+        SET_EACH(self->o.slots, i,
             darray_pushptr(DARRAY(slots), (void *)i->key);
         );
     }
@@ -71,8 +71,8 @@ LK_LIB_DEFINECFUNC(also__obj_obj) {
         pars = LK_OBJ_PARENTS(self);
     } else {
         pars = darray_allocptr();
-        darray_pushptr(pars, self->obj.parent);
-        self->obj.parent = LK_OBJ((ptrdiff_t)pars | 1);
+        darray_pushptr(pars, self->o.parent);
+        self->o.parent = LK_OBJ((ptrdiff_t)pars | 1);
     }
     darray_unshiftptr(pars, ARG(0));
     if(lk_object_calcancestors(self)) {
@@ -85,8 +85,8 @@ LK_LIB_DEFINECFUNC(also__obj_obj) {
 LK_LIB_DEFINECFUNC(ancestor__obj_obj) {
     RETURN(LK_OBJ_ISTYPE(self, ARG(0)) ? VM->t_true : VM->t_false); }
 LK_LIB_DEFINECFUNC(ancestors__obj) {
-    if(self->obj.ancestors != NULL || lk_object_calcancestors(self)) {
-        RETURN(lk_list_newfromlist(VM, self->obj.ancestors));
+    if(self->o.ancestors != NULL || lk_object_calcancestors(self)) {
+        RETURN(lk_list_newfromlist(VM, self->o.ancestors));
     } else {
         printf("BUG: Throw proper ancestor error here\n");
         exit(EXIT_FAILURE);
@@ -101,15 +101,15 @@ LK_LIB_DEFINECFUNC(do__obj_f) {
     fr->receiver = fr->self = self;
     fr->func = LK_OBJ(kf);
     fr->returnto = NULL;
-    fr->obj.parent = LK_OBJ(kf->frame);
+    fr->o.parent = LK_OBJ(kf->frame);
     lk_vm_doevalfunc(VM);
     RETURN(self);
 }
 LK_LIB_DEFINECFUNC(import__obj_obj) {
-    qphash_t *from = ARG(0)->obj.slots;
+    qphash_t *from = ARG(0)->o.slots;
     if(from != NULL) {
-        qphash_t *to = self->obj.slots;
-        if(to == NULL) to = self->obj.slots = qphash_alloc(
+        qphash_t *to = self->o.slots;
+        if(to == NULL) to = self->o.slots = qphash_alloc(
         sizeof(struct lk_slot), lk_object_hashcode, lk_object_keycmp);
         SET_EACH(from, i,
             *LK_SLOT(qphash_set(to, i->key)) = *LK_SLOT(SETITEM_VALUEPTR(i));
@@ -122,7 +122,7 @@ LK_LIB_DEFINECFUNC(parents__obj) {
         RETURN(lk_list_newfromlist(VM, LK_OBJ_PARENTS(self)));
     } else {
         lk_list_t *ret = lk_list_new(VM);
-        darray_pushptr(DARRAY(ret), self->obj.parent);
+        darray_pushptr(DARRAY(ret), self->o.parent);
         RETURN(ret);
     }
 }
@@ -131,7 +131,7 @@ LK_LIB_DEFINECFUNC(parent__obj) {
         darray_t *pars = LK_OBJ_PARENTS(self);
         RETURN(LIST_COUNT(pars) > 0 ? darray_getptr(pars, -1) : NIL);
     }
-    RETURN(self->obj.parent);
+    RETURN(self->o.parent);
 }
 LK_LIB_DEFINECFUNC(with__obj_f) {
     do__obj_f(lk_object_addref(LK_OBJ(env), lk_object_alloc(self)), env);
@@ -170,11 +170,11 @@ static struct lk_tag *tag_clone(struct lk_tag *self) {
 lk_object_t *lk_object_allocwithsize(lk_object_t *parent, size_t s) {
     lk_gc_t *gc = LK_VM(parent)->gc;
     lk_object_t *self = memory_alloc(s);
-    struct lk_tag *tag = parent->obj.tag;
+    struct lk_tag *tag = parent->o.tag;
     if(tag->size == s) tag->refc ++;
     else (tag = tag_clone(tag))->size = s;
-    self->obj.parent = parent;
-    self->obj.tag = tag;
+    self->o.parent = parent;
+    self->o.tag = tag;
     if(tag->allocfunc != NULL) tag->allocfunc(self, parent);
     if(gc != NULL) {
         gc->newvalues ++;
@@ -183,19 +183,19 @@ lk_object_t *lk_object_allocwithsize(lk_object_t *parent, size_t s) {
     return self;
 }
 lk_object_t *lk_object_alloc(lk_object_t *parent) {
-    return lk_object_allocwithsize(parent, parent->obj.tag->size);
+    return lk_object_allocwithsize(parent, parent->o.tag->size);
 }
 lk_object_t *lk_object_clone(lk_object_t *self) {
     lk_object_t *c = lk_object_alloc(LK_OBJ_PROTO(self));
-    if(c->obj.tag->allocfunc != NULL) c->obj.tag->allocfunc(c, self);
+    if(c->o.tag->allocfunc != NULL) c->o.tag->allocfunc(c, self);
     return c;
 }
 void lk_object_justfree(lk_object_t *self) {
-    struct lk_tag *tag = self->obj.tag;
+    struct lk_tag *tag = self->o.tag;
     if(tag->freefunc != NULL) tag->freefunc(self);
     if(LK_OBJ_HASPARENTS(self)) darray_free(LK_OBJ_PARENTS(self));
-    if(self->obj.ancestors != NULL) darray_free(self->obj.ancestors);
-    if(self->obj.slots != NULL) qphash_free(self->obj.slots);
+    if(self->o.ancestors != NULL) darray_free(self->o.ancestors);
+    if(self->o.slots != NULL) qphash_free(self->o.slots);
     if(-- tag->refc < 1) memory_free(tag);
     memory_free(self);
 }
@@ -207,11 +207,11 @@ void lk_object_free(lk_object_t *self) {
 /* update - tag */
 #define LK_OBJ_IMPLTAGSETTER(t, field) \
 LK_OBJ_DEFTAGSETTER(t, field) { \
-    struct lk_tag *tag = self->obj.tag; \
+    struct lk_tag *tag = self->o.tag; \
     if(tag->field != field) { \
         if(tag->refc > 1) { \
             tag->refc --; \
-            tag = self->obj.tag = tag_clone(tag); \
+            tag = self->o.tag = tag_clone(tag); \
         } \
         tag->field = field; \
     } \
@@ -226,12 +226,12 @@ struct lk_slot *lk_object_setslot(lk_object_t *self, lk_object_t *k,
     struct lk_slot *slot = lk_object_getslot(self, k);
     if(slot == NULL) {
         uint32_t first = darray_getuchar(DARRAY(k), 0);
-        if(self->obj.slots == NULL) {
-            self->obj.slots = qphash_alloc(sizeof(struct lk_slot),
+        if(self->o.slots == NULL) {
+            self->o.slots = qphash_alloc(sizeof(struct lk_slot),
                                        lk_object_hashcode,
                                        lk_object_keycmp);
         }
-        slot = LK_SLOT(qphash_set(self->obj.slots, k));
+        slot = LK_SLOT(qphash_set(self->o.slots, k));
         slot->check = check;
         if('A' <= first && first <= 'Z') {
             LK_SLOT_SETOPTION(slot, LK_SLOTOPTION_READONLY);
@@ -277,18 +277,18 @@ int lk_object_calcancestors(lk_object_t *self) {
         for(candi = 0; candi < LIST_COUNT(pars); candi ++) {
             cand = LIST_ATPTR(pars, candi);
             il = darray_allocptr();
-            if(cand->obj.ancestors == NULL) lk_object_calcancestors(cand);
-            if(cand->obj.ancestors == NULL) return 0;
-            darray_concat(il, cand->obj.ancestors);
+            if(cand->o.ancestors == NULL) lk_object_calcancestors(cand);
+            if(cand->o.ancestors == NULL) return 0;
+            darray_concat(il, cand->o.ancestors);
             darray_pushptr(ol, il);
         }
     } else {
-        cand = self->obj.parent;
+        cand = self->o.parent;
         if(cand != NULL) {
             il = darray_allocptr();
-            if(cand->obj.ancestors == NULL) lk_object_calcancestors(cand);
-            if(cand->obj.ancestors == NULL) return 0;
-            darray_concat(il, cand->obj.ancestors);
+            if(cand->o.ancestors == NULL) lk_object_calcancestors(cand);
+            if(cand->o.ancestors == NULL) return 0;
+            darray_concat(il, cand->o.ancestors);
             darray_pushptr(ol, il);
         }
     }
@@ -297,9 +297,9 @@ int lk_object_calcancestors(lk_object_t *self) {
         darray_concat(il, LK_OBJ_PARENTS(self));
         darray_pushptr(ol, il);
     } else {
-        if(self->obj.parent != NULL) {
+        if(self->o.parent != NULL) {
             il = darray_allocptr();
-            darray_pushptr(il, self->obj.parent);
+            darray_pushptr(il, self->o.parent);
             darray_pushptr(ol, il);
         }
     }
@@ -331,9 +331,9 @@ int lk_object_calcancestors(lk_object_t *self) {
     darray_free(ol);
     if(cand == NULL) return 0;
     else {
-        darray_t *oldancs = self->obj.ancestors;
+        darray_t *oldancs = self->o.ancestors;
         if(oldancs != NULL) darray_free(oldancs);
-        self->obj.ancestors = newancs;
+        self->o.ancestors = newancs;
         return 1;
     }
 }
@@ -342,11 +342,11 @@ int lk_object_calcancestors(lk_object_t *self) {
 #define FIND(nil, check) do { \
     while(1) { \
         check \
-        if(self->obj.ancestors != NULL) goto checkancestors; \
-        self = self->obj.parent; \
+        if(self->o.ancestors != NULL) goto checkancestors; \
+        self = self->o.parent; \
     } \
     checkancestors: { \
-        darray_t *ancs = self->obj.ancestors; \
+        darray_t *ancs = self->o.ancestors; \
         int i, c = LIST_COUNT(ancs); \
         for(i = 1; i < c; i ++) { \
             self = LIST_ATPTR(ancs, i); \
@@ -363,7 +363,7 @@ int lk_object_isa(lk_object_t *self, lk_object_t *t) {
     );
 }
 struct lk_slot *lk_object_getslot(lk_object_t *self, lk_object_t *k) {
-    qphash_t *slots = self->obj.slots;
+    qphash_t *slots = self->o.slots;
     setitem_t *item;
     if(slots == NULL || (item = qphash_get(slots, k)) == NULL) return NULL;
     return LK_SLOT(SETITEM_VALUEPTR(item));
@@ -372,7 +372,7 @@ struct lk_slot *lk_object_getslotfromany(lk_object_t *self, lk_object_t *k) {
     qphash_t *slots;
     setitem_t *si;
     FIND(NULL,
-        if((slots = self->obj.slots) != NULL
+        if((slots = self->o.slots) != NULL
         && (si = qphash_get(slots, k)) != NULL
         ) return LK_SLOT(SETITEM_VALUEPTR(si));
     );

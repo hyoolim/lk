@@ -6,8 +6,8 @@ typedef struct lk_charset lk_charset_t;
 #define LK_CHARSET(v) ((lk_charset_t *)(v))
 #include "vm.h"
 struct lk_charset {
-    struct lk_common obj;
-    charset_t        cs;
+    struct lk_common o;
+    charset_t        data;
 };
 
 /* ext map */

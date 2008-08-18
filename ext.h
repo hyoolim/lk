@@ -9,7 +9,7 @@
 
 /* type */
 typedef struct lk_library {
-    struct lk_common  obj;
+    struct lk_common o;
     void             *lib;
 } lk_library_t;
 #define LK_EXT(v) ((lk_library_t *)(v))
@@ -27,15 +27,15 @@ LK_OBJ(LIST_ATPTR(&env->stack, (i))))
 } while(0)
 #define GOTO(name) (name(self, env))
 
-#define CHAR(v) (LK_CHAR(v)->c)
-#define CHARSET(v) (&LK_CHARSET(v)->cs)
+#define CHAR(v) (LK_CHAR(v)->data)
+#define CHARSET(v) (&LK_CHARSET(v)->data)
 #define CSTRING(v) (darray_toCString(DARRAY(v)))
 #define DARRAY(v) (&LK_SEQ(v)->data)
-#define DOUBLE(v) (LK_FR(v)->r)
+#define DOUBLE(v) (LK_FR(v)->data)
 #define FALSE (VM->t_false)
-#define INT(v) (LK_FI(v)->i)
+#define INT(v) (LK_FI(v)->data)
 #define NIL (VM->t_nil)
-#define QPHASH(v) (&LK_MAP(v)->set)
+#define QPHASH(v) (&LK_MAP(v)->data)
 #define TRUE (VM->t_true)
 #define VM (LK_VM(self))
 

@@ -67,10 +67,10 @@ LK_LIB_DEFINECFUNC(include__fra_str_str) {
     lk_frame_t *fr = lk_vm_evalfile(VM,
     darray_toCString(DARRAY(ARG(0))), darray_toCString(DARRAY(ARG(1))));
     if(fr != NULL) {
-        qphash_t *from = fr->obj.slots;
+        qphash_t *from = fr->o.slots;
         if(from != NULL) {
-            qphash_t *to = self->obj.slots;
-            if(to == NULL) to = self->obj.slots = qphash_alloc(
+            qphash_t *to = self->o.slots;
+            if(to == NULL) to = self->o.slots = qphash_alloc(
             sizeof(struct lk_slot), lk_object_hashcode, lk_object_keycmp);
             SET_EACH(from, i,
                 *LK_SLOT(qphash_set(to, i->key)) = *LK_SLOT(SETITEM_VALUEPTR(i));
@@ -160,13 +160,13 @@ lk_frame_t *lk_frame_new(lk_vm_t *vm) {
     lk_frame_t *self;
 
     /* optimization to reduce the number of frames created */
-    if(parent->child != NULL && parent->child->obj.mark.isref == 0) {
+    if(parent->child != NULL && parent->child->o.mark.isref == 0) {
         vm->stat.recycledFrames ++;
         self = parent->child;
-        self->obj.parent = LK_OBJ(parent);
+        self->o.parent = LK_OBJ(parent);
         darray_clear(&self->stack);
-        if(self->obj.slots != NULL) {
-            qphash_clear(self->obj.slots);
+        if(self->o.slots != NULL) {
+            qphash_clear(self->o.slots);
         }
     } else {
         self = parent->child = LK_FRAME(lk_object_alloc(LK_OBJ(parent)));

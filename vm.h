@@ -44,7 +44,7 @@ struct lk_common {
         uint8_t             isref;
     }                       mark;
 };
-#define LK_VM(v) ((v)->obj.tag->vm)
+#define LK_VM(v) ((v)->o.tag->vm)
 
 /* used by ext - can't be in ext.h due to bootstrapping issues */
 #define LK_EXT_DEFINIT(name) void name(lk_vm_t *vm)
@@ -64,7 +64,7 @@ typedef void lk_cfuncfunc_t(lk_object_t *self, lk_frame_t *env);
 
 /* actual def - add header to above #include's on lk_vm_t change */
 struct lk_object {
-    struct lk_common obj;
+    struct lk_common o;
 };
 struct lk_vm {
     struct lk_rsrcchain {

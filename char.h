@@ -6,8 +6,8 @@ typedef struct lk_char lk_char_t;
 #define LK_CHAR(v) ((lk_char_t *)(v))
 #include "vm.h"
 struct lk_char {
-    struct lk_common obj;
-    uint32_t         c;
+    struct lk_common o;
+    uint32_t         data;
 };
 
 /* ext map */

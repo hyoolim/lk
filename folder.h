@@ -7,7 +7,7 @@ typedef struct lk_folder lk_folder_t;
 #include "vm.h"
 #include "string.h"
 struct lk_folder {
-    struct lk_common  obj;
+    struct lk_common o;
     lk_string_t      *path;
 };
 

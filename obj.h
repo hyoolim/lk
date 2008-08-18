@@ -66,43 +66,43 @@ int lk_object_keycmp(const void *self, const void *other);
 #define LK_OBJ_ISTYPE(self, t) \
 (  (self) == (t) \
 || (t) == LK_VM(self)->t_obj \
-/* || (  (t)->obj.tag != LK_VM(self)->t_obj->obj.tag \
-   && (self)->obj.tag == (t)->obj.tag \
+/* || (  (t)->o.tag != LK_VM(self)->t_obj->o.tag \
+   && (self)->o.tag == (t)->o.tag \
    ) */ \
 || lk_object_isa((self), (t)) \
 )
 /*
 #define LK_OBJ_ISA(self, t) ((self) == (t) ? 1 : \
-LK_OBJ_HASONEPARENT((self)->obj.parents) && \
-LK_OBJ_ONEPARENT((self)->obj.parents) == (t) ? 2 : \
+LK_OBJ_HASONEPARENT((self)->o.parents) && \
+LK_OBJ_ONEPARENT((self)->o.parents) == (t) ? 2 : \
 lk_object_isa((self), (t)))
 #define LK_OBJ_HASONEPARENT(pars) ((ptrdiff_t)(pars) & 1)
 #define LK_OBJ_ONEPARENT(pars) LK_OBJ((ptrdiff_t)(pars) & ~1)
-#define LK_OBJ_PROTO(self) LK_OBJ_HASONEPARENT((self)->obj.parents) \
-? LK_OBJ_ONEPARENT((self)->obj.parents) : LIST_ATPTR((self)->obj.parents, 0)
+#define LK_OBJ_PROTO(self) LK_OBJ_HASONEPARENT((self)->o.parents) \
+? LK_OBJ_ONEPARENT((self)->o.parents) : LIST_ATPTR((self)->o.parents, 0)
  */
-#define LK_OBJ_HASPARENTS(self) ((ptrdiff_t)((self)->obj.parent) & 1)
-#define LK_OBJ_PARENTS(self) ((darray_t *)((ptrdiff_t)((self)->obj.parent) & ~1))
+#define LK_OBJ_HASPARENTS(self) ((ptrdiff_t)((self)->o.parent) & 1)
+#define LK_OBJ_PARENTS(self) ((darray_t *)((ptrdiff_t)((self)->o.parent) & ~1))
 #define LK_OBJ_PROTO(self) ( \
     LK_OBJ_HASPARENTS(self) \
     ? darray_getptr(LK_OBJ_PARENTS(self), -1) \
-    : (self)->obj.parent \
+    : (self)->o.parent \
 )
 #define LK_OBJ_ISA(self, t) ( \
     (self) == (t) ? 1 : \
-    !LK_OBJ_HASPARENTS(self) && (self)->obj.parent == (t) ? 2 : \
+    !LK_OBJ_HASPARENTS(self) && (self)->o.parent == (t) ? 2 : \
     lk_object_isa((self), (t)) \
 )
 #define LK_OBJ_ISCFUNC(self) ( \
-    (self)->obj.tag->allocfunc == LK_VM(self)->t_cfunc->obj.tag->allocfunc)
+    (self)->o.tag->allocfunc == LK_VM(self)->t_cfunc->o.tag->allocfunc)
 #define LK_OBJ_ISFRAME(self) ( \
-    (self)->obj.tag->freefunc == LK_VM(self)->t_frame->obj.tag->freefunc)
+    (self)->o.tag->freefunc == LK_VM(self)->t_frame->o.tag->freefunc)
 #define LK_OBJ_ISGFUNC(self) ( \
-    (self)->obj.tag->freefunc == LK_VM(self)->t_gfunc->obj.tag->freefunc)
+    (self)->o.tag->freefunc == LK_VM(self)->t_gfunc->o.tag->freefunc)
 #define LK_OBJ_ISFUNC(self) ( \
-    (self)->obj.tag->freefunc == LK_VM(self)->t_func->obj.tag->freefunc || \
+    (self)->o.tag->freefunc == LK_VM(self)->t_func->o.tag->freefunc || \
     LK_OBJ_ISGFUNC(self) \
 )
 #define LK_OBJ_ISINSTR(self) ( \
-    (self)->obj.tag->markfunc == LK_VM(self)->t_instr->obj.tag->markfunc)
+    (self)->o.tag->markfunc == LK_VM(self)->t_instr->o.tag->markfunc)
 #endif

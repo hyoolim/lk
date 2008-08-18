@@ -8,7 +8,7 @@ typedef struct lk_frame lk_frame_t;
 #include "instr.h"
 #include "list.h"
 struct lk_frame {
-    struct lk_common     obj;
+    struct lk_common o;
     enum lk_frametype_t {
         LK_FRAMETYPE_APPLY = 1,
         LK_FRAMETYPE_LIST,

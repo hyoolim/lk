@@ -8,7 +8,7 @@ typedef struct lk_prec lk_prec_t;
 #include "vm.h"
 #include "instr.h"
 struct lk_parser {
-    struct lk_common   obj;
+    struct lk_common o;
     const lk_string_t *text;
     const char        *error;
     qphash_t          *binaryops;
@@ -25,7 +25,7 @@ struct lk_parser {
     int                isterminated;
 };
 struct lk_prec {
-    struct lk_common obj;
+    struct lk_common o;
     int              level;
     enum lk_precassoc_t {
         LK_PREC_ASSOC_LEFT = 1,

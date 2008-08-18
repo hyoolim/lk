@@ -57,12 +57,12 @@ LK_LIB_DEFINECFUNC(move__file_str) {
 LK_LIB_DEFINECFUNC(open__dir);
 LK_LIB_DEFINECFUNC(open__rf);
 LK_LIB_DEFINECFUNC(open_r__file) {
-    self->obj.parent = VM->t_rf;
+    self->o.parent = VM->t_rf;
     GOTO(open__rf);
 }
 LK_LIB_DEFINECFUNC(open__wf);
 LK_LIB_DEFINECFUNC(open_w__file) {
-    self->obj.parent = VM->t_wf;
+    self->o.parent = VM->t_wf;
     GOTO(open__wf);
 }
 LK_LIB_DEFINECFUNC(readableQ__file) {
@@ -84,7 +84,7 @@ LK_LIB_DEFINECFUNC(close__rwf) {
         if(fclose(FILEF(self)) == 0) FILEF(self) = NULL;
         else lk_vm_raiseerrno(VM);
     }
-    self->obj.parent = VM->t_file;
+    self->o.parent = VM->t_file;
     RETURN(self);
 }
 /* ReadableFile */

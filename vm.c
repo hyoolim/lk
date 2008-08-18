@@ -54,7 +54,7 @@ LK_LIB_DEFINECFUNC(fork__vm_f) {
         fr->receiver = fr->self = self;
         fr->func = LK_OBJ(kf);
         fr->returnto = NULL;
-        fr->obj.parent = LK_OBJ(kf->frame);
+        fr->o.parent = LK_OBJ(kf->frame);
         lk_vm_doevalfunc(VM);
         lk_vm_exit(VM);
         DONE;
@@ -288,7 +288,7 @@ lk_frame_t *lk_vm_evalstring(lk_vm_t *self, const char *code) {
         LK_CFUNC(func)->func((args)->receiver, (args)); \
         vm->currentFrame = (self); \
     } else { \
-        (args)->obj.parent = LK_OBJ(LK_KFUNC(func)->frame); \
+        (args)->o.parent = LK_OBJ(LK_KFUNC(func)->frame); \
         (args)->self = LK_OBJ_ISFRAME((args)->receiver) \
         ? LK_KFUNC(func)->frame->self : (args)->receiver; \
         (args)->first = (args)->next = LK_KFUNC(func)->first; \
@@ -323,7 +323,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         args = lk_frame_new(vm);
         lk_frame_stackpush(args, LK_OBJ(vm->lasterror));
         for(; recv != NULL; recv = LK_OBJ(LK_FRAME(recv)->returnto)) {
-            if((slots = recv->obj.slots) == NULL) continue;
+            if((slots = recv->o.slots) == NULL) continue;
             if((si = qphash_get(slots, vm->str_rescue)) == NULL) continue;
             slot = LK_SLOT(SETITEM_VALUEPTR(si));
             slotv = lk_object_getvaluefromslot(recv, slot);
@@ -438,7 +438,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         }
         ancs = NULL;
         findslot:
-        if((slots = r->obj.slots) == NULL) goto parent;
+        if((slots = r->o.slots) == NULL) goto parent;
         if((si = qphash_get(slots, msgn)) == NULL) goto parent;
         found:
         slot = LK_SLOT(SETITEM_VALUEPTR(si));
@@ -479,16 +479,16 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
             goto nextinstr;
         }
         parent:
-        if((ancs = r->obj.ancestors) != NULL) {
+        if((ancs = r->o.ancestors) != NULL) {
             ancc = LIST_COUNT(ancs);
             for(anci = 1; anci < ancc; anci ++) {
                 r = LIST_ATPTR(ancs, anci);
-                if((slots = r->obj.slots) == NULL) continue;
+                if((slots = r->o.slots) == NULL) continue;
                 if((si = qphash_get(slots, msg->v)) == NULL) continue;
                 goto found;
             }
         } else {
-            r = r->obj.parent;
+            r = r->o.parent;
             goto findslot;
         }
         /* forward: */

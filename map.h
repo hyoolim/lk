@@ -6,8 +6,8 @@ typedef struct lk_map lk_map_t;
 #define LK_MAP(v) ((lk_map_t *)(v))
 #include "vm.h"
 struct lk_map {
-    struct lk_common obj;
-    qphash_t            set;
+    struct lk_common o;
+    qphash_t         data;
 };
 
 /* ext map */

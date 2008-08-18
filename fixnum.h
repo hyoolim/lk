@@ -8,12 +8,12 @@ typedef struct lk_fr lk_fr_t;
 #define LK_FR(v) ((lk_fr_t *)(v))
 #include "vm.h"
 struct lk_fi {
-    struct lk_common obj;
-    int              i;
+    struct lk_common o;
+    int              data;
 };
 struct lk_fr {
-    struct lk_common obj;
-    double           r;
+    struct lk_common o;
+    double           data;
 };
 
 /* ext map */

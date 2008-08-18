@@ -7,7 +7,7 @@ typedef struct lk_gc lk_gc_t;
 #include "vm.h"
 #include "frame.h"
 struct lk_gc {
-    struct lk_common    obj;
+    struct lk_common o;
     struct lk_objectgroup *unused;
     struct lk_objectgroup *pending;
     struct lk_objectgroup *used;
@@ -36,9 +36,9 @@ void lk_gc_sweep(lk_gc_t *self);
 int lk_objectgroup_size(struct lk_objectgroup *self);
 struct lk_objectgroup *lk_object_objgroup(lk_object_t *self);
 #define LK_GC_ISMARKUNUSED(self, v) ( \
-(v)->obj.mark.objgroup == (self)->unused || (v)->obj.mark.objgroup == NULL)
+(v)->o.mark.objgroup == (self)->unused || (v)->o.mark.objgroup == NULL)
 #define LK_GC_ISMARKPENDING(self, v) ( \
-(v)->obj.mark.objgroup == (self)->pending)
-#define LK_GC_ISMARKUSED(self, o) ( \
-(v)->obj.mark.objgroup == (self)->used)
+(v)->o.mark.objgroup == (self)->pending)
+#define LK_GC_ISMARKUSED(self, v) ( \
+(v)->o.mark.objgroup == (self)->used)
 #endif

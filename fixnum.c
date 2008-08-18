@@ -221,11 +221,11 @@ LK_EXT_DEFINIT(lk_fixnum_extinitfuncs) {
 /* new */
 lk_fi_t *lk_fi_new(lk_vm_t *vm, int i) {
     lk_fi_t *self = LK_FI(lk_object_alloc(vm->t_fi));
-    self->i = i;
+    INT(self) = i;
     return self;
 }
 lk_fr_t *lk_fr_new(lk_vm_t *vm, double r) {
     lk_fr_t *self = LK_FR(lk_object_alloc(vm->t_fr));
-    self->r = r;
+    DOUBLE(self) = r;
     return self;
 }

@@ -23,7 +23,6 @@ LK_LIB_DEFINECFUNC(items__Folder) {
     lk_string_t *fullPath = lk_string_new(VM);
     DIR *dir = opendir(CSTRING(LK_FOLDER(self)->path));
     struct dirent *dirEntry;
-    struct stat fileInfo;
     while(dir != NULL) {
         errno = 0;
         if((dirEntry = readdir(dir)) == NULL) break;

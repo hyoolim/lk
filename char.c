@@ -45,6 +45,6 @@ LK_EXT_DEFINIT(lk_char_extinitfuncs) {
 /* new */
 lk_char_t *lk_char_new(lk_vm_t *vm, uint32_t c) {
     lk_char_t *self = LK_CHAR(lk_object_alloc(vm->t_char));
-    self->c = c;
+    CHAR(self) = c;
     return self;
 }

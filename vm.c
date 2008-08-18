@@ -8,6 +8,7 @@
 #include "file.h"
 #include "vector.h"
 #include "fixnum.h"
+#include "folder.h"
 #include "frame.h"
 #include "func.h"
 #include "gc.h"

@@ -54,7 +54,6 @@ LK_LIB_DEFINECFUNC(move__file_str) {
     if(rename(CSTRING(PATH(self)), CSTRING(ARG(0))) == 0) RETURN(self);
     else lk_vm_raiseerrno(VM);
 }
-LK_LIB_DEFINECFUNC(open__dir);
 LK_LIB_DEFINECFUNC(open__rf);
 LK_LIB_DEFINECFUNC(open_r__file) {
     self->o.parent = VM->t_rf;

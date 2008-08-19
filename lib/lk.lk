@@ -471,8 +471,6 @@ Real/extend {
 
 # Socket
 
-# StandardInput (stdin) < ReadableFile
-
 # StandardOutput (stdout) < WritableFile
 
 # StandardError (stderr) < WritableFile

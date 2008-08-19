@@ -144,7 +144,6 @@ DocumentGeneratorFile/new[root ++ '/index.html']/do {
     PositiveInfinity
     Random
     Range
-    ReadableFile
     Real
     Socket
     String

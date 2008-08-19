@@ -471,10 +471,6 @@ Real/extend {
 
 # Socket
 
-# StandardOutput (stdout) < WritableFile
-
-# StandardError (stderr) < WritableFile
-
 # Stream
 
 # String
@@ -608,8 +604,8 @@ VM/Frame/extend {
 
 # VirtualMachine/Parser
 
-# WritableFile
-WritableFile/extend {
+# File
+File/extend {
 
     # Convert each of the arguments into Strings
     # and calls write on them.

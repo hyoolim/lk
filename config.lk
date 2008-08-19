@@ -26,7 +26,7 @@ loop {
 
 # save
 writeSeperator
-WritableFile/new(ARGUMENTS(0))/do {
+File/new(ARGUMENTS(0))/openForWriting/do {
     /writeln('PREFIX="' ++ prefix ++ '"')
     /writeln('BINDIR="' ++ bindir ++ '"')
     /writeln('LIBDIR="' ++ libdir ++ '"')

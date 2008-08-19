@@ -89,8 +89,7 @@ struct lk_vm {
     /* char     */ lk_object_t *t_char;
     /* charset  */ lk_object_t *t_charset;
     /* error    */ lk_object_t *t_error;
-    /* file     */ lk_object_t *t_file, *t_folder, *t_rf, *t_wf,
-                               *t_stdin, *t_stdout, *t_stderr;
+    /* file     */ lk_object_t *t_file, *t_folder, *t_stdin, *t_stdout, *t_stderr;
     /* vector   */ lk_object_t *t_vector;
     /* fixnum   */ lk_object_t *t_number, *t_int, *t_fi, *t_real, *t_fr;
     /* frame    */ lk_object_t *t_frame;

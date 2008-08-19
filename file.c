@@ -20,11 +20,9 @@ LK_EXT_DEFINIT(lk_file_extinittypes) {
     vm->t_file = lk_object_allocwithsize(vm->t_obj, sizeof(lk_file_t));
     lk_object_setmarkfunc(vm->t_file, mark__file);
     lk_object_setfreefunc(vm->t_file, free__file);
-    vm->t_rf = lk_object_alloc(vm->t_file);
-    vm->t_wf = lk_object_alloc(vm->t_file);
-    vm->t_stdin = lk_object_alloc(vm->t_rf);
-    vm->t_stdout = lk_object_alloc(vm->t_wf);
-    vm->t_stderr = lk_object_alloc(vm->t_wf);
+    vm->t_stdin = lk_object_alloc(vm->t_file);
+    vm->t_stdout = lk_object_alloc(vm->t_file);
+    vm->t_stderr = lk_object_alloc(vm->t_file);
 }
 
 /* ext map - funcs */
@@ -66,14 +64,14 @@ LK_LIB_DEFINECFUNC(move__file_str) {
     if(rename(CSTRING(PATH(self)), CSTRING(ARG(0))) == 0) RETURN(self);
     else lk_vm_raiseerrno(VM);
 }
-LK_LIB_DEFINECFUNC(open_r__file) {
+LK_LIB_DEFINECFUNC(openForReading__file) {
     const char *path = CSTRING(PATH(self));
     if(FILEF(self) != NULL) BUG("ReadableFile->st.file should be NULL");
     FILEF(self) = fopen(path, "rb");
     if(FILEF(self) == NULL) lk_vm_raiseerrno(VM);
     else RETURN(self);
 }
-LK_LIB_DEFINECFUNC(open_w__file) {
+LK_LIB_DEFINECFUNC(openForWriting__file) {
     const char *path = CSTRING(PATH(self));
     if(FILEF(self) != NULL) BUG("WritableFile->st.file should be NULL");
     FILEF(self) = fopen(path, "wb");
@@ -133,7 +131,6 @@ LK_LIB_DEFINECFUNC(writableQ__file) {
 }
 LK_EXT_DEFINIT(lk_file_extinitfuncs) {
     lk_object_t *file = vm->t_file,
-                *rf = vm->t_rf, *wf = vm->t_wf,
                 *str = vm->t_string, *fi = vm->t_fi,
                 *ch = vm->t_char, *charset = vm->t_charset;
     /* File */
@@ -146,9 +143,8 @@ LK_EXT_DEFINIT(lk_file_extinitfuncs) {
     lk_lib_setCFunc(file, "flush", flush__file, NULL);
     lk_lib_setCFunc(file, "init", init__file_str, str, NULL);
     lk_lib_setCFunc(file, "move", move__file_str, str, NULL);
-    lk_lib_setCFunc(file, "open", open_r__file, NULL);
-    lk_lib_setCFunc(file, "open_r", open_r__file, NULL);
-    lk_lib_setCFunc(file, "open_w", open_w__file, NULL);
+    lk_lib_setCFunc(file, "openForReading", openForReading__file, NULL);
+    lk_lib_setCFunc(file, "openForWriting", openForWriting__file, NULL);
     lk_lib_setCField(file, "path", str, offsetof(lk_file_t, path));
     lk_lib_setCFunc(file, "read", read__file, NULL);
     lk_lib_setCFunc(file, "read", read__file_ch, ch, NULL);

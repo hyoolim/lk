@@ -1,4 +1,4 @@
-DocumentGeneratorFile := WritableFile/with {
+DocumentGeneratorFile := File/with {
     /write_header := { title ---
         /write[
         '<html>'
@@ -150,7 +150,6 @@ DocumentGeneratorFile/new[root ++ '/index.html']/do {
     T
     Vector
     VirtualMachine
-    WritableFile
     ]/each { class ---
         name := class/.CLASS
         /write['<li><a href="./'; name; '.html">'; name; '</a></li>']

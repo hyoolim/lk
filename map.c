@@ -1,7 +1,7 @@
 #include "ext.h"
 #include "fixnum.h"
 #include "map.h"
-#include "obj.h"
+#include "object.h"
 
 /* ext map - types */
 static LK_OBJ_DEFALLOCFUNC(alloc__map) {

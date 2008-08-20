@@ -38,8 +38,8 @@ ConfigOptional := Object/with {
     }
     /finish := { ---
         /ALL/push![/.]
-        objects/writeln[/name ++ '.o']
-        /c_libs/each { v --- libs/writeln[v] }
+        objects/writeLine[/name ++ '.o']
+        /c_libs/each { v --- libs/writeLine[v] }
         WritableFile/new[build ++ /name ++ '.cf']/write[/c_flags/join[' ']]
     }
     /init := { ---
@@ -73,18 +73,18 @@ ConfigOptional/new['postgres']/do {
     /c_header?['libpq-fe.h'] && /c_header?['libpq/libpq-fs.h'] ? /finish
 }
 #
-objects/writeln['optional.o']
+objects/writeLine['optional.o']
 WritableFile/new[build ++ 'optional.c']/do {
-    /writeln['#include "../../vm.h"']
-    /writeln['#include "../../ext.h"']
-    /writeln
-    /writeln['/* */']
+    /writeLine['#include "../../vm.h"']
+    /writeLine['#include "../../ext.h"']
+    /writeLine
+    /writeLine['/* */']
     ConfigOptional/ALL/each { v ---
-        /writeln['extern LK_EXT_DEFINIT(lk_' ++ v/name ++ ');']
+        /writeLine['extern LK_EXT_DEFINIT(lk_' ++ v/name ++ ');']
     }
-    /writeln['LK_EXT_DEFINIT(lk_optional_extinit) {']
+    /writeLine['LK_EXT_DEFINIT(lk_optional_extinit) {']
     ConfigOptional/ALL/each { v ---
-        /writeln['lk_' ++ v/name ++ '_extinit(vm);']
+        /writeLine['lk_' ++ v/name ++ '_extinit(vm);']
     }
-    /writeln['}']
+    /writeLine['}']
 }

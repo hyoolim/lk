@@ -403,10 +403,6 @@ Object/extend {
     /nil? := False
     /'||' := { other | /toBoolean ? /. ! other }
     /'|||' := { other | /nil? ? other ! /. }
-    /print := { | /print(STDOUT) }
-    /print += { to | to/write(/.); /. }
-    /println := { | /println(STDOUT) }
-    /println += { to | to/write(/., NEWLINE); /. }
     /'-' += { other | /clone() -= other }
     /to := { to | Range/new(/., to) }
     /toBoolean := True
@@ -591,11 +587,11 @@ VM/Frame/extend {
     #/resume := { | .receiver/.return_to = .receiver/proto; .receiver/leave }
     #/retry := { | .receiver/proto/redo; .receiver/resume }
     /read := { args... | STDIN/read(*args) }
-    /readln := { | STDIN/read(NEWLINE) }
+    /readLine := { | STDIN/read(0c\n) }
     /while := { cond : True, block | block(); retry }
     /while += { cond : False, block | }
     /write := { args... | STDOUT/write(*args); /. }
-    /writeln := { args... | STDOUT/write(*args, NEWLINE); /. }
+    /writeLine := { args... | STDOUT/write(*args, NEWLINE); /. }
 }
 
 # VirtualMachine/GarbageCollector
@@ -612,21 +608,21 @@ File/extend {
     /write += { args... | args/each { v | /write(v/toString) }; /. }
 
     # Calls write on the arguments and nl.
-    /writeln := { args... | /write(*args, NEWLINE) }
+    /writeLine := { args... | /write(*args, NEWLINE) }
 }
 
 # default error handler
 rescue { e |
-    STDERR/writeln('Error/', e/.CLASS, ': ', e)
+    STDERR/writeLine('Error/', e/.CLASS, ': ', e)
     f := .
     c := f/.caller ->nil? ->not? ? loop {
         f = c
         c = c/.caller ->nil? ? break
         f/.function/nil? ? {
-            STDERR/writeln('    @ CFunction')
+            STDERR/writeLine('    @ CFunction')
         } ! {
             i := c/.current
-            STDERR/writeln('    @ ', i/RESOURCE, ' ', i/LINE, ': ', i/MESSAGE, f/.args/toCode)
+            STDERR/writeLine('    @ ', i/RESOURCE, ' ', i/LINE, ': ', i/MESSAGE, f/.args/toCode)
         }
     }
 }

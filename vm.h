@@ -55,7 +55,7 @@ typedef LK_EXT_DEFINIT(lk_libraryinitfunc_t);
 #include "frame.h"
 #include "gc.h"
 #include "instr.h"
-#include "obj.h"
+#include "object.h"
 #include "error.h"
 
 /* todo: figure out a way to move this before req primitives */

@@ -47,6 +47,7 @@ LK_OBJ_DEFTAGSETTER(lk_tagmarkfunc_t *, markfunc);
 LK_OBJ_DEFTAGSETTER(lk_tagfreefunc_t *, freefunc);
 
 /* update */
+void lk_object_extend(lk_object_t *self, lk_object_t *parent);
 struct lk_slot *lk_object_setslot(lk_object_t *self, lk_object_t *k,
                                   lk_object_t *check, lk_object_t *v);
 struct lk_slot *lk_object_setslotbycstr(lk_object_t *self, const char *k,

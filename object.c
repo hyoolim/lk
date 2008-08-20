@@ -1,4 +1,4 @@
-#include "obj.h"
+#include "object.h"
 #include "ext.h"
 #include "fixnum.h"
 #include "gc.h"
@@ -66,21 +66,8 @@ LK_LIB_DEFINECFUNC(Dslots__obj) {
 LK_LIB_DEFINECFUNC(alloc__obj) {
     RETURN(lk_object_alloc(self)); }
 LK_LIB_DEFINECFUNC(also__obj_obj) {
-    darray_t *pars;
-    if(LK_OBJ_HASPARENTS(self)) {
-        pars = LK_OBJ_PARENTS(self);
-    } else {
-        pars = darray_allocptr();
-        darray_pushptr(pars, self->o.parent);
-        self->o.parent = LK_OBJ((ptrdiff_t)pars | 1);
-    }
-    darray_unshiftptr(pars, ARG(0));
-    if(lk_object_calcancestors(self)) {
-        RETURN(self);
-    } else {
-        printf("BUG: Throw proper ancestor error here\n");
-        exit(EXIT_FAILURE);
-    }
+    lk_object_extend(self, ARG(0));
+    RETURN(self);
 }
 LK_LIB_DEFINECFUNC(ancestor__obj_obj) {
     RETURN(LK_OBJ_ISTYPE(self, ARG(0)) ? VM->t_true : VM->t_false); }
@@ -221,6 +208,21 @@ LK_OBJ_IMPLTAGSETTER(lk_tagmarkfunc_t *, markfunc);
 LK_OBJ_IMPLTAGSETTER(lk_tagfreefunc_t *, freefunc);
 
 /* update */
+void lk_object_extend(lk_object_t *self, lk_object_t *parent) {
+    darray_t *parents;
+    if(LK_OBJ_HASPARENTS(self)) {
+        parents = LK_OBJ_PARENTS(self);
+    } else {
+        parents = darray_allocptr();
+        darray_pushptr(parents, self->o.parent);
+        self->o.parent = LK_OBJ((ptrdiff_t)parents | 1);
+    }
+    darray_unshiftptr(parents, parent);
+    if(!lk_object_calcancestors(self)) {
+        printf("BUG: Throw proper ancestor error here\n");
+        exit(EXIT_FAILURE);
+    }
+}
 struct lk_slot *lk_object_setslot(lk_object_t *self, lk_object_t *k,
                                   lk_object_t *check, lk_object_t *v) {
     struct lk_slot *slot = lk_object_getslot(self, k);

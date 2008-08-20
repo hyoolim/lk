@@ -1,8 +1,7 @@
 Tester := Object/new/do {
     /init := { /name --- /index := 0 }
     /finish := { ---
-        /name/toString ++ ': Ran ' ++ /index/toString ++
-        ' test(s) successfully' ->println
+        writeLine(/name/toString, ': Ran ', /index/toString, ' test(s) successfully')
     }
     /test := { name, actual, expected ---
         /index += 1

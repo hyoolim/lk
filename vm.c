@@ -16,7 +16,7 @@
 #include "instr.h"
 #include "list.h"
 #include "map.h"
-#include "obj.h"
+#include "object.h"
 #include "parser.h"
 #include "random.h"
 #include "socket.h"

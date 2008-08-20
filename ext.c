@@ -1,5 +1,5 @@
 #include "ext.h"
-#include "obj.h"
+#include "object.h"
 #include "string.h"
 #include <dlfcn.h>
 #include <stdarg.h>

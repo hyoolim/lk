@@ -5,7 +5,7 @@
 #include "func.h"
 #include "fixnum.h"
 #include "gc.h"
-#include "obj.h"
+#include "object.h"
 
 /* type */
 typedef struct lk_library {

@@ -9,7 +9,7 @@ static LK_OBJ_DEFALLOCFUNC(alloc__seq) {
 static LK_OBJ_DEFFREEFUNC(free__seq) {
     darray_fin(DARRAY(self));
 }
-LK_EXT_DEFINIT(lk_seq_extinittypes) {
+LK_LIB_DEFINEINIT(lk_seq_libPreInit) {
     vm->t_seq = lk_object_allocwithsize(vm->t_obj, sizeof(lk_seq_t));
     darray_init(DARRAY(vm->t_seq), 1, 16);
     lk_object_setallocfunc(vm->t_seq, alloc__seq);
@@ -57,7 +57,7 @@ LK_LIB_DEFINECFUNC(swapB__gl_fi_fi) {
     memory_free(t);
     RETURN(self);
 }
-LK_EXT_DEFINIT(lk_seq_extinitfuncs) {
+LK_LIB_DEFINEINIT(lk_seq_libInit) {
     lk_object_t *gl = vm->t_seq, *fi = vm->t_fi, *vec = vm->t_vector;
     lk_lib_setGlobal("Sequence", gl);
     lk_lib_setCFunc(gl, "at", at__gl_vec, vec, NULL);

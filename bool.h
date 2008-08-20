@@ -3,6 +3,6 @@
 #include "vm.h"
 
 /* ext map */
-LK_EXT_DEFINIT(lk_boolean_extinittypes);
-LK_EXT_DEFINIT(lk_boolean_extinitfuncs);
+LK_LIB_DEFINEINIT(lk_boolean_libPreInit);
+LK_LIB_DEFINEINIT(lk_boolean_libInit);
 #endif

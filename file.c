@@ -16,7 +16,7 @@ static LK_OBJ_DEFMARKFUNC(mark__file) {
 static LK_OBJ_DEFFREEFUNC(free__file) {
     if(FILEF(self) != NULL) fclose(FILEF(self));
 }
-LK_EXT_DEFINIT(lk_file_extinittypes) {
+LK_LIB_DEFINEINIT(lk_file_libPreInit) {
     vm->t_file = lk_object_allocwithsize(vm->t_obj, sizeof(lk_file_t));
     lk_object_setmarkfunc(vm->t_file, mark__file);
     lk_object_setfreefunc(vm->t_file, free__file);
@@ -129,7 +129,7 @@ LK_LIB_DEFINECFUNC(write__file_str) {
 LK_LIB_DEFINECFUNC(writableQ__file) {
     RETURN(access(CSTRING(PATH(self)), W_OK) == 0 ? TRUE : FALSE);
 }
-LK_EXT_DEFINIT(lk_file_extinitfuncs) {
+LK_LIB_DEFINEINIT(lk_file_libInit) {
     lk_object_t *file = vm->t_file,
                 *str = vm->t_string, *fi = vm->t_fi,
                 *ch = vm->t_char, *charset = vm->t_charset;

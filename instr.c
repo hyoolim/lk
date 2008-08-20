@@ -13,7 +13,7 @@ static LK_OBJ_DEFMARKFUNC(mark__instr) {
     mark(INSTR->v);
     if(INSTR->comment != NULL) mark(LK_OBJ(INSTR->comment));
 }
-LK_EXT_DEFINIT(lk_instr_extinittypes) {
+LK_LIB_DEFINEINIT(lk_instr_libPreInit) {
     vm->t_instr = lk_object_allocwithsize(vm->t_obj, sizeof(lk_instr_t));
     lk_object_setmarkfunc(vm->t_instr, mark__instr);
 }
@@ -37,7 +37,7 @@ LK_LIB_DEFINECFUNC(message) {
 }
 LK_LIB_DEFINECFUNC(resource) {
     RETURN(INSTR->rsrc); }
-LK_EXT_DEFINIT(lk_instr_extinitfuncs) {
+LK_LIB_DEFINEINIT(lk_instr_libInit) {
     lk_object_t *instr = vm->t_instr;
     lk_lib_setObject(vm->t_vm, "Instruction", instr);
     lk_lib_setCField(instr, ".next", instr, offsetof(lk_instr_t, next));

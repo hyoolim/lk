@@ -13,6 +13,6 @@ struct lk_file {
 };
 
 /* ext map */
-LK_EXT_DEFINIT(lk_file_extinittypes);
-LK_EXT_DEFINIT(lk_file_extinitfuncs);
+LK_LIB_DEFINEINIT(lk_file_libPreInit);
+LK_LIB_DEFINEINIT(lk_file_libInit);
 #endif

@@ -73,7 +73,7 @@ LK_LIB_DEFINECFUNC(listen__sock) {
     }
     RETURN(self);
 }
-LK_EXT_DEFINIT(lk_socket_extinit) {
+LK_LIB_DEFINEINIT(lk_socket_extinit) {
     lk_object_t *obj = vm->t_obj, *str = vm->t_string, *fi = vm->t_fi;
     lk_object_t *ip = lk_object_allocwithsize(obj, sizeof(lk_ipaddr_t));
     lk_object_t *sock = lk_object_allocwithsize(obj, sizeof(lk_socket_t));

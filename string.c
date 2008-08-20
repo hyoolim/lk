@@ -5,7 +5,7 @@
 #include "fixnum.h"
 
 /* ext map - types */
-LK_EXT_DEFINIT(lk_string_extinittypes) {
+LK_LIB_DEFINEINIT(lk_string_libPreInit) {
     vm->t_string = lk_object_alloc(vm->t_seq);
     darray_fin(DARRAY(vm->t_string));
     darray_init(DARRAY(vm->t_string), sizeof(uint8_t), 16);
@@ -53,7 +53,7 @@ LK_LIB_DEFINECFUNC(to_number__str) {
     default: BUG("Invalid number type while trying to parse code.\n");
     }
 }
-LK_EXT_DEFINIT(lk_string_extinitfuncs) {
+LK_LIB_DEFINEINIT(lk_string_libInit) {
     lk_object_t *str = vm->t_string, *fi = vm->t_fi, *charset = vm->t_charset,
                 *ch = vm->t_char;
     lk_lib_setGlobal("NEWLINE", LK_OBJ(lk_string_newFromCString(vm, "\n")));

@@ -6,7 +6,7 @@
 #include "map.h"
 
 /* ext map - types */
-LK_EXT_DEFINIT(lk_object_extinittypes) {
+LK_LIB_DEFINEINIT(lk_object_libPreInit) {
     lk_object_t *o = vm->t_obj = memory_alloc(sizeof(lk_object_t));
     o->o.tag = memory_alloc(sizeof(struct lk_tag));
     o->o.tag->refc = 1;
@@ -123,7 +123,7 @@ LK_LIB_DEFINECFUNC(parent__obj) {
 LK_LIB_DEFINECFUNC(with__obj_f) {
     do__obj_f(lk_object_addref(LK_OBJ(env), lk_object_alloc(self)), env);
 }
-LK_EXT_DEFINIT(lk_object_extinitfuncs) {
+LK_LIB_DEFINEINIT(lk_object_libInit) {
     lk_object_t *obj = vm->t_obj, *str = vm->t_string, *f = vm->t_func;
     lk_lib_setGlobal("Object", obj);
     lk_lib_setCFunc(obj, ".", Dself__obj, NULL);

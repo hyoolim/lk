@@ -9,7 +9,7 @@
 static LK_OBJ_DEFMARKFUNC(mark__Folder) {
     mark(LK_OBJ(LK_FOLDER(self)->path));
 }
-LK_EXT_DEFINIT(lk_folder_extinittypes) {
+LK_LIB_DEFINEINIT(lk_folder_libPreInit) {
     vm->t_folder = lk_object_allocwithsize(vm->t_obj, sizeof(lk_folder_t));
     lk_object_setmarkfunc(vm->t_folder, mark__Folder);
 }
@@ -43,7 +43,7 @@ LK_LIB_DEFINECFUNC(items__Folder) {
         lk_vm_raiseerrno(VM);
     }
 }
-LK_EXT_DEFINIT(lk_folder_extinitfuncs) {
+LK_LIB_DEFINEINIT(lk_folder_libInit) {
     lk_object_t *folder = vm->t_folder, *str = vm->t_string;
     lk_lib_setGlobal("Folder", folder);
     lk_lib_setCFunc(folder, "init!", init__Folder_str, str, NULL);

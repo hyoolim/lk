@@ -8,8 +8,8 @@ typedef struct lk_seq lk_list_t;
 #include "seq.h"
 
 /* ext map */
-LK_EXT_DEFINIT(lk_list_extinittypes);
-LK_EXT_DEFINIT(lk_list_extinitfuncs);
+LK_LIB_DEFINEINIT(lk_list_libPreInit);
+LK_LIB_DEFINEINIT(lk_list_libInit);
 
 /* new */
 lk_list_t *lk_list_new(lk_vm_t *vm);

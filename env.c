@@ -26,7 +26,7 @@ LK_LIB_DEFINECFUNC(keys__env) {
     }
     RETURN(keys);
 }
-LK_EXT_DEFINIT(lk_env_extinit) {
+LK_LIB_DEFINEINIT(lk_env_extinit) {
     lk_object_t *obj = vm->t_obj, *str = vm->t_string;
     lk_object_t *env = lk_object_allocwithsize(obj, sizeof(lk_env_t));
     lk_lib_setGlobal("Environment", env);

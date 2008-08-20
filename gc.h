@@ -17,8 +17,8 @@ struct lk_gc {
 };
 
 /* ext map */
-LK_EXT_DEFINIT(lk_gc_extinittypes);
-LK_EXT_DEFINIT(lk_gc_extinitfuncs);
+LK_LIB_DEFINEINIT(lk_gc_libPreInit);
+LK_LIB_DEFINEINIT(lk_gc_libInit);
 
 /* update */
 void lk_objectgroup_freevalues(struct lk_objectgroup *self);

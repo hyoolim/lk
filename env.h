@@ -10,5 +10,5 @@ struct lk_env {
 };
 
 /* ext map */
-LK_EXT_DEFINIT(lk_env_extinit);
+LK_LIB_DEFINEINIT(lk_env_extinit);
 #endif

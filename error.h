@@ -15,8 +15,8 @@ struct lk_error {
 };
 
 /* ext map */
-LK_EXT_DEFINIT(lk_error_extinittypes);
-LK_EXT_DEFINIT(lk_error_extinitfuncs);
+LK_LIB_DEFINEINIT(lk_error_libPreInit);
+LK_LIB_DEFINEINIT(lk_error_libInit);
 
 /* new */
 lk_error_t *lk_error_new(lk_vm_t *vm, lk_object_t *parent, const char *text);

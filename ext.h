@@ -44,7 +44,7 @@ LK_OBJ(LIST_ATPTR(&env->stack, (i))))
 #define CLROPT(v, o) ((v) &= ~(o))
 
 /* ext map */
-LK_EXT_DEFINIT(lk_library_extinit);
+LK_LIB_DEFINEINIT(lk_library_extinit);
 
 /* update */
 void lk_lib_setObject(lk_object_t *parent, const char *k, lk_object_t *v);

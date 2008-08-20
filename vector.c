@@ -3,7 +3,7 @@
 #include "fixnum.h"
 
 /* ext map - types */
-LK_EXT_DEFINIT(lk_vector_extinittypes) {
+LK_LIB_DEFINEINIT(lk_vector_libPreInit) {
     vm->t_vector = lk_object_alloc(vm->t_seq);
     darray_fin(DARRAY(vm->t_vector));
     darray_init(DARRAY(vm->t_vector), sizeof(int), 16);
@@ -55,7 +55,7 @@ LK_LIB_DEFINECFUNC(setB__vec_fi_fi) {
     darray_set(DARRAY(self), INT(ARG(0)), &INT(ARG(1)));
     RETURN(self);
 }
-LK_EXT_DEFINIT(lk_vector_extinitfuncs) {
+LK_LIB_DEFINEINIT(lk_vector_libInit) {
     lk_object_t *vec = vm->t_vector, *fi = vm->t_fi;
     lk_lib_setGlobal("Vector", vec);
     lk_lib_setCFunc(vec, "at", at__vec_fi, fi, NULL);

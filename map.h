@@ -11,8 +11,8 @@ struct lk_map {
 };
 
 /* ext map */
-LK_EXT_DEFINIT(lk_map_extinittypes);
-LK_EXT_DEFINIT(lk_map_extinitfuncs);
+LK_LIB_DEFINEINIT(lk_map_libPreInit);
+LK_LIB_DEFINEINIT(lk_map_libInit);
 
 /* new */
 lk_map_t *lk_map_new(lk_vm_t *vm);

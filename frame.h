@@ -30,8 +30,8 @@ struct lk_frame {
 };
 
 /* ext map */
-LK_EXT_DEFINIT(lk_frame_extinittypes);
-LK_EXT_DEFINIT(lk_frame_extinitfuncs);
+LK_LIB_DEFINEINIT(lk_frame_libPreInit);
+LK_LIB_DEFINEINIT(lk_frame_libInit);
 
 /* update */
 lk_frame_t *lk_frame_new(lk_vm_t *vm);

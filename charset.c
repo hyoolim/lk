@@ -10,7 +10,7 @@ static LK_OBJ_DEFALLOCFUNC(alloc__charset) {
 static LK_OBJ_DEFFREEFUNC(free__charset) {
     charset_fin(CHARSET(self));
 }
-LK_EXT_DEFINIT(lk_charset_extinittypes) {
+LK_LIB_DEFINEINIT(lk_charset_libPreInit) {
     vm->t_charset = lk_object_allocwithsize(vm->t_obj, sizeof(lk_charset_t));
     charset_init(CHARSET(vm->t_charset));
     lk_object_setallocfunc(vm->t_charset, alloc__charset);
@@ -70,7 +70,7 @@ LK_LIB_DEFINECFUNC(negateB__charset) {
     CHARSET(self)->isinverted = !CHARSET(self)->isinverted;
     RETURN(self);
 }
-LK_EXT_DEFINIT(lk_charset_extinitfuncs) {
+LK_LIB_DEFINEINIT(lk_charset_libInit) {
     lk_object_t *charset = vm->t_charset, *ch = vm->t_char, *str = vm->t_string;
     lk_lib_setGlobal("CharacterSet", charset);
     lk_lib_setCFunc(charset, "+=", addB__charset_charset, charset, NULL);

@@ -17,8 +17,8 @@ struct lk_fr {
 };
 
 /* ext map */
-LK_EXT_DEFINIT(lk_fixnum_extinittypes);
-LK_EXT_DEFINIT(lk_fixnum_extinitfuncs);
+LK_LIB_DEFINEINIT(lk_fixnum_libPreInit);
+LK_LIB_DEFINEINIT(lk_fixnum_libInit);
 
 /* new */
 lk_fi_t *lk_fi_new(lk_vm_t *vm, int i);

@@ -12,7 +12,7 @@ static LK_OBJ_DEFALLOCFUNC(alloc__fi) {
 static LK_OBJ_DEFALLOCFUNC(alloc__fr) {
     DOUBLE(self) = DOUBLE(parent);
 }
-LK_EXT_DEFINIT(lk_fixnum_extinittypes) {
+LK_LIB_DEFINEINIT(lk_fixnum_libPreInit) {
     vm->t_number = lk_object_alloc(vm->t_obj);
     vm->t_pi = lk_object_alloc(vm->t_obj);
     vm->t_ni = lk_object_alloc(vm->t_obj);
@@ -163,7 +163,7 @@ LK_LIB_DEFINECFUNC(to_string__fr_str) {
 LK_LIB_DEFINECFUNC(zero__fr) {
     RETURN(DOUBLE(self) == 0.0 ? TRUE : FALSE);
 }
-LK_EXT_DEFINIT(lk_fixnum_extinitfuncs) {
+LK_LIB_DEFINEINIT(lk_fixnum_libInit) {
     lk_object_t *num = vm->t_number, *str = vm->t_string,
                 *i = vm->t_int, *fi = vm->t_fi,
                 *f = vm->t_real, *fr = vm->t_fr;

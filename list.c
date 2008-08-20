@@ -6,7 +6,7 @@
 static LK_OBJ_DEFMARKFUNC(mark__list) {
     LIST_EACHPTR(DARRAY(self), i, v, mark(v));
 }
-LK_EXT_DEFINIT(lk_list_extinittypes) {
+LK_LIB_DEFINEINIT(lk_list_libPreInit) {
     vm->t_list = lk_object_alloc(vm->t_seq);
     darray_fin(DARRAY(vm->t_list));
     darray_init(DARRAY(vm->t_list), sizeof(lk_object_t *), 16);
@@ -40,7 +40,7 @@ LK_LIB_DEFINECFUNC(setB__darray_fi_fi_list) {
     darray_setrange(DARRAY(self), INT(ARG(0)), INT(ARG(1)), DARRAY(ARG(2)));
     RETURN(self);
 }
-LK_EXT_DEFINIT(lk_list_extinitfuncs) {
+LK_LIB_DEFINEINIT(lk_list_libInit) {
     lk_object_t *list = vm->t_list, *obj = vm->t_obj, *fi = vm->t_fi;
     lk_lib_setGlobal("List", list);
     lk_lib_setCFunc(list, "at", at__darray_fi, fi, NULL);

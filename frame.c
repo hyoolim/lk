@@ -26,7 +26,7 @@ static LK_OBJ_DEFMARKFUNC(mark__fra) {
 static LK_OBJ_DEFFREEFUNC(free__fra) {
     if(LIST_ISINIT(FRAMESTACK)) darray_fin(FRAMESTACK);
 }
-LK_EXT_DEFINIT(lk_frame_extinittypes) {
+LK_LIB_DEFINEINIT(lk_frame_libPreInit) {
     vm->t_frame = lk_object_allocwithsize(vm->t_obj, sizeof(lk_frame_t));
     lk_object_setmarkfunc(vm->t_frame, mark__fra);
     lk_object_setfreefunc(vm->t_frame, free__fra);
@@ -128,7 +128,7 @@ LK_LIB_DEFINECFUNC(return__fra) {
     }
     DONE;
 }
-LK_EXT_DEFINIT(lk_frame_extinitfuncs) {
+LK_LIB_DEFINEINIT(lk_frame_libInit) {
     lk_object_t *fra = vm->t_frame, *obj = vm->t_obj, *instr = vm->t_instr,
                 *str = vm->t_string, *err = vm->t_error, *f = vm->t_func;
     lk_lib_setObject(vm->t_vm, "Frame", fra);

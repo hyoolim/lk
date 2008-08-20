@@ -9,7 +9,7 @@ static LK_OBJ_DEFFREEFUNC(free__gc) {
     memory_free(GC->used);
     memory_free(GC->permanent);
 }
-LK_EXT_DEFINIT(lk_gc_extinittypes) {
+LK_LIB_DEFINEINIT(lk_gc_libPreInit) {
     vm->gc = LK_GC(lk_object_allocwithsize(vm->t_obj, sizeof(lk_gc_t)));
     vm->gc->unused = memory_alloc(sizeof(struct lk_objectgroup));
     vm->gc->pending = memory_alloc(sizeof(struct lk_objectgroup));
@@ -23,7 +23,7 @@ LK_LIB_DEFINECFUNC(pause__gc) {
     lk_gc_pause(LK_GC(self)); RETURN(self); }
 LK_LIB_DEFINECFUNC(resume__gc) {
     lk_gc_resume(LK_GC(self)); RETURN(self); }
-LK_EXT_DEFINIT(lk_gc_extinitfuncs) {
+LK_LIB_DEFINEINIT(lk_gc_libInit) {
     lk_object_t *gc = LK_OBJ(vm->gc);
     lk_lib_setObject(vm->t_vm, "GarbageCollector", gc);
     lk_lib_setCFunc(gc, "pause", pause__gc, NULL);

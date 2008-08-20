@@ -88,7 +88,7 @@ static LK_OBJ_DEFFREEFUNC(free__parser) {
     if(PARSER->ops != NULL) darray_free(PARSER->ops);
     if(PARSER->comments != NULL) darray_free(PARSER->comments);
 }
-LK_EXT_DEFINIT(lk_parser_extinittypes) {
+LK_LIB_DEFINEINIT(lk_parser_libPreInit) {
     lk_object_t *obj = vm->t_obj;
     vm->t_prec = lk_object_allocwithsize(obj, sizeof(lk_prec_t));
     vm->t_parser = lk_object_allocwithsize(obj, sizeof(lk_parser_t));
@@ -98,7 +98,7 @@ LK_EXT_DEFINIT(lk_parser_extinittypes) {
 }
 
 /* ext map - funcs */
-LK_EXT_DEFINIT(lk_parser_extinitfuncs) {
+LK_LIB_DEFINEINIT(lk_parser_libInit) {
     lk_lib_setObject(vm->t_vm, "Precedence", vm->t_prec);
     lk_lib_setObject(vm->t_vm, "Parser", vm->t_parser);
 }

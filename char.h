@@ -11,8 +11,8 @@ struct lk_char {
 };
 
 /* ext map */
-LK_EXT_DEFINIT(lk_char_extinittypes);
-LK_EXT_DEFINIT(lk_char_extinitfuncs);
+LK_LIB_DEFINEINIT(lk_char_libPreInit);
+LK_LIB_DEFINEINIT(lk_char_libInit);
 
 /* new */
 lk_char_t *lk_char_new(lk_vm_t *vm, uint32_t c);

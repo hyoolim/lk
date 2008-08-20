@@ -36,8 +36,8 @@ struct lk_prec {
 #define LK_PREC(v) ((lk_prec_t *)(v))
 
 /* ext map */
-LK_EXT_DEFINIT(lk_parser_extinittypes);
-LK_EXT_DEFINIT(lk_parser_extinitfuncs);
+LK_LIB_DEFINEINIT(lk_parser_libPreInit);
+LK_LIB_DEFINEINIT(lk_parser_libInit);
 
 /* new */
 lk_parser_t *lk_parser_new(lk_vm_t *vm);

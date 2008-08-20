@@ -47,8 +47,8 @@ struct lk_common {
 #define LK_VM(v) ((v)->o.tag->vm)
 
 /* used by ext - can't be in ext.h due to bootstrapping issues */
-#define LK_EXT_DEFINIT(name) void name(lk_vm_t *vm)
-typedef LK_EXT_DEFINIT(lk_libraryinitfunc_t);
+#define LK_LIB_DEFINEINIT(name) void name(lk_vm_t *vm)
+typedef LK_LIB_DEFINEINIT(lk_libraryinitfunc_t);
 
 /* required primitives */
 #include "string.h"
@@ -121,8 +121,8 @@ struct lk_vm {
 };
 
 /* ext map */
-LK_EXT_DEFINIT(lk_vm_extinittypes);
-LK_EXT_DEFINIT(lk_vm_extinitfuncs);
+LK_LIB_DEFINEINIT(lk_vm_libPreInit);
+LK_LIB_DEFINEINIT(lk_vm_libInit);
 
 /* new */
 lk_vm_t *lk_vm_new(void);

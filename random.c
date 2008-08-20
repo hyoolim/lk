@@ -31,7 +31,7 @@ LK_LIB_DEFINECFUNC(fixed_integer__rd) {
     RETURN(lk_fi_new(VM, (int)genrand_int32(RANDOM))); }
 LK_LIB_DEFINECFUNC(fixed_real__rd) {
     RETURN(lk_fr_new(VM, genrand_real1(RANDOM))); }
-LK_EXT_DEFINIT(lk_random_extinit) {
+LK_LIB_DEFINEINIT(lk_random_extinit) {
     lk_object_t *obj = vm->t_obj, *fi = vm->t_fi;
     lk_object_t *rd = lk_object_allocwithsize(obj, sizeof(lk_random_t));
     LK_RANDOM(rd)->seed = lk_fi_new(vm, 0);

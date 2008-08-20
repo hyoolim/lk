@@ -11,8 +11,8 @@ struct lk_charset {
 };
 
 /* ext map */
-LK_EXT_DEFINIT(lk_charset_extinittypes);
-LK_EXT_DEFINIT(lk_charset_extinitfuncs);
+LK_LIB_DEFINEINIT(lk_charset_libPreInit);
+LK_LIB_DEFINEINIT(lk_charset_libInit);
 
 /* new */
 lk_charset_t *lk_charset_new(lk_vm_t *vm);

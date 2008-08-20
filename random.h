@@ -14,5 +14,5 @@ typedef struct lk_random {
 } lk_random_t;
 
 /* ext map */
-LK_EXT_DEFINIT(lk_random_extinit);
+LK_LIB_DEFINEINIT(lk_random_extinit);
 #endif

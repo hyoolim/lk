@@ -12,6 +12,6 @@ struct lk_folder {
 };
 
 /* ext map */
-LK_EXT_DEFINIT(lk_folder_extinittypes);
-LK_EXT_DEFINIT(lk_folder_extinitfuncs);
+LK_LIB_DEFINEINIT(lk_folder_libPreInit);
+LK_LIB_DEFINEINIT(lk_folder_libInit);
 #endif

@@ -27,5 +27,5 @@ struct lk_ipaddr {
 };
 
 /* ext map */
-LK_EXT_DEFINIT(lk_socket_extinit);
+LK_LIB_DEFINEINIT(lk_socket_extinit);
 #endif

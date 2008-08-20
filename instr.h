@@ -35,8 +35,8 @@ struct lk_instr {
 };
 
 /* ext map */
-LK_EXT_DEFINIT(lk_instr_extinittypes);
-LK_EXT_DEFINIT(lk_instr_extinitfuncs);
+LK_LIB_DEFINEINIT(lk_instr_libPreInit);
+LK_LIB_DEFINEINIT(lk_instr_libInit);
 
 /* new */
 lk_instr_t *lk_instr_new(lk_parser_t *parser);

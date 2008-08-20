@@ -30,7 +30,7 @@
 #include <unistd.h>
 
 /* ext map - types */
-LK_EXT_DEFINIT(lk_vm_extinittypes) {
+LK_LIB_DEFINEINIT(lk_vm_libPreInit) {
     vm->t_vm = lk_object_alloc(vm->t_obj);
 }
 
@@ -116,7 +116,7 @@ LK_LIB_DEFINECFUNC(wait__vm) {
     pid_t child = wait(&status);
     RETURN(lk_fi_new(VM, (int)child));
 }
-LK_EXT_DEFINIT(lk_vm_extinitfuncs) {
+LK_LIB_DEFINEINIT(lk_vm_libInit) {
     lk_object_t *tvm = vm->t_vm, *f = vm->t_func, *fr = vm->t_fr,
                 *str = vm->t_string;
     lk_lib_setGlobal("VirtualMachine", tvm);
@@ -136,27 +136,27 @@ lk_vm_t *lk_vm_new(void) {
     lk_vm_t *self = memory_alloc(sizeof(lk_vm_t));
 
     /* must be loaded before other primitive types */
-    lk_object_extinittypes(self);
-    lk_gc_extinittypes(self);
-    lk_vm_extinittypes(self);
-    lk_seq_extinittypes(self);
-    lk_map_extinittypes(self);
-    lk_string_extinittypes(self);
+    lk_object_libPreInit(self);
+    lk_gc_libPreInit(self);
+    lk_vm_libPreInit(self);
+    lk_seq_libPreInit(self);
+    lk_map_libPreInit(self);
+    lk_string_libPreInit(self);
 
     /* init all other primitive types */
-    lk_boolean_extinittypes(self);
-    lk_char_extinittypes(self);
-    lk_charset_extinittypes(self);
-    lk_error_extinittypes(self);
-    lk_file_extinittypes(self);
-    lk_folder_extinittypes(self);
-    lk_vector_extinittypes(self);
-    lk_fixnum_extinittypes(self);
-    lk_frame_extinittypes(self);
-    lk_func_extinittypes(self);
-    lk_instr_extinittypes(self);
-    lk_list_extinittypes(self);
-    lk_parser_extinittypes(self);
+    lk_boolean_libPreInit(self);
+    lk_char_libPreInit(self);
+    lk_charset_libPreInit(self);
+    lk_error_libPreInit(self);
+    lk_file_libPreInit(self);
+    lk_folder_libPreInit(self);
+    lk_vector_libPreInit(self);
+    lk_fixnum_libPreInit(self);
+    lk_frame_libPreInit(self);
+    lk_func_libPreInit(self);
+    lk_instr_libPreInit(self);
+    lk_list_libPreInit(self);
+    lk_parser_libPreInit(self);
 
     /* init rest of the fields in vm */
     self->global = LK_FRAME(lk_object_alloc(self->t_frame));
@@ -169,25 +169,25 @@ lk_vm_t *lk_vm_new(void) {
     lk_lib_setGlobal(".string.slash", LK_OBJ(self->str_filesep = lk_string_newFromCString(self, "/")));
 
     /* attach all funcs to primitive types */
-    lk_boolean_extinitfuncs(self);
-    lk_char_extinitfuncs(self);
-    lk_charset_extinitfuncs(self);
-    lk_map_extinitfuncs(self);
-    lk_error_extinitfuncs(self);
-    lk_file_extinitfuncs(self);
-    lk_folder_extinitfuncs(self);
-    lk_vector_extinitfuncs(self);
-    lk_fixnum_extinitfuncs(self);
-    lk_frame_extinitfuncs(self);
-    lk_func_extinitfuncs(self);
-    lk_gc_extinitfuncs(self);
-    lk_instr_extinitfuncs(self);
-    lk_list_extinitfuncs(self);
-    lk_object_extinitfuncs(self);
-    lk_parser_extinitfuncs(self);
-    lk_string_extinitfuncs(self);
-    lk_vm_extinitfuncs(self);
-    lk_seq_extinitfuncs(self);
+    lk_boolean_libInit(self);
+    lk_char_libInit(self);
+    lk_charset_libInit(self);
+    lk_map_libInit(self);
+    lk_error_libInit(self);
+    lk_file_libInit(self);
+    lk_folder_libInit(self);
+    lk_vector_libInit(self);
+    lk_fixnum_libInit(self);
+    lk_frame_libInit(self);
+    lk_func_libInit(self);
+    lk_gc_libInit(self);
+    lk_instr_libInit(self);
+    lk_list_libInit(self);
+    lk_object_libInit(self);
+    lk_parser_libInit(self);
+    lk_string_libInit(self);
+    lk_vm_libInit(self);
+    lk_seq_libInit(self);
 
     /* extra libs */
     lk_env_extinit(self);

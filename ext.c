@@ -25,7 +25,7 @@ LK_LIB_DEFINECFUNC(init__ext_str_str) {
     }
     RETURN(self);
 }
-LK_EXT_DEFINIT(lk_library_extinit) {
+LK_LIB_DEFINEINIT(lk_library_extinit) {
     lk_object_t *str = vm->t_string;
     lk_object_t *ext = lk_object_allocwithsize(vm->t_obj, sizeof(lk_library_t));
     lk_object_setfreefunc(ext, free__ext);

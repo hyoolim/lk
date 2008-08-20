@@ -6,7 +6,7 @@
 static LK_OBJ_DEFALLOCFUNC(alloc__ch) {
     CHAR(self) = CHAR(parent);
 }
-LK_EXT_DEFINIT(lk_char_extinittypes) {
+LK_LIB_DEFINEINIT(lk_char_libPreInit) {
     vm->t_char = lk_object_allocwithsize(vm->t_obj, sizeof(lk_char_t));
     lk_object_setallocfunc(vm->t_char, alloc__ch);
 }
@@ -32,7 +32,7 @@ LK_LIB_DEFINECFUNC(to_string__ch) {
     darray_setuchar(DARRAY(str), 0, CHAR(self));
     RETURN(str);
 }
-LK_EXT_DEFINIT(lk_char_extinitfuncs) {
+LK_LIB_DEFINEINIT(lk_char_libInit) {
     lk_object_t *ch = vm->t_char, *fi = vm->t_fi;
     lk_lib_setGlobal("Character", ch);
     lk_lib_setCFunc(ch, "+", add__ch_fi, fi, NULL);

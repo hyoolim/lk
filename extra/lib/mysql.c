@@ -87,7 +87,7 @@ LK_EXT_DEFINIT(lk_mysql_extinit) {
     lk_object_setmarkfunc(myquery, mark__myquery);
     lk_object_setfreefunc(myquery, free__myquery);
     lk_ext_global("MySQL", myconn);
-    lk_ext_cfunc(myconn, "init", init__myconn_str_str_str_str_fi_str, str, str, str, str, fi, str, NULL);
+    lk_ext_cfunc(myconn, "init!", init__myconn_str_str_str_str_fi_str, str, str, str, str, fi, str, NULL);
     lk_ext_cfunc(myconn, "prepare", prepare__myconn_str, str, NULL);
     LK_VM_SETGLOBAL(vm, MySQL_Query, myquery);
     lk_ext_set(myconn, "Query", myquery);

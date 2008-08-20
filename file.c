@@ -141,7 +141,7 @@ LK_EXT_DEFINIT(lk_file_extinitfuncs) {
     lk_lib_setCFunc(file, "executable?", executableQ__file, NULL);
     lk_lib_setCFunc(file, "exists?", existsQ__file, NULL);
     lk_lib_setCFunc(file, "flush", flush__file, NULL);
-    lk_lib_setCFunc(file, "init", init__file_str, str, NULL);
+    lk_lib_setCFunc(file, "init!", init__file_str, str, NULL);
     lk_lib_setCFunc(file, "move", move__file_str, str, NULL);
     lk_lib_setCFunc(file, "openForReading", openForReading__file, NULL);
     lk_lib_setCFunc(file, "openForWriting", openForWriting__file, NULL);

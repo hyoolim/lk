@@ -1,5 +1,5 @@
 Tester := Object/new/do {
-    /init := { /name --- /index := 0 }
+    /init! := { /name --- /index := 0 }
     /finish := { ---
         writeLine(/name/toString, ': Ran ', /index/toString, ' test(s) successfully')
     }

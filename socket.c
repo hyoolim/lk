@@ -82,7 +82,7 @@ LK_EXT_DEFINIT(lk_socket_extinit) {
     /* */
     lk_lib_setGlobal("IpAddress", ip);
     lk_lib_setObject(ip, "ANY", lk_object_alloc(ip));
-    lk_lib_setCFunc(ip, "init", alloc__ip_str, str, NULL);
+    lk_lib_setCFunc(ip, "init!", alloc__ip_str, str, NULL);
     lk_lib_setCFunc(ip, "toString", to_string__ip, NULL);
     /* */
     lk_lib_setGlobal("Socket", vm->t_socket = sock);

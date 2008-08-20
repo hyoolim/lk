@@ -176,7 +176,7 @@ ENV/extend {
 
 # Error
 Error/extend {
-    /init := { /message : String | }
+    /init! := { /message : String | }
     /toString := { | /message/toString }
 }
 MessageError/extend {
@@ -395,11 +395,11 @@ Object/extend {
     /in? := { list | list/has?(/.) }
 
     # Default init function that never does anything.
-    /init := { | }
+    /init! := { | }
     /'~=' := /.retrieve('==')
     /'?' := { args... | /toBoolean/'?'(*args) }
     /'!=' := { to | /. == to ->not? }
-    /new := { args... | new := /alloc; new/init(*args); new }
+    /new := { args... | new := /alloc; new/init!(*args); new }
     /nil? := False
     /'||' := { other | /toBoolean ? /. ! other }
     /'|||' := { other | /nil? ? other ! /. }
@@ -439,7 +439,7 @@ Range/extend {
             }
         }
     }
-    /init := { /from, /to | }
+    /init! := { /from, /to | }
     /toCode := { | /from/toCode ++ '/to(' ++ /to/toCode ++ ')' }
     /also(Enumerable)
 }

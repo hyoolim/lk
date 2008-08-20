@@ -192,8 +192,8 @@ Date := Object/with {
     # }}}
 
     # init
-    /init := { year; month; day; hour; minute; second ---
-        /init[year; month; day; hour; minute; second; 0.0]
+    /init! := { year; month; day; hour; minute; second ---
+        /init![year; month; day; hour; minute; second; 0.0]
     } + { /year; /month; /day; /hour; /minute; /second; /tz ---
     }
 

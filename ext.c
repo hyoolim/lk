@@ -30,7 +30,7 @@ LK_EXT_DEFINIT(lk_library_extinit) {
     lk_object_t *ext = lk_object_allocwithsize(vm->t_obj, sizeof(lk_library_t));
     lk_object_setfreefunc(ext, free__ext);
     lk_lib_setGlobal("Extension", ext);
-    lk_lib_setCFunc(ext, "init", init__ext_str_str, str, str, NULL);
+    lk_lib_setCFunc(ext, "init!", init__ext_str_str, str, str, NULL);
 }
 
 /* update */

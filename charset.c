@@ -77,7 +77,7 @@ LK_EXT_DEFINIT(lk_charset_extinitfuncs) {
     lk_lib_setCFunc(charset, "+=", addB__charset_str, str, NULL);
     lk_lib_setCFunc(charset, "has?", has__charset_ch, ch, NULL);
     lk_lib_setCFunc(charset, "has?", has__charset_str, str, NULL);
-    lk_lib_setCFunc(charset, "init", init__charset_str, str, NULL);
+    lk_lib_setCFunc(charset, "init!", init__charset_str, str, NULL);
     lk_lib_setCFunc(charset, "negate!", negateB__charset, NULL);
     lk_lib_setCFunc(charset, "-=", subtractB__charset_charset, charset, NULL);
     lk_lib_setCFunc(charset, "-=", subtractB__charset_str, str, NULL);

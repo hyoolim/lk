@@ -42,12 +42,12 @@ ConfigOptional := Object/with {
         /c_libs/each { v --- libs/writeLine[v] }
         WritableFile/new[build ++ /name ++ '.cf']/write[/c_flags/join[' ']]
     }
-    /init := { ---
+    /init! := { ---
         /c_flags := [ ]
         /c_libs := [ ]
     }
-    /init  = { /name ---
-        /init
+    /init!  = { /name ---
+        /init!
     }
 }
 

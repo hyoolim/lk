@@ -46,6 +46,6 @@ LK_LIB_DEFINECFUNC(items__Folder) {
 LK_EXT_DEFINIT(lk_folder_extinitfuncs) {
     lk_object_t *folder = vm->t_folder, *str = vm->t_string;
     lk_lib_setGlobal("Folder", folder);
-    lk_lib_setCFunc(folder, "init", init__Folder_str, str, NULL);
+    lk_lib_setCFunc(folder, "init!", init__Folder_str, str, NULL);
     lk_lib_setCFunc(folder, "items", items__Folder, NULL);
 }

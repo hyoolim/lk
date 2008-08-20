@@ -4,7 +4,7 @@ Row := List/with {
     /'<' := { x --- /map { v --- v < x } }
 }
 Table := Object/with {
-    /init := { /columns... ---
+    /init! := { /columns... ---
         /data := Map/new
         /columns/each { v; i ---
             /data/set![v; r := Row/new]

@@ -164,7 +164,7 @@ LK_EXT_DEFINIT(lk_postgres_extinit) {
     lk_object_setmarkfunc(pgquery, mark__pgquery);
     lk_object_setfreefunc(pgquery, free__pgquery);
     lk_ext_global("PostgreSQL", pgconn);
-    lk_ext_cfunc1(pgconn, "init", init__pgconn_str, str);
+    lk_ext_cfunc1(pgconn, "init!", init__pgconn_str, str);
     lk_ext_cfunc1(pgconn, "query", query__pgconn_str, str);
     lk_ext_cfunc1(pgconn, "prepare", prepare__pgconn_str, str);
     LK_VM_SETGLOBAL(vm, PostgreSQL_Query, pgquery);

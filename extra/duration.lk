@@ -22,7 +22,7 @@ Duration := Object/with {
     /hour.on assign := { h --- /s var = make svar[h; /minute; /second]; h }
 
     # init
-    /init := { /year; /month; /day; /hour; /minute; /second ---
+    /init! := { /year; /month; /day; /hour; /minute; /second ---
     } + { /m var; /day; /s var --- /normalize
     }
     /normalize! := { ---

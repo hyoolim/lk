@@ -1,10 +1,10 @@
 Toggle := Object/with {
-    /init := { start state : Boolean --- /bool := start state }
+    /init! := { start state : Boolean --- /bool := start state }
     /value := { --- /bool }
     /activate := { --- /bool = !/bool; /. }
 }
 NthToggle := Toggle/with {
-    /init := { start state : Boolean; max counter : FixedInteger ---
+    /init! := { start state : Boolean; max counter : FixedInteger ---
         /bool := start state
         /count max := max counter
         /counter := 0

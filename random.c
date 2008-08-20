@@ -38,7 +38,7 @@ LK_EXT_DEFINIT(lk_random_extinit) {
     init_genrand(LK_RANDOM(rd), 0);
     lk_object_setallocfunc(rd, alloc__rd);
     lk_lib_setGlobal("Random", rd);
-    lk_lib_setCFunc(rd, "init", init__rd_fi, fi, NULL);
+    lk_lib_setCFunc(rd, "init!", init__rd_fi, fi, NULL);
     lk_lib_setCFunc(rd, "fixed_integer", fixed_integer__rd, NULL);
     lk_lib_setCFunc(rd, "fixed_real", fixed_real__rd, NULL);
     lk_lib_setCField(rd, "seed", fi, offsetof(lk_random_t, seed));

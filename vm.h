@@ -52,15 +52,15 @@ typedef LK_LIB_DEFINEINIT(lk_libraryinitfunc_t);
 
 /* required primitives */
 #include "string.h"
-#include "frame.h"
+#include "scope.h"
 #include "gc.h"
 #include "instr.h"
 #include "object.h"
 #include "error.h"
 
 /* todo: figure out a way to move this before req primitives */
-#define LK_LIB_DEFINECFUNC(name) static void name(lk_object_t *self, lk_frame_t *env)
-typedef void lk_cfuncfunc_t(lk_object_t *self, lk_frame_t *env);
+#define LK_LIB_DEFINECFUNC(name) static void name(lk_object_t *self, lk_scope_t *local)
+typedef void lk_cfuncfunc_t(lk_object_t *self, lk_scope_t *local);
 
 /* actual def - add header to above #include's on lk_vm_t change */
 struct lk_object {
@@ -78,10 +78,10 @@ struct lk_vm {
         struct lk_rsrcchain *rsrc;
     } *rescue;
     lk_instr_t *currinstr;
-    lk_frame_t *currentFrame;
+    lk_scope_t *currentScope;
     lk_error_t *lasterror;
     lk_gc_t *gc;
-    lk_frame_t *global;
+    lk_scope_t *global;
 
     /* freq used primitive types */
     /* bool     */ lk_object_t *t_nil, *t_bool, *t_true, *t_false;
@@ -91,7 +91,7 @@ struct lk_vm {
     /* file     */ lk_object_t *t_file, *t_folder, *t_stdin, *t_stdout, *t_stderr;
     /* vector   */ lk_object_t *t_vector;
     /* fixnum   */ lk_object_t *t_number;
-    /* frame    */ lk_object_t *t_frame;
+    /* scope    */ lk_object_t *t_scope;
     /* func     */ lk_object_t *t_func, *t_sig, *t_kfunc, *t_cfunc, *t_gfunc;
     /* seq      */ lk_object_t *t_seq;
     /* instr    */ lk_object_t *t_instr;
@@ -114,8 +114,8 @@ struct lk_vm {
     /* statistics */
     struct {
         long totalInstructions;
-        long totalFrames;
-        long recycledFrames;
+        long totalScopes;
+        long recycledScopes;
     } stat;
 };
 
@@ -128,8 +128,8 @@ lk_vm_t *lk_vm_new(void);
 void lk_vm_free(lk_vm_t *self);
 
 /* eval */
-lk_frame_t *lk_vm_evalfile(lk_vm_t *self, const char *file, const char *base);
-lk_frame_t *lk_vm_evalstring(lk_vm_t *self, const char *code);
+lk_scope_t *lk_vm_evalfile(lk_vm_t *self, const char *file, const char *base);
+lk_scope_t *lk_vm_evalstring(lk_vm_t *self, const char *code);
 void lk_vm_doevalfunc(lk_vm_t *vm);
 void lk_vm_raisecstr(lk_vm_t *self, const char *message,
                      ...) __attribute__((noreturn));

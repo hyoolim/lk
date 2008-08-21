@@ -19,13 +19,13 @@ LK_LIB_DEFINEINIT(lk_object_libPreInit) {
 /* ext map - funcs */
 LK_LIB_DEFINECFUNC(Ddefine_and_assignB__obj_str_obj_obj);
 LK_LIB_DEFINECFUNC(Ddefine__obj_str_obj) {
-    env->argc ++;
-    darray_pushptr(&env->stack, NIL);
+    local->argc ++;
+    darray_pushptr(&local->stack, NIL);
     GOTO(Ddefine_and_assignB__obj_str_obj_obj);
 }
 LK_LIB_DEFINECFUNC(Ddefine_and_assignB__obj_str_obj) {
-    env->argc ++;
-    darray_insertptr(&env->stack, 1, VM->t_obj);
+    local->argc ++;
+    darray_insertptr(&local->stack, 1, VM->t_obj);
     GOTO(Ddefine_and_assignB__obj_str_obj_obj);
 }
 LK_LIB_DEFINECFUNC(Ddefine_and_assignB__obj_str_obj_obj) {
@@ -40,7 +40,7 @@ LK_LIB_DEFINECFUNC(Ddefine_and_assignB__obj_str_obj_obj) {
     if(LK_OBJ_ISFUNC(v)) {
         LK_SLOT_SETOPTION(slot, LK_SLOTOPTION_AUTOSEND);
         SETOPT(LK_FUNC(v)->cf.opts, LK_FUNCOASSIGNED);
-        LK_FUNC(v)->cf.doc = env->caller->current->prev->comment;
+        LK_FUNC(v)->cf.doc = local->caller->current->prev->comment;
     }
     RETURN(v);
 }
@@ -83,12 +83,12 @@ LK_LIB_DEFINECFUNC(clone__obj) {
     RETURN(lk_object_clone(self)); }
 LK_LIB_DEFINECFUNC(do__obj_f) {
     lk_kfunc_t *kf = LK_KFUNC(ARG(0));
-    lk_frame_t *fr = lk_frame_new(VM);
+    lk_scope_t *fr = lk_scope_new(VM);
     fr->first = fr->next = kf->first;
     fr->receiver = fr->self = self;
     fr->func = LK_OBJ(kf);
     fr->returnto = NULL;
-    fr->o.parent = LK_OBJ(kf->frame);
+    fr->o.parent = LK_OBJ(kf->scope);
     lk_vm_doevalfunc(VM);
     RETURN(self);
 }
@@ -121,7 +121,7 @@ LK_LIB_DEFINECFUNC(parent__obj) {
     RETURN(self->o.parent);
 }
 LK_LIB_DEFINECFUNC(with__obj_f) {
-    do__obj_f(lk_object_addref(LK_OBJ(env), lk_object_alloc(self)), env);
+    do__obj_f(lk_object_addref(LK_OBJ(local), lk_object_alloc(self)), local);
 }
 LK_LIB_DEFINEINIT(lk_object_libInit) {
     lk_object_t *obj = vm->t_obj, *str = vm->t_string, *f = vm->t_func;

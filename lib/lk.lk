@@ -512,11 +512,8 @@ True/extend {
 
 # Vector < Sequence
 
-# VirtualMachine
-VM := VirtualMachine
-
-# VirtualMachine/Frame
-VM/Frame/extend {
+# VirtualMachine/Scope
+Scope/extend {
     breaker := Error/alloc
     /break := { | raise(breaker) }
 

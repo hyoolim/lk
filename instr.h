@@ -19,7 +19,7 @@ struct lk_instr {
         LK_INSTRTYPE_CHAR,
         LK_INSTRTYPE_NUMBER,
         LK_INSTRTYPE_APPLYMSG,
-        LK_INSTRTYPE_FRAMEMSG,
+        LK_INSTRTYPE_SCOPEMSG,
         LK_INSTRTYPE_SELFMSG,
         LK_INSTRTYPE_MORE
     }                 type;
@@ -48,7 +48,7 @@ lk_instr_t *lk_instr_newempty(lk_parser_t *parser);
 lk_instr_t *lk_instr_newNumber(lk_parser_t *parser, double number);
 lk_instr_t *lk_instr_newchar(lk_parser_t *parser, uint32_t c);
 lk_instr_t *lk_instr_newmessage(lk_parser_t *parser, lk_string_t *name);
-lk_instr_t *lk_instr_newframemessage(lk_parser_t *parser, lk_string_t *name);
+lk_instr_t *lk_instr_newscopemessage(lk_parser_t *parser, lk_string_t *name);
 
 /* info */
 void lk_instr_print(lk_instr_t *);

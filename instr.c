@@ -28,7 +28,7 @@ LK_LIB_DEFINECFUNC(message) {
     do {
         switch(instr->type) {
         case LK_INSTRTYPE_APPLYMSG:
-        case LK_INSTRTYPE_FRAMEMSG:
+        case LK_INSTRTYPE_SCOPEMSG:
         case LK_INSTRTYPE_SELFMSG: RETURN(instr->v);
         default: instr = instr->prev;
         }
@@ -108,8 +108,8 @@ lk_instr_t *lk_instr_newmessage(lk_parser_t *parser, lk_string_t *name) {
     }
     return new;
 }
-lk_instr_t *lk_instr_newframemessage(lk_parser_t *parser, lk_string_t *name) {
-    lk_instr_t *new = instr_new(parser, LK_INSTRTYPE_FRAMEMSG);
+lk_instr_t *lk_instr_newscopemessage(lk_parser_t *parser, lk_string_t *name) {
+    lk_instr_t *new = instr_new(parser, LK_INSTRTYPE_SCOPEMSG);
     new->v = LK_OBJ(name);
     return new;
 }
@@ -149,7 +149,7 @@ void lk_instr_print(lk_instr_t *self) {
         darray_printToStream(DARRAY(self->v), stdout);
         if(!(self->opts & LK_INSTROHASMSGARGS)) printf("[]");
         break;
-    case LK_INSTRTYPE_FRAMEMSG:
+    case LK_INSTRTYPE_SCOPEMSG:
         darray_printToStream(DARRAY(self->v), stdout);
         if(!(self->opts & LK_INSTROHASMSGARGS)) printf("[]");
         break;

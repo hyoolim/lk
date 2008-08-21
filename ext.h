@@ -15,17 +15,16 @@ typedef struct lk_library {
 #define LK_EXT(v) ((lk_library_t *)(v))
 
 /* ext shortcuts */
-#define ARG(i) ( \
-assert(env != NULL && 0 <= (i) && (i) < env->argc), \
-LK_OBJ(LIST_ATPTR(&env->stack, (i))))
+#define ARG(i) (assert(local != NULL && 0 <= (i) && (i) < local->argc),  LK_OBJ(LIST_ATPTR(&local->stack, (i))))
 #define DONE return
-#define RETURN(v) do { \
-    lk_object_t *_r = LK_OBJ(v); \
-    assert(_r != NULL); \
-    lk_frame_stackpush(env->caller, _r); \
-    DONE; \
-} while(0)
-#define GOTO(name) (name(self, env))
+#define RETURN(v) \
+    do { \
+        lk_object_t *_r = LK_OBJ(v); \
+        assert(_r != NULL); \
+        lk_scope_stackpush(local->caller, _r); \
+        DONE; \
+    } while(0)
+#define GOTO(name) (name(self, local))
 
 #define CHAR(v) (LK_CHAR(v)->data)
 #define CHARSET(v) (&LK_CHARSET(v)->data)

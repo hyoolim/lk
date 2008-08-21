@@ -25,7 +25,7 @@ LK_LIB_DEFINECFUNC(resume__gc) {
     lk_gc_resume(LK_GC(self)); RETURN(self); }
 LK_LIB_DEFINEINIT(lk_gc_libInit) {
     lk_object_t *gc = LK_OBJ(vm->gc);
-    lk_lib_setObject(vm->t_vm, "GarbageCollector", gc);
+    lk_lib_setGlobal("GarbageCollector", gc);
     lk_lib_setCFunc(gc, "pause", pause__gc, NULL);
     lk_lib_setCFunc(gc, "resume", resume__gc, NULL);
 }
@@ -129,7 +129,7 @@ void lk_gc_sweep(lk_gc_t *self) {
         lk_objectgroup_size(self->unused),
         lk_objectgroup_size(self->used));
          */
-        lk_object_markpending(LK_OBJ(vm->currentFrame));
+        lk_object_markpending(LK_OBJ(vm->currentScope));
         for(; rsrc != NULL; rsrc = rsrc->prev) {
             lk_object_markpending(LK_OBJ(rsrc->rsrc));
         }

@@ -5,7 +5,7 @@
 typedef struct lk_gc lk_gc_t;
 #define LK_GC(v) ((lk_gc_t *)(v))
 #include "vm.h"
-#include "frame.h"
+#include "scope.h"
 struct lk_gc {
     struct lk_common o;
     struct lk_objectgroup *unused;

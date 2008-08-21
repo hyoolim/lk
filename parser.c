@@ -149,7 +149,7 @@ typedef READFUNC(readfunc_t);
 #define LISTSEP ";"
 #define EXPRSEP ";"
 /* instr type conversion */
-#define FRAME2APPLY(type) ((type) - LK_INSTRTYPE_FRAMEMSG + LK_INSTRTYPE_APPLYMSG)
+#define SCOPE2APPLY(type) ((type) - LK_INSTRTYPE_SCOPEMSG + LK_INSTRTYPE_APPLYMSG)
 
 /* */
 static lk_string_t *getbinaryop(lk_parser_t *self, lk_string_t *op) {
@@ -206,7 +206,7 @@ static lk_prec_t *shiftreduce(lk_parser_t *self, lk_instr_t *op) {
             top->v = LK_OBJ(getbinaryop(self, LK_STRING(top->v)));
             topstr = DARRAY(top->v);
             /* rec / arg -> rec /arg */
-            if((arg->type == LK_INSTRTYPE_FRAMEMSG
+            if((arg->type == LK_INSTRTYPE_SCOPEMSG
             || arg->type == LK_INSTRTYPE_STRING)
             && darray_compareToCString(topstr, "send") == 0) {
                 top = arg;
@@ -586,7 +586,7 @@ static READFUNC(readmsg) {
     /* msg[], msg {}, msg[] {}, ... */
     lk_string_t *tok = getnexttoken(self, WORD);
     if(tok == NULL) return 0;
-    darray_pushptr(self->words, lk_instr_newframemessage(self, tok));
+    darray_pushptr(self->words, lk_instr_newscopemessage(self, tok));
     return 1;
 }
 static READFUNC(readunaryop) {
@@ -700,7 +700,7 @@ static READFUNC(readobj) {
                     args->type = LK_INSTRTYPE_APPLY;
                     while(obj->next != NULL) obj = obj->next;
                     (obj->next = args)->prev = obj;
-                    if(obj->type == LK_INSTRTYPE_FRAMEMSG
+                    if(obj->type == LK_INSTRTYPE_SCOPEMSG
                     ) obj->opts |= LK_INSTROHASMSGARGS;
                 } else {
                     break;
@@ -765,7 +765,7 @@ static lk_instr_t *applymacros(lk_parser_t *self, lk_instr_t *it) {
                || it->type == LK_INSTRTYPE_LIST) {
             it->v = LK_OBJ(applymacros(self, LK_INSTR(it->v)));
             /*
-        } else if(it->type == LK_INSTRTYPE_FRAMEMSG
+        } else if(it->type == LK_INSTRTYPE_SCOPEMSG
                && darray_compareToCString(DARRAY(it->v), ".") == 0) {
             lk_instr_t *msg = it->next;
             if(msg != NULL && msg->type == LK_INSTRTYPE_APPLYMSG) {
@@ -780,7 +780,7 @@ static lk_instr_t *applymacros(lk_parser_t *self, lk_instr_t *it) {
                || darray_compareToCString(DARRAY(it->v), ":=") == 0)) {
             lk_instr_t *name = it->prev, *args = it->next;
             if(name->type == LK_INSTRTYPE_SELFMSG
-            || name->type == LK_INSTRTYPE_FRAMEMSG
+            || name->type == LK_INSTRTYPE_SCOPEMSG
             || name->type == LK_INSTRTYPE_APPLYMSG) {
                 /* var[] /:= @[1 ] -> := @['var' 1 ] */
                 lk_instr_t *nextop = args->next;

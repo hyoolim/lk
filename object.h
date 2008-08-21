@@ -96,8 +96,8 @@ lk_object_isa((self), (t)))
 )
 #define LK_OBJ_ISCFUNC(self) ( \
     (self)->o.tag->allocfunc == LK_VM(self)->t_cfunc->o.tag->allocfunc)
-#define LK_OBJ_ISFRAME(self) ( \
-    (self)->o.tag->freefunc == LK_VM(self)->t_frame->o.tag->freefunc)
+#define LK_OBJ_ISSCOPE(self) ( \
+    (self)->o.tag->freefunc == LK_VM(self)->t_scope->o.tag->freefunc)
 #define LK_OBJ_ISGFUNC(self) ( \
     (self)->o.tag->freefunc == LK_VM(self)->t_gfunc->o.tag->freefunc)
 #define LK_OBJ_ISFUNC(self) ( \

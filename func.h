@@ -8,7 +8,7 @@ typedef struct lk_gfunc lk_gfunc_t;
 typedef struct lk_kfunc lk_kfunc_t;
 typedef struct lk_sig lk_sig_t;
 #include "vm.h"
-#include "frame.h"
+#include "scope.h"
 #include "instr.h"
 struct lk_func {
     struct lk_common o;
@@ -40,7 +40,7 @@ struct lk_gfunc {
 struct lk_kfunc {
     struct lk_common o;
     struct lk_commonfunc  cf;
-    lk_frame_t           *frame;
+    lk_scope_t           *scope;
     lk_instr_t           *first;
 };
 #define LK_KFUNC(v) ((lk_kfunc_t *)(v))
@@ -58,12 +58,12 @@ LK_LIB_DEFINEINIT(lk_func_libInit);
 
 /* new */
 lk_cfunc_t *lk_cfunc_new(lk_vm_t * vm, lk_cfuncfunc_t *func, int minargc, int maxargc);
-lk_kfunc_t *lk_kfunc_new(lk_vm_t *vm, lk_frame_t *frame, lk_instr_t *first);
+lk_kfunc_t *lk_kfunc_new(lk_vm_t *vm, lk_scope_t *scope, lk_instr_t *first);
 lk_gfunc_t *lk_gfunc_new(lk_vm_t *vm);
 lk_sig_t *lk_sig_new(lk_vm_t *vm, lk_string_t *name, lk_object_t *type);
 
 /* update */
 lk_gfunc_t *lk_func_combine(lk_func_t *self, lk_func_t *other);
-lk_func_t *lk_func_match(lk_func_t *self, lk_frame_t *args, lk_object_t *recv);
+lk_func_t *lk_func_match(lk_func_t *self, lk_scope_t *args, lk_object_t *recv);
 void lk_kfunc_updatesig(lk_kfunc_t *self);
 #endif

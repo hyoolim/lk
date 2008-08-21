@@ -19,7 +19,7 @@ LK_LIB_DEFINECFUNC(at__darray_number) {
     RETURN(v != NULL ? v : NIL);
 }
 LK_LIB_DEFINECFUNC(flatten__list) {
-    lk_frame_t *caller = env->caller;
+    lk_scope_t *caller = local->caller;
     if(!LIST_ISINIT(&caller->stack)) darray_initptr(&caller->stack);
     darray_concat(&caller->stack, DARRAY(self));
     DONE;

@@ -46,12 +46,12 @@ static LK_OBJ_DEFFREEFUNC(free__gf) {
 /* */
 static LK_OBJ_DEFALLOCFUNC(alloc__kf) {
     alloc__f(self, parent);
-    LK_KFUNC(self)->frame = LK_KFUNC(parent)->frame;
+    LK_KFUNC(self)->scope = LK_KFUNC(parent)->scope;
     LK_KFUNC(self)->first = LK_KFUNC(parent)->first;
 }
 static LK_OBJ_DEFMARKFUNC(mark__kf) {
     mark__f(self, mark);
-    mark(LK_OBJ(LK_KFUNC(self)->frame));
+    mark(LK_OBJ(LK_KFUNC(self)->scope));
     mark(LK_OBJ(LK_KFUNC(self)->first));
 }
 
@@ -95,11 +95,11 @@ LK_LIB_DEFINECFUNC(add__f_f) {
     RETURN(lk_func_combine(LK_FUNC(self), LK_FUNC(ARG(0))));
 }
 LK_LIB_DEFINECFUNC(addB__f_f) {
-    if(env->caller == NULL && env->caller->lastslot == NULL) {
+    if(local->caller == NULL && local->caller->lastslot == NULL) {
         lk_vm_raisecstr(VM, "Cannot add to the function without a slot");
     } else {
         lk_gfunc_t *new = lk_func_combine(LK_FUNC(self), LK_FUNC(ARG(0)));
-        lk_object_setvalueonslot(self, env->caller->lastslot, LK_OBJ(new));
+        lk_object_setvalueonslot(self, local->caller->lastslot, LK_OBJ(new));
         RETURN(new);
     }
 }
@@ -162,9 +162,9 @@ lk_cfunc_t *lk_cfunc_new(lk_vm_t *vm, lk_cfuncfunc_t *func, int minargc, int max
     self->cf.sigs = darray_allocptrwithcapacity(minargc);
     return self;
 }
-lk_kfunc_t *lk_kfunc_new(lk_vm_t *vm, lk_frame_t *frame, lk_instr_t *first) {
+lk_kfunc_t *lk_kfunc_new(lk_vm_t *vm, lk_scope_t *scope, lk_instr_t *first) {
     lk_kfunc_t *self = LK_KFUNC(lk_object_alloc(vm->t_kfunc));
-    self->frame = frame;
+    self->scope = scope;
     self->first = first;
     self->cf.maxargc = INT_MAX;
     return self;
@@ -219,7 +219,7 @@ lk_gfunc_t *lk_func_combine(lk_func_t *self, lk_func_t *other) {
     else darray_pushptr(funcs, other);
     return LK_GFUNC(self);
 }
-lk_func_t *lk_func_match(lk_func_t *self, lk_frame_t *args, lk_object_t *recv) {
+lk_func_t *lk_func_match(lk_func_t *self, lk_scope_t *args, lk_object_t *recv) {
     lk_vm_t *vm = LK_VM(self);
     darray_t *funcs, *stack, *sigs;
     int funci, funcc, argi = 0, argc;
@@ -283,7 +283,7 @@ void lk_kfunc_updatesig(lk_kfunc_t *self) {
     }
     for(; argdef != NULL; argdef = argdef->next) {
         if((isself = argdef->type == LK_INSTRTYPE_SELFMSG)
-        || argdef->type == LK_INSTRTYPE_FRAMEMSG) {
+        || argdef->type == LK_INSTRTYPE_SCOPEMSG) {
             name = LK_STRING(argdef->v);
             if(darray_compareToCString(DARRAY(name), ":") == 0) {
                 argdef = argdef->next;
@@ -291,9 +291,9 @@ void lk_kfunc_updatesig(lk_kfunc_t *self) {
                     typeinstr = LK_INSTR(argdef->v);
                     name = LK_STRING(typeinstr->v);
                     typeinstr = typeinstr->next;
-                    slot = lk_object_getslotfromany(LK_OBJ(VM->currentFrame), typeinstr->v);
+                    slot = lk_object_getslotfromany(LK_OBJ(VM->currentScope), typeinstr->v);
                     if(slot != NULL) {
-                        type = lk_object_getvaluefromslot(LK_OBJ(VM->currentFrame), slot);
+                        type = lk_object_getvaluefromslot(LK_OBJ(VM->currentScope), slot);
                     } else {
                         printf("Invalid sig, invalid type\n");
                         exit(EXIT_FAILURE);

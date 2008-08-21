@@ -1,7 +1,7 @@
 #include "frame.h"
 #include "char.h"
 #include "ext.h"
-#include "fixnum.h"
+#include "number.h"
 #include "gc.h"
 #include "list.h"
 #include "parser.h"

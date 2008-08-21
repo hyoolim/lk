@@ -17,8 +17,7 @@ struct lk_instr {
         LK_INSTRTYPE_GROUP,
         LK_INSTRTYPE_STRING,
         LK_INSTRTYPE_CHAR,
-        LK_INSTRTYPE_FIXINT,
-        LK_INSTRTYPE_FIXF,
+        LK_INSTRTYPE_NUMBER,
         LK_INSTRTYPE_APPLYMSG,
         LK_INSTRTYPE_FRAMEMSG,
         LK_INSTRTYPE_SELFMSG,
@@ -46,9 +45,8 @@ lk_instr_t *lk_instr_newarglist(lk_parser_t *parser, lk_instr_t *first);
 lk_instr_t *lk_instr_newcomment(lk_parser_t *parser, lk_string_t *s);
 lk_instr_t *lk_instr_newstring(lk_parser_t *parser, lk_string_t *s);
 lk_instr_t *lk_instr_newempty(lk_parser_t *parser);
-lk_instr_t *lk_instr_newfi(lk_parser_t *parser, int i);
+lk_instr_t *lk_instr_newNumber(lk_parser_t *parser, double number);
 lk_instr_t *lk_instr_newchar(lk_parser_t *parser, uint32_t c);
-lk_instr_t *lk_instr_newff(lk_parser_t *parser, double f);
 lk_instr_t *lk_instr_newmessage(lk_parser_t *parser, lk_string_t *name);
 lk_instr_t *lk_instr_newframemessage(lk_parser_t *parser, lk_string_t *name);
 

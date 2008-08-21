@@ -39,7 +39,7 @@ Comparable/extend {
 
     # Returns true if it's equal to the other, using <=> operator
     # for comparison, false otherwise.
-    /'==' := { other | /. <=> other ->zero? }
+    /'==' := { other | (/. <=> other) == 0 }
 
     # Returns true if it's greater than or equal to the other, using
     # < operator for comparison, false otherwise.
@@ -47,7 +47,7 @@ Comparable/extend {
 
     # Returns true if it's greater than the other, using <=> operator for
     # comparison, false otherwise.
-    /'>' := { other | /. <=> other ->positive? }
+    /'>' := { other | (/. <=> other) > 0 }
 
     # Returns true if it's less than or equal to the other, using
     # > operator for comparison, false otherwise.
@@ -55,7 +55,7 @@ Comparable/extend {
 
     # Returns true if it's less than the other, using <=> operator for
     # comparison, false otherwise.
-    /'<' := { other | /. <=> other ->negative? }
+    /'<' := { other | (/. <=> other) < 0 }
 }
 
 # Map
@@ -129,16 +129,29 @@ Enumerable/extend {
     /max := { | /max { x, y | x <=> y } }
 
     # Returns the maximum value, using the <=> argument for comparison.
-    /max += { cmp | /reduce(NegativeInfinity) { a, v | cmp(a, v) < 0 ? v ! a } }
+    /max += { cmp | /reduce { a, v | cmp(a, v) < 0 ? v ! a } }
 
     # Returns the minimum value, using the <=> operator for comparison.
     /min := { | /min { x, y | x <=> y } }
 
     # Returns the minimum value, using the <=> argument for comparison.
-    /min += { cmp | /reduce(PositiveInfinity) { a, v | cmp(a, v) > 0 ? v ! a } }
+    /min += { cmp | /reduce { a, v | cmp(a, v) > 0 ? v ! a } }
 
     # NEED DOCUMENTATION
-    /reduce := { initialValue, using |
+    /reduce := { using |
+        first? := True
+        result := Nil
+        /each { value |
+            first? ? {
+                first? = False
+                result = value
+            } ! {
+                result = using(result, value)
+            }
+        }
+        result
+    }
+    /reduce += { initialValue, using |
         /each { v | initialValue = using(initialValue, v) }
         initialValue
     }
@@ -205,10 +218,6 @@ False/extend {
 
 # File
 
-# FixedInteger < Integer < Number
-
-# FixedReal < Real < Number
-
 # Function
 
 # GenericFunction < Function
@@ -250,8 +259,8 @@ Sequence/extend {
             h := hi/clone
             p := /at(hi)
             loop {
-                while(l < h && cmp(/at(l), p)/positive?/not?) { l += 1 }
-                while(h > l && cmp(/at(h), p)/negative?/not?) { h -= 1 }
+                while(l < h && cmp(/at(l), p) <= 0) { l += 1 }
+                while(h > l && cmp(/at(h), p) >= 0) { h -= 1 }
                 l < h ? /swap!(l, h)
                 l >= h ? break
             }
@@ -288,21 +297,6 @@ Sequence/extend {
     /also(Enumerable)
 }
 
-# Integer < Number
-Integer/extend {
-    /'+' := { value : Real | /toReal + value }
-    /'<=>' := { to : Real | /toReal - to }
-    /'%' := { by : Real | /toReal % by }
-    /'==' := { to : Real | /toReal == to }
-    /integer? := True
-    /'*' := { by : Real | /toReal * by }
-    /'-' := { value : Real | /toReal - value }
-
-    # Always returns itself.
-    /toInteger := { | /. }
-    /toString := { | /toString('%i') }
-}
-
 # IpAddress
 
 # KineticFunction < Function
@@ -313,7 +307,7 @@ List/extend {
         d := to/size - /size
         d > 0 ? to ! /. ->each { i, v |
             d := v <=> to(i)
-            d/zero?/not? ? return(d)
+            d != 0 ? return(d)
         }
         d
     }
@@ -351,29 +345,17 @@ Nil/extend {
     /toString := 'Nil'
 }
 
-# NegativeInfinity (-inf)
-NegativeInfinity/extend {
-    /.forward := { args... | NegativeInfinity }
-    /'<=>' := { to | -1 }
-    /inf? := True
-    /negate := PositiveInfinity
-    /toString := 'NegativeInfinity'
-}
-
 # Number
 Number/extend {
 
     # Returns the absolute value of the number.
-    /abs := { | /negative? ? /negate ! /. }
-    /'==' := { to | False }
     /finite? := True
     /inf? := False
-    /integer? := False
-    /real? := False
     /succ := { | /. + 1 }
     /toBoolean := { | /. != 0 }
     /toCode := { | /toString }
     /toNumber := { | /. }
+    /toString += { | /integer? ? /toString(0, 0) ! /toString(0, 6) }
     /also(Comparable)
 }
 
@@ -389,8 +371,6 @@ Object/extend {
     # Returns other if the receiver evaluates
     # to true or false otherwise.
     /'&&' := { other | /toBoolean ? other ! False }
-    /'<=>' := { to : PositiveInfinity | -1 }
-    /'<=>' += { to : NegativeInfinity | 1 }
     /'==' := { to | /.id == to/.id }
     /in? := { list | list/has?(/.) }
 
@@ -410,15 +390,6 @@ Object/extend {
     /toString := { | /.CLASS ++ '#' ++ /.id/toString }
 }
 
-# PositiveInfinity (inf)
-PositiveInfinity/extend {
-    /.forward := { args... | PositiveInfinity }
-    /'<=>' := { to | 1 }
-    /inf? := True
-    /negate := NegativeInfinity
-    /toString := 'PositiveInfinity'
-}
-
 # Random
 
 # Range
@@ -426,13 +397,13 @@ Range/extend {
     /each := { block |
         rv := /from
         block/minimum_argument_size <= 1 ? {
-            while(rv <=> /to ->positive? ->not?) {
+            while((rv <=> /to) <= 0) {
                 block(rv)
                 rv = rv/succ
             }
         } ! {
             i := 0
-            while(i <=> /to ->positive? ->not?) {
+            while((i <=> /to) <= 0) {
                 block(i, rv)
                 rv = rv/succ
                 i = i + 1
@@ -442,27 +413,6 @@ Range/extend {
     /init! := { /from, /to | }
     /toCode := { | /from/toCode ++ '/to(' ++ /to/toCode ++ ')' }
     /also(Enumerable)
-}
-
-# Real < Number
-Real/extend {
-    /'+' := { value : Integer | /. + value/toReal }
-    /ceil := { | i := /toInteger; /. > 0 && /. - i != 0.0 ? i + 1 ! i }
-    /'<=>' := { to : Integer | /. - to/toReal }
-    /'%' := { by : Integer | /. % by/toReal }
-    /'==' := { to : Integer | /. == to/toReal }
-    /floor := { | i := /toInteger; /. > 0 || /. - i == 0.0 ? i ! i - 1 }
-    /'*' := { by : Integer | /. * by/toReal }
-    /real? := True
-    /round := { |
-        i := /toInteger
-        /. - i > 0.5 ? i + 1 !
-        /. - i < -0.5 ? i - 1 !
-        i
-    }
-    /'-' := { value : Integer | /. - value/toReal }
-    /toReal := { | /. }
-    /toString := { | /toString('%f') }
 }
 
 # Socket
@@ -482,10 +432,10 @@ String/extend {
     # Returns a list of strings separated by the delim argument.
     /'%' := { delim |
         a := [ ]
-        /each(delim, PositiveInfinity) { v | a/push!(v) }
+        /each(delim, 1 % 0) { v | a/push!(v) }
         a
     }
-    /each := { delim, block | /each(delim, PositiveInfinity, block) }
+    /each := { delim, block | /each(delim, 1 % 0, block) }
     /each += { delim, max, block |
         t := /.; i := 0; pos := 0; dl := delim/size || 1
         loop {

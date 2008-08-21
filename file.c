@@ -2,7 +2,7 @@
 #include "char.h"
 #include "charset.h"
 #include "ext.h"
-#include "fixnum.h"
+#include "number.h"
 #include <errno.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -102,11 +102,11 @@ LK_LIB_DEFINECFUNC(read__file_charset) {
         RETURN(c != NULL ? LK_OBJ(lk_string_newFromDArray(VM, c)) : NIL);
     }
 }
-LK_LIB_DEFINECFUNC(read__file_fi) {
+LK_LIB_DEFINECFUNC(read__file_number) {
     FILE *f = FILEF(self);
     if(f == NULL) BUG("ReadableFile->st.file should NEVER be NULL");
     else {
-        darray_t *c = darray_allocfromfile(f, INT(ARG(0)));
+        darray_t *c = darray_allocfromfile(f, CNUMBER(ARG(0)));
         RETURN(c != NULL ? LK_OBJ(lk_string_newFromDArray(VM, c)) : NIL);
     }
 }
@@ -116,7 +116,7 @@ LK_LIB_DEFINECFUNC(readableQ__file) {
 LK_LIB_DEFINECFUNC(size__file) {
     struct stat s;
     if(stat(CSTRING(PATH(self)), &s) != 0) lk_vm_raiseerrno(VM);
-    RETURN(lk_fi_new(VM, s.st_size));
+    RETURN(lk_number_new(VM, s.st_size));
 }
 LK_LIB_DEFINECFUNC(write__file_str) {
     FILE *f = FILEF(self);
@@ -131,7 +131,7 @@ LK_LIB_DEFINECFUNC(writableQ__file) {
 }
 LK_LIB_DEFINEINIT(lk_file_libInit) {
     lk_object_t *file = vm->t_file,
-                *str = vm->t_string, *fi = vm->t_fi,
+                *str = vm->t_string, *number = vm->t_number,
                 *ch = vm->t_char, *charset = vm->t_charset;
     /* File */
     lk_lib_setGlobal("File", file);
@@ -149,7 +149,7 @@ LK_LIB_DEFINEINIT(lk_file_libInit) {
     lk_lib_setCFunc(file, "read", read__file, NULL);
     lk_lib_setCFunc(file, "read", read__file_ch, ch, NULL);
     lk_lib_setCFunc(file, "read", read__file_charset, charset, NULL);
-    lk_lib_setCFunc(file, "read", read__file_fi, fi, NULL);
+    lk_lib_setCFunc(file, "read", read__file_number, number, NULL);
     lk_lib_setCFunc(file, "readable?", readableQ__file, NULL);
     lk_lib_setCFunc(file, "size", size__file, NULL);
     lk_lib_setCFunc(file, "write", write__file_str, str, NULL);

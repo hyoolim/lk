@@ -1,7 +1,7 @@
 #include "instr.h"
 #include "char.h"
 #include "ext.h"
-#include "fixnum.h"
+#include "number.h"
 #include "string.h"
 #define INSTR (LK_INSTR(self))
 
@@ -20,9 +20,9 @@ LK_LIB_DEFINEINIT(lk_instr_libPreInit) {
 
 /* ext map - funcs */
 LK_LIB_DEFINECFUNC(column) {
-    RETURN(lk_fi_new(VM, INSTR->column)); }
+    RETURN(lk_number_new(VM, INSTR->column)); }
 LK_LIB_DEFINECFUNC(line) {
-    RETURN(lk_fi_new(VM, INSTR->line)); }
+    RETURN(lk_number_new(VM, INSTR->line)); }
 LK_LIB_DEFINECFUNC(message) {
     lk_instr_t *instr = INSTR;
     do {
@@ -82,9 +82,9 @@ lk_instr_t *lk_instr_newstring(lk_parser_t *parser, lk_string_t *s) {
     new->v = LK_OBJ(s); /* lk_string_newFromDArray(LK_VM(parser), s)); */
     return new;
 }
-lk_instr_t *lk_instr_newfi(lk_parser_t *parser, int i) {
-    lk_instr_t *new = instr_new(parser, LK_INSTRTYPE_FIXINT);
-    new->v = LK_OBJ(lk_fi_new(LK_VM(parser), i));
+lk_instr_t *lk_instr_newNumber(lk_parser_t *parser, double number) {
+    lk_instr_t *new = instr_new(parser, LK_INSTRTYPE_NUMBER);
+    new->v = LK_OBJ(lk_number_new(LK_VM(parser), number));
     return new;
 }
 lk_instr_t *lk_instr_newchar(lk_parser_t *parser, uint32_t c) {
@@ -94,11 +94,6 @@ lk_instr_t *lk_instr_newchar(lk_parser_t *parser, uint32_t c) {
 }
 lk_instr_t *lk_instr_newempty(lk_parser_t *parser) {
     return instr_new(parser, (enum lk_instrtype_t)NULL);
-}
-lk_instr_t *lk_instr_newff(lk_parser_t *parser, double f) {
-    lk_instr_t *new = instr_new(parser, LK_INSTRTYPE_FIXF);
-    new->v = LK_OBJ(lk_fr_new(LK_VM(parser), f));
-    return new;
 }
 lk_instr_t *lk_instr_newmessage(lk_parser_t *parser, lk_string_t *name) {
     lk_instr_t *new = instr_new(parser, LK_INSTRTYPE_APPLYMSG);
@@ -143,11 +138,8 @@ void lk_instr_print(lk_instr_t *self) {
         darray_printToStream(DARRAY(self->v), stdout);
         printf("'");
         break;
-    case LK_INSTRTYPE_FIXINT:
-        printf("%i", INT(self->v));
-        break;
-    case LK_INSTRTYPE_FIXF:
-        printf("%f", DOUBLE(self->v));
+    case LK_INSTRTYPE_NUMBER:
+        printf("%f", CNUMBER(self->v));
         break;
     case LK_INSTRTYPE_CHAR:
         printf("%c", CHAR(self->v));

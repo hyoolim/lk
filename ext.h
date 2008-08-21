@@ -3,7 +3,7 @@
 #include "vm.h"
 #include "error.h"
 #include "func.h"
-#include "fixnum.h"
+#include "number.h"
 #include "gc.h"
 #include "object.h"
 
@@ -29,11 +29,11 @@ LK_OBJ(LIST_ATPTR(&env->stack, (i))))
 
 #define CHAR(v) (LK_CHAR(v)->data)
 #define CHARSET(v) (&LK_CHARSET(v)->data)
+#define CNUMBER(v) (LK_NUMBER(v)->data)
+#define CSIZE(v) ((int)CNUMBER(v))
 #define CSTRING(v) (darray_toCString(DARRAY(v)))
 #define DARRAY(v) (&LK_SEQ(v)->data)
-#define DOUBLE(v) (LK_FR(v)->data)
 #define FALSE (VM->t_false)
-#define INT(v) (LK_FI(v)->data)
 #define NIL (VM->t_nil)
 #define QPHASH(v) (&LK_MAP(v)->data)
 #define TRUE (VM->t_true)

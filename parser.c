@@ -626,10 +626,10 @@ static READFUNC(readnumber) {
         numberifn_t num;
         switch(number_new(0, DARRAY(tok), &num)) {
         case NUMBERTYPE_INT:
-            darray_pushptr(self->words, lk_instr_newfi(self, num.i));
+            darray_pushptr(self->words, lk_instr_newNumber(self, num.i));
             break;
         case NUMBERTYPE_FLOAT:
-            darray_pushptr(self->words, lk_instr_newff(self, num.f));
+            darray_pushptr(self->words, lk_instr_newNumber(self, num.f));
             break;
         default:
             BUG("Invalid number type while trying to parse code.\n");

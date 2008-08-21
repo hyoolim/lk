@@ -1,6 +1,6 @@
 #include "object.h"
 #include "ext.h"
-#include "fixnum.h"
+#include "number.h"
 #include "gc.h"
 #include "list.h"
 #include "map.h"
@@ -45,7 +45,7 @@ LK_LIB_DEFINECFUNC(Ddefine_and_assignB__obj_str_obj_obj) {
     RETURN(v);
 }
 LK_LIB_DEFINECFUNC(Did__obj) {
-    RETURN(lk_fi_new(VM, (int)self)); }
+    RETURN(lk_number_new(VM, (int)self)); }
 LK_LIB_DEFINECFUNC(Dretrieve__obj_str) {
     struct lk_slot *slot = lk_object_getslotfromany(self, ARG(0));
     if(slot != NULL) RETURN(lk_object_getvaluefromslot(self, slot));

@@ -1,6 +1,6 @@
 #include "seq.h"
 #include "ext.h"
-#include "fixnum.h"
+#include "number.h"
 
 /* ext map - types */
 static LK_OBJ_DEFALLOCFUNC(alloc__seq) {
@@ -29,27 +29,27 @@ LK_LIB_DEFINECFUNC(at__gl_vec) {
 LK_LIB_DEFINECFUNC(clearB__gl) {
     darray_clear(DARRAY(self)); RETURN(self); }
 LK_LIB_DEFINECFUNC(cmp__gl_gl) {
-    RETURN(lk_fi_new(VM, darray_compareTo(DARRAY(self), DARRAY(ARG(0))))); }
+    RETURN(lk_number_new(VM, darray_compareTo(DARRAY(self), DARRAY(ARG(0))))); }
 LK_LIB_DEFINECFUNC(concatB__gl_gl) {
     darray_concat(DARRAY(self), DARRAY(ARG(0))); RETURN(self); }
 LK_LIB_DEFINECFUNC(size__gl) {
-    RETURN(lk_fi_new(VM, LIST_COUNT(DARRAY(self)))); }
+    RETURN(lk_number_new(VM, LIST_COUNT(DARRAY(self)))); }
 LK_LIB_DEFINECFUNC(eq__gl_gl) {
     RETURN(LIST_EQ(DARRAY(self), DARRAY(ARG(0))) ? TRUE : FALSE); }
-LK_LIB_DEFINECFUNC(limitB__gl_fi) {
-    darray_limit(DARRAY(self), INT(ARG(0))); RETURN(self); }
-LK_LIB_DEFINECFUNC(offsetB__gl_fi) {
-    darray_offset(DARRAY(self), INT(ARG(0))); RETURN(self); }
+LK_LIB_DEFINECFUNC(limitB__gl_number) {
+    darray_limit(DARRAY(self), CSIZE(ARG(0))); RETURN(self); }
+LK_LIB_DEFINECFUNC(offsetB__gl_number) {
+    darray_offset(DARRAY(self), CSIZE(ARG(0))); RETURN(self); }
 LK_LIB_DEFINECFUNC(restB__gl) {
     darray_offset(DARRAY(self), 1); RETURN(self); }
 LK_LIB_DEFINECFUNC(reverseB__gl) {
     darray_reverse(DARRAY(self)); RETURN(self); }
-LK_LIB_DEFINECFUNC(sliceB__gl_fi_fi) {
-    darray_slice(DARRAY(self), INT(ARG(0)), INT(ARG(1))); RETURN(self); }
-LK_LIB_DEFINECFUNC(swapB__gl_fi_fi) {
+LK_LIB_DEFINECFUNC(sliceB__gl_number_number) {
+    darray_slice(DARRAY(self), CSIZE(ARG(0)), CSIZE(ARG(1))); RETURN(self); }
+LK_LIB_DEFINECFUNC(swapB__gl_number_number) {
     int s = DARRAY(self)->data->ilen;
-    void *x = darray_get(DARRAY(self), INT(ARG(0)));
-    void *y = darray_get(DARRAY(self), INT(ARG(1)));
+    void *x = darray_get(DARRAY(self), CSIZE(ARG(0)));
+    void *y = darray_get(DARRAY(self), CSIZE(ARG(1)));
     void *t = memory_alloc(s);
     memcpy(t, x, s);
     memcpy(x, y, s);
@@ -58,7 +58,7 @@ LK_LIB_DEFINECFUNC(swapB__gl_fi_fi) {
     RETURN(self);
 }
 LK_LIB_DEFINEINIT(lk_seq_libInit) {
-    lk_object_t *gl = vm->t_seq, *fi = vm->t_fi, *vec = vm->t_vector;
+    lk_object_t *gl = vm->t_seq, *number = vm->t_number, *vec = vm->t_vector;
     lk_lib_setGlobal("Sequence", gl);
     lk_lib_setCFunc(gl, "at", at__gl_vec, vec, NULL);
     lk_lib_setCFunc(gl, "clear!", clearB__gl, NULL);
@@ -66,10 +66,10 @@ LK_LIB_DEFINEINIT(lk_seq_libInit) {
     lk_lib_setCFunc(gl, "++=", concatB__gl_gl, gl, NULL);
     lk_lib_setCFunc(gl, "size", size__gl, NULL);
     lk_lib_setCFunc(gl, "==", eq__gl_gl, gl, NULL);
-    lk_lib_setCFunc(gl, "limit!", limitB__gl_fi, fi, NULL);
-    lk_lib_setCFunc(gl, "offset!", offsetB__gl_fi, fi, NULL);
+    lk_lib_setCFunc(gl, "limit!", limitB__gl_number, number, NULL);
+    lk_lib_setCFunc(gl, "offset!", offsetB__gl_number, number, NULL);
     lk_lib_setCFunc(gl, "rest!", restB__gl, NULL);
     lk_lib_setCFunc(gl, "reverse!", reverseB__gl, NULL);
-    lk_lib_setCFunc(gl, "slice!", sliceB__gl_fi_fi, fi, fi, NULL);
-    lk_lib_setCFunc(gl, "swap!", swapB__gl_fi_fi, fi, fi, NULL);
+    lk_lib_setCFunc(gl, "slice!", sliceB__gl_number_number, number, number, NULL);
+    lk_lib_setCFunc(gl, "swap!", swapB__gl_number_number, number, number, NULL);
 }

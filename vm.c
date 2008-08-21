@@ -7,7 +7,7 @@
 #include "ext.h"
 #include "file.h"
 #include "vector.h"
-#include "fixnum.h"
+#include "number.h"
 #include "folder.h"
 #include "frame.h"
 #include "func.h"
@@ -42,12 +42,12 @@ LK_LIB_DEFINECFUNC(exit__vm) {
 LK_LIB_DEFINECFUNC(fork__vm) {
     pid_t child = fork();
     if(child == -1) lk_vm_raiseerrno(VM);
-    RETURN(lk_fi_new(VM, (int)child));
+    RETURN(lk_number_new(VM, (int)child));
 }
 LK_LIB_DEFINECFUNC(fork__vm_f) {
     pid_t child = fork();
     if(child == -1) lk_vm_raiseerrno(VM);
-    if(child > 0) RETURN(lk_fi_new(VM, (int)child));
+    if(child > 0) RETURN(lk_number_new(VM, (int)child));
     else {
         lk_kfunc_t *kf = LK_KFUNC(ARG(0));
         lk_frame_t *fr = lk_frame_new(VM);
@@ -61,14 +61,14 @@ LK_LIB_DEFINECFUNC(fork__vm_f) {
         DONE;
     }
 }
-LK_LIB_DEFINECFUNC(sleep_vm_fr) {
-    usleep((unsigned long)(DOUBLE(ARG(0)) * 1000000));
+LK_LIB_DEFINECFUNC(sleep_vm_number) {
+    usleep((unsigned long)(CNUMBER(ARG(0)) * 1000000));
     RETURN(self);
 }
 LK_LIB_DEFINECFUNC(seconds_since_epoch__vm) {
     struct timeval now;
     gettimeofday(&now, NULL);
-    RETURN(lk_fr_new(VM, now.tv_sec + now.tv_usec / 1000000.0));
+    RETURN(lk_number_new(VM, now.tv_sec + now.tv_usec / 1000000.0));
 }
 LK_LIB_DEFINECFUNC(seconds_west_of_utc__vm) {
     struct timeval now;
@@ -78,7 +78,7 @@ LK_LIB_DEFINECFUNC(seconds_west_of_utc__vm) {
     t = now.tv_sec;
     gm = *gmtime(&t);
     local = *localtime(&t);
-    RETURN(lk_fr_new(VM, (local.tm_sec - gm.tm_sec
+    RETURN(lk_number_new(VM, (local.tm_sec - gm.tm_sec
     + (local.tm_min - gm.tm_min) * 60
     + (local.tm_hour - gm.tm_hour) * 3600)
     - (local.tm_year < gm.tm_year
@@ -91,7 +91,7 @@ LK_LIB_DEFINECFUNC(system__vm) {
     if(child > 0) {
         int status;
         waitpid(child, &status, 0);
-        RETURN(lk_fi_new(VM, WEXITSTATUS(status)));
+        RETURN(lk_number_new(VM, WEXITSTATUS(status)));
     } else {
         int i, c = env->argc;
         char **args = memory_alloc(sizeof(char *) * (c + 1));
@@ -114,16 +114,15 @@ LK_LIB_DEFINECFUNC(system2__vm_str) {
 LK_LIB_DEFINECFUNC(wait__vm) {
     int status;
     pid_t child = wait(&status);
-    RETURN(lk_fi_new(VM, (int)child));
+    RETURN(lk_number_new(VM, (int)child));
 }
 LK_LIB_DEFINEINIT(lk_vm_libInit) {
-    lk_object_t *tvm = vm->t_vm, *f = vm->t_func, *fr = vm->t_fr,
-                *str = vm->t_string;
+    lk_object_t *tvm = vm->t_vm, *f = vm->t_func, *number = vm->t_number, *str = vm->t_string;
     lk_lib_setGlobal("VirtualMachine", tvm);
     lk_lib_setCFunc(tvm, "exit", exit__vm, NULL);
     lk_lib_setCFunc(tvm, "fork", fork__vm, NULL);
     lk_lib_setCFunc(tvm, "fork", fork__vm_f, f, NULL);
-    lk_lib_setCFunc(tvm, "sleep", sleep_vm_fr, fr, NULL);
+    lk_lib_setCFunc(tvm, "sleep", sleep_vm_number, number, NULL);
     lk_lib_setCFunc(tvm, "seconds since epoch", seconds_since_epoch__vm, NULL);
     lk_lib_setCFunc(tvm, "seconds west of utc", seconds_west_of_utc__vm, NULL);
     lk_lib_setCFunc(tvm, "system", system__vm, -1);
@@ -151,7 +150,7 @@ lk_vm_t *lk_vm_new(void) {
     lk_file_libPreInit(self);
     lk_folder_libPreInit(self);
     lk_vector_libPreInit(self);
-    lk_fixnum_libPreInit(self);
+    lk_number_libPreInit(self);
     lk_frame_libPreInit(self);
     lk_func_libPreInit(self);
     lk_instr_libPreInit(self);
@@ -177,7 +176,7 @@ lk_vm_t *lk_vm_new(void) {
     lk_file_libInit(self);
     lk_folder_libInit(self);
     lk_vector_libInit(self);
-    lk_fixnum_libInit(self);
+    lk_number_libInit(self);
     lk_frame_libInit(self);
     lk_func_libInit(self);
     lk_gc_libInit(self);
@@ -378,8 +377,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         self = args;
         goto nextinstr;
     /* "literals" are actually generators */
-    case LK_INSTRTYPE_FIXINT:
-    case LK_INSTRTYPE_FIXF:
+    case LK_INSTRTYPE_NUMBER:
     case LK_INSTRTYPE_STRING: 
     case LK_INSTRTYPE_CHAR: 
         lk_frame_stackpush(self, lk_object_clone(instr->v));

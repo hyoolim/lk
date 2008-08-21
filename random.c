@@ -2,7 +2,6 @@
 #include "ext.h"
 #include <sys/time.h>
 #include <time.h>
-#define RANDOM (LK_RANDOM(self))
 
 /* private func - see below for real impl */
 static void init_genrand(lk_random_t *self, unsigned long s);
@@ -14,38 +13,36 @@ static double genrand_real3(lk_random_t *self);
 static double genrand_res53(lk_random_t *self); */
 
 /* ext map */
-static LK_OBJ_DEFALLOCFUNC(alloc__rd) {
+static LK_OBJ_DEFALLOCFUNC(alloc__random) {
     static int n = 0;
     struct timeval tv;
     int seed;
     gettimeofday(&tv, 0);
     seed = tv.tv_sec ^ tv.tv_usec ^ n ++;
-    RANDOM->seed = lk_fi_new(LK_VM(self), seed);
-    init_genrand(RANDOM, seed);
+    LK_RANDOM(self)->seed = lk_number_new(LK_VM(self), seed);
+    init_genrand(LK_RANDOM(self), seed);
 }
-LK_LIB_DEFINECFUNC(init__rd_fi) {
-    init_genrand(RANDOM, INT(RANDOM->seed = LK_FI(ARG(0))));
+LK_LIB_DEFINECFUNC(init__random_number) {
+    init_genrand(LK_RANDOM(self), CNUMBER(LK_RANDOM(self)->seed = LK_NUMBER(ARG(0))));
     RETURN(self);
 }
-LK_LIB_DEFINECFUNC(fixed_integer__rd) {
-    RETURN(lk_fi_new(VM, (int)genrand_int32(RANDOM))); }
-LK_LIB_DEFINECFUNC(fixed_real__rd) {
-    RETURN(lk_fr_new(VM, genrand_real1(RANDOM))); }
-LK_LIB_DEFINEINIT(lk_random_extinit) {
-    lk_object_t *obj = vm->t_obj, *fi = vm->t_fi;
-    lk_object_t *rd = lk_object_allocwithsize(obj, sizeof(lk_random_t));
-    LK_RANDOM(rd)->seed = lk_fi_new(vm, 0);
-    init_genrand(LK_RANDOM(rd), 0);
-    lk_object_setallocfunc(rd, alloc__rd);
-    lk_lib_setGlobal("Random", rd);
-    lk_lib_setCFunc(rd, "init!", init__rd_fi, fi, NULL);
-    lk_lib_setCFunc(rd, "fixed_integer", fixed_integer__rd, NULL);
-    lk_lib_setCFunc(rd, "fixed_real", fixed_real__rd, NULL);
-    lk_lib_setCField(rd, "seed", fi, offsetof(lk_random_t, seed));
+LK_LIB_DEFINECFUNC(nextFloat__random) {
+    RETURN(lk_number_new(VM, genrand_real1(LK_RANDOM(self))));
 }
-
-/* name conflict with ext rand gen */
-#undef N
+LK_LIB_DEFINECFUNC(nextInteger__random) {
+    RETURN(lk_number_new(VM, (int)genrand_int32(LK_RANDOM(self))));
+}
+LK_LIB_DEFINEINIT(lk_random_extinit) {
+    lk_object_t *number = vm->t_number;
+    lk_object_t *random = lk_object_allocwithsize(vm->t_obj, sizeof(lk_random_t));
+    lk_object_setallocfunc(random, alloc__random);
+    alloc__random(random, NULL);
+    lk_lib_setGlobal("RandomNumberGenerator", random);
+    lk_lib_setCFunc(random, "init!", init__random_number, number, NULL);
+    lk_lib_setCFunc(random, "nextFloat", nextFloat__random, NULL);
+    lk_lib_setCFunc(random, "nextInteger", nextInteger__random, NULL);
+    lk_lib_setCField(random, "seed", number, offsetof(lk_random_t, seed));
+}
 
 /* modified and cut so that mult rand gen are possible */
 /* 

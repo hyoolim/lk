@@ -1,6 +1,6 @@
 #include "list.h"
 #include "ext.h"
-#include "fixnum.h"
+#include "number.h"
 
 /* ext map - types */
 static LK_OBJ_DEFMARKFUNC(mark__list) {
@@ -14,8 +14,8 @@ LK_LIB_DEFINEINIT(lk_list_libPreInit) {
 }
 
 /* ext map - funcs */
-LK_LIB_DEFINECFUNC(at__darray_fi) {
-    lk_object_t *v = darray_getptr(DARRAY(self), INT(ARG(0)));
+LK_LIB_DEFINECFUNC(at__darray_number) {
+    lk_object_t *v = darray_getptr(DARRAY(self), CSIZE(ARG(0)));
     RETURN(v != NULL ? v : NIL);
 }
 LK_LIB_DEFINECFUNC(flatten__list) {
@@ -24,31 +24,31 @@ LK_LIB_DEFINECFUNC(flatten__list) {
     darray_concat(&caller->stack, DARRAY(self));
     DONE;
 }
-LK_LIB_DEFINECFUNC(insertB__darray_fi_obj) {
-    darray_insertptr(DARRAY(self), INT(ARG(0)), lk_object_addref(self, ARG(0)));
+LK_LIB_DEFINECFUNC(insertB__darray_number_obj) {
+    darray_insertptr(DARRAY(self), CSIZE(ARG(0)), lk_object_addref(self, ARG(0)));
     RETURN(self);
 }
-LK_LIB_DEFINECFUNC(removeB__darray_fi) {
-    lk_object_t *v = darray_removeptr(DARRAY(self), INT(ARG(0)));
+LK_LIB_DEFINECFUNC(removeB__darray_number) {
+    lk_object_t *v = darray_removeptr(DARRAY(self), CSIZE(ARG(0)));
     RETURN(v != NULL ? v : NIL);
 }
-LK_LIB_DEFINECFUNC(setB__darray_fi_obj) {
-    darray_setptr(DARRAY(self), INT(ARG(0)), ARG(1));
+LK_LIB_DEFINECFUNC(setB__darray_number_obj) {
+    darray_setptr(DARRAY(self), CSIZE(ARG(0)), ARG(1));
     RETURN(self);
 }
-LK_LIB_DEFINECFUNC(setB__darray_fi_fi_list) {
-    darray_setrange(DARRAY(self), INT(ARG(0)), INT(ARG(1)), DARRAY(ARG(2)));
+LK_LIB_DEFINECFUNC(setB__darray_number_number_list) {
+    darray_setrange(DARRAY(self), CSIZE(ARG(0)), CSIZE(ARG(1)), DARRAY(ARG(2)));
     RETURN(self);
 }
 LK_LIB_DEFINEINIT(lk_list_libInit) {
-    lk_object_t *list = vm->t_list, *obj = vm->t_obj, *fi = vm->t_fi;
+    lk_object_t *list = vm->t_list, *obj = vm->t_obj, *number = vm->t_number;
     lk_lib_setGlobal("List", list);
-    lk_lib_setCFunc(list, "at", at__darray_fi, fi, NULL);
+    lk_lib_setCFunc(list, "at", at__darray_number, number, NULL);
     lk_lib_setCFunc(list, "*", flatten__list, NULL);
-    lk_lib_setCFunc(list, "insert!", insertB__darray_fi_obj, fi, obj, NULL);
-    lk_lib_setCFunc(list, "remove!", removeB__darray_fi, fi, NULL);
-    lk_lib_setCFunc(list, "set!", setB__darray_fi_obj, fi, obj, NULL);
-    lk_lib_setCFunc(list, "set!", setB__darray_fi_fi_list, fi, fi, list, NULL);
+    lk_lib_setCFunc(list, "insert!", insertB__darray_number_obj, number, obj, NULL);
+    lk_lib_setCFunc(list, "remove!", removeB__darray_number, number, NULL);
+    lk_lib_setCFunc(list, "set!", setB__darray_number_obj, number, obj, NULL);
+    lk_lib_setCFunc(list, "set!", setB__darray_number_number_list, number, number, list, NULL);
 }
 
 /* new */

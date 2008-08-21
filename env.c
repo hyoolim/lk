@@ -1,6 +1,6 @@
 #include "env.h"
 #include "ext.h"
-#include "fixnum.h"
+#include "number.h"
 #include "string.h"
 #include <unistd.h>
 
@@ -14,7 +14,7 @@ extern char** environ;
 LK_LIB_DEFINECFUNC(size__env) {
     int c;
     for(c = 0; environ[c] != NULL; c ++) { }
-    RETURN(lk_fi_new(VM, c));
+    RETURN(lk_number_new(VM, c));
 }
 LK_LIB_DEFINECFUNC(keys__env) {
     lk_list_t *keys = lk_list_new(VM);

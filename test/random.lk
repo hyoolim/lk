@@ -1,8 +1,9 @@
 include('tester.lk')
 Tester/new('Random')/do {
+r := RandomNumberGenerator/new(0)
 
-/test('Random/fixed_integer #1', Random/fixed_integer, -1937831252)
-/test('Random/fixed_integer #2', Random/fixed_integer, -1748719057)
-/test('Random/fixed_integer #3', Random/fixed_integer, -1223252363)
+/test('nextInteger #1', r/nextInteger, -1937831252)
+/test('nextInteger #2', r/nextInteger, -1748719057)
+/test('nextInteger #3', r/nextInteger, -1223252363)
 /finish
 }

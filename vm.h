@@ -84,14 +84,13 @@ struct lk_vm {
     lk_frame_t *global;
 
     /* freq used primitive types */
-    /* bool     */ lk_object_t *t_nil, *t_bool, *t_true, *t_false,
-                               *t_pi, *t_ni;
+    /* bool     */ lk_object_t *t_nil, *t_bool, *t_true, *t_false;
     /* char     */ lk_object_t *t_char;
     /* charset  */ lk_object_t *t_charset;
     /* error    */ lk_object_t *t_error;
     /* file     */ lk_object_t *t_file, *t_folder, *t_stdin, *t_stdout, *t_stderr;
     /* vector   */ lk_object_t *t_vector;
-    /* fixnum   */ lk_object_t *t_number, *t_int, *t_fi, *t_real, *t_fr;
+    /* fixnum   */ lk_object_t *t_number;
     /* frame    */ lk_object_t *t_frame;
     /* func     */ lk_object_t *t_func, *t_sig, *t_kfunc, *t_cfunc, *t_gfunc;
     /* seq      */ lk_object_t *t_seq;

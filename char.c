@@ -1,6 +1,6 @@
 #include "char.h"
 #include "ext.h"
-#include "fixnum.h"
+#include "number.h"
 
 /* ext map - types */
 static LK_OBJ_DEFALLOCFUNC(alloc__ch) {
@@ -12,20 +12,20 @@ LK_LIB_DEFINEINIT(lk_char_libPreInit) {
 }
 
 /* ext map - funcs */
-LK_LIB_DEFINECFUNC(add__ch_fi) {
-    if(INT(ARG(0)) > UINT32_MAX - CHAR(self)) {
+LK_LIB_DEFINECFUNC(add__ch_number) {
+    if(CNUMBER(ARG(0)) > UINT32_MAX - CHAR(self)) {
         lk_vm_raisecstr(VM, "Will overflow");
     }
-    RETURN(lk_char_new(VM, CHAR(self) + INT(ARG(0))));
+    RETURN(lk_char_new(VM, CHAR(self) + CNUMBER(ARG(0))));
 }
 LK_LIB_DEFINECFUNC(subtract__ch_ch) {
-    RETURN(lk_fi_new(VM, CHAR(self) - CHAR(ARG(0))));
+    RETURN(lk_number_new(VM, CHAR(self) - CHAR(ARG(0))));
 }
-LK_LIB_DEFINECFUNC(subtract__ch_fi) {
-    if(INT(ARG(0)) > CHAR(self)) {
+LK_LIB_DEFINECFUNC(subtract__ch_number) {
+    if(CNUMBER(ARG(0)) > CHAR(self)) {
         lk_vm_raisecstr(VM, "Will underflow");
     }
-    RETURN(lk_char_new(VM, CHAR(self) - INT(ARG(0))));
+    RETURN(lk_char_new(VM, CHAR(self) - CNUMBER(ARG(0))));
 }
 LK_LIB_DEFINECFUNC(to_string__ch) {
     lk_string_t *str = lk_string_new(VM);
@@ -33,12 +33,12 @@ LK_LIB_DEFINECFUNC(to_string__ch) {
     RETURN(str);
 }
 LK_LIB_DEFINEINIT(lk_char_libInit) {
-    lk_object_t *ch = vm->t_char, *fi = vm->t_fi;
+    lk_object_t *ch = vm->t_char, *number = vm->t_number;
     lk_lib_setGlobal("Character", ch);
-    lk_lib_setCFunc(ch, "+", add__ch_fi, fi, NULL);
+    lk_lib_setCFunc(ch, "+", add__ch_number, number, NULL);
     lk_lib_setCFunc(ch, "<=>", subtract__ch_ch, ch, NULL);
     lk_lib_setCFunc(ch, "-", subtract__ch_ch, ch, NULL);
-    lk_lib_setCFunc(ch, "-", subtract__ch_fi, fi, NULL);
+    lk_lib_setCFunc(ch, "-", subtract__ch_number, number, NULL);
     lk_lib_setCFunc(ch, "toString", to_string__ch, NULL);
 }
 

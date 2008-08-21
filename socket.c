@@ -1,6 +1,6 @@
 #include "socket.h"
 #include "ext.h"
-#include "fixnum.h"
+#include "number.h"
 #include "list.h"
 #define IPADDR (LK_IPADDR(self))
 #define SOCKET (LK_SOCKET(self))
@@ -43,10 +43,10 @@ LK_LIB_DEFINECFUNC(acce_sock) {
     conn->out = fdopen(conn->fd, "w");
     RETURN(conn);
 }
-LK_LIB_DEFINECFUNC(bind__sock_ip_fi) {
+LK_LIB_DEFINECFUNC(bind__sock_ip_number) {
     struct sockaddr_in my;
     my.sin_family = AF_INET;
-    my.sin_port = htons((uint16_t)INT(ARG(1)));
+    my.sin_port = htons((uint16_t)CNUMBER(ARG(1)));
     my.sin_addr = LK_IPADDR(ARG(0))->addr;
     memset(&(my.sin_zero), 0x0, 8);
     if(bind(SOCKET->fd,
@@ -55,10 +55,10 @@ LK_LIB_DEFINECFUNC(bind__sock_ip_fi) {
     }
     RETURN(self);
 }
-LK_LIB_DEFINECFUNC(connect__sock_ip_fi) {
+LK_LIB_DEFINECFUNC(connect__sock_ip_number) {
     struct sockaddr_in remote;
     remote.sin_family = AF_INET;
-    remote.sin_port = htons((uint16_t)INT(ARG(1)));
+    remote.sin_port = htons((uint16_t)CNUMBER(ARG(1)));
     remote.sin_addr = LK_IPADDR(ARG(0))->addr;
     memset(&(remote.sin_zero), 0x0, 8);
     if(connect(SOCKET->fd,
@@ -74,7 +74,7 @@ LK_LIB_DEFINECFUNC(listen__sock) {
     RETURN(self);
 }
 LK_LIB_DEFINEINIT(lk_socket_extinit) {
-    lk_object_t *obj = vm->t_obj, *str = vm->t_string, *fi = vm->t_fi;
+    lk_object_t *obj = vm->t_obj, *str = vm->t_string, *number = vm->t_number;
     lk_object_t *ip = lk_object_allocwithsize(obj, sizeof(lk_ipaddr_t));
     lk_object_t *sock = lk_object_allocwithsize(obj, sizeof(lk_socket_t));
     lk_object_setallocfunc(sock, alloc__sock);
@@ -87,7 +87,7 @@ LK_LIB_DEFINEINIT(lk_socket_extinit) {
     /* */
     lk_lib_setGlobal("Socket", vm->t_socket = sock);
     lk_lib_setCFunc(sock, "accept", acce_sock, NULL);
-    lk_lib_setCFunc(sock, "bind", bind__sock_ip_fi, ip, fi, NULL);
-    lk_lib_setCFunc(sock, "connect", connect__sock_ip_fi, ip, fi, NULL);
+    lk_lib_setCFunc(sock, "bind", bind__sock_ip_number, ip, number, NULL);
+    lk_lib_setCFunc(sock, "connect", connect__sock_ip_number, ip, number, NULL);
     lk_lib_setCFunc(sock, "listen", listen__sock, NULL);
 }

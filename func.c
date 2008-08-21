@@ -1,6 +1,6 @@
 #include "func.h"
 #include "ext.h"
-#include "fixnum.h"
+#include "number.h"
 
 /* ext map - types */
 /* */
@@ -104,10 +104,10 @@ LK_LIB_DEFINECFUNC(addB__f_f) {
     }
 }
 LK_LIB_DEFINECFUNC(minimum_argument_size__f) {
-    RETURN(lk_fi_new(VM, LK_FUNC(self)->cf.minargc));
+    RETURN(lk_number_new(VM, LK_FUNC(self)->cf.minargc));
 }
 LK_LIB_DEFINECFUNC(maximum_argument_size__f) {
-    RETURN(lk_fi_new(VM, LK_FUNC(self)->cf.maxargc));
+    RETURN(lk_number_new(VM, LK_FUNC(self)->cf.maxargc));
 }
 LK_LIB_DEFINECFUNC(signature__f) {
     darray_t *sigs = LK_FUNC(self)->cf.sigs;

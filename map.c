@@ -1,5 +1,5 @@
 #include "ext.h"
-#include "fixnum.h"
+#include "number.h"
 #include "map.h"
 #include "object.h"
 
@@ -34,7 +34,7 @@ LK_LIB_DEFINECFUNC(clearB__map) {
     RETURN(self);
 }
 LK_LIB_DEFINECFUNC(size__map) {
-    RETURN(lk_fi_new(VM, qphash_size(QPHASH(self))));
+    RETURN(lk_number_new(VM, qphash_size(QPHASH(self))));
 }
 LK_LIB_DEFINECFUNC(keys__map) {
     lk_list_t *keys = lk_list_new(VM);

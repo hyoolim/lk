@@ -1,6 +1,6 @@
 #include "vector.h"
 #include "ext.h"
-#include "fixnum.h"
+#include "number.h"
 
 /* ext map - types */
 LK_LIB_DEFINEINIT(lk_vector_libPreInit) {
@@ -10,9 +10,9 @@ LK_LIB_DEFINEINIT(lk_vector_libPreInit) {
 }
 
 /* ext map - funcs */
-LK_LIB_DEFINECFUNC(at__vec_fi) {
-    int *v = darray_get(DARRAY(self), INT(ARG(0)));
-    RETURN(v != NULL ? LK_OBJ(lk_fi_new(VM, *v)) : NIL);
+LK_LIB_DEFINECFUNC(at__vec_number) {
+    int *v = darray_get(DARRAY(self), CSIZE(ARG(0)));
+    RETURN(v != NULL ? LK_OBJ(lk_number_new(VM, *v)) : NIL);
 }
 #define AT(i) (*(int *)LIST_AT(values, *(int *)LIST_AT(indexes, (i))))
 #define SWAP(x, y) do { \
@@ -41,26 +41,30 @@ LK_LIB_DEFINECFUNC(grade__vec) {
     quicksort_hoare(sl, il, 0, LIST_COUNT(il) - 1);
     RETURN(indexes);
 }
-LK_LIB_DEFINECFUNC(insertB__vec_fi_fi) {
-    darray_insert(DARRAY(self), INT(ARG(0)), &INT(ARG(1)));
+LK_LIB_DEFINECFUNC(insertB__vec_number_number) {
+    /*
+    darray_insert(DARRAY(self), CSIZE(ARG(0)), &CSIZE(ARG(1)));
+    */
     RETURN(self);
 }
-LK_LIB_DEFINECFUNC(removeB__vec_fi) {
-    int i = INT(ARG(0));
+LK_LIB_DEFINECFUNC(removeB__vec_number) {
+    int i = CSIZE(ARG(0));
     int *v = darray_get(DARRAY(self), i);
     darray_remove(DARRAY(self), i);
-    RETURN(v != NULL ? LK_OBJ(lk_fi_new(VM, *v)) : NIL);
+    RETURN(v != NULL ? LK_OBJ(lk_number_new(VM, *v)) : NIL);
 }
-LK_LIB_DEFINECFUNC(setB__vec_fi_fi) {
-    darray_set(DARRAY(self), INT(ARG(0)), &INT(ARG(1)));
+LK_LIB_DEFINECFUNC(setB__vec_number_number) {
+    /*
+    darray_set(DARRAY(self), CSIZE(ARG(0)), &CSIZE(ARG(1)));
+    */
     RETURN(self);
 }
 LK_LIB_DEFINEINIT(lk_vector_libInit) {
-    lk_object_t *vec = vm->t_vector, *fi = vm->t_fi;
+    lk_object_t *vec = vm->t_vector, *number = vm->t_number;
     lk_lib_setGlobal("Vector", vec);
-    lk_lib_setCFunc(vec, "at", at__vec_fi, fi, NULL);
+    lk_lib_setCFunc(vec, "at", at__vec_number, number, NULL);
     lk_lib_setCFunc(vec, "grade", grade__vec, NULL);
-    lk_lib_setCFunc(vec, "insert!", insertB__vec_fi_fi, fi, fi, NULL);
-    lk_lib_setCFunc(vec, "remove!", removeB__vec_fi, fi, NULL);
-    lk_lib_setCFunc(vec, "set!", setB__vec_fi_fi, fi, fi, NULL);
+    lk_lib_setCFunc(vec, "insert!", insertB__vec_number_number, number, number, NULL);
+    lk_lib_setCFunc(vec, "remove!", removeB__vec_number, number, NULL);
+    lk_lib_setCFunc(vec, "set!", setB__vec_number_number, number, number, NULL);
 }

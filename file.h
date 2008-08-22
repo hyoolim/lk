@@ -13,6 +13,6 @@ struct lk_file {
 };
 
 /* init */
-LK_LIB_DEFINEINIT(lk_file_libPreInit);
-LK_LIB_DEFINEINIT(lk_file_libInit);
+void lk_file_libPreInit(lk_vm_t *vm);
+void lk_file_libInit(lk_vm_t *vm);
 #endif

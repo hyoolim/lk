@@ -3,14 +3,14 @@
 #include "number.h"
 
 /* ext map - types */
-LK_LIB_DEFINEINIT(lk_vector_libPreInit) {
+void lk_vector_libPreInit(lk_vm_t *vm) {
     vm->t_vector = lk_object_alloc(vm->t_seq);
     darray_fin(DARRAY(vm->t_vector));
     darray_init(DARRAY(vm->t_vector), sizeof(int), 16);
 }
 
 /* ext map - funcs */
-LK_LIB_DEFINECFUNC(at_vec_number) {
+static void at_vec_number(lk_object_t *self, lk_scope_t *local) {
     int *v = darray_get(DARRAY(self), CSIZE(ARG(0)));
     RETURN(v != NULL ? LK_OBJ(lk_number_new(VM, *v)) : NIL);
 }
@@ -33,7 +33,7 @@ static void quicksort_hoare(darray_t *values, darray_t *indexes, int low, int hi
         quicksort_hoare(values, indexes, l + 1, hi);
     }
 }
-LK_LIB_DEFINECFUNC(grade_vec) {
+static void grade_vec(lk_object_t *self, lk_scope_t *local) {
     lk_vector_t *indexes = LK_VECTOR(lk_object_alloc(VM->t_vector));
     darray_t *sl = DARRAY(self), *il = DARRAY(indexes);
     darray_resize(il, LIST_COUNT(sl));
@@ -41,25 +41,25 @@ LK_LIB_DEFINECFUNC(grade_vec) {
     quicksort_hoare(sl, il, 0, LIST_COUNT(il) - 1);
     RETURN(indexes);
 }
-LK_LIB_DEFINECFUNC(insertB_vec_number_number) {
+static void insertB_vec_number_number(lk_object_t *self, lk_scope_t *local) {
     /*
     darray_insert(DARRAY(self), CSIZE(ARG(0)), &CSIZE(ARG(1)));
     */
     RETURN(self);
 }
-LK_LIB_DEFINECFUNC(removeB_vec_number) {
+static void removeB_vec_number(lk_object_t *self, lk_scope_t *local) {
     int i = CSIZE(ARG(0));
     int *v = darray_get(DARRAY(self), i);
     darray_remove(DARRAY(self), i);
     RETURN(v != NULL ? LK_OBJ(lk_number_new(VM, *v)) : NIL);
 }
-LK_LIB_DEFINECFUNC(setB_vec_number_number) {
+static void setB_vec_number_number(lk_object_t *self, lk_scope_t *local) {
     /*
     darray_set(DARRAY(self), CSIZE(ARG(0)), &CSIZE(ARG(1)));
     */
     RETURN(self);
 }
-LK_LIB_DEFINEINIT(lk_vector_libInit) {
+void lk_vector_libInit(lk_vm_t *vm) {
     lk_object_t *vec = vm->t_vector, *number = vm->t_number;
     lk_lib_setGlobal("Vector", vec);
     lk_lib_setCFunc(vec, "at", at_vec_number, number, NULL);

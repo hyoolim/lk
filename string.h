@@ -8,8 +8,8 @@ typedef struct lk_seq lk_string_t;
 #include "seq.h"
 
 /* ext map */
-LK_LIB_DEFINEINIT(lk_string_libPreInit);
-LK_LIB_DEFINEINIT(lk_string_libInit);
+void lk_string_libPreInit(lk_vm_t *vm);
+void lk_string_libInit(lk_vm_t *vm);
 
 /* new */
 lk_string_t *lk_string_new(lk_vm_t *vm);

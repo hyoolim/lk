@@ -13,7 +13,7 @@ static double genrand_real3(lk_random_t *self);
 static double genrand_res53(lk_random_t *self); */
 
 /* ext map */
-static LK_OBJ_DEFALLOCFUNC(alloc_random) {
+static void alloc_random(lk_object_t *self, lk_object_t *parent) {
     static int n = 0;
     struct timeval tv;
     int seed;
@@ -22,17 +22,17 @@ static LK_OBJ_DEFALLOCFUNC(alloc_random) {
     LK_RANDOM(self)->seed = lk_number_new(LK_VM(self), seed);
     init_genrand(LK_RANDOM(self), seed);
 }
-LK_LIB_DEFINECFUNC(init_random_number) {
+static void init_random_number(lk_object_t *self, lk_scope_t *local) {
     init_genrand(LK_RANDOM(self), CNUMBER(LK_RANDOM(self)->seed = LK_NUMBER(ARG(0))));
     RETURN(self);
 }
-LK_LIB_DEFINECFUNC(nextFloat_random) {
+static void nextFloat_random(lk_object_t *self, lk_scope_t *local) {
     RETURN(lk_number_new(VM, genrand_real1(LK_RANDOM(self))));
 }
-LK_LIB_DEFINECFUNC(nextInteger_random) {
+static void nextInteger_random(lk_object_t *self, lk_scope_t *local) {
     RETURN(lk_number_new(VM, (int)genrand_int32(LK_RANDOM(self))));
 }
-LK_LIB_DEFINEINIT(lk_random_extinit) {
+void lk_random_extinit(lk_vm_t *vm) {
     lk_object_t *number = vm->t_number;
     lk_object_t *random = lk_object_allocWithSize(vm->t_object, sizeof(lk_random_t));
     lk_object_setallocfunc(random, alloc_random);

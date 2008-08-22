@@ -13,10 +13,10 @@
 static LK_OBJ_DEFMARKFUNC(mark_file) {
     mark(LK_OBJ(PATH(self)));
 }
-static LK_OBJ_DEFFREEFUNC(free_file) {
+static void free_file(lk_object_t *self) {
     if(FILEF(self) != NULL) fclose(FILEF(self));
 }
-LK_LIB_DEFINEINIT(lk_file_libPreInit) {
+void lk_file_libPreInit(lk_vm_t *vm) {
     vm->t_file = lk_object_allocWithSize(vm->t_object, sizeof(lk_file_t));
     lk_object_setmarkfunc(vm->t_file, mark_file);
     lk_object_setfreefunc(vm->t_file, free_file);
@@ -26,7 +26,7 @@ LK_LIB_DEFINEINIT(lk_file_libPreInit) {
 }
 
 /* ext map - funcs */
-LK_LIB_DEFINECFUNC(close_file) {
+static void close_file(lk_object_t *self, lk_scope_t *local) {
     FILE *f = FILEF(self);
     if(f == NULL) BUG("Readable/WritableFile->st.file should NEVER be NULL");
     else {
@@ -36,49 +36,49 @@ LK_LIB_DEFINECFUNC(close_file) {
     self->o.parent = VM->t_file;
     RETURN(self);
 }
-LK_LIB_DEFINECFUNC(directoryQ_file) {
+static void directoryQ_file(lk_object_t *self, lk_scope_t *local) {
     struct stat s;
     RETURN(stat(CSTRING(PATH(self)), &s) == 0 && S_ISDIR(s.st_mode) ? TRUE : FALSE);
 }
-LK_LIB_DEFINECFUNC(delete_file) {
+static void delete_file(lk_object_t *self, lk_scope_t *local) {
     if(remove(CSTRING(PATH(self))) == 0) RETURN(self);
     else lk_vm_raiseerrno(VM);
 }
-LK_LIB_DEFINECFUNC(executableQ_file) {
+static void executableQ_file(lk_object_t *self, lk_scope_t *local) {
     RETURN(access(CSTRING(PATH(self)), X_OK) == 0 ? TRUE : FALSE);
 }
-LK_LIB_DEFINECFUNC(existsQ_file) {
+static void existsQ_file(lk_object_t *self, lk_scope_t *local) {
     RETURN(access(CSTRING(PATH(self)), F_OK) == 0 ? TRUE : FALSE);
 }
-LK_LIB_DEFINECFUNC(flush_file) {
+static void flush_file(lk_object_t *self, lk_scope_t *local) {
     FILE *f = FILEF(self);
     if(f == NULL) BUG("WritableFile->st.file should NEVER be NULL");
     if(fflush(f) == 0) RETURN(self);
     else lk_vm_raiseerrno(VM);
 }
-LK_LIB_DEFINECFUNC(init_file_str) {
+static void init_file_str(lk_object_t *self, lk_scope_t *local) {
     PATH(self) = LK_STRING(ARG(0));
     RETURN(self);
 }
-LK_LIB_DEFINECFUNC(move_file_str) {
+static void move_file_str(lk_object_t *self, lk_scope_t *local) {
     if(rename(CSTRING(PATH(self)), CSTRING(ARG(0))) == 0) RETURN(self);
     else lk_vm_raiseerrno(VM);
 }
-LK_LIB_DEFINECFUNC(openForReading_file) {
+static void openForReading_file(lk_object_t *self, lk_scope_t *local) {
     const char *path = CSTRING(PATH(self));
     if(FILEF(self) != NULL) BUG("ReadableFile->st.file should be NULL");
     FILEF(self) = fopen(path, "rb");
     if(FILEF(self) == NULL) lk_vm_raiseerrno(VM);
     else RETURN(self);
 }
-LK_LIB_DEFINECFUNC(openForWriting_file) {
+static void openForWriting_file(lk_object_t *self, lk_scope_t *local) {
     const char *path = CSTRING(PATH(self));
     if(FILEF(self) != NULL) BUG("WritableFile->st.file should be NULL");
     FILEF(self) = fopen(path, "wb");
     if(FILEF(self) == NULL) lk_vm_raiseerrno(VM);
     else RETURN(self);
 }
-LK_LIB_DEFINECFUNC(read_file) {
+static void read_file(lk_object_t *self, lk_scope_t *local) {
     FILE *f = FILEF(self);
     if(f == NULL) BUG("ReadableFile->st.file should NEVER be NULL");
     else {
@@ -86,7 +86,7 @@ LK_LIB_DEFINECFUNC(read_file) {
         RETURN(c != NULL ? LK_OBJ(lk_string_newFromDArray(VM, c)) : NIL);
     }
 }
-LK_LIB_DEFINECFUNC(read_file_ch) {
+static void read_file_ch(lk_object_t *self, lk_scope_t *local) {
     FILE *f = FILEF(self);
     if(f == NULL) BUG("ReadableFile->st.file should NEVER be NULL");
     else {
@@ -94,7 +94,7 @@ LK_LIB_DEFINECFUNC(read_file_ch) {
         RETURN(c != NULL ? LK_OBJ(lk_string_newFromDArray(VM, c)) : NIL);
     }
 }
-LK_LIB_DEFINECFUNC(read_file_charset) {
+static void read_file_charset(lk_object_t *self, lk_scope_t *local) {
     FILE *f = FILEF(self);
     if(f == NULL) BUG("ReadableFile->st.file should NEVER be NULL");
     else {
@@ -102,7 +102,7 @@ LK_LIB_DEFINECFUNC(read_file_charset) {
         RETURN(c != NULL ? LK_OBJ(lk_string_newFromDArray(VM, c)) : NIL);
     }
 }
-LK_LIB_DEFINECFUNC(read_file_number) {
+static void read_file_number(lk_object_t *self, lk_scope_t *local) {
     FILE *f = FILEF(self);
     if(f == NULL) BUG("ReadableFile->st.file should NEVER be NULL");
     else {
@@ -110,15 +110,15 @@ LK_LIB_DEFINECFUNC(read_file_number) {
         RETURN(c != NULL ? LK_OBJ(lk_string_newFromDArray(VM, c)) : NIL);
     }
 }
-LK_LIB_DEFINECFUNC(readableQ_file) {
+static void readableQ_file(lk_object_t *self, lk_scope_t *local) {
     RETURN(access(CSTRING(PATH(self)), R_OK) == 0 ? TRUE : FALSE);
 }
-LK_LIB_DEFINECFUNC(size_file) {
+static void size_file(lk_object_t *self, lk_scope_t *local) {
     struct stat s;
     if(stat(CSTRING(PATH(self)), &s) != 0) lk_vm_raiseerrno(VM);
     RETURN(lk_number_new(VM, s.st_size));
 }
-LK_LIB_DEFINECFUNC(write_file_str) {
+static void write_file_str(lk_object_t *self, lk_scope_t *local) {
     FILE *f = FILEF(self);
     if(f == NULL) BUG("WritableFile->st.file should NEVER be NULL");
     else {
@@ -126,10 +126,10 @@ LK_LIB_DEFINECFUNC(write_file_str) {
         RETURN(self);
     }
 }
-LK_LIB_DEFINECFUNC(writableQ_file) {
+static void writableQ_file(lk_object_t *self, lk_scope_t *local) {
     RETURN(access(CSTRING(PATH(self)), W_OK) == 0 ? TRUE : FALSE);
 }
-LK_LIB_DEFINEINIT(lk_file_libInit) {
+void lk_file_libInit(lk_vm_t *vm) {
     lk_object_t *file = vm->t_file,
                 *str = vm->t_string, *number = vm->t_number,
                 *ch = vm->t_char, *charset = vm->t_charset;

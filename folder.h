@@ -12,6 +12,6 @@ struct lk_folder {
 };
 
 /* init */
-LK_LIB_DEFINEINIT(lk_folder_libPreInit);
-LK_LIB_DEFINEINIT(lk_folder_libInit);
+void lk_folder_libPreInit(lk_vm_t *vm);
+void lk_folder_libInit(lk_vm_t *vm);
 #endif

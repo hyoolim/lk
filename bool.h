@@ -3,6 +3,6 @@
 #include "vm.h"
 
 /* init */
-LK_LIB_DEFINEINIT(lk_bool_libPreInit);
-LK_LIB_DEFINEINIT(lk_bool_libInit);
+void lk_bool_libPreInit(lk_vm_t *vm);
+void lk_bool_libInit(lk_vm_t *vm);
 #endif

@@ -3,36 +3,36 @@
 #include "number.h"
 
 /* ext map - types */
-static LK_OBJ_DEFALLOCFUNC(alloc_ch) {
+static void alloc_ch(lk_object_t *self, lk_object_t *parent) {
     CHAR(self) = CHAR(parent);
 }
-LK_LIB_DEFINEINIT(lk_char_libPreInit) {
+void lk_char_libPreInit(lk_vm_t *vm) {
     vm->t_char = lk_object_allocWithSize(vm->t_object, sizeof(lk_char_t));
     lk_object_setallocfunc(vm->t_char, alloc_ch);
 }
 
 /* ext map - funcs */
-LK_LIB_DEFINECFUNC(add_ch_number) {
+static void add_ch_number(lk_object_t *self, lk_scope_t *local) {
     if(CNUMBER(ARG(0)) > UINT32_MAX - CHAR(self)) {
         lk_vm_raisecstr(VM, "Will overflow");
     }
     RETURN(lk_char_new(VM, CHAR(self) + CNUMBER(ARG(0))));
 }
-LK_LIB_DEFINECFUNC(subtract_ch_ch) {
+static void subtract_ch_ch(lk_object_t *self, lk_scope_t *local) {
     RETURN(lk_number_new(VM, CHAR(self) - CHAR(ARG(0))));
 }
-LK_LIB_DEFINECFUNC(subtract_ch_number) {
+static void subtract_ch_number(lk_object_t *self, lk_scope_t *local) {
     if(CNUMBER(ARG(0)) > CHAR(self)) {
         lk_vm_raisecstr(VM, "Will underflow");
     }
     RETURN(lk_char_new(VM, CHAR(self) - CNUMBER(ARG(0))));
 }
-LK_LIB_DEFINECFUNC(to_string_ch) {
+static void to_string_ch(lk_object_t *self, lk_scope_t *local) {
     lk_string_t *str = lk_string_new(VM);
     darray_setuchar(DARRAY(str), 0, CHAR(self));
     RETURN(str);
 }
-LK_LIB_DEFINEINIT(lk_char_libInit) {
+void lk_char_libInit(lk_vm_t *vm) {
     lk_object_t *ch = vm->t_char, *number = vm->t_number;
     lk_lib_setGlobal("Character", ch);
     lk_lib_setCFunc(ch, "+", add_ch_number, number, NULL);

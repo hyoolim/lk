@@ -11,8 +11,8 @@ struct lk_char {
 };
 
 /* init */
-LK_LIB_DEFINEINIT(lk_char_libPreInit);
-LK_LIB_DEFINEINIT(lk_char_libInit);
+void lk_char_libPreInit(lk_vm_t *vm);
+void lk_char_libInit(lk_vm_t *vm);
 
 /* new */
 lk_char_t *lk_char_new(lk_vm_t *vm, uint32_t data);

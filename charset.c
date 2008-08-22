@@ -4,13 +4,13 @@
 #include "string.h"
 
 /* ext map - types */
-static LK_OBJ_DEFALLOCFUNC(alloc_charset) {
+static void alloc_charset(lk_object_t *self, lk_object_t *parent) {
     charset_copy(CHARSET(self), CHARSET(parent));
 }
-static LK_OBJ_DEFFREEFUNC(free_charset) {
+static void free_charset(lk_object_t *self) {
     charset_fin(CHARSET(self));
 }
-LK_LIB_DEFINEINIT(lk_charset_libPreInit) {
+void lk_charset_libPreInit(lk_vm_t *vm) {
     vm->t_charset = lk_object_allocWithSize(vm->t_object, sizeof(lk_charset_t));
     charset_init(CHARSET(vm->t_charset));
     lk_object_setallocfunc(vm->t_charset, alloc_charset);
@@ -18,47 +18,47 @@ LK_LIB_DEFINEINIT(lk_charset_libPreInit) {
 }
 
 /* ext map - funcs */
-LK_LIB_DEFINECFUNC(addB_charset_charset) {
+static void addB_charset_charset(lk_object_t *self, lk_scope_t *local) {
     charset_add_charset(CHARSET(self), CHARSET(ARG(0)));
     RETURN(self);
 }
-LK_LIB_DEFINECFUNC(addB_charset_string) {
+static void addB_charset_string(lk_object_t *self, lk_scope_t *local) {
     charset_add_darray(CHARSET(self), DARRAY(ARG(0)));
     RETURN(self);
 }
-LK_LIB_DEFINECFUNC(has_charset_char) {
+static void has_charset_char(lk_object_t *self, lk_scope_t *local) {
     RETURN(charset_has(CHARSET(self), CHAR(ARG(0))) ? TRUE : FALSE);
 }
-LK_LIB_DEFINECFUNC(has_charset_string) {
+static void has_charset_string(lk_object_t *self, lk_scope_t *local) {
     darray_t *str = DARRAY(ARG(0));
     LIST_EACH(str, i, v, {
         if(!charset_has(CHARSET(self), darray_getuchar(str, i))) RETURN(FALSE);
     });
     RETURN(TRUE);
 }
-LK_LIB_DEFINECFUNC(init_charset_string) {
+static void init_charset_string(lk_object_t *self, lk_scope_t *local) {
     charset_add_darray(CHARSET(self), DARRAY(ARG(0)));
     RETURN(self);
 }
-LK_LIB_DEFINECFUNC(subtractB_charset_charset) {
+static void subtractB_charset_charset(lk_object_t *self, lk_scope_t *local) {
     charset_subtract_charset(CHARSET(self), CHARSET(ARG(0)));
     RETURN(self);
 }
-LK_LIB_DEFINECFUNC(subtractB_charset_string) {
+static void subtractB_charset_string(lk_object_t *self, lk_scope_t *local) {
     charset_subtract_darray(CHARSET(self), DARRAY(ARG(0)));
     RETURN(self);
 }
-LK_LIB_DEFINECFUNC(to_string_charset) {
+static void to_string_charset(lk_object_t *self, lk_scope_t *local) {
     darray_t *base = charset_tostring(CHARSET(self));
     lk_string_t *lk = lk_string_newFromDArray(VM, base);
     darray_free(base);
     RETURN(lk);
 }
-LK_LIB_DEFINECFUNC(negateB_charset) {
+static void negateB_charset(lk_object_t *self, lk_scope_t *local) {
     charset_invert(CHARSET(self));
     RETURN(self);
 }
-LK_LIB_DEFINEINIT(lk_charset_libInit) {
+void lk_charset_libInit(lk_vm_t *vm) {
     lk_object_t *charset = vm->t_charset, *ch = vm->t_char, *string = vm->t_string;
     lk_lib_setGlobal("CharacterSet", charset);
     lk_lib_setCFunc(charset, "+=", addB_charset_charset, charset, NULL);

@@ -5,18 +5,18 @@
 #include <unistd.h>
 
 /* ext map - funcs */
-LK_LIB_DEFINECFUNC(at_env_str) {
+static void at_env_str(lk_object_t *self, lk_scope_t *local) {
     const char *k = darray_toCString(DARRAY(ARG(0)));
     const char *v = getenv(k);
     RETURN(v != NULL ? LK_OBJ(lk_string_newFromCString(VM, v)) : NIL);
 }
 extern char** environ;
-LK_LIB_DEFINECFUNC(size_env) {
+static void size_env(lk_object_t *self, lk_scope_t *local) {
     int c;
     for(c = 0; environ[c] != NULL; c ++) { }
     RETURN(lk_number_new(VM, c));
 }
-LK_LIB_DEFINECFUNC(keys_env) {
+static void keys_env(lk_object_t *self, lk_scope_t *local) {
     lk_list_t *keys = lk_list_new(VM);
     int i, j;
     const char *v;
@@ -26,7 +26,7 @@ LK_LIB_DEFINECFUNC(keys_env) {
     }
     RETURN(keys);
 }
-LK_LIB_DEFINEINIT(lk_env_extinit) {
+void lk_env_extinit(lk_vm_t *vm) {
     lk_object_t *obj = vm->t_object, *str = vm->t_string;
     lk_object_t *env = lk_object_allocWithSize(obj, sizeof(lk_env_t));
     lk_lib_setGlobal("Environment", env);

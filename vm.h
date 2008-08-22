@@ -14,12 +14,10 @@ typedef struct lk_object lk_object_t;
 #define LK_OBJ(v) ((lk_object_t *)(v))
 
 /* common data for all lk objs */
-#define LK_OBJ_DEFALLOCFUNC(name) void name(lk_object_t *self, lk_object_t *parent)
-typedef LK_OBJ_DEFALLOCFUNC(lk_tagallocfunc_t);
+typedef void lk_tagallocfunc_t(lk_object_t *self, lk_object_t *parent);
 #define LK_OBJ_DEFMARKFUNC(name) void name(lk_object_t *self, void (*mark)(lk_object_t *self))
 typedef LK_OBJ_DEFMARKFUNC(lk_tagmarkfunc_t);
-#define LK_OBJ_DEFFREEFUNC(name) void name(lk_object_t *self)
-typedef LK_OBJ_DEFFREEFUNC(lk_tagfreefunc_t);
+typedef void lk_tagfreefunc_t(lk_object_t *self);
 struct lk_tag {
     int                refc;
     lk_vm_t           *vm;
@@ -37,7 +35,7 @@ struct lk_common {
     darray_t              *ancestors;
     qphash_t               *slots;
     struct lk_tag          *tag;
-    struct lk_mark {
+    struct {
         lk_object_t        *prev;
         lk_object_t        *next;
         struct lk_objGroup *objgroup;
@@ -47,8 +45,7 @@ struct lk_common {
 #define LK_VM(v) ((v)->o.tag->vm)
 
 /* used by ext - can't be in ext.h due to bootstrapping issues */
-#define LK_LIB_DEFINEINIT(name) void name(lk_vm_t *vm)
-typedef LK_LIB_DEFINEINIT(lk_libraryinitfunc_t);
+typedef void lk_libraryinitfunc_t(lk_vm_t *vm);
 
 /* required primitives */
 #include "string.h"
@@ -59,7 +56,6 @@ typedef LK_LIB_DEFINEINIT(lk_libraryinitfunc_t);
 #include "error.h"
 
 /* todo: figure out a way to move this before req primitives */
-#define LK_LIB_DEFINECFUNC(name) static void name(lk_object_t *self, lk_scope_t *local)
 typedef void lk_cfuncfunc_t(lk_object_t *self, lk_scope_t *local);
 
 /* actual def - add header to above #include's on lk_vm_t change */
@@ -120,8 +116,8 @@ struct lk_vm {
 };
 
 /* ext map */
-LK_LIB_DEFINEINIT(lk_vm_libPreInit);
-LK_LIB_DEFINEINIT(lk_vm_libInit);
+void lk_vm_libPreInit(lk_vm_t *vm);
+void lk_vm_libInit(lk_vm_t *vm);
 
 /* new */
 lk_vm_t *lk_vm_new(void);

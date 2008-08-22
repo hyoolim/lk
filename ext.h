@@ -43,7 +43,7 @@ typedef struct lk_library {
 #define CLROPT(v, o) ((v) &= ~(o))
 
 /* ext map */
-LK_LIB_DEFINEINIT(lk_library_extinit);
+void lk_library_extinit(lk_vm_t *vm);
 
 /* update */
 void lk_lib_setObject(lk_object_t *parent, const char *k, lk_object_t *v);

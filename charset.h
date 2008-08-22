@@ -11,8 +11,8 @@ struct lk_charset {
 };
 
 /* init */
-LK_LIB_DEFINEINIT(lk_charset_libPreInit);
-LK_LIB_DEFINEINIT(lk_charset_libInit);
+void lk_charset_libPreInit(lk_vm_t *vm);
+void lk_charset_libInit(lk_vm_t *vm);
 
 /* new */
 lk_charset_t *lk_charset_new(lk_vm_t *vm);

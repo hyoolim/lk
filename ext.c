@@ -5,10 +5,10 @@
 #include <stdarg.h>
 
 /* ext map - types */
-static LK_OBJ_DEFFREEFUNC(free_ext) {
+static void free_ext(lk_object_t *self) {
     if(LK_EXT(self)->lib != NULL) dlclose(LK_EXT(self)->lib);
 }
-LK_LIB_DEFINECFUNC(init_ext_str_str) {
+static void init_ext_str_str(lk_object_t *self, lk_scope_t *local) {
     const char *libpath = darray_toCString(DARRAY(ARG(0)));
     void *lib = dlopen(libpath, RTLD_NOW);
     if(lib != NULL) {
@@ -25,7 +25,7 @@ LK_LIB_DEFINECFUNC(init_ext_str_str) {
     }
     RETURN(self);
 }
-LK_LIB_DEFINEINIT(lk_library_extinit) {
+void lk_library_extinit(lk_vm_t *vm) {
     lk_object_t *str = vm->t_string;
     lk_object_t *ext = lk_object_allocWithSize(vm->t_object, sizeof(lk_library_t));
     lk_object_setfreefunc(ext, free_ext);

@@ -30,21 +30,21 @@
 #include <unistd.h>
 
 /* ext map - types */
-LK_LIB_DEFINEINIT(lk_vm_libPreInit) {
+void lk_vm_libPreInit(lk_vm_t *vm) {
     vm->t_vm = lk_object_alloc(vm->t_object);
 }
 
 /* ext map - funcs */
-LK_LIB_DEFINECFUNC(exit_vm) {
+static void exit_vm(lk_object_t *self, lk_scope_t *local) {
     lk_vm_exit(VM);
     DONE;
 }
-LK_LIB_DEFINECFUNC(fork_vm) {
+static void fork_vm(lk_object_t *self, lk_scope_t *local) {
     pid_t child = fork();
     if(child == -1) lk_vm_raiseerrno(VM);
     RETURN(lk_number_new(VM, (int)child));
 }
-LK_LIB_DEFINECFUNC(fork_vm_f) {
+static void fork_vm_f(lk_object_t *self, lk_scope_t *local) {
     pid_t child = fork();
     if(child == -1) lk_vm_raiseerrno(VM);
     if(child > 0) RETURN(lk_number_new(VM, (int)child));
@@ -61,16 +61,16 @@ LK_LIB_DEFINECFUNC(fork_vm_f) {
         DONE;
     }
 }
-LK_LIB_DEFINECFUNC(sleep_vm_number) {
+static void sleep_vm_number(lk_object_t *self, lk_scope_t *local) {
     usleep((unsigned long)(CNUMBER(ARG(0)) * 1000000));
     RETURN(self);
 }
-LK_LIB_DEFINECFUNC(seconds_since_epoch_vm) {
+static void seconds_since_epoch_vm(lk_object_t *self, lk_scope_t *local) {
     struct timeval now;
     gettimeofday(&now, NULL);
     RETURN(lk_number_new(VM, now.tv_sec + now.tv_usec / 1000000.0));
 }
-LK_LIB_DEFINECFUNC(seconds_west_of_utc_vm) {
+static void seconds_west_of_utc_vm(lk_object_t *self, lk_scope_t *local) {
     time_t raw;
     struct tm gm, l;
     long offset;
@@ -85,7 +85,7 @@ LK_LIB_DEFINECFUNC(seconds_west_of_utc_vm) {
     }
     RETURN(lk_number_new(VM, offset));
 }
-LK_LIB_DEFINECFUNC(system_vm) {
+static void system_vm(lk_object_t *self, lk_scope_t *local) {
     pid_t child = fork();
     if(child == -1) lk_vm_raiseerrno(VM);
     if(child > 0) {
@@ -102,7 +102,7 @@ LK_LIB_DEFINECFUNC(system_vm) {
         lk_vm_raiseerrno(VM);
     }
 }
-LK_LIB_DEFINECFUNC(system2_vm_str) {
+static void system2_vm_str(lk_object_t *self, lk_scope_t *local) {
     FILE *out = popen(darray_toCString(DARRAY(ARG(0))), "r");
     if(out != NULL) {
         char ret[4096];
@@ -111,12 +111,12 @@ LK_LIB_DEFINECFUNC(system2_vm_str) {
     }
     RETURN(NIL);
 }
-LK_LIB_DEFINECFUNC(wait_vm) {
+static void wait_vm(lk_object_t *self, lk_scope_t *local) {
     int status;
     pid_t child = wait(&status);
     RETURN(lk_number_new(VM, (int)child));
 }
-LK_LIB_DEFINEINIT(lk_vm_libInit) {
+void lk_vm_libInit(lk_vm_t *vm) {
     lk_object_t *tvm = vm->t_vm, *f = vm->t_func, *number = vm->t_number, *str = vm->t_string;
     lk_lib_setGlobal("VirtualMachine", tvm);
     lk_lib_setCFunc(tvm, "exit", exit_vm, NULL);

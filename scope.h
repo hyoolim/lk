@@ -30,8 +30,8 @@ struct lk_scope {
 };
 
 /* ext map */
-LK_LIB_DEFINEINIT(lk_scope_libPreInit);
-LK_LIB_DEFINEINIT(lk_scope_libInit);
+void lk_scope_libPreInit(lk_vm_t *vm);
+void lk_scope_libInit(lk_vm_t *vm);
 
 /* update */
 lk_scope_t *lk_scope_new(lk_vm_t *vm);

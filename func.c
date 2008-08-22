@@ -4,7 +4,7 @@
 
 /* ext map - types */
 /* */
-static LK_OBJ_DEFALLOCFUNC(alloc_f) {
+static void alloc_f(lk_object_t *self, lk_object_t *parent) {
     LK_FUNC(self)->cf.sigdef = LK_FUNC(parent)->cf.sigdef;
     LK_FUNC(self)->cf.minargc = LK_FUNC(parent)->cf.minargc;
     LK_FUNC(self)->cf.maxargc = LK_FUNC(parent)->cf.maxargc;
@@ -19,18 +19,18 @@ static LK_OBJ_DEFMARKFUNC(mark_f) {
     ) LIST_EACHPTR(LK_FUNC(self)->cf.sigs, i, v, mark(v));
     mark(LK_OBJ(LK_FUNC(self)->cf.rest));
 }
-static LK_OBJ_DEFFREEFUNC(free_f) {
+static void free_f(lk_object_t *self) {
     if(LK_FUNC(self)->cf.sigs != NULL) darray_free(LK_FUNC(self)->cf.sigs);
 }
 
 /* */
-static LK_OBJ_DEFALLOCFUNC(alloc_cf) {
+static void alloc_cf(lk_object_t *self, lk_object_t *parent) {
     alloc_f(self, parent);
     LK_CFUNC(self)->func = LK_CFUNC(parent)->func;
 }
 
 /* */
-static LK_OBJ_DEFALLOCFUNC(alloc_gf) {
+static void alloc_gf(lk_object_t *self, lk_object_t *parent) {
     alloc_f(self, parent);
     LK_GFUNC(self)->funcs = darray_clone(LK_GFUNC(parent)->funcs);
 }
@@ -38,13 +38,13 @@ static LK_OBJ_DEFMARKFUNC(mark_gf) {
     mark_f(self, mark);
     LIST_EACHPTR(LK_GFUNC(self)->funcs, i, v, mark(v));
 }
-static LK_OBJ_DEFFREEFUNC(free_gf) {
+static void free_gf(lk_object_t *self) {
     free_f(self);
     darray_free(LK_GFUNC(self)->funcs);
 }
 
 /* */
-static LK_OBJ_DEFALLOCFUNC(alloc_kf) {
+static void alloc_kf(lk_object_t *self, lk_object_t *parent) {
     alloc_f(self, parent);
     LK_KFUNC(self)->scope = LK_KFUNC(parent)->scope;
     LK_KFUNC(self)->first = LK_KFUNC(parent)->first;
@@ -56,7 +56,7 @@ static LK_OBJ_DEFMARKFUNC(mark_kf) {
 }
 
 /* */
-static LK_OBJ_DEFALLOCFUNC(alloc_sig) {
+static void alloc_sig(lk_object_t *self, lk_object_t *parent) {
     LK_SIG(self)->name = LK_SIG(parent)->name;
     LK_SIG(self)->check = LK_SIG(parent)->check;
     LK_SIG(self)->isself = LK_SIG(parent)->isself;
@@ -65,7 +65,7 @@ static LK_OBJ_DEFMARKFUNC(mark_sig) {
     mark(LK_OBJ(LK_SIG(self)->name));
     mark(LK_OBJ(LK_SIG(self)->check));
 }
-LK_LIB_DEFINEINIT(lk_func_libPreInit) {
+void lk_func_libPreInit(lk_vm_t *vm) {
     /* */
     vm->t_func = lk_object_allocWithSize(vm->t_object, sizeof(lk_func_t));
     lk_object_setallocfunc(vm->t_func, alloc_f);
@@ -91,10 +91,10 @@ LK_LIB_DEFINEINIT(lk_func_libPreInit) {
 }
 
 /* ext map - funcs */
-LK_LIB_DEFINECFUNC(add_f_f) {
+static void add_f_f(lk_object_t *self, lk_scope_t *local) {
     RETURN(lk_func_combine(LK_FUNC(self), LK_FUNC(ARG(0))));
 }
-LK_LIB_DEFINECFUNC(addB_f_f) {
+static void addB_f_f(lk_object_t *self, lk_scope_t *local) {
     if(local->caller == NULL && local->caller->lastslot == NULL) {
         lk_vm_raisecstr(VM, "Cannot add to the function without a slot");
     } else {
@@ -103,32 +103,32 @@ LK_LIB_DEFINECFUNC(addB_f_f) {
         RETURN(new);
     }
 }
-LK_LIB_DEFINECFUNC(minimum_argument_size_f) {
+static void minimum_argument_size_f(lk_object_t *self, lk_scope_t *local) {
     RETURN(lk_number_new(VM, LK_FUNC(self)->cf.minargc));
 }
-LK_LIB_DEFINECFUNC(maximum_argument_size_f) {
+static void maximum_argument_size_f(lk_object_t *self, lk_scope_t *local) {
     RETURN(lk_number_new(VM, LK_FUNC(self)->cf.maxargc));
 }
-LK_LIB_DEFINECFUNC(signature_f) {
+static void signature_f(lk_object_t *self, lk_scope_t *local) {
     darray_t *sigs = LK_FUNC(self)->cf.sigs;
     RETURN(sigs != NULL ? lk_list_newFromDArray(VM, sigs) : lk_list_new(VM));
 }
-LK_LIB_DEFINECFUNC(last_argument_f) {
+static void last_argument_f(lk_object_t *self, lk_scope_t *local) {
     lk_sig_t *last = LK_FUNC(self)->cf.rest;
     RETURN(last != NULL ? LK_OBJ(last) : NIL);
 }
-LK_LIB_DEFINECFUNC(functions_gf) {
+static void functions_gf(lk_object_t *self, lk_scope_t *local) {
     RETURN(lk_list_newFromDArray(VM, LK_GFUNC(self)->funcs));
 }
-LK_LIB_DEFINECFUNC(name_sig) {
+static void name_sig(lk_object_t *self, lk_scope_t *local) {
     lk_string_t *name = LK_SIG(self)->name;
     RETURN(name != NULL ? name : lk_string_newFromCString(VM, "_"));
 }
-LK_LIB_DEFINECFUNC(check_sig) {
+static void check_sig(lk_object_t *self, lk_scope_t *local) {
     lk_object_t *type = LK_SIG(self)->check;
     RETURN(type != NULL ? type : VM->t_object);
 }
-LK_LIB_DEFINEINIT(lk_func_libInit) {
+void lk_func_libInit(lk_vm_t *vm) {
     lk_object_t *f = vm->t_func, *sig = vm->t_sig;
     /* */
     lk_lib_setGlobal("Function", vm->t_func);

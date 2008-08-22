@@ -6,7 +6,7 @@
 #include "map.h"
 
 /* ext map - types */
-LK_LIB_DEFINEINIT(lk_object_libPreInit) {
+void lk_object_libPreInit(lk_vm_t *vm) {
     lk_object_t *o = vm->t_object = memory_alloc(sizeof(lk_object_t));
     o->o.tag = memory_alloc(sizeof(struct lk_tag));
     o->o.tag->refc = 1;
@@ -17,18 +17,18 @@ LK_LIB_DEFINEINIT(lk_object_libPreInit) {
 }
 
 /* ext map - funcs */
-LK_LIB_DEFINECFUNC(Ddefine_and_assignB_obj_str_obj_obj);
-LK_LIB_DEFINECFUNC(Ddefine_obj_str_obj) {
+static void Ddefine_and_assignB_obj_str_obj_obj(lk_object_t *self, lk_scope_t *local);
+static void Ddefine_obj_str_obj(lk_object_t *self, lk_scope_t *local) {
     local->argc ++;
     darray_pushptr(&local->stack, NIL);
     GOTO(Ddefine_and_assignB_obj_str_obj_obj);
 }
-LK_LIB_DEFINECFUNC(Ddefine_and_assignB_obj_str_obj) {
+static void Ddefine_and_assignB_obj_str_obj(lk_object_t *self, lk_scope_t *local) {
     local->argc ++;
     darray_insertptr(&local->stack, 1, VM->t_object);
     GOTO(Ddefine_and_assignB_obj_str_obj_obj);
 }
-LK_LIB_DEFINECFUNC(Ddefine_and_assignB_obj_str_obj_obj) {
+static void Ddefine_and_assignB_obj_str_obj_obj(lk_object_t *self, lk_scope_t *local) {
     lk_object_t *k = ARG(0);
     lk_object_t *v = ARG(2);
     struct lk_slot *slot;
@@ -44,17 +44,17 @@ LK_LIB_DEFINECFUNC(Ddefine_and_assignB_obj_str_obj_obj) {
     }
     RETURN(v);
 }
-LK_LIB_DEFINECFUNC(Did_obj) {
+static void Did_obj(lk_object_t *self, lk_scope_t *local) {
     RETURN(lk_number_new(VM, (int)self)); }
-LK_LIB_DEFINECFUNC(Dretrieve_obj_str) {
+static void Dretrieve_obj_str(lk_object_t *self, lk_scope_t *local) {
     struct lk_slot *slot = lk_object_getslotfromany(self, ARG(0));
     if(slot != NULL) RETURN(lk_object_getvaluefromslot(self, slot));
     else RETURN(NIL);
 
 }
-LK_LIB_DEFINECFUNC(Dself_obj) {
+static void Dself_obj(lk_object_t *self, lk_scope_t *local) {
     RETURN(self); }
-LK_LIB_DEFINECFUNC(Dslots_obj) {
+static void Dslots_obj(lk_object_t *self, lk_scope_t *local) {
     lk_list_t *slots = lk_list_new(VM);
     if(self->o.slots != NULL) {
         SET_EACH(self->o.slots, i,
@@ -63,15 +63,15 @@ LK_LIB_DEFINECFUNC(Dslots_obj) {
     }
     RETURN(slots);
 }
-LK_LIB_DEFINECFUNC(alloc_obj) {
+static void alloc_obj(lk_object_t *self, lk_scope_t *local) {
     RETURN(lk_object_alloc(self)); }
-LK_LIB_DEFINECFUNC(also_obj_obj) {
+static void also_obj_obj(lk_object_t *self, lk_scope_t *local) {
     lk_object_extend(self, ARG(0));
     RETURN(self);
 }
-LK_LIB_DEFINECFUNC(ancestor_obj_obj) {
+static void ancestor_obj_obj(lk_object_t *self, lk_scope_t *local) {
     RETURN(LK_OBJ_ISTYPE(self, ARG(0)) ? VM->t_true : VM->t_false); }
-LK_LIB_DEFINECFUNC(ancestors_obj) {
+static void ancestors_obj(lk_object_t *self, lk_scope_t *local) {
     if(self->o.ancestors != NULL || lk_object_calcancestors(self)) {
         RETURN(lk_list_newFromDArray(VM, self->o.ancestors));
     } else {
@@ -79,9 +79,9 @@ LK_LIB_DEFINECFUNC(ancestors_obj) {
         exit(EXIT_FAILURE);
     }
 }
-LK_LIB_DEFINECFUNC(clone_obj) {
+static void clone_obj(lk_object_t *self, lk_scope_t *local) {
     RETURN(lk_object_clone(self)); }
-LK_LIB_DEFINECFUNC(do_obj_f) {
+static void do_obj_f(lk_object_t *self, lk_scope_t *local) {
     lk_kfunc_t *kf = LK_KFUNC(ARG(0));
     lk_scope_t *fr = lk_scope_new(VM);
     fr->first = fr->next = kf->first;
@@ -92,7 +92,7 @@ LK_LIB_DEFINECFUNC(do_obj_f) {
     lk_vm_doevalfunc(VM);
     RETURN(self);
 }
-LK_LIB_DEFINECFUNC(import_object_obj) {
+static void import_object_obj(lk_object_t *self, lk_scope_t *local) {
     qphash_t *from = ARG(0)->o.slots;
     if(from != NULL) {
         qphash_t *to = self->o.slots;
@@ -104,7 +104,7 @@ LK_LIB_DEFINECFUNC(import_object_obj) {
     }
     RETURN(self);
 }
-LK_LIB_DEFINECFUNC(parents_obj) {
+static void parents_obj(lk_object_t *self, lk_scope_t *local) {
     if(LK_OBJ_HASPARENTS(self)) {
         RETURN(lk_list_newFromDArray(VM, LK_OBJ_PARENTS(self)));
     } else {
@@ -113,17 +113,17 @@ LK_LIB_DEFINECFUNC(parents_obj) {
         RETURN(ret);
     }
 }
-LK_LIB_DEFINECFUNC(parent_object) {
+static void parent_object(lk_object_t *self, lk_scope_t *local) {
     if(LK_OBJ_HASPARENTS(self)) {
         darray_t *pars = LK_OBJ_PARENTS(self);
         RETURN(LIST_COUNT(pars) > 0 ? darray_getptr(pars, -1) : NIL);
     }
     RETURN(self->o.parent);
 }
-LK_LIB_DEFINECFUNC(with_obj_f) {
+static void with_obj_f(lk_object_t *self, lk_scope_t *local) {
     do_obj_f(lk_object_addref(LK_OBJ(local), lk_object_alloc(self)), local);
 }
-LK_LIB_DEFINEINIT(lk_object_libInit) {
+void lk_object_libInit(lk_vm_t *vm) {
     lk_object_t *obj = vm->t_object, *str = vm->t_string, *f = vm->t_func;
     lk_lib_setGlobal("Object", obj);
     lk_lib_setCFunc(obj, ".", Dself_obj, NULL);

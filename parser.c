@@ -15,7 +15,7 @@ static void setprec(lk_parser_t *self, const char *op, int level, enum lk_precas
     prec->assoc = assoc;
     *(lk_prec_t **)qphash_set(self->precs, lk_string_newFromCString(vm, op)) = prec;
 }
-static LK_OBJ_DEFALLOCFUNC(alloc_parser) {
+static void alloc_parser(lk_object_t *self, lk_object_t *parent) {
     PARSER->binaryops = qphash_alloc(sizeof(lk_prec_t *), lk_object_hashcode, lk_object_keycmp);
     PARSER->precs = qphash_alloc(sizeof(lk_prec_t *), lk_object_hashcode, lk_object_keycmp);
     PARSER->tokentypes = darray_allocptr();
@@ -79,7 +79,7 @@ static LK_OBJ_DEFMARKFUNC(mark_parser) {
         LIST_EACHPTR(PARSER->comments, i, v, mark(v));
     }
 }
-static LK_OBJ_DEFFREEFUNC(free_parser) {
+static void free_parser(lk_object_t *self) {
     if(PARSER->binaryops != NULL) qphash_free(PARSER->binaryops);
     if(PARSER->precs != NULL) qphash_free(PARSER->precs);
     if(PARSER->tokentypes != NULL) darray_free(PARSER->tokentypes);
@@ -88,7 +88,7 @@ static LK_OBJ_DEFFREEFUNC(free_parser) {
     if(PARSER->ops != NULL) darray_free(PARSER->ops);
     if(PARSER->comments != NULL) darray_free(PARSER->comments);
 }
-LK_LIB_DEFINEINIT(lk_parser_libPreInit) {
+void lk_parser_libPreInit(lk_vm_t *vm) {
     lk_object_t *obj = vm->t_object;
     vm->t_prec = lk_object_allocWithSize(obj, sizeof(lk_prec_t));
     vm->t_parser = lk_object_allocWithSize(obj, sizeof(lk_parser_t));
@@ -98,7 +98,7 @@ LK_LIB_DEFINEINIT(lk_parser_libPreInit) {
 }
 
 /* ext map - funcs */
-LK_LIB_DEFINEINIT(lk_parser_libInit) {
+void lk_parser_libInit(lk_vm_t *vm) {
     lk_lib_setObject(vm->t_vm, "Precedence", vm->t_prec);
     lk_lib_setObject(vm->t_vm, "Parser", vm->t_parser);
 }

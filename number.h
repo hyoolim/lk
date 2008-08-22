@@ -11,8 +11,8 @@ struct lk_number {
 };
 
 /* ext map */
-LK_LIB_DEFINEINIT(lk_number_libPreInit);
-LK_LIB_DEFINEINIT(lk_number_libInit);
+void lk_number_libPreInit(lk_vm_t *vm);
+void lk_number_libInit(lk_vm_t *vm);
 
 /* new */
 lk_number_t *lk_number_new(lk_vm_t *vm, double number);

@@ -5,47 +5,47 @@
 #include "number.h"
 
 /* ext map - types */
-LK_LIB_DEFINEINIT(lk_string_libPreInit) {
+void lk_string_libPreInit(lk_vm_t *vm) {
     vm->t_string = lk_object_alloc(vm->t_seq);
     darray_fin(DARRAY(vm->t_string));
     darray_init(DARRAY(vm->t_string), sizeof(uint8_t), 16);
 }
 
 /* ext map - funcs */
-LK_LIB_DEFINECFUNC(at_str_number) {
+static void at_str_number(lk_object_t *self, lk_scope_t *local) {
     RETURN(lk_char_new(VM, darray_getuchar(DARRAY(self), CSIZE(ARG(0)))));
 }
-LK_LIB_DEFINECFUNC(find_str_ch_number) {
+static void find_str_ch_number(lk_object_t *self, lk_scope_t *local) {
     int i = darray_findChar(DARRAY(self), CHAR(ARG(0)), CSIZE(ARG(1)));
     if(i >= 0) RETURN(lk_number_new(VM, i));
     RETURN(NIL);
 }
-LK_LIB_DEFINECFUNC(find_str_charset_number) {
+static void find_str_charset_number(lk_object_t *self, lk_scope_t *local) {
     int i = darray_findCharSet(DARRAY(self), CHARSET(ARG(0)), CSIZE(ARG(1)));
     if(i >= 0) RETURN(lk_number_new(VM, i));
     RETURN(NIL);
 }
-LK_LIB_DEFINECFUNC(find_str_str_number) {
+static void find_str_str_number(lk_object_t *self, lk_scope_t *local) {
     int i = darray_findDArray(DARRAY(self), DARRAY(ARG(0)), CSIZE(ARG(1)));
     if(i >= 0) RETURN(lk_number_new(VM, i));
     RETURN(NIL);
 }
-LK_LIB_DEFINECFUNC(setB_str_number_ch) {
+static void setB_str_number_ch(lk_object_t *self, lk_scope_t *local) {
     darray_setuchar(DARRAY(self), CSIZE(ARG(0)), CHAR(ARG(1)));
     RETURN(self);
 }
-LK_LIB_DEFINECFUNC(setB_str_number_number_str) {
+static void setB_str_number_number_str(lk_object_t *self, lk_scope_t *local) {
     darray_t *x = DARRAY(self), *y = DARRAY(ARG(2));
     darray_resizeitem(x, y);
     darray_setrange(x, CSIZE(ARG(0)), CSIZE(ARG(1)), y);
     RETURN(self);
 }
-LK_LIB_DEFINECFUNC(to_character_qphash_str) {
+static void to_character_qphash_str(lk_object_t *self, lk_scope_t *local) {
     lk_charset_t *cs = lk_charset_new(VM);
     charset_add_darray(CHARSET(cs), DARRAY(self));
     RETURN(cs);
 }
-LK_LIB_DEFINECFUNC(to_number_str) {
+static void to_number_str(lk_object_t *self, lk_scope_t *local) {
     numberifn_t num;
     switch(number_new(0, DARRAY(self), &num)) {
     case NUMBERTYPE_INT: RETURN(lk_number_new(VM, num.i));
@@ -53,7 +53,7 @@ LK_LIB_DEFINECFUNC(to_number_str) {
     default: BUG("Invalid number type while trying to parse code.\n");
     }
 }
-LK_LIB_DEFINEINIT(lk_string_libInit) {
+void lk_string_libInit(lk_vm_t *vm) {
     lk_object_t *str = vm->t_string, *number = vm->t_number, *charset = vm->t_charset,
                 *ch = vm->t_char;
     lk_lib_setGlobal("NEWLINE", LK_OBJ(lk_string_newFromCString(vm, "\n")));

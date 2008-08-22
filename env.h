@@ -10,5 +10,5 @@ struct lk_env {
 };
 
 /* init */
-LK_LIB_DEFINEINIT(lk_env_extinit);
+void lk_env_extinit(lk_vm_t *vm);
 #endif

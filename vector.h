@@ -8,6 +8,6 @@ typedef struct lk_seq lk_vector_t;
 #include "seq.h"
 
 /* ext map */
-LK_LIB_DEFINEINIT(lk_vector_libPreInit);
-LK_LIB_DEFINEINIT(lk_vector_libInit);
+void lk_vector_libPreInit(lk_vm_t *vm);
+void lk_vector_libInit(lk_vm_t *vm);
 #endif

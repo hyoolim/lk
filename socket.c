@@ -10,16 +10,16 @@ FILE *fdopen(int fildes, const char *mode);
 int inet_aton(const char *cp, struct in_addr *pin);
 
 /* ext map - ip addr */
-LK_LIB_DEFINECFUNC(alloc_ip_str) {
+static void alloc_ip_str(lk_object_t *self, lk_scope_t *local) {
     inet_aton(darray_toCString(DARRAY(ARG(0))), &IPADDR->addr);
     RETURN(self);
 }
-LK_LIB_DEFINECFUNC(to_string_ip) {
+static void to_string_ip(lk_object_t *self, lk_scope_t *local) {
     RETURN(lk_string_newFromCString(VM, inet_ntoa(IPADDR->addr)));
 }
 
 /* ext map - socket */
-static LK_OBJ_DEFALLOCFUNC(alloc_sock) {
+static void alloc_sock(lk_object_t *self, lk_object_t *parent) {
     int yes = 1;
     SOCKET->fd = socket(AF_INET, SOCK_STREAM, 0);
     SOCKET->in = fdopen(SOCKET->fd, "r");
@@ -30,11 +30,11 @@ static LK_OBJ_DEFALLOCFUNC(alloc_sock) {
         exit(1);
     }
 }
-static LK_OBJ_DEFFREEFUNC(free_sock) {
+static void free_sock(lk_object_t *self) {
     if(LK_SOCKET(self)->in != NULL) fclose(LK_SOCKET(self)->in);
     if(LK_SOCKET(self)->out != NULL) fclose(LK_SOCKET(self)->out);
 }
-LK_LIB_DEFINECFUNC(acce_sock) {
+static void acce_sock(lk_object_t *self, lk_scope_t *local) {
     struct sockaddr remote;
     socklen_t len = sizeof(struct sockaddr);
     lk_socket_t *conn = LK_SOCKET(lk_object_alloc(VM->t_socket));
@@ -43,7 +43,7 @@ LK_LIB_DEFINECFUNC(acce_sock) {
     conn->out = fdopen(conn->fd, "w");
     RETURN(conn);
 }
-LK_LIB_DEFINECFUNC(bind_sock_ip_number) {
+static void bind_sock_ip_number(lk_object_t *self, lk_scope_t *local) {
     struct sockaddr_in my;
     my.sin_family = AF_INET;
     my.sin_port = htons((uint16_t)CNUMBER(ARG(1)));
@@ -55,7 +55,7 @@ LK_LIB_DEFINECFUNC(bind_sock_ip_number) {
     }
     RETURN(self);
 }
-LK_LIB_DEFINECFUNC(connect_sock_ip_number) {
+static void connect_sock_ip_number(lk_object_t *self, lk_scope_t *local) {
     struct sockaddr_in remote;
     remote.sin_family = AF_INET;
     remote.sin_port = htons((uint16_t)CNUMBER(ARG(1)));
@@ -67,13 +67,13 @@ LK_LIB_DEFINECFUNC(connect_sock_ip_number) {
     }
     RETURN(self);
 }
-LK_LIB_DEFINECFUNC(listen_sock) {
+static void listen_sock(lk_object_t *self, lk_scope_t *local) {
     if(listen(SOCKET->fd, 10) == -1) {
         lk_vm_raisecstr(VM, "Cannot listen");
     }
     RETURN(self);
 }
-LK_LIB_DEFINEINIT(lk_socket_extinit) {
+void lk_socket_extinit(lk_vm_t *vm) {
     lk_object_t *obj = vm->t_object, *str = vm->t_string, *number = vm->t_number;
     lk_object_t *ip = lk_object_allocWithSize(obj, sizeof(lk_ipaddr_t));
     lk_object_t *sock = lk_object_allocWithSize(obj, sizeof(lk_socket_t));

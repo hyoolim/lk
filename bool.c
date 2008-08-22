@@ -2,7 +2,7 @@
 #include "ext.h"
 
 /* ext map - types */
-LK_LIB_DEFINEINIT(lk_bool_libPreInit) {
+void lk_bool_libPreInit(lk_vm_t *vm) {
     vm->t_nil = lk_object_alloc(vm->t_object);
     vm->t_bool = lk_object_alloc(vm->t_object);
     vm->t_true = lk_object_alloc(vm->t_bool);
@@ -10,7 +10,7 @@ LK_LIB_DEFINEINIT(lk_bool_libPreInit) {
 }
 
 /* ext map - funcs */
-LK_LIB_DEFINEINIT(lk_bool_libInit) {
+void lk_bool_libInit(lk_vm_t *vm) {
     lk_lib_setGlobal("Nil", vm->t_nil);
     lk_lib_setGlobal("Boolean", vm->t_bool);
     lk_lib_setGlobal("True", vm->t_true);

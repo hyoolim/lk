@@ -3,13 +3,13 @@
 #include "number.h"
 
 /* ext map - types */
-static LK_OBJ_DEFALLOCFUNC(alloc_seq) {
+static void alloc_seq(lk_object_t *self, lk_object_t *parent) {
     darray_copy(DARRAY(self), DARRAY(parent));
 }
-static LK_OBJ_DEFFREEFUNC(free_seq) {
+static void free_seq(lk_object_t *self) {
     darray_fin(DARRAY(self));
 }
-LK_LIB_DEFINEINIT(lk_seq_libPreInit) {
+void lk_seq_libPreInit(lk_vm_t *vm) {
     vm->t_seq = lk_object_allocWithSize(vm->t_object, sizeof(lk_seq_t));
     darray_init(DARRAY(vm->t_seq), 1, 16);
     lk_object_setallocfunc(vm->t_seq, alloc_seq);
@@ -17,7 +17,7 @@ LK_LIB_DEFINEINIT(lk_seq_libPreInit) {
 }
 
 /* ext map - funcs */
-LK_LIB_DEFINECFUNC(at_gl_vec) {
+static void at_gl_vec(lk_object_t *self, lk_scope_t *local) {
     lk_list_t *ret = LK_DARRAY(lk_object_clone(self));
     darray_t *sl = DARRAY(self), *rl = DARRAY(ret), *indexes = DARRAY(ARG(0));
     darray_limit(rl, LIST_COUNT(indexes));
@@ -26,27 +26,27 @@ LK_LIB_DEFINECFUNC(at_gl_vec) {
     );
     RETURN(ret);
 }
-LK_LIB_DEFINECFUNC(clearB_gl) {
+static void clearB_gl(lk_object_t *self, lk_scope_t *local) {
     darray_clear(DARRAY(self)); RETURN(self); }
-LK_LIB_DEFINECFUNC(cmp_gl_gl) {
+static void cmp_gl_gl(lk_object_t *self, lk_scope_t *local) {
     RETURN(lk_number_new(VM, darray_compareTo(DARRAY(self), DARRAY(ARG(0))))); }
-LK_LIB_DEFINECFUNC(concatB_gl_gl) {
+static void concatB_gl_gl(lk_object_t *self, lk_scope_t *local) {
     darray_concat(DARRAY(self), DARRAY(ARG(0))); RETURN(self); }
-LK_LIB_DEFINECFUNC(size_gl) {
+static void size_gl(lk_object_t *self, lk_scope_t *local) {
     RETURN(lk_number_new(VM, LIST_COUNT(DARRAY(self)))); }
-LK_LIB_DEFINECFUNC(eq_gl_gl) {
+static void eq_gl_gl(lk_object_t *self, lk_scope_t *local) {
     RETURN(LIST_EQ(DARRAY(self), DARRAY(ARG(0))) ? TRUE : FALSE); }
-LK_LIB_DEFINECFUNC(limitB_gl_number) {
+static void limitB_gl_number(lk_object_t *self, lk_scope_t *local) {
     darray_limit(DARRAY(self), CSIZE(ARG(0))); RETURN(self); }
-LK_LIB_DEFINECFUNC(offsetB_gl_number) {
+static void offsetB_gl_number(lk_object_t *self, lk_scope_t *local) {
     darray_offset(DARRAY(self), CSIZE(ARG(0))); RETURN(self); }
-LK_LIB_DEFINECFUNC(restB_gl) {
+static void restB_gl(lk_object_t *self, lk_scope_t *local) {
     darray_offset(DARRAY(self), 1); RETURN(self); }
-LK_LIB_DEFINECFUNC(reverseB_gl) {
+static void reverseB_gl(lk_object_t *self, lk_scope_t *local) {
     darray_reverse(DARRAY(self)); RETURN(self); }
-LK_LIB_DEFINECFUNC(sliceB_gl_number_number) {
+static void sliceB_gl_number_number(lk_object_t *self, lk_scope_t *local) {
     darray_slice(DARRAY(self), CSIZE(ARG(0)), CSIZE(ARG(1))); RETURN(self); }
-LK_LIB_DEFINECFUNC(swapB_gl_number_number) {
+static void swapB_gl_number_number(lk_object_t *self, lk_scope_t *local) {
     int s = DARRAY(self)->data->ilen;
     void *x = darray_get(DARRAY(self), CSIZE(ARG(0)));
     void *y = darray_get(DARRAY(self), CSIZE(ARG(1)));
@@ -57,7 +57,7 @@ LK_LIB_DEFINECFUNC(swapB_gl_number_number) {
     memory_free(t);
     RETURN(self);
 }
-LK_LIB_DEFINEINIT(lk_seq_libInit) {
+void lk_seq_libInit(lk_vm_t *vm) {
     lk_object_t *gl = vm->t_seq, *number = vm->t_number, *vec = vm->t_vector;
     lk_lib_setGlobal("Sequence", gl);
     lk_lib_setCFunc(gl, "at", at_gl_vec, vec, NULL);

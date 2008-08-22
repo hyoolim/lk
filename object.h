@@ -28,8 +28,8 @@ struct lk_slot {
 #define LK_SLOT_CHECKOPTION(self, option) ((self)->typeandoption & (option))
 
 /* ext map */
-LK_LIB_DEFINEINIT(lk_object_libPreInit);
-LK_LIB_DEFINEINIT(lk_object_libInit);
+void lk_object_libPreInit(lk_vm_t *vm);
+void lk_object_libInit(lk_vm_t *vm);
 
 /* new */
 #define LK_OBJ_MAXRECYCLED 1000

@@ -23,17 +23,17 @@ static LK_OBJ_DEFMARKFUNC(mark_scope) {
     mark(LK_OBJ(SCOPE->current));
     mark(LK_OBJ(SCOPE->func));
 }
-static LK_OBJ_DEFFREEFUNC(free_scope) {
+static void free_scope(lk_object_t *self) {
     if(LIST_ISINIT(SCOPESTACK)) darray_fin(SCOPESTACK);
 }
-LK_LIB_DEFINEINIT(lk_scope_libPreInit) {
+void lk_scope_libPreInit(lk_vm_t *vm) {
     vm->t_scope = lk_object_allocWithSize(vm->t_object, sizeof(lk_scope_t));
     lk_object_setmarkfunc(vm->t_scope, mark_scope);
     lk_object_setfreefunc(vm->t_scope, free_scope);
 }
 
 /* ext map - funcs */
-LK_LIB_DEFINECFUNC(Dargs_scope) {
+static void Dargs_scope(lk_object_t *self, lk_scope_t *local) {
     if(!LIST_ISINIT(SCOPESTACK)) RETURN(lk_list_new(VM));
     else {
         lk_list_t *args = lk_list_newFromDArray(VM, SCOPESTACK);
@@ -41,7 +41,7 @@ LK_LIB_DEFINECFUNC(Dargs_scope) {
         RETURN(args);
     }
 }
-LK_LIB_DEFINECFUNC(DassignB_scope_str_obj) {
+static void DassignB_scope_str_obj(lk_object_t *self, lk_scope_t *local) {
     lk_string_t *k = LK_STRING(ARG(0));
     lk_object_t *v = ARG(1);
     struct lk_slot *slot = lk_object_getslotfromany(self, LK_OBJ(k));
@@ -63,7 +63,7 @@ LK_LIB_DEFINECFUNC(DassignB_scope_str_obj) {
         RETURN(v);
     }
 }
-LK_LIB_DEFINECFUNC(include_scope_str_str) {
+static void include_scope_str_str(lk_object_t *self, lk_scope_t *local) {
     lk_scope_t *fr = lk_vm_evalfile(VM,
     darray_toCString(DARRAY(ARG(0))), darray_toCString(DARRAY(ARG(1))));
     if(fr != NULL) {
@@ -79,32 +79,32 @@ LK_LIB_DEFINECFUNC(include_scope_str_str) {
     }
     RETURN(self);
 }
-LK_LIB_DEFINECFUNC(raise_scope_err) {
+static void raise_scope_err(lk_object_t *self, lk_scope_t *local) {
     lk_vm_raiseerror(VM, LK_ERROR(ARG(0)));
 }
-LK_LIB_DEFINECFUNC(raise_scope_str) {
+static void raise_scope_str(lk_object_t *self, lk_scope_t *local) {
     lk_error_t *err = lk_error_new(VM, VM->t_error, NULL);
     err->message = LK_STRING(ARG(0));
     lk_vm_raiseerror(VM, err);
 }
-LK_LIB_DEFINECFUNC(redo_scope) {
+static void redo_scope(lk_object_t *self, lk_scope_t *local) {
     if(LIST_ISINIT(SCOPESTACK)) darray_clear(SCOPESTACK);
     SCOPE->next = SCOPE->first;
     DONE;
 }
-LK_LIB_DEFINECFUNC(require_scope_str_str) {
+static void require_scope_str_str(lk_object_t *self, lk_scope_t *local) {
     RETURN(lk_vm_evalfile(VM,
     darray_toCString(DARRAY(ARG(0))), darray_toCString(DARRAY(ARG(1)))));
 }
-LK_LIB_DEFINECFUNC(rescue_scope_f) {
+static void rescue_scope_f(lk_object_t *self, lk_scope_t *local) {
     RETURN(lk_object_getvaluefromslot(self, lk_object_setslot(
     self, LK_OBJ(VM->str_rescue), VM->t_func, ARG(0))));
 }
-LK_LIB_DEFINECFUNC(RESOURCE_scope) {
+static void RESOURCE_scope(lk_object_t *self, lk_scope_t *local) {
     RETURN(VM->rsrc != NULL && !VM->rsrc->isstring
     ? LK_OBJ(VM->rsrc->rsrc) : NIL);
 }
-LK_LIB_DEFINECFUNC(retry_scope) {
+static void retry_scope(lk_object_t *self, lk_scope_t *local) {
     lk_scope_t *caller = SCOPE->caller;
     lk_instr_t *i = caller->current->prev;
     SCOPE->next = NULL;
@@ -113,7 +113,7 @@ LK_LIB_DEFINECFUNC(retry_scope) {
     caller->next = i;
     DONE;
 }
-LK_LIB_DEFINECFUNC(return_scope) {
+static void return_scope(lk_object_t *self, lk_scope_t *local) {
     lk_scope_t *f = SCOPE;
     for(; ; f = LK_OBJ_PROTO(f)) {
         if(f == NULL) lk_vm_abort(VM, NULL);
@@ -128,7 +128,7 @@ LK_LIB_DEFINECFUNC(return_scope) {
     }
     DONE;
 }
-LK_LIB_DEFINEINIT(lk_scope_libInit) {
+void lk_scope_libInit(lk_vm_t *vm) {
     lk_object_t *scope = vm->t_scope, *obj = vm->t_object, *instr = vm->t_instr,
                 *str = vm->t_string, *err = vm->t_error, *f = vm->t_func;
     lk_lib_setGlobal("Scope", scope);

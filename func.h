@@ -53,8 +53,8 @@ struct lk_sig {
 #define LK_SIG(v) ((lk_sig_t *)(v))
 
 /* ext map */
-LK_LIB_DEFINEINIT(lk_func_libPreInit);
-LK_LIB_DEFINEINIT(lk_func_libInit);
+void lk_func_libPreInit(lk_vm_t *vm);
+void lk_func_libInit(lk_vm_t *vm);
 
 /* new */
 lk_cfunc_t *lk_cfunc_new(lk_vm_t * vm, lk_cfuncfunc_t *func, int minargc, int maxargc);

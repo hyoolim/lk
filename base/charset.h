@@ -10,6 +10,8 @@ typedef struct {
     uint32_t  min;
     int       size;
 } charset_t;
+#define CHARSET_DATA(self) ((uint32_t *)((ptrdiff_t)(self)->data & ~1))
+#define CHARSET_ISINVERTED(self) ((ptrdiff_t)(self)->data & 1)
 
 /* new */
 charset_t *charset_alloc(void);
@@ -37,4 +39,5 @@ int charset_size(const charset_t *self);
 #include "darray.h"
 void charset_add_darray(charset_t *self, darray_t *string);
 void charset_subtract_darray(charset_t *self, darray_t *string);
+darray_t *charset_tostring(const charset_t *self);
 #endif

@@ -1,7 +1,5 @@
 #include "charset.h"
-#define DATA(self) ((uint32_t *)((ptrdiff_t)(self)->data & ~1))
-#define DEFAULTCAP 8
-#define ISINVERTED(self) ((ptrdiff_t)(self)->data & 1)
+#define CHARSET_DEFAULTCAP 8
 
 /* new */
 charset_t *charset_alloc(void) {
@@ -15,11 +13,11 @@ charset_t *charset_clone(charset_t *self) {
 void charset_copy(charset_t *self, charset_t *from) {
     memcpy(self, from, sizeof(charset_t));
     self->data = memory_alloc(sizeof(uint32_t) * self->cap);
-    memcpy(DATA(self), DATA(from), sizeof(uint32_t) * self->cap);
-    if(ISINVERTED(from)) charset_invert(self);
+    memcpy(CHARSET_DATA(self), CHARSET_DATA(from), sizeof(uint32_t) * self->cap);
+    if(CHARSET_ISINVERTED(from)) charset_invert(self);
 }
 void charset_fin(charset_t *self) {
-    memory_free(DATA(self));
+    memory_free(CHARSET_DATA(self));
 }
 void charset_free(charset_t *self) {
     charset_fin(self);
@@ -28,7 +26,7 @@ void charset_free(charset_t *self) {
 void charset_init(charset_t *self) {
     self->min = UINT32_MAX;
     self->max = 0;
-    self->cap = DEFAULTCAP;
+    self->cap = CHARSET_DEFAULTCAP;
     self->size = 0;
     self->data = memory_alloc(sizeof(uint32_t) * self->cap);
 }
@@ -41,22 +39,22 @@ charset_t *charset_new(void) {
 /* update */
 /* double the internal storage space when we run out */
 static void resize(charset_t *self) {
-    int isinverted = ISINVERTED(self), newcap = self->cap;
+    int isinverted = CHARSET_ISINVERTED(self), newcap = self->cap;
     while(self->size >= newcap) newcap *= 2;
     if(newcap > self->cap) {
         self->cap = newcap;
-        self->data = memory_resize(DATA(self), sizeof(uint32_t) * newcap);
+        self->data = memory_resize(CHARSET_DATA(self), sizeof(uint32_t) * newcap);
         if(isinverted) charset_invert(self);
     }
 }
 
 /* */
-#define GET(self, index) (DATA(self)[(index)])
-#define SET(self, index, value) (DATA(self)[(index)] = (value))
+#define GET(self, index) (CHARSET_DATA(self)[(index)])
+#define SET(self, index, value) (CHARSET_DATA(self)[(index)] = (value))
 #define INSERT(self, i, v) \
     do { \
         resize(self); \
-        memmove(DATA(self) + (i) + 1, DATA(self) + (i), sizeof(uint32_t) * ((self)->size - (i))); \
+        memmove(CHARSET_DATA(self) + (i) + 1, CHARSET_DATA(self) + (i), sizeof(uint32_t) * ((self)->size - (i))); \
         SET(self, i, v); \
         (self)->size ++; \
     } while(0)
@@ -68,7 +66,7 @@ static void resize(charset_t *self) {
     } while(0)
 #define REMOVE(self, i) \
     do { \
-        memmove(DATA(self) + (i), DATA(self) + (i) + 1, sizeof(uint32_t) * ((self)->size - (i))); \
+        memmove(CHARSET_DATA(self) + (i), CHARSET_DATA(self) + (i) + 1, sizeof(uint32_t) * ((self)->size - (i))); \
         (self)->size --; \
     } while(0)
 
@@ -180,17 +178,17 @@ static void charset_remove(charset_t *self, uint32_t from, uint32_t to) {
 
 /* add specified range of chars to the charset */
 void charset_add_chars(charset_t *self, uint32_t from, uint32_t to) {
-    (ISINVERTED(self) ? charset_remove : charset_insert)(self, from, to);
+    (CHARSET_ISINVERTED(self) ? charset_remove : charset_insert)(self, from, to);
 }
 
 /* add another charset to this charset */
 void charset_add_charset(charset_t *self, charset_t *other) {
     uint32_t f, t;
-    uint32_t *c = DATA(other), *last = c + other->size;
+    uint32_t *c = CHARSET_DATA(other), *last = c + other->size;
     for(; c < last; ) {
         f = *c ++;
         t = *c ++;
-        (ISINVERTED(self) ? charset_remove : charset_insert)(self, f, t);
+        (CHARSET_ISINVERTED(self) ? charset_remove : charset_insert)(self, f, t);
     }
 }
 
@@ -202,36 +200,36 @@ void charset_add_darray(charset_t *self, darray_t *string) {
         uint32_t v = darray_getuchar(string, i);
         while(i < c) {
             v = darray_getuchar(string, i ++);
-            (ISINVERTED(self) ? charset_remove : charset_insert)(self, v, i < c && darray_getuchar(string, i) == '-' ? darray_getuchar(string, (i += 2) - 1) : v);
+            (CHARSET_ISINVERTED(self) ? charset_remove : charset_insert)(self, v, i < c && darray_getuchar(string, i) == '-' ? darray_getuchar(string, (i += 2) - 1) : v);
         }
     }
 }
 
 /* charset_remove all chars from the charset */
 void charset_clear(charset_t *self) {
-    self->data = DATA(self);
+    self->data = CHARSET_DATA(self);
     self->max = 0;
     self->min = UINT32_MAX;
     self->size = 0;
 }
 
 void charset_invert(charset_t *self) {
-    self->data = ISINVERTED(self) ? DATA(self) : (uint32_t *)((ptrdiff_t)self->data | 1);
+    self->data = CHARSET_ISINVERTED(self) ? CHARSET_DATA(self) : (uint32_t *)((ptrdiff_t)self->data | 1);
 }
 
 /* charset_remove specified range of chars from the charset */
 void charset_subtract_chars(charset_t *self, uint32_t from, uint32_t to) {
-    (ISINVERTED(self) ? charset_insert : charset_remove)(self, from, to);
+    (CHARSET_ISINVERTED(self) ? charset_insert : charset_remove)(self, from, to);
 }
 
 /* charset_remove another charset from this charset */
 void charset_subtract_charset(charset_t *self, charset_t *other) {
     uint32_t f, t;
-    uint32_t *c = DATA(other), *last = c + other->size;
+    uint32_t *c = CHARSET_DATA(other), *last = c + other->size;
     for(; c < last; ) {
         f = *c ++;
         t = *c ++;
-        (ISINVERTED(self) ? charset_insert : charset_remove)(self, f, t);
+        (CHARSET_ISINVERTED(self) ? charset_insert : charset_remove)(self, f, t);
     }
 }
 
@@ -243,7 +241,7 @@ void charset_subtract_darray(charset_t *self, darray_t *string) {
         uint32_t v = darray_getuchar(string, i);
         while(i < c) {
             v = darray_getuchar(string, i ++);
-            (ISINVERTED(self) ? charset_insert : charset_remove)(self, v, i < c && darray_getuchar(string, i) == '-' ? darray_getuchar(string, (i += 2) - 1) : v);
+            (CHARSET_ISINVERTED(self) ? charset_insert : charset_remove)(self, v, i < c && darray_getuchar(string, i) == '-' ? darray_getuchar(string, (i += 2) - 1) : v);
         }
     }
 }
@@ -253,22 +251,22 @@ void charset_subtract_darray(charset_t *self, darray_t *string) {
 int charset_has(const charset_t *self, uint32_t achar) {
     if(self->min <= achar && achar <= self->max) {
         uint32_t from, to;
-        uint32_t *curr = DATA(self), *last = curr + self->size;
+        uint32_t *curr = CHARSET_DATA(self), *last = curr + self->size;
         for(; curr < last; ) {
             from = *curr ++;
             to = *curr ++;
             if(from <= achar && achar <= to) {
-                return 1 ^ ISINVERTED(self);
+                return 1 ^ CHARSET_ISINVERTED(self);
             }
         }
     }
-    return 0 ^ ISINVERTED(self);
+    return 0 ^ CHARSET_ISINVERTED(self);
 }
 
 /* print the contents of charset struct - useful for debugging */
 void charset_inspect(const charset_t *self, FILE *output) {
     uint32_t f, t;
-    uint32_t *c = DATA(self), *last = c + self->size;
+    uint32_t *c = CHARSET_DATA(self), *last = c + self->size;
     fprintf(output, "charset_t(%p", (void *)self);
     fprintf(output, ", min=%i", self->min);
     fprintf(output, ", max=%i", self->max);
@@ -288,11 +286,30 @@ void charset_inspect(const charset_t *self, FILE *output) {
 int charset_size(const charset_t *self) {
     int total = 0;
     uint32_t from, to;
-    uint32_t *curr = DATA(self), *last = curr + self->size;
+    uint32_t *curr = CHARSET_DATA(self), *last = curr + self->size;
     for(; curr < last; ) {
         from = *curr ++;
         to = *curr ++;
         total += to - from + 1;
     }
     return total;
+}
+
+/* string representation of the string */
+darray_t *charset_tostring(const charset_t *self) {
+    darray_t *string = darray_alloc_string();
+    uint32_t from, to;
+    uint32_t *curr = CHARSET_DATA(self), *last = curr + self->size;
+    if(CHARSET_ISINVERTED(self)) darray_setuchar(string, string->size, '^');
+    for(; curr < last; ) {
+        from = *curr ++;
+        to = *curr ++;
+        if(from == to) darray_setuchar(string, string->size, from);
+        else {
+            darray_setuchar(string, string->size, from);
+            darray_setuchar(string, string->size, '-');
+            darray_setuchar(string, string->size, to);
+        }
+    }
+    return string;
 }

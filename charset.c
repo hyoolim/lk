@@ -49,24 +49,10 @@ LK_LIB_DEFINECFUNC(subtractB_charset_string) {
     RETURN(self);
 }
 LK_LIB_DEFINECFUNC(to_string_charset) {
-    lk_string_t *str = lk_string_new(VM);
-    /*
-    darray_t *s = DARRAY(str);
-    uint32_t f, t;
-    uint32_t *c = CHARSET(self)->data, *last = c + CHARSET(self)->size;
-    if(CHARSET_ISINVERTED(self)) darray_setuchar(s, s->size, '^');
-    for(; c < last; ) {
-        f = *c ++;
-        t = *c ++;
-        if(f == t) darray_setuchar(s, s->size, f);
-        else {
-            darray_setuchar(s, s->size, f);
-            darray_setuchar(s, s->size, '-');
-            darray_setuchar(s, s->size, t);
-        }
-    }
-    */
-    RETURN(str);
+    darray_t *base = charset_tostring(CHARSET(self));
+    lk_string_t *lk = lk_string_newFromDArray(VM, base);
+    darray_free(base);
+    RETURN(lk);
 }
 LK_LIB_DEFINECFUNC(negateB_charset) {
     charset_invert(CHARSET(self));

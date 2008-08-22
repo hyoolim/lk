@@ -27,6 +27,7 @@ darray_t *darray_allocFromData(const void *data, int len);
 darray_t *darray_allocFromCString(const char *cstr);
 darray_t *string_allocfromfile(FILE *stream);
 darray_t *darray_allocFromFileUntilChar(FILE *stream, uint32_t pat);
+darray_t *darray_alloc_string(void);
 darray_t *darray_clone(darray_t *self);
 void darray_init(darray_t *self, int ilen, int cap);
 void darray_initptr(darray_t *self);

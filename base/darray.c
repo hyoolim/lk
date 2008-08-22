@@ -33,6 +33,9 @@ darray_t *darray_allocfromfile(FILE *stream, size_t rs) {
     self->data->used = fread(self->first, 1, rs, stream);
     return self;
 }
+darray_t *darray_alloc_string(void) {
+    return darray_alloc(sizeof(uint8_t), 10);
+}
 darray_t *darray_clone(darray_t *self) {
     darray_t *clone = memory_alloc(sizeof(darray_t));
     darray_copy(clone, self);

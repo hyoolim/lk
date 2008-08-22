@@ -3,12 +3,12 @@
 
 /* type */
 typedef struct lk_env lk_env_t;
-#define LK_ENV(v) ((lk_env_t *)(v))
+#define LK_ENV(object) ((lk_env_t *)(object))
 #include "vm.h"
 struct lk_env {
     struct lk_common o;
 };
 
-/* ext map */
+/* init */
 LK_LIB_DEFINEINIT(lk_env_extinit);
 #endif

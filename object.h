@@ -33,7 +33,7 @@ LK_LIB_DEFINEINIT(lk_object_libInit);
 
 /* new */
 #define LK_OBJ_MAXRECYCLED 1000
-lk_object_t *lk_object_allocwithsize(lk_object_t *parent, size_t s);
+lk_object_t *lk_object_allocWithSize(lk_object_t *parent, size_t s);
 lk_object_t *lk_object_alloc(lk_object_t *parent);
 lk_object_t *lk_object_clone(lk_object_t *self);
 void lk_object_justfree(lk_object_t *self);
@@ -62,12 +62,12 @@ struct lk_slot *lk_object_getslot(lk_object_t *self, lk_object_t *k);
 struct lk_slot *lk_object_getslotfromany(lk_object_t *self, lk_object_t *k);
 lk_object_t *lk_object_getvaluefromslot(lk_object_t *self,
                                         struct lk_slot *slot);
-int lk_object_hashcode(const void *k, int capacity);
+int lk_object_hashcode(const void *k, int cap);
 int lk_object_keycmp(const void *self, const void *other);
 #define LK_OBJ_ISTYPE(self, t) \
 (  (self) == (t) \
-|| (t) == LK_VM(self)->t_obj \
-/* || (  (t)->o.tag != LK_VM(self)->t_obj->o.tag \
+|| (t) == LK_VM(self)->t_object \
+/* || (  (t)->o.tag != LK_VM(self)->t_object->o.tag \
    && (self)->o.tag == (t)->o.tag \
    ) */ \
 || lk_object_isa((self), (t)) \

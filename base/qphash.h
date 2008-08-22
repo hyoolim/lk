@@ -8,11 +8,11 @@ typedef struct setitem {
 } setitem_t;
 
 /* set data so that cloning isn't so expensive */
-typedef int sethashfunc_t(const void *key, int capacity);
+typedef int sethashfunc_t(const void *key, int cap);
 typedef int setkeycmpfunc_t(const void *self, const void *other);
 struct setdata {
     int               ci;
-    int               capacity;
+    int               cap;
     int               ivlen; /* length of item value */
     int               refc;
     int               size;
@@ -45,7 +45,7 @@ void qphash_unset(qphash_t *self, const void *key);
 
 /* default hash and keycmp */
 int qphash_keycmp(const void *self, const void *other);
-int qphash_hash(const void *key, int capacity);
+int qphash_hash(const void *key, int cap);
 
 /* set item pointer math */
 #define SETITEM_ADD(data, item, delta) ((setitem_t *)((char *)(item) + SETITEM_SIZE(data) * (delta)))
@@ -63,7 +63,7 @@ int qphash_hash(const void *key, int capacity);
     int _i, _isize = SETITEM_SIZE(_data); \
     setitem_t *item = (setitem_t *)&_data->items; \
     item = (setitem_t *)((char *)item - _isize); \
-    for(_i = 0; _i < _data->capacity; _i ++) { \
+    for(_i = 0; _i < _data->cap; _i ++) { \
         item = (setitem_t *)((char *)item + _isize); \
         if(item->key == NULL || item->key == SETITEM_SKIPKEY) continue; \
         { block; } \

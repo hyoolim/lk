@@ -4,7 +4,7 @@
 
 /* type - contains actual list data */
 struct listdata {
-    int  capacity;
+    int  cap;
     int  used;
     int  ilen; /* length of item in data in bytes */
     int  refc; /* how many ref this buf? */
@@ -19,16 +19,16 @@ typedef struct list {
 } darray_t;
 
 /* new */
-darray_t *darray_alloc(int ilen, int capacity);
+darray_t *darray_alloc(int ilen, int cap);
 darray_t *darray_allocptr(void);
-darray_t *darray_allocptrwithcapacity(int capacity);
+darray_t *darray_allocptrwithcap(int cap);
 darray_t *darray_allocfromfile(FILE *stream, size_t rs);
 darray_t *darray_allocFromData(const void *data, int len);
 darray_t *darray_allocFromCString(const char *cstr);
 darray_t *string_allocfromfile(FILE *stream);
 darray_t *darray_allocFromFileUntilChar(FILE *stream, uint32_t pat);
 darray_t *darray_clone(darray_t *self);
-void darray_init(darray_t *self, int ilen, int capacity);
+void darray_init(darray_t *self, int ilen, int cap);
 void darray_initptr(darray_t *self);
 void darray_copy(darray_t *self, darray_t *src);
 void darray_fin(darray_t *self);

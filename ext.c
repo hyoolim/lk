@@ -5,10 +5,10 @@
 #include <stdarg.h>
 
 /* ext map - types */
-static LK_OBJ_DEFFREEFUNC(free__ext) {
+static LK_OBJ_DEFFREEFUNC(free_ext) {
     if(LK_EXT(self)->lib != NULL) dlclose(LK_EXT(self)->lib);
 }
-LK_LIB_DEFINECFUNC(init__ext_str_str) {
+LK_LIB_DEFINECFUNC(init_ext_str_str) {
     const char *libpath = darray_toCString(DARRAY(ARG(0)));
     void *lib = dlopen(libpath, RTLD_NOW);
     if(lib != NULL) {
@@ -27,17 +27,17 @@ LK_LIB_DEFINECFUNC(init__ext_str_str) {
 }
 LK_LIB_DEFINEINIT(lk_library_extinit) {
     lk_object_t *str = vm->t_string;
-    lk_object_t *ext = lk_object_allocwithsize(vm->t_obj, sizeof(lk_library_t));
-    lk_object_setfreefunc(ext, free__ext);
+    lk_object_t *ext = lk_object_allocWithSize(vm->t_object, sizeof(lk_library_t));
+    lk_object_setfreefunc(ext, free_ext);
     lk_lib_setGlobal("Extension", ext);
-    lk_lib_setCFunc(ext, "init!", init__ext_str_str, str, str, NULL);
+    lk_lib_setCFunc(ext, "init!", init_ext_str_str, str, str, NULL);
 }
 
 /* update */
 void lk_lib_setObject(lk_object_t *parent, const char *k, lk_object_t *v) {
     lk_vm_t *vm = LK_VM(parent);
     lk_string_t *k_kc = lk_string_newFromCString(vm, k);
-    lk_object_setslot(parent, LK_OBJ(k_kc), vm->t_obj, v);
+    lk_object_setslot(parent, LK_OBJ(k_kc), vm->t_object, v);
     /*
     lk_object_setslot(v, LK_OBJ(vm->str_type), vm->t_string, LK_OBJ(k_kc));
     */

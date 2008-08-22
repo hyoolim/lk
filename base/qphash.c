@@ -1,6 +1,6 @@
 #include "qphash.h"
 
-/* set capacity needs to be primes for quadratic probing to work */
+/* set cap needs to be primes for quadratic probing to work */
 static unsigned long primes[] = { 
     11, 19, 37, 67, 131, 283, 521, 1033, 2053, 4099, 8219, 16427,
     32771, 65581, 131101, 262147, 524309, 1048583, 2097169, 4194319,
@@ -18,7 +18,7 @@ static struct setdata *setdata_alloc(int ivlen, int ci,
                          - sizeof(setitem_t)
                          + (sizeof(setitem_t) + ivlen) * c);
     self->ci = ci;
-    self->capacity = c;
+    self->cap = c;
     self->ivlen = ivlen;
     self->refc = 1;
     self->size = 0;
@@ -38,19 +38,19 @@ static void qphash_resize(qphash_t *self, int ci) {
     struct setdata *olddata = self->data, *newdata;
     sethashfunc_t *hashfunc = olddata->hashfunc;
     setkeycmpfunc_t *cmpfunc = olddata->cmpfunc;
-    int delta, newcapacity;
+    int delta, newcap;
     setitem_t *newitem, *newlast;
     newdata = setdata_alloc(olddata->ivlen, ci, hashfunc, cmpfunc);
-    newlast = SETITEM_AT(newdata, newdata->capacity - 1);
-    newcapacity = newdata->capacity;
+    newlast = SETITEM_AT(newdata, newdata->cap - 1);
+    newcap = newdata->cap;
     SET_EACH(self, olditem,
         delta = 1;
-        newitem = SETITEM_AT(newdata, hashfunc(olditem->key, newcapacity));
+        newitem = SETITEM_AT(newdata, hashfunc(olditem->key, newcap));
         while(newitem->key != NULL && (newitem->key == SETITEM_SKIPKEY
         || cmpfunc(newitem->key, olditem->key) != 0)) {
             newitem = SETITEM_ADD(newdata, newitem, delta);
             while(newitem > newlast) {
-                newitem = SETITEM_ADD(newdata, newitem, -newcapacity);
+                newitem = SETITEM_ADD(newdata, newitem, -newcap);
             }
             delta += 2;
         }
@@ -92,40 +92,40 @@ void qphash_init(qphash_t *self, int ivlen, sethashfunc_t *hashfunc,
 void qphash_clear(qphash_t *self) {
     struct setdata *data = self->data;
     data->size = 0;
-    memset(&data->items, 0x0, SETITEM_SIZE(data) * data->capacity);
+    memset(&data->items, 0x0, SETITEM_SIZE(data) * data->cap);
 }
 int qphash_size(qphash_t *self) {
     return self->data->size;
 }
 setitem_t *qphash_get(const qphash_t *self, const void *key) {
     struct setdata *data = self->data;
-    int delta = 1, capacity = data->capacity;
-    setitem_t *item = SETITEM_AT(data, data->hashfunc(key, capacity));
-    setitem_t *last = SETITEM_AT(data, capacity - 1);
+    int delta = 1, cap = data->cap;
+    setitem_t *item = SETITEM_AT(data, data->hashfunc(key, cap));
+    setitem_t *last = SETITEM_AT(data, cap - 1);
     while(item->key != NULL) {
         if(item->key != SETITEM_SKIPKEY
         && data->cmpfunc(item->key, key) == 0) {
             return item;
         }
         item = SETITEM_ADD(data, item, delta);
-        while(item > last) item = SETITEM_ADD(data, item, -capacity);
+        while(item > last) item = SETITEM_ADD(data, item, -cap);
         delta += 2;
     }
     return NULL;
 }
 void *qphash_set(qphash_t *self, const void *key) {
     struct setdata *data = self->data;
-    int delta = 1, capacity;
+    int delta = 1, cap;
     setitem_t *item, *last;
-    if(data->size >= data->capacity / 2) qphash_resize(self, data->ci + 1);
+    if(data->size >= data->cap / 2) qphash_resize(self, data->ci + 1);
     data = self->data;
-    capacity = data->capacity;
-    item = SETITEM_AT(data, data->hashfunc(key, capacity));
-    last = SETITEM_AT(data, capacity - 1);
+    cap = data->cap;
+    item = SETITEM_AT(data, data->hashfunc(key, cap));
+    last = SETITEM_AT(data, cap - 1);
     while(item->key != NULL && (item->key == SETITEM_SKIPKEY
     || data->cmpfunc(item->key, key) != 0)) {
         item = SETITEM_ADD(data, item, delta);
-        while(item > last) item = SETITEM_ADD(data, item, -capacity);
+        while(item > last) item = SETITEM_ADD(data, item, -cap);
         delta += 2;
     }
     if(item->key == NULL || item->key == SETITEM_SKIPKEY) data->size ++;
@@ -141,8 +141,8 @@ void qphash_unset(qphash_t *self, const void *key) {
 }
 
 /* default hash and keycmp */
-int qphash_hash(const void *key, int capacity) {
-    return (ptrdiff_t)key % capacity;
+int qphash_hash(const void *key, int cap) {
+    return (ptrdiff_t)key % cap;
 }
 int qphash_keycmp(const void *self, const void *other) {
     return (ptrdiff_t)self - (ptrdiff_t)other;

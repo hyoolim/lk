@@ -3,14 +3,14 @@
 
 /* type */
 typedef struct lk_charset lk_charset_t;
-#define LK_CHARSET(v) ((lk_charset_t *)(v))
+#define LK_CHARSET(object) ((lk_charset_t *)(object))
 #include "vm.h"
 struct lk_charset {
     struct lk_common o;
     charset_t        data;
 };
 
-/* ext map */
+/* init */
 LK_LIB_DEFINEINIT(lk_charset_libPreInit);
 LK_LIB_DEFINEINIT(lk_charset_libInit);
 

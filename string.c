@@ -12,40 +12,40 @@ LK_LIB_DEFINEINIT(lk_string_libPreInit) {
 }
 
 /* ext map - funcs */
-LK_LIB_DEFINECFUNC(at__str_number) {
+LK_LIB_DEFINECFUNC(at_str_number) {
     RETURN(lk_char_new(VM, darray_getuchar(DARRAY(self), CSIZE(ARG(0)))));
 }
-LK_LIB_DEFINECFUNC(find__str_ch_number) {
+LK_LIB_DEFINECFUNC(find_str_ch_number) {
     int i = darray_findChar(DARRAY(self), CHAR(ARG(0)), CSIZE(ARG(1)));
     if(i >= 0) RETURN(lk_number_new(VM, i));
     RETURN(NIL);
 }
-LK_LIB_DEFINECFUNC(find__str_charset_number) {
+LK_LIB_DEFINECFUNC(find_str_charset_number) {
     int i = darray_findCharSet(DARRAY(self), CHARSET(ARG(0)), CSIZE(ARG(1)));
     if(i >= 0) RETURN(lk_number_new(VM, i));
     RETURN(NIL);
 }
-LK_LIB_DEFINECFUNC(find__str_str_number) {
+LK_LIB_DEFINECFUNC(find_str_str_number) {
     int i = darray_findDArray(DARRAY(self), DARRAY(ARG(0)), CSIZE(ARG(1)));
     if(i >= 0) RETURN(lk_number_new(VM, i));
     RETURN(NIL);
 }
-LK_LIB_DEFINECFUNC(setB__str_number_ch) {
+LK_LIB_DEFINECFUNC(setB_str_number_ch) {
     darray_setuchar(DARRAY(self), CSIZE(ARG(0)), CHAR(ARG(1)));
     RETURN(self);
 }
-LK_LIB_DEFINECFUNC(setB__str_number_number_str) {
+LK_LIB_DEFINECFUNC(setB_str_number_number_str) {
     darray_t *x = DARRAY(self), *y = DARRAY(ARG(2));
     darray_resizeitem(x, y);
     darray_setrange(x, CSIZE(ARG(0)), CSIZE(ARG(1)), y);
     RETURN(self);
 }
-LK_LIB_DEFINECFUNC(to_character_qphash__str) {
+LK_LIB_DEFINECFUNC(to_character_qphash_str) {
     lk_charset_t *cs = lk_charset_new(VM);
-    charset_addDArray(CHARSET(cs), DARRAY(self));
+    charset_add_darray(CHARSET(cs), DARRAY(self));
     RETURN(cs);
 }
-LK_LIB_DEFINECFUNC(to_number__str) {
+LK_LIB_DEFINECFUNC(to_number_str) {
     numberifn_t num;
     switch(number_new(0, DARRAY(self), &num)) {
     case NUMBERTYPE_INT: RETURN(lk_number_new(VM, num.i));
@@ -58,14 +58,14 @@ LK_LIB_DEFINEINIT(lk_string_libInit) {
                 *ch = vm->t_char;
     lk_lib_setGlobal("NEWLINE", LK_OBJ(lk_string_newFromCString(vm, "\n")));
     lk_lib_setGlobal("String", str);
-    lk_lib_setCFunc(str, "at", at__str_number, number, NULL);
-    lk_lib_setCFunc(str, "find", find__str_ch_number, ch, number, NULL);
-    lk_lib_setCFunc(str, "find", find__str_charset_number, charset, number, NULL);
-    lk_lib_setCFunc(str, "find", find__str_str_number, str, number, NULL);
-    lk_lib_setCFunc(str, "set!", setB__str_number_ch, number, ch, NULL);
-    lk_lib_setCFunc(str, "set!", setB__str_number_number_str, number, number, str, NULL);
-    lk_lib_setCFunc(str, "toCharacterSet", to_character_qphash__str, NULL);
-    lk_lib_setCFunc(str, "toNumber", to_number__str, NULL);
+    lk_lib_setCFunc(str, "at", at_str_number, number, NULL);
+    lk_lib_setCFunc(str, "find", find_str_ch_number, ch, number, NULL);
+    lk_lib_setCFunc(str, "find", find_str_charset_number, charset, number, NULL);
+    lk_lib_setCFunc(str, "find", find_str_str_number, str, number, NULL);
+    lk_lib_setCFunc(str, "set!", setB_str_number_ch, number, ch, NULL);
+    lk_lib_setCFunc(str, "set!", setB_str_number_number_str, number, number, str, NULL);
+    lk_lib_setCFunc(str, "toCharacterSet", to_character_qphash_str, NULL);
+    lk_lib_setCFunc(str, "toNumber", to_number_str, NULL);
 }
 
 /* new */

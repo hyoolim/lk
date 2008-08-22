@@ -6,7 +6,7 @@
 #define INSTR (LK_INSTR(self))
 
 /* ext map - types */
-static LK_OBJ_DEFMARKFUNC(mark__instr) {
+static LK_OBJ_DEFMARKFUNC(mark_instr) {
     mark(LK_OBJ(INSTR->prev));
     mark(LK_OBJ(INSTR->next));
     mark(LK_OBJ(INSTR->rsrc));
@@ -14,8 +14,8 @@ static LK_OBJ_DEFMARKFUNC(mark__instr) {
     if(INSTR->comment != NULL) mark(LK_OBJ(INSTR->comment));
 }
 LK_LIB_DEFINEINIT(lk_instr_libPreInit) {
-    vm->t_instr = lk_object_allocwithsize(vm->t_obj, sizeof(lk_instr_t));
-    lk_object_setmarkfunc(vm->t_instr, mark__instr);
+    vm->t_instr = lk_object_allocWithSize(vm->t_object, sizeof(lk_instr_t));
+    lk_object_setmarkfunc(vm->t_instr, mark_instr);
 }
 
 /* ext map - funcs */

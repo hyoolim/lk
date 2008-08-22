@@ -1,12 +1,12 @@
 #include "darray.h"
 
 /* new */
-static struct listdata *listdata_alloc(int ilen, int capacity) {
+static struct listdata *listdata_alloc(int ilen, int cap) {
     struct listdata *self;
     int c = 8;
-    while(capacity > c) c *= 2;
+    while(cap > c) c *= 2;
     self = memory_alloc(sizeof(struct listdata) - sizeof(char) + ilen * c);
-    self->capacity = c;
+    self->cap = c;
     self->used = 0;
     self->ilen = ilen;
     self->refc = 1;
@@ -16,16 +16,16 @@ static void listdata_free(struct listdata *self) {
     if(self->refc > 0) self->refc --;
     if(self->refc < 1) memory_free(self);
 }
-darray_t *darray_alloc(int ilen, int capacity) {
+darray_t *darray_alloc(int ilen, int cap) {
     darray_t *self = memory_alloc(sizeof(darray_t));
-    darray_init(self, ilen, capacity);
+    darray_init(self, ilen, cap);
     return self;
 }
 darray_t *darray_allocptr(void) {
-    return darray_allocptrwithcapacity(10);
+    return darray_allocptrwithcap(10);
 }
-darray_t *darray_allocptrwithcapacity(int capacity) {
-    return darray_alloc(sizeof(void *), capacity);
+darray_t *darray_allocptrwithcap(int cap) {
+    return darray_alloc(sizeof(void *), cap);
 }
 darray_t *darray_allocfromfile(FILE *stream, size_t rs) {
     darray_t *self = darray_alloc(1, rs);
@@ -69,7 +69,7 @@ darray_t *string_allocfromfile(FILE *stream) {
             self->data = memory_resize(self->data, \
             sizeof(struct listdata) - sizeof(char) \
             + self->data->ilen * c); \
-            self->data->capacity = (c); \
+            self->data->cap = (c); \
             self->first = &(self)->data->item; \
         } \
         ((char *)self->first)[i] = ch; \
@@ -86,8 +86,8 @@ darray_t *darray_allocFromFileUntilCharSet(FILE *stream, const charset_t *pat) {
     if(feof(stream)) return NULL;
     UNTIL(charset_has(pat, ch));
 }
-void darray_init(darray_t *self, int ilen, int capacity) {
-    self->data = listdata_alloc(ilen, capacity);
+void darray_init(darray_t *self, int ilen, int cap) {
+    self->data = listdata_alloc(ilen, cap);
     self->first = &self->data->item;
     self->size = 0;
 }
@@ -122,22 +122,22 @@ void darray_free(darray_t *self) {
 } while(0)
 static void darray_prepupdate(darray_t *self, int i, int newsize) {
     struct listdata *bd = self->data;
-    int newcapacity = bd->capacity, ilen = bd->ilen;
-    if(newsize > newcapacity) {
-        do { newcapacity *= 2; } while(newsize > newcapacity);
+    int newcap = bd->cap, ilen = bd->ilen;
+    if(newsize > newcap) {
+        do { newcap *= 2; } while(newsize > newcap);
         /* buf shared? alloc new */
         if(bd->refc > 1) {
             newlistdata:
             bd->refc --;
-            bd = self->data = listdata_alloc(ilen, newcapacity);
+            bd = self->data = listdata_alloc(ilen, newcap);
             memcpy(&bd->item, self->first, ilen * self->size);
             self->first = &bd->item;
         /* resize existing buf */
         } else {
             ptrdiff_t d = self->first - &bd->item;
             bd = self->data = memory_resize(bd,
-            sizeof(struct listdata) - sizeof(char) + ilen * newcapacity);
-            bd->capacity = newcapacity;
+            sizeof(struct listdata) - sizeof(char) + ilen * newcap);
+            bd->cap = newcap;
             self->first = &bd->item + d;
         }
     /* new buf if replacing existing item in shared buf */
@@ -479,7 +479,7 @@ void darray_write(const darray_t *self, FILE *stream) {
     fprintf(stream, "(%i)", (first - &bd->item) / ilen);
     fprintf(stream, ", size=%i", self->size);
     fprintf(stream, ")\n-> data(%p", (void *)bd);
-    fprintf(stream, ", capacity=%i", bd->capacity);
+    fprintf(stream, ", cap=%i", bd->cap);
     fprintf(stream, ", used=%i", bd->used);
     fprintf(stream, ", ilen=%i", ilen);
     fprintf(stream, ", refc=%i", bd->refc);

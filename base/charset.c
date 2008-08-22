@@ -11,8 +11,8 @@ charset_t *charset_clone(charset_t *self) {
 }
 void charset_copy(charset_t *self, charset_t *from) {
     memcpy(self, from, sizeof(charset_t));
-    self->data = memory_alloc(sizeof(uint32_t) * self->capacity);
-    memcpy(self->data, from->data, sizeof(uint32_t) * self->capacity);
+    self->data = memory_alloc(sizeof(uint32_t) * self->cap);
+    memcpy(self->data, from->data, sizeof(uint32_t) * self->cap);
 }
 void charset_fin(charset_t *self) {
     memory_free(self->data);
@@ -24,9 +24,9 @@ void charset_free(charset_t *self) {
 void charset_init(charset_t *self) {
     self->min = UINT32_MAX;
     self->max = 0;
-    self->capacity = CHARSET_DEFAULTCAPA;
+    self->cap = CHARSET_DEFAULTCAPA;
     self->size = 0;
-    self->data = memory_alloc(sizeof(uint32_t) * self->capacity);
+    self->data = memory_alloc(sizeof(uint32_t) * self->cap);
 }
 charset_t *charset_new(void) {
     charset_t *self = charset_alloc();
@@ -36,10 +36,10 @@ charset_t *charset_new(void) {
 
 /* update */
 static void charset_resize(charset_t *self) {
-    int capacity = self->capacity, c = self->size;
-    while(c >= capacity) capacity *= 2;
-    if(capacity > self->capacity) self->data = memory_resize(
-    self->data, sizeof(uint32_t) * (self->capacity = capacity));
+    int cap = self->cap, c = self->size;
+    while(c >= cap) cap *= 2;
+    if(cap > self->cap) self->data = memory_resize(
+    self->data, sizeof(uint32_t) * (self->cap = cap));
 }
 void charset_clear(charset_t *self) {
     self->min = UINT32_MAX;
@@ -148,13 +148,13 @@ static void charset_remove(charset_t *self, uint32_t from, uint32_t to) {
         }
     }
 }
-void charset_addRange(charset_t *self, uint32_t from, uint32_t to) {
+void charset_add_chars(charset_t *self, uint32_t from, uint32_t to) {
     (self->isinverted ? charset_remove : charset_insert)(self, from, to);
 }
-void charset_subtractRange(charset_t *self, uint32_t from, uint32_t to) {
+void charset_subtract_chars(charset_t *self, uint32_t from, uint32_t to) {
     (self->isinverted ? charset_insert : charset_remove)(self, from, to);
 }
-void charset_addCharSet(charset_t *self, charset_t *other) {
+void charset_add_charset(charset_t *self, charset_t *other) {
     uint32_t f, t;
     uint32_t *c = other->data, *last = c + other->size;
     void (*func)(charset_t *, uint32_t, uint32_t
@@ -165,7 +165,7 @@ void charset_addCharSet(charset_t *self, charset_t *other) {
         func(self, f, t);
     }
 }
-void charset_subtractCharSet(charset_t *self, charset_t *other) {
+void charset_subtract_charset(charset_t *self, charset_t *other) {
     uint32_t f, t;
     uint32_t *c = other->data, *last = c + other->size;
     void (*func)(charset_t *, uint32_t, uint32_t
@@ -176,7 +176,7 @@ void charset_subtractCharSet(charset_t *self, charset_t *other) {
         func(self, f, t);
     }
 }
-void charset_addDArray(charset_t *self, darray_t *str) {
+void charset_add_darray(charset_t *self, darray_t *str) {
     int c = str->size;
     if(c > 0) {
         int i = 0;
@@ -191,7 +191,7 @@ void charset_addDArray(charset_t *self, darray_t *str) {
         }
     }
 }
-void charset_subtractDArray(charset_t *self, darray_t *str) {
+void charset_subtract_darray(charset_t *self, darray_t *str) {
     int c = str->size;
     if(c > 0) {
         int i = 0;
@@ -225,7 +225,7 @@ void charset_print(const charset_t *self, FILE *stream) {
     fprintf(stream, "charset_t(%p", (void *)self);
     fprintf(stream, ", min=%i", self->min);
     fprintf(stream, ", max=%i", self->max);
-    fprintf(stream, ", capacity=%i", self->capacity);
+    fprintf(stream, ", cap=%i", self->cap);
     fprintf(stream, ", size=%i", self->size);
     fprintf(stream, ")\n-> ");
     for(; c < last; ) {

@@ -4,7 +4,7 @@
 
 /* type */
 typedef struct charset {
-    int       capacity;
+    int       cap;
     int       size;
     uint32_t  min;
     uint32_t  max;
@@ -24,16 +24,16 @@ charset_t *charset_new(void);
 
 /* update */
 void charset_clear(charset_t *self);
-void charset_addRange(charset_t *self, uint32_t from, uint32_t to);
-void charset_subtractRange(charset_t *self, uint32_t from, uint32_t to);
-void charset_addCharSet(charset_t *self, charset_t *other);
-void charset_subtractCharSet(charset_t *self, charset_t *other);
+void charset_add_chars(charset_t *self, uint32_t from, uint32_t to);
+void charset_subtract_chars(charset_t *self, uint32_t from, uint32_t to);
+void charset_add_charset(charset_t *self, charset_t *other);
+void charset_subtract_charset(charset_t *self, charset_t *other);
 #include "darray.h"
-void charset_addDArray(charset_t *self, darray_t *str);
-void charset_subtractDArray(charset_t *self, darray_t *str);
+void charset_add_darray(charset_t *self, darray_t *str);
+void charset_subtract_darray(charset_t *self, darray_t *str);
 
 /* info */
+int charset_has(const charset_t *self, uint32_t n);
 int charset_size(const charset_t *self);
 void charset_print(const charset_t *self, FILE *stream);
-int charset_has(const charset_t *self, uint32_t n);
 #endif

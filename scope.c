@@ -10,7 +10,7 @@
 #define SCOPESTACK (&SCOPE->stack)
 
 /* ext map - types */
-static LK_OBJ_DEFMARKFUNC(mark__scope) {
+static LK_OBJ_DEFMARKFUNC(mark_scope) {
     if(LIST_ISINIT(SCOPESTACK)) LIST_EACHPTR(SCOPESTACK, i, v, mark(v));
     mark(LK_OBJ(SCOPE->scope));
     mark(LK_OBJ(SCOPE->receiver));
@@ -23,25 +23,25 @@ static LK_OBJ_DEFMARKFUNC(mark__scope) {
     mark(LK_OBJ(SCOPE->current));
     mark(LK_OBJ(SCOPE->func));
 }
-static LK_OBJ_DEFFREEFUNC(free__scope) {
+static LK_OBJ_DEFFREEFUNC(free_scope) {
     if(LIST_ISINIT(SCOPESTACK)) darray_fin(SCOPESTACK);
 }
 LK_LIB_DEFINEINIT(lk_scope_libPreInit) {
-    vm->t_scope = lk_object_allocwithsize(vm->t_obj, sizeof(lk_scope_t));
-    lk_object_setmarkfunc(vm->t_scope, mark__scope);
-    lk_object_setfreefunc(vm->t_scope, free__scope);
+    vm->t_scope = lk_object_allocWithSize(vm->t_object, sizeof(lk_scope_t));
+    lk_object_setmarkfunc(vm->t_scope, mark_scope);
+    lk_object_setfreefunc(vm->t_scope, free_scope);
 }
 
 /* ext map - funcs */
-LK_LIB_DEFINECFUNC(Dargs__scope) {
+LK_LIB_DEFINECFUNC(Dargs_scope) {
     if(!LIST_ISINIT(SCOPESTACK)) RETURN(lk_list_new(VM));
     else {
-        lk_list_t *args = lk_list_newfromlist(VM, SCOPESTACK);
+        lk_list_t *args = lk_list_newFromDArray(VM, SCOPESTACK);
         darray_limit(DARRAY(args), SCOPE->argc);
         RETURN(args);
     }
 }
-LK_LIB_DEFINECFUNC(DassignB__scope_str_obj) {
+LK_LIB_DEFINECFUNC(DassignB_scope_str_obj) {
     lk_string_t *k = LK_STRING(ARG(0));
     lk_object_t *v = ARG(1);
     struct lk_slot *slot = lk_object_getslotfromany(self, LK_OBJ(k));
@@ -63,7 +63,7 @@ LK_LIB_DEFINECFUNC(DassignB__scope_str_obj) {
         RETURN(v);
     }
 }
-LK_LIB_DEFINECFUNC(include__scope_str_str) {
+LK_LIB_DEFINECFUNC(include_scope_str_str) {
     lk_scope_t *fr = lk_vm_evalfile(VM,
     darray_toCString(DARRAY(ARG(0))), darray_toCString(DARRAY(ARG(1))));
     if(fr != NULL) {
@@ -79,32 +79,32 @@ LK_LIB_DEFINECFUNC(include__scope_str_str) {
     }
     RETURN(self);
 }
-LK_LIB_DEFINECFUNC(raise__scope_err) {
-    lk_vm_raiseerror(VM, LK_ERR(ARG(0)));
+LK_LIB_DEFINECFUNC(raise_scope_err) {
+    lk_vm_raiseerror(VM, LK_ERROR(ARG(0)));
 }
-LK_LIB_DEFINECFUNC(raise__scope_str) {
+LK_LIB_DEFINECFUNC(raise_scope_str) {
     lk_error_t *err = lk_error_new(VM, VM->t_error, NULL);
-    err->text = LK_STRING(ARG(0));
+    err->message = LK_STRING(ARG(0));
     lk_vm_raiseerror(VM, err);
 }
-LK_LIB_DEFINECFUNC(redo__scope) {
+LK_LIB_DEFINECFUNC(redo_scope) {
     if(LIST_ISINIT(SCOPESTACK)) darray_clear(SCOPESTACK);
     SCOPE->next = SCOPE->first;
     DONE;
 }
-LK_LIB_DEFINECFUNC(require__scope_str_str) {
+LK_LIB_DEFINECFUNC(require_scope_str_str) {
     RETURN(lk_vm_evalfile(VM,
     darray_toCString(DARRAY(ARG(0))), darray_toCString(DARRAY(ARG(1)))));
 }
-LK_LIB_DEFINECFUNC(rescue__scope_f) {
+LK_LIB_DEFINECFUNC(rescue_scope_f) {
     RETURN(lk_object_getvaluefromslot(self, lk_object_setslot(
     self, LK_OBJ(VM->str_rescue), VM->t_func, ARG(0))));
 }
-LK_LIB_DEFINECFUNC(RESOURCE__scope) {
+LK_LIB_DEFINECFUNC(RESOURCE_scope) {
     RETURN(VM->rsrc != NULL && !VM->rsrc->isstring
     ? LK_OBJ(VM->rsrc->rsrc) : NIL);
 }
-LK_LIB_DEFINECFUNC(retry__scope) {
+LK_LIB_DEFINECFUNC(retry_scope) {
     lk_scope_t *caller = SCOPE->caller;
     lk_instr_t *i = caller->current->prev;
     SCOPE->next = NULL;
@@ -113,7 +113,7 @@ LK_LIB_DEFINECFUNC(retry__scope) {
     caller->next = i;
     DONE;
 }
-LK_LIB_DEFINECFUNC(return__scope) {
+LK_LIB_DEFINECFUNC(return_scope) {
     lk_scope_t *f = SCOPE;
     for(; ; f = LK_OBJ_PROTO(f)) {
         if(f == NULL) lk_vm_abort(VM, NULL);
@@ -129,11 +129,11 @@ LK_LIB_DEFINECFUNC(return__scope) {
     DONE;
 }
 LK_LIB_DEFINEINIT(lk_scope_libInit) {
-    lk_object_t *scope = vm->t_scope, *obj = vm->t_obj, *instr = vm->t_instr,
+    lk_object_t *scope = vm->t_scope, *obj = vm->t_object, *instr = vm->t_instr,
                 *str = vm->t_string, *err = vm->t_error, *f = vm->t_func;
     lk_lib_setGlobal("Scope", scope);
-    lk_lib_setCFunc(scope, ".args", Dargs__scope, NULL);
-    lk_lib_setCFunc(scope, "=", DassignB__scope_str_obj, str, obj, NULL);
+    lk_lib_setCFunc(scope, ".args", Dargs_scope, NULL);
+    lk_lib_setCFunc(scope, "=", DassignB_scope_str_obj, str, obj, NULL);
     lk_lib_setCField(scope, ".caller", scope, offsetof(lk_scope_t, caller));
     lk_lib_setCField(scope, ".current", instr, offsetof(lk_scope_t, current));
     lk_lib_setCField(scope, ".first", instr, offsetof(lk_scope_t, first));
@@ -142,16 +142,16 @@ LK_LIB_DEFINEINIT(lk_scope_libInit) {
     lk_lib_setCField(scope, ".next", instr, offsetof(lk_scope_t, next));
     lk_lib_setCField(scope, ".receiver", obj, offsetof(lk_scope_t, receiver));
     lk_lib_setCField(scope, ".return_to", scope, offsetof(lk_scope_t, returnto));
-    lk_lib_setCFunc(scope, "include", include__scope_str_str, str, str, NULL);
-    lk_lib_setCFunc(scope, "raise", raise__scope_err, err, NULL);
-    lk_lib_setCFunc(scope, "raise", raise__scope_str, str, NULL);
+    lk_lib_setCFunc(scope, "include", include_scope_str_str, str, str, NULL);
+    lk_lib_setCFunc(scope, "raise", raise_scope_err, err, NULL);
+    lk_lib_setCFunc(scope, "raise", raise_scope_str, str, NULL);
     lk_lib_setCField(scope, "receiver", obj, offsetof(lk_scope_t, receiver));
-    lk_lib_setCFunc(scope, "redo", redo__scope, NULL);
-    lk_lib_setCFunc(scope, "require", require__scope_str_str, str, str, NULL);
-    lk_lib_setCFunc(scope, "rescue", rescue__scope_f, f, NULL);
-    lk_lib_setCFunc(scope, "RESOURCE", RESOURCE__scope, NULL);
-    lk_lib_setCFunc(scope, "retry", retry__scope, NULL);
-    lk_lib_setCFunc(scope, "return", return__scope, -1);
+    lk_lib_setCFunc(scope, "redo", redo_scope, NULL);
+    lk_lib_setCFunc(scope, "require", require_scope_str_str, str, str, NULL);
+    lk_lib_setCFunc(scope, "rescue", rescue_scope_f, f, NULL);
+    lk_lib_setCFunc(scope, "RESOURCE", RESOURCE_scope, NULL);
+    lk_lib_setCFunc(scope, "retry", retry_scope, NULL);
+    lk_lib_setCFunc(scope, "return", return_scope, -1);
 }
 
 /* create a new scope based on the current one set in vm */

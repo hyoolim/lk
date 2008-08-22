@@ -28,7 +28,7 @@ struct lk_tag {
     lk_tagmarkfunc_t  *markfunc;
     lk_tagfreefunc_t  *freefunc;
 };
-struct lk_objectgroup {
+struct lk_objGroup {
     lk_object_t *first;
     lk_object_t *last;
 };
@@ -40,7 +40,7 @@ struct lk_common {
     struct lk_mark {
         lk_object_t        *prev;
         lk_object_t        *next;
-        struct lk_objectgroup *objgroup;
+        struct lk_objGroup *objgroup;
         uint8_t             isref;
     }                       mark;
 };
@@ -97,7 +97,7 @@ struct lk_vm {
     /* instr    */ lk_object_t *t_instr;
     /* list     */ lk_object_t *t_list;
     /* map      */ lk_object_t *t_map;
-    /* obj      */ lk_object_t *t_obj;
+    /* obj      */ lk_object_t *t_object;
     /* parser   */ lk_object_t *t_parser, *t_prec;
     /* socket   */ lk_object_t *t_socket;
     /* string   */ lk_object_t *t_string;
@@ -131,11 +131,9 @@ void lk_vm_free(lk_vm_t *self);
 lk_scope_t *lk_vm_evalfile(lk_vm_t *self, const char *file, const char *base);
 lk_scope_t *lk_vm_evalstring(lk_vm_t *self, const char *code);
 void lk_vm_doevalfunc(lk_vm_t *vm);
-void lk_vm_raisecstr(lk_vm_t *self, const char *message,
-                     ...) __attribute__((noreturn));
+void lk_vm_raisecstr(lk_vm_t *self, const char *message, ...) __attribute__((noreturn));
 void lk_vm_raiseerrno(lk_vm_t *self) __attribute__((noreturn));
-void lk_vm_raiseerror(lk_vm_t *self,
-                      lk_error_t *error) __attribute__((noreturn));
+void lk_vm_raiseerror(lk_vm_t *self, lk_error_t *error) __attribute__((noreturn));
 void lk_vm_exit(lk_vm_t *self) __attribute__((noreturn));
 void lk_vm_abort(lk_vm_t *self, lk_error_t *error) __attribute__((noreturn));
 #endif

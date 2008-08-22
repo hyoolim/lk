@@ -15,7 +15,7 @@ static void setprec(lk_parser_t *self, const char *op, int level, enum lk_precas
     prec->assoc = assoc;
     *(lk_prec_t **)qphash_set(self->precs, lk_string_newFromCString(vm, op)) = prec;
 }
-static LK_OBJ_DEFALLOCFUNC(alloc__parser) {
+static LK_OBJ_DEFALLOCFUNC(alloc_parser) {
     PARSER->binaryops = qphash_alloc(sizeof(lk_prec_t *), lk_object_hashcode, lk_object_keycmp);
     PARSER->precs = qphash_alloc(sizeof(lk_prec_t *), lk_object_hashcode, lk_object_keycmp);
     PARSER->tokentypes = darray_allocptr();
@@ -52,7 +52,7 @@ static LK_OBJ_DEFALLOCFUNC(alloc__parser) {
     setprec(PARSER, "!",   19999, LK_PREC_ASSOC_RIGHT);
     setprec(PARSER, "->",  -10000, LK_PREC_ASSOC_LEFT); /* misc - low prec */
 }
-static LK_OBJ_DEFMARKFUNC(mark__parser) {
+static LK_OBJ_DEFMARKFUNC(mark_parser) {
     mark(LK_OBJ(PARSER->text));
     if(PARSER->binaryops != NULL) {
         SET_EACH(PARSER->binaryops, item,
@@ -79,7 +79,7 @@ static LK_OBJ_DEFMARKFUNC(mark__parser) {
         LIST_EACHPTR(PARSER->comments, i, v, mark(v));
     }
 }
-static LK_OBJ_DEFFREEFUNC(free__parser) {
+static LK_OBJ_DEFFREEFUNC(free_parser) {
     if(PARSER->binaryops != NULL) qphash_free(PARSER->binaryops);
     if(PARSER->precs != NULL) qphash_free(PARSER->precs);
     if(PARSER->tokentypes != NULL) darray_free(PARSER->tokentypes);
@@ -89,12 +89,12 @@ static LK_OBJ_DEFFREEFUNC(free__parser) {
     if(PARSER->comments != NULL) darray_free(PARSER->comments);
 }
 LK_LIB_DEFINEINIT(lk_parser_libPreInit) {
-    lk_object_t *obj = vm->t_obj;
-    vm->t_prec = lk_object_allocwithsize(obj, sizeof(lk_prec_t));
-    vm->t_parser = lk_object_allocwithsize(obj, sizeof(lk_parser_t));
-    lk_object_setallocfunc(vm->t_parser, alloc__parser);
-    lk_object_setmarkfunc(vm->t_parser, mark__parser);
-    lk_object_setfreefunc(vm->t_parser, free__parser);
+    lk_object_t *obj = vm->t_object;
+    vm->t_prec = lk_object_allocWithSize(obj, sizeof(lk_prec_t));
+    vm->t_parser = lk_object_allocWithSize(obj, sizeof(lk_parser_t));
+    lk_object_setallocfunc(vm->t_parser, alloc_parser);
+    lk_object_setmarkfunc(vm->t_parser, mark_parser);
+    lk_object_setfreefunc(vm->t_parser, free_parser);
 }
 
 /* ext map - funcs */

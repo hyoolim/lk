@@ -16,13 +16,13 @@ LK_LIB_DEFINEINIT(lk_map_libInit);
 
 /* new */
 lk_map_t *lk_map_new(lk_vm_t *vm);
-lk_map_t *lk_map_newfrompt(lk_vm_t *vm, qphash_t *ht);
+lk_map_t *lk_map_newFromQPHash(lk_vm_t *vm, qphash_t *ht);
 
 /* update */
 void lk_map_set(lk_map_t *self, lk_object_t *k, lk_object_t *v);
-void lk_map_setbycstr(lk_map_t *self, const char *k, lk_object_t *v);
+void lk_map_setWithCStringKey(lk_map_t *self, const char *k, lk_object_t *v);
 
 /* info */
 lk_object_t *lk_map_get(lk_map_t *self, lk_object_t *k);
-lk_object_t *lk_map_getbycstr(lk_map_t *self, const char *k);
+lk_object_t *lk_map_getByCStringKey(lk_map_t *self, const char *k);
 #endif

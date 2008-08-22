@@ -3,16 +3,16 @@
 
 /* type */
 typedef struct lk_file lk_file_t;
-#define LK_FILE(v) ((lk_file_t *)(v))
+#define LK_FILE(object) ((lk_file_t *)(object))
 #include "vm.h"
 #include "string.h"
 struct lk_file {
-    struct lk_common o;
+    struct lk_common  o;
     lk_string_t      *path;
     FILE             *file;
 };
 
-/* ext map */
+/* init */
 LK_LIB_DEFINEINIT(lk_file_libPreInit);
 LK_LIB_DEFINEINIT(lk_file_libInit);
 #endif

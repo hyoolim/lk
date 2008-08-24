@@ -16,7 +16,7 @@ static LK_OBJ_DEFMARKFUNC(mark_file) {
 static void free_file(lk_object_t *self) {
     if(FILEF(self) != NULL) fclose(FILEF(self));
 }
-void lk_file_libPreInit(lk_vm_t *vm) {
+void lk_file_typeinit(lk_vm_t *vm) {
     vm->t_file = lk_object_allocWithSize(vm->t_object, sizeof(lk_file_t));
     lk_object_setmarkfunc(vm->t_file, mark_file);
     lk_object_setfreefunc(vm->t_file, free_file);
@@ -129,7 +129,7 @@ static void write_file_str(lk_object_t *self, lk_scope_t *local) {
 static void writableQ_file(lk_object_t *self, lk_scope_t *local) {
     RETURN(access(CSTRING(PATH(self)), W_OK) == 0 ? TRUE : FALSE);
 }
-void lk_file_libInit(lk_vm_t *vm) {
+void lk_file_libinit(lk_vm_t *vm) {
     lk_object_t *file = vm->t_file,
                 *str = vm->t_string, *number = vm->t_number,
                 *ch = vm->t_char, *charset = vm->t_charset;

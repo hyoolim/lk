@@ -3,7 +3,7 @@
 #include "number.h"
 
 /* ext map - types */
-void lk_vector_libPreInit(lk_vm_t *vm) {
+void lk_vector_typeinit(lk_vm_t *vm) {
     vm->t_vector = lk_object_alloc(vm->t_seq);
     darray_fin(DARRAY(vm->t_vector));
     darray_init(DARRAY(vm->t_vector), sizeof(int), 16);
@@ -59,7 +59,7 @@ static void setB_vec_number_number(lk_object_t *self, lk_scope_t *local) {
     */
     RETURN(self);
 }
-void lk_vector_libInit(lk_vm_t *vm) {
+void lk_vector_libinit(lk_vm_t *vm) {
     lk_object_t *vec = vm->t_vector, *number = vm->t_number;
     lk_lib_setGlobal("Vector", vec);
     lk_lib_setCFunc(vec, "at", at_vec_number, number, NULL);

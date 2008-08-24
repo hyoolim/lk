@@ -34,8 +34,8 @@ struct lk_instr {
 };
 
 /* ext map */
-void lk_instr_libPreInit(lk_vm_t *vm);
-void lk_instr_libInit(lk_vm_t *vm);
+void lk_instr_typeinit(lk_vm_t *vm);
+void lk_instr_libinit(lk_vm_t *vm);
 
 /* new */
 lk_instr_t *lk_instr_new(lk_parser_t *parser);

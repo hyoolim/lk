@@ -9,7 +9,7 @@
 static LK_OBJ_DEFMARKFUNC(mark_Folder) {
     mark(LK_OBJ(LK_FOLDER(self)->path));
 }
-void lk_folder_libPreInit(lk_vm_t *vm) {
+void lk_folder_typeinit(lk_vm_t *vm) {
     vm->t_folder = lk_object_allocWithSize(vm->t_object, sizeof(lk_folder_t));
     lk_object_setmarkfunc(vm->t_folder, mark_Folder);
 }
@@ -43,7 +43,7 @@ static void items_Folder(lk_object_t *self, lk_scope_t *local) {
         lk_vm_raiseerrno(VM);
     }
 }
-void lk_folder_libInit(lk_vm_t *vm) {
+void lk_folder_libinit(lk_vm_t *vm) {
     lk_object_t *folder = vm->t_folder, *str = vm->t_string;
     lk_lib_setGlobal("Folder", folder);
     lk_lib_setCFunc(folder, "init!", init_Folder_str, str, NULL);

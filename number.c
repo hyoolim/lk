@@ -7,7 +7,7 @@
 static void alloc_number(lk_object_t *self, lk_object_t *parent) {
     CNUMBER(self) = CNUMBER(parent);
 }
-void lk_number_libPreInit(lk_vm_t *vm) {
+void lk_number_typeinit(lk_vm_t *vm) {
     vm->t_number = lk_object_allocWithSize(vm->t_object, sizeof(lk_number_t));
     lk_object_setallocfunc(vm->t_number, alloc_number);
 }
@@ -83,7 +83,7 @@ static void to_string_number_number_number(lk_object_t *self, lk_scope_t *local)
     snprintf(cString, 200, "%*.*f", i, f, CNUMBER(self));
     RETURN(lk_string_newFromCString(VM, cString));
 }
-void lk_number_libInit(lk_vm_t *vm) {
+void lk_number_libinit(lk_vm_t *vm) {
     lk_object_t *number = vm->t_number;
     lk_lib_setGlobal("Number", number);
     lk_lib_setCFunc(number, "abs", abs_number, NULL);

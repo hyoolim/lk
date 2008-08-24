@@ -6,7 +6,7 @@
 static void alloc_ch(lk_object_t *self, lk_object_t *parent) {
     CHAR(self) = CHAR(parent);
 }
-void lk_char_libPreInit(lk_vm_t *vm) {
+void lk_char_typeinit(lk_vm_t *vm) {
     vm->t_char = lk_object_allocWithSize(vm->t_object, sizeof(lk_char_t));
     lk_object_setallocfunc(vm->t_char, alloc_ch);
 }
@@ -32,7 +32,7 @@ static void to_string_ch(lk_object_t *self, lk_scope_t *local) {
     darray_setuchar(DARRAY(str), 0, CHAR(self));
     RETURN(str);
 }
-void lk_char_libInit(lk_vm_t *vm) {
+void lk_char_libinit(lk_vm_t *vm) {
     lk_object_t *ch = vm->t_char, *number = vm->t_number;
     lk_lib_setGlobal("Character", ch);
     lk_lib_setCFunc(ch, "+", add_ch_number, number, NULL);

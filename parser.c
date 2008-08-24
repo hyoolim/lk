@@ -88,7 +88,7 @@ static void free_parser(lk_object_t *self) {
     if(PARSER->ops != NULL) darray_free(PARSER->ops);
     if(PARSER->comments != NULL) darray_free(PARSER->comments);
 }
-void lk_parser_libPreInit(lk_vm_t *vm) {
+void lk_parser_typeinit(lk_vm_t *vm) {
     lk_object_t *obj = vm->t_object;
     vm->t_prec = lk_object_allocWithSize(obj, sizeof(lk_prec_t));
     vm->t_parser = lk_object_allocWithSize(obj, sizeof(lk_parser_t));
@@ -98,7 +98,7 @@ void lk_parser_libPreInit(lk_vm_t *vm) {
 }
 
 /* ext map - funcs */
-void lk_parser_libInit(lk_vm_t *vm) {
+void lk_parser_libinit(lk_vm_t *vm) {
     lk_lib_setObject(vm->t_vm, "Precedence", vm->t_prec);
     lk_lib_setObject(vm->t_vm, "Parser", vm->t_parser);
 }

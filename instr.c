@@ -13,7 +13,7 @@ static LK_OBJ_DEFMARKFUNC(mark_instr) {
     mark(INSTR->v);
     if(INSTR->comment != NULL) mark(LK_OBJ(INSTR->comment));
 }
-void lk_instr_libPreInit(lk_vm_t *vm) {
+void lk_instr_typeinit(lk_vm_t *vm) {
     vm->t_instr = lk_object_allocWithSize(vm->t_object, sizeof(lk_instr_t));
     lk_object_setmarkfunc(vm->t_instr, mark_instr);
 }
@@ -37,7 +37,7 @@ static void message(lk_object_t *self, lk_scope_t *local) {
 }
 static void resource(lk_object_t *self, lk_scope_t *local) {
     RETURN(INSTR->rsrc); }
-void lk_instr_libInit(lk_vm_t *vm) {
+void lk_instr_libinit(lk_vm_t *vm) {
     lk_object_t *instr = vm->t_instr;
     lk_lib_setObject(vm->t_vm, "Instruction", instr);
     lk_lib_setCField(instr, ".next", instr, offsetof(lk_instr_t, next));

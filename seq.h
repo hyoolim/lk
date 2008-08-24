@@ -11,6 +11,6 @@ struct lk_seq {
 };
 
 /* ext map */
-void lk_seq_libPreInit(lk_vm_t *vm);
-void lk_seq_libInit(lk_vm_t *vm);
+void lk_seq_typeinit(lk_vm_t *vm);
+void lk_seq_libinit(lk_vm_t *vm);
 #endif

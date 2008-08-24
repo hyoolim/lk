@@ -8,13 +8,13 @@ static LK_OBJ_DEFMARKFUNC(error_mark) {
     mark(LK_OBJ(LK_ERROR(self)->instr));
     mark(LK_OBJ(LK_ERROR(self)->message));
 }
-void lk_error_libPreInit(lk_vm_t *vm) {
+void lk_error_typeinit(lk_vm_t *vm) {
     vm->t_error = lk_object_allocWithSize(vm->t_object, sizeof(lk_error_t));
     lk_object_setmarkfunc(vm->t_error, error_mark);
 }
 
 /* ext map - funcs */
-void lk_error_libInit(lk_vm_t *vm) {
+void lk_error_libinit(lk_vm_t *vm) {
     lk_object_t *err = vm->t_error, *instr = vm->t_instr, *str = vm->t_string;
     lk_lib_setGlobal("Error", err);
     lk_lib_setCField(err, "instruction", instr, offsetof(lk_error_t, instr));

@@ -6,7 +6,7 @@
 static LK_OBJ_DEFMARKFUNC(mark_list) {
     LIST_EACHPTR(DARRAY(self), i, v, mark(v));
 }
-void lk_list_libPreInit(lk_vm_t *vm) {
+void lk_list_typeinit(lk_vm_t *vm) {
     vm->t_list = lk_object_alloc(vm->t_seq);
     darray_fin(DARRAY(vm->t_list));
     darray_init(DARRAY(vm->t_list), sizeof(lk_object_t *), 16);
@@ -40,7 +40,7 @@ static void setB_darray_number_number_list(lk_object_t *self, lk_scope_t *local)
     darray_setrange(DARRAY(self), CSIZE(ARG(0)), CSIZE(ARG(1)), DARRAY(ARG(2)));
     RETURN(self);
 }
-void lk_list_libInit(lk_vm_t *vm) {
+void lk_list_libinit(lk_vm_t *vm) {
     lk_object_t *list = vm->t_list, *obj = vm->t_object, *number = vm->t_number;
     lk_lib_setGlobal("List", list);
     lk_lib_setCFunc(list, "at", at_darray_number, number, NULL);

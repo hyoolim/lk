@@ -17,8 +17,8 @@ struct lk_gc {
 };
 
 /* init */
-void lk_gc_libPreInit(lk_vm_t *vm);
-void lk_gc_libInit(lk_vm_t *vm);
+void lk_gc_typeinit(lk_vm_t *vm);
+void lk_gc_libinit(lk_vm_t *vm);
 
 /* update */
 void lk_objGroup_freeAll(struct lk_objGroup *self);

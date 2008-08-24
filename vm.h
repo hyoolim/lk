@@ -116,8 +116,8 @@ struct lk_vm {
 };
 
 /* ext map */
-void lk_vm_libPreInit(lk_vm_t *vm);
-void lk_vm_libInit(lk_vm_t *vm);
+void lk_vm_typeinit(lk_vm_t *vm);
+void lk_vm_libinit(lk_vm_t *vm);
 
 /* new */
 lk_vm_t *lk_vm_new(void);

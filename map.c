@@ -16,7 +16,7 @@ static LK_OBJ_DEFMARKFUNC(mark_map) {
 static void free_map(lk_object_t *self) {
     qphash_fin(QPHASH(self));
 }
-void lk_map_libPreInit(lk_vm_t *vm) {
+void lk_map_typeinit(lk_vm_t *vm) {
     vm->t_map = lk_object_allocWithSize(vm->t_object, sizeof(lk_map_t));
     qphash_init(QPHASH(vm->t_map), sizeof(lk_object_t *), lk_object_hashcode, lk_object_keycmp);
     lk_object_setallocfunc(vm->t_map, alloc_map);
@@ -53,7 +53,7 @@ static void values_map(lk_object_t *self, lk_scope_t *local) {
     );
     RETURN(values);
 }
-void lk_map_libInit(lk_vm_t *vm) {
+void lk_map_libinit(lk_vm_t *vm) {
     lk_object_t *map = vm->t_map, *obj = vm->t_object;
     lk_lib_setGlobal("Map", map);
     lk_lib_setCFunc(map, "at", at_map_obj, obj, NULL);

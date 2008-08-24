@@ -65,7 +65,7 @@ static LK_OBJ_DEFMARKFUNC(mark_sig) {
     mark(LK_OBJ(LK_SIG(self)->name));
     mark(LK_OBJ(LK_SIG(self)->check));
 }
-void lk_func_libPreInit(lk_vm_t *vm) {
+void lk_func_typeinit(lk_vm_t *vm) {
     /* */
     vm->t_func = lk_object_allocWithSize(vm->t_object, sizeof(lk_func_t));
     lk_object_setallocfunc(vm->t_func, alloc_f);
@@ -128,7 +128,7 @@ static void check_sig(lk_object_t *self, lk_scope_t *local) {
     lk_object_t *type = LK_SIG(self)->check;
     RETURN(type != NULL ? type : VM->t_object);
 }
-void lk_func_libInit(lk_vm_t *vm) {
+void lk_func_libinit(lk_vm_t *vm) {
     lk_object_t *f = vm->t_func, *sig = vm->t_sig;
     /* */
     lk_lib_setGlobal("Function", vm->t_func);

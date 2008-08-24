@@ -8,7 +8,7 @@ static void free_gc(lk_object_t *self) {
     memory_free(LK_GC(self)->used);
     memory_free(LK_GC(self)->permanent);
 }
-void lk_gc_libPreInit(lk_vm_t *vm) {
+void lk_gc_typeinit(lk_vm_t *vm) {
     vm->gc = LK_GC(lk_object_allocWithSize(vm->t_object, sizeof(lk_gc_t)));
     vm->gc->unused = memory_alloc(sizeof(struct lk_objGroup));
     vm->gc->pending = memory_alloc(sizeof(struct lk_objGroup));
@@ -22,7 +22,7 @@ static void pause_gc(lk_object_t *self, lk_scope_t *local) {
     lk_gc_pause(LK_GC(self)); RETURN(self); }
 static void resume_gc(lk_object_t *self, lk_scope_t *local) {
     lk_gc_resume(LK_GC(self)); RETURN(self); }
-void lk_gc_libInit(lk_vm_t *vm) {
+void lk_gc_libinit(lk_vm_t *vm) {
     lk_object_t *gc = LK_OBJ(vm->gc);
     lk_lib_setGlobal("GarbageCollector", gc);
     lk_lib_setCFunc(gc, "pause", pause_gc, NULL);

@@ -14,8 +14,8 @@ struct lk_error {
 };
 
 /* init */
-void lk_error_libPreInit(lk_vm_t *vm);
-void lk_error_libInit(lk_vm_t *vm);
+void lk_error_typeinit(lk_vm_t *vm);
+void lk_error_libinit(lk_vm_t *vm);
 
 /* new */
 lk_error_t *lk_error_new(lk_vm_t *vm, lk_object_t *parent, const char *message);

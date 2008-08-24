@@ -10,7 +10,7 @@ static void alloc_charset(lk_object_t *self, lk_object_t *parent) {
 static void free_charset(lk_object_t *self) {
     charset_fin(CHARSET(self));
 }
-void lk_charset_libPreInit(lk_vm_t *vm) {
+void lk_charset_typeinit(lk_vm_t *vm) {
     vm->t_charset = lk_object_allocWithSize(vm->t_object, sizeof(lk_charset_t));
     charset_init(CHARSET(vm->t_charset));
     lk_object_setallocfunc(vm->t_charset, alloc_charset);
@@ -58,7 +58,7 @@ static void negateB_charset(lk_object_t *self, lk_scope_t *local) {
     charset_invert(CHARSET(self));
     RETURN(self);
 }
-void lk_charset_libInit(lk_vm_t *vm) {
+void lk_charset_libinit(lk_vm_t *vm) {
     lk_object_t *charset = vm->t_charset, *ch = vm->t_char, *string = vm->t_string;
     lk_lib_setGlobal("CharacterSet", charset);
     lk_lib_setCFunc(charset, "+=", addB_charset_charset, charset, NULL);

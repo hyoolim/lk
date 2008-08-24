@@ -9,7 +9,7 @@ static void alloc_seq(lk_object_t *self, lk_object_t *parent) {
 static void free_seq(lk_object_t *self) {
     darray_fin(DARRAY(self));
 }
-void lk_seq_libPreInit(lk_vm_t *vm) {
+void lk_seq_typeinit(lk_vm_t *vm) {
     vm->t_seq = lk_object_allocWithSize(vm->t_object, sizeof(lk_seq_t));
     darray_init(DARRAY(vm->t_seq), 1, 16);
     lk_object_setallocfunc(vm->t_seq, alloc_seq);
@@ -57,7 +57,7 @@ static void swapB_gl_number_number(lk_object_t *self, lk_scope_t *local) {
     memory_free(t);
     RETURN(self);
 }
-void lk_seq_libInit(lk_vm_t *vm) {
+void lk_seq_libinit(lk_vm_t *vm) {
     lk_object_t *gl = vm->t_seq, *number = vm->t_number, *vec = vm->t_vector;
     lk_lib_setGlobal("Sequence", gl);
     lk_lib_setCFunc(gl, "at", at_gl_vec, vec, NULL);

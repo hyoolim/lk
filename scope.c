@@ -26,7 +26,7 @@ static LK_OBJ_DEFMARKFUNC(mark_scope) {
 static void free_scope(lk_object_t *self) {
     if(LIST_ISINIT(SCOPESTACK)) darray_fin(SCOPESTACK);
 }
-void lk_scope_libPreInit(lk_vm_t *vm) {
+void lk_scope_typeinit(lk_vm_t *vm) {
     vm->t_scope = lk_object_allocWithSize(vm->t_object, sizeof(lk_scope_t));
     lk_object_setmarkfunc(vm->t_scope, mark_scope);
     lk_object_setfreefunc(vm->t_scope, free_scope);
@@ -128,7 +128,7 @@ static void return_scope(lk_object_t *self, lk_scope_t *local) {
     }
     DONE;
 }
-void lk_scope_libInit(lk_vm_t *vm) {
+void lk_scope_libinit(lk_vm_t *vm) {
     lk_object_t *scope = vm->t_scope, *obj = vm->t_object, *instr = vm->t_instr,
                 *str = vm->t_string, *err = vm->t_error, *f = vm->t_func;
     lk_lib_setGlobal("Scope", scope);

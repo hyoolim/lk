@@ -25,8 +25,8 @@ static void resume_gc(lk_object_t *self, lk_scope_t *local) {
 void lk_gc_libinit(lk_vm_t *vm) {
     lk_object_t *gc = LK_OBJ(vm->gc);
     lk_lib_setGlobal("GarbageCollector", gc);
-    lk_lib_setCFunc(gc, "pause", pause_gc, NULL);
-    lk_lib_setCFunc(gc, "resume", resume_gc, NULL);
+    lk_object_setcfunc_lk(gc, "pause", pause_gc, NULL);
+    lk_object_setcfunc_lk(gc, "resume", resume_gc, NULL);
 }
 
 /* update */

@@ -46,6 +46,6 @@ static void items_Folder(lk_object_t *self, lk_scope_t *local) {
 void lk_folder_libinit(lk_vm_t *vm) {
     lk_object_t *folder = vm->t_folder, *str = vm->t_string;
     lk_lib_setGlobal("Folder", folder);
-    lk_lib_setCFunc(folder, "init!", init_Folder_str, str, NULL);
-    lk_lib_setCFunc(folder, "items", items_Folder, NULL);
+    lk_object_setcfunc_lk(folder, "init!", init_Folder_str, str, NULL);
+    lk_object_setcfunc_lk(folder, "items", items_Folder, NULL);
 }

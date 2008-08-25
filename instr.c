@@ -42,10 +42,10 @@ void lk_instr_libinit(lk_vm_t *vm) {
     lk_lib_setObject(vm->t_vm, "Instruction", instr);
     lk_lib_setCField(instr, ".next", instr, offsetof(lk_instr_t, next));
     lk_lib_setCField(instr, ".previous", instr, offsetof(lk_instr_t, prev));
-    lk_lib_setCFunc(instr, "COLUMN", column, NULL);
-    lk_lib_setCFunc(instr, "LINE", line, NULL);
-    lk_lib_setCFunc(instr, "MESSAGE", message, NULL);
-    lk_lib_setCFunc(instr, "RESOURCE", resource, NULL);
+    lk_object_setcfunc_lk(instr, "COLUMN", column, NULL);
+    lk_object_setcfunc_lk(instr, "LINE", line, NULL);
+    lk_object_setcfunc_lk(instr, "MESSAGE", message, NULL);
+    lk_object_setcfunc_lk(instr, "RESOURCE", resource, NULL);
 }
 
 /* new */

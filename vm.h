@@ -46,6 +46,17 @@ struct lk_common {
 
 /* used by ext - can't be in ext.h due to bootstrapping issues */
 typedef void lk_libraryinitfunc_t(lk_vm_t *vm);
+typedef struct lk_cfunc lk_cfunc_t;
+typedef struct lk_scope lk_scope_t;
+typedef void lk_cfunc_lk_t(lk_object_t *self, lk_scope_t *local);
+typedef lk_object_t *lk_cfunc_r0_t(lk_object_t *self);
+typedef lk_object_t *lk_cfunc_r1_t(lk_object_t *self, lk_object_t *a0type);
+typedef lk_object_t *lk_cfunc_r2_t(lk_object_t *self, lk_object_t *a0type, lk_object_t *a1type);
+typedef lk_object_t *lk_cfunc_r3_t(lk_object_t *self, lk_object_t *a0type, lk_object_t *a1type, lk_object_t *a2type);
+typedef void lk_cfunc_v0_t(lk_object_t *self);
+typedef void lk_cfunc_v1_t(lk_object_t *self, lk_object_t *a0type);
+typedef void lk_cfunc_v2_t(lk_object_t *self, lk_object_t *a0type, lk_object_t *a1type);
+typedef void lk_cfunc_v3_t(lk_object_t *self, lk_object_t *a0type, lk_object_t *a1type, lk_object_t *a2type);
 
 /* required primitives */
 #include "string.h"

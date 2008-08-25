@@ -26,7 +26,8 @@ static void free_f(lk_object_t *self) {
 /* */
 static void alloc_cf(lk_object_t *self, lk_object_t *parent) {
     alloc_f(self, parent);
-    LK_CFUNC(self)->func = LK_CFUNC(parent)->func;
+    LK_CFUNC(self)->cc = LK_CFUNC(parent)->cc;
+    LK_CFUNC(self)->cfunc = LK_CFUNC(parent)->cfunc;
 }
 
 /* */
@@ -132,30 +133,30 @@ void lk_func_libinit(lk_vm_t *vm) {
     lk_object_t *f = vm->t_func, *sig = vm->t_sig;
     /* */
     lk_lib_setGlobal("Function", vm->t_func);
-    lk_lib_setCFunc(f, "+", add_f_f, f, NULL);
-    lk_lib_setCFunc(f, "+=", addB_f_f, f, NULL);
+    lk_object_setcfunc_lk(f, "+", add_f_f, f, NULL);
+    lk_object_setcfunc_lk(f, "+=", addB_f_f, f, NULL);
     lk_lib_setCField(f, "doc", f, offsetof(lk_func_t, cf.doc));
-    lk_lib_setCFunc(f, "minimum_argument_size", minimum_argument_size_f, NULL);
-    lk_lib_setCFunc(f, "maximum_argument_size", maximum_argument_size_f, NULL);
-    lk_lib_setCFunc(f, "signature", signature_f, NULL);
-    lk_lib_setCFunc(f, "last_argument", last_argument_f, NULL);
+    lk_object_setcfunc_lk(f, "minimum_argument_size", minimum_argument_size_f, NULL);
+    lk_object_setcfunc_lk(f, "maximum_argument_size", maximum_argument_size_f, NULL);
+    lk_object_setcfunc_lk(f, "signature", signature_f, NULL);
+    lk_object_setcfunc_lk(f, "last_argument", last_argument_f, NULL);
     /* */
     lk_lib_setGlobal("CFunction", vm->t_cfunc);
     /* */
     lk_lib_setGlobal("GenericFunction", vm->t_gfunc);
-    lk_lib_setCFunc(vm->t_gfunc, "functions", functions_gf, NULL);
+    lk_object_setcfunc_lk(vm->t_gfunc, "functions", functions_gf, NULL);
     /* */
     lk_lib_setGlobal("KineticFunction", vm->t_kfunc);
     /* */
     lk_lib_setGlobal("Signature", vm->t_sig);
-    lk_lib_setCFunc(sig, "name", name_sig, NULL);
-    lk_lib_setCFunc(sig, "check", check_sig, NULL);
+    lk_object_setcfunc_lk(sig, "name", name_sig, NULL);
+    lk_object_setcfunc_lk(sig, "check", check_sig, NULL);
 }
 
 /* new */
-lk_cfunc_t *lk_cfunc_new(lk_vm_t *vm, lk_cfuncfunc_t *func, int minargc, int maxargc) {
+lk_cfunc_t *lk_cfunc_new(lk_vm_t *vm, lk_cfunc_lk_t *cfunc, int minargc, int maxargc) {
     lk_cfunc_t *self = LK_CFUNC(lk_object_alloc(vm->t_cfunc));
-    self->func = func;
+    self->cfunc.lk = cfunc;
     self->cf.minargc = minargc;
     self->cf.maxargc = maxargc;
     /* if(minargc > 0) self->cf.sigs = darray_allocptrwithcap(minargc); */

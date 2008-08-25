@@ -38,9 +38,9 @@ void lk_random_extinit(lk_vm_t *vm) {
     lk_object_setallocfunc(random, alloc_random);
     alloc_random(random, NULL);
     lk_lib_setGlobal("RandomNumberGenerator", random);
-    lk_lib_setCFunc(random, "init!", init_random_number, number, NULL);
-    lk_lib_setCFunc(random, "nextFloat", nextFloat_random, NULL);
-    lk_lib_setCFunc(random, "nextInteger", nextInteger_random, NULL);
+    lk_object_setcfunc_lk(random, "init!", init_random_number, number, NULL);
+    lk_object_setcfunc_lk(random, "nextFloat", nextFloat_random, NULL);
+    lk_object_setcfunc_lk(random, "nextInteger", nextInteger_random, NULL);
     lk_lib_setCField(random, "seed", number, offsetof(lk_random_t, seed));
 }
 

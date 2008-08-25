@@ -58,14 +58,14 @@ void lk_string_libinit(lk_vm_t *vm) {
                 *ch = vm->t_char;
     lk_lib_setGlobal("NEWLINE", LK_OBJ(lk_string_newFromCString(vm, "\n")));
     lk_lib_setGlobal("String", str);
-    lk_lib_setCFunc(str, "at", at_str_number, number, NULL);
-    lk_lib_setCFunc(str, "find", find_str_ch_number, ch, number, NULL);
-    lk_lib_setCFunc(str, "find", find_str_charset_number, charset, number, NULL);
-    lk_lib_setCFunc(str, "find", find_str_str_number, str, number, NULL);
-    lk_lib_setCFunc(str, "set!", setB_str_number_ch, number, ch, NULL);
-    lk_lib_setCFunc(str, "set!", setB_str_number_number_str, number, number, str, NULL);
-    lk_lib_setCFunc(str, "toCharacterSet", to_character_qphash_str, NULL);
-    lk_lib_setCFunc(str, "toNumber", to_number_str, NULL);
+    lk_object_setcfunc_lk(str, "at", at_str_number, number, NULL);
+    lk_object_setcfunc_lk(str, "find", find_str_ch_number, ch, number, NULL);
+    lk_object_setcfunc_lk(str, "find", find_str_charset_number, charset, number, NULL);
+    lk_object_setcfunc_lk(str, "find", find_str_str_number, str, number, NULL);
+    lk_object_setcfunc_lk(str, "set!", setB_str_number_ch, number, ch, NULL);
+    lk_object_setcfunc_lk(str, "set!", setB_str_number_number_str, number, number, str, NULL);
+    lk_object_setcfunc_lk(str, "toCharacterSet", to_character_qphash_str, NULL);
+    lk_object_setcfunc_lk(str, "toNumber", to_number_str, NULL);
 }
 
 /* new */

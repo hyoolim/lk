@@ -132,8 +132,8 @@ void lk_scope_libinit(lk_vm_t *vm) {
     lk_object_t *scope = vm->t_scope, *obj = vm->t_object, *instr = vm->t_instr,
                 *str = vm->t_string, *err = vm->t_error, *f = vm->t_func;
     lk_lib_setGlobal("Scope", scope);
-    lk_lib_setCFunc(scope, ".args", Dargs_scope, NULL);
-    lk_lib_setCFunc(scope, "=", DassignB_scope_str_obj, str, obj, NULL);
+    lk_object_setcfunc_lk(scope, ".args", Dargs_scope, NULL);
+    lk_object_setcfunc_lk(scope, "=", DassignB_scope_str_obj, str, obj, NULL);
     lk_lib_setCField(scope, ".caller", scope, offsetof(lk_scope_t, caller));
     lk_lib_setCField(scope, ".current", instr, offsetof(lk_scope_t, current));
     lk_lib_setCField(scope, ".first", instr, offsetof(lk_scope_t, first));
@@ -142,16 +142,16 @@ void lk_scope_libinit(lk_vm_t *vm) {
     lk_lib_setCField(scope, ".next", instr, offsetof(lk_scope_t, next));
     lk_lib_setCField(scope, ".receiver", obj, offsetof(lk_scope_t, receiver));
     lk_lib_setCField(scope, ".return_to", scope, offsetof(lk_scope_t, returnto));
-    lk_lib_setCFunc(scope, "include", include_scope_str_str, str, str, NULL);
-    lk_lib_setCFunc(scope, "raise", raise_scope_err, err, NULL);
-    lk_lib_setCFunc(scope, "raise", raise_scope_str, str, NULL);
+    lk_object_setcfunc_lk(scope, "include", include_scope_str_str, str, str, NULL);
+    lk_object_setcfunc_lk(scope, "raise", raise_scope_err, err, NULL);
+    lk_object_setcfunc_lk(scope, "raise", raise_scope_str, str, NULL);
     lk_lib_setCField(scope, "receiver", obj, offsetof(lk_scope_t, receiver));
-    lk_lib_setCFunc(scope, "redo", redo_scope, NULL);
-    lk_lib_setCFunc(scope, "require", require_scope_str_str, str, str, NULL);
-    lk_lib_setCFunc(scope, "rescue", rescue_scope_f, f, NULL);
-    lk_lib_setCFunc(scope, "RESOURCE", RESOURCE_scope, NULL);
-    lk_lib_setCFunc(scope, "retry", retry_scope, NULL);
-    lk_lib_setCFunc(scope, "return", return_scope, -1);
+    lk_object_setcfunc_lk(scope, "redo", redo_scope, NULL);
+    lk_object_setcfunc_lk(scope, "require", require_scope_str_str, str, str, NULL);
+    lk_object_setcfunc_lk(scope, "rescue", rescue_scope_f, f, NULL);
+    lk_object_setcfunc_lk(scope, "RESOURCE", RESOURCE_scope, NULL);
+    lk_object_setcfunc_lk(scope, "retry", retry_scope, NULL);
+    lk_object_setcfunc_lk(scope, "return", return_scope, -1);
 }
 
 /* create a new scope based on the current one set in vm */

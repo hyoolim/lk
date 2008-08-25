@@ -49,5 +49,4 @@ void lk_library_extinit(lk_vm_t *vm);
 void lk_lib_setObject(lk_object_t *parent, const char *k, lk_object_t *v);
 void lk_lib_setGlobal(const char *k, lk_object_t *v);
 void lk_lib_setCField(lk_object_t *self, const char *k, lk_object_t *t, size_t offset);
-void lk_lib_setCFunc(lk_object_t *obj, const char *k, lk_cfuncfunc_t *func, ...);
 #endif

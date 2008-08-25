@@ -86,27 +86,27 @@ static void to_string_number_number_number(lk_object_t *self, lk_scope_t *local)
 void lk_number_libinit(lk_vm_t *vm) {
     lk_object_t *number = vm->t_number;
     lk_lib_setGlobal("Number", number);
-    lk_lib_setCFunc(number, "abs", abs_number, NULL);
-    lk_lib_setCFunc(number, "+", add_number_number, number, NULL);
-    lk_lib_setCFunc(number, "+=", addB_number_number, number, NULL);
-    lk_lib_setCFunc(number, "ceil", ceil_number, NULL);
-    lk_lib_setCFunc(number, "<=>", subtract_number_number, number, NULL);
-    lk_lib_setCFunc(number, "%", divide_number_number, number, NULL);
-    lk_lib_setCFunc(number, "%=", divideB_number_number, number, NULL);
-    lk_lib_setCFunc(number, "==", eq_number_number, number, NULL);
-    lk_lib_setCFunc(number, "floor", floor_number, NULL);
-    lk_lib_setCFunc(number, ">", gt_number_number, number, NULL);
-    lk_lib_setCFunc(number, "integer?", integerQuestion_number, NULL);
-    lk_lib_setCFunc(number, "<", lt_number_number, number, NULL);
-    lk_lib_setCFunc(number, "mod", mod_number_number, number, NULL);
-    lk_lib_setCFunc(number, "mod!", modB_number_number, number, NULL);
-    lk_lib_setCFunc(number, "*", multiply_number_number, number, NULL);
-    lk_lib_setCFunc(number, "*=", multiplyB_number_number, number, NULL);
-    lk_lib_setCFunc(number, "negate", negate_number, NULL);
-    lk_lib_setCFunc(number, "round", round_number, NULL);
-    lk_lib_setCFunc(number, "-", subtract_number_number, number, NULL);
-    lk_lib_setCFunc(number, "-=", subtractB_number_number, number, NULL);
-    lk_lib_setCFunc(number, "toString", to_string_number_number_number, number, number, NULL);
+    lk_object_setcfunc_lk(number, "abs", abs_number, NULL);
+    lk_object_setcfunc_lk(number, "+", add_number_number, number, NULL);
+    lk_object_setcfunc_lk(number, "+=", addB_number_number, number, NULL);
+    lk_object_setcfunc_lk(number, "ceil", ceil_number, NULL);
+    lk_object_setcfunc_lk(number, "<=>", subtract_number_number, number, NULL);
+    lk_object_setcfunc_lk(number, "%", divide_number_number, number, NULL);
+    lk_object_setcfunc_lk(number, "%=", divideB_number_number, number, NULL);
+    lk_object_setcfunc_lk(number, "==", eq_number_number, number, NULL);
+    lk_object_setcfunc_lk(number, "floor", floor_number, NULL);
+    lk_object_setcfunc_lk(number, ">", gt_number_number, number, NULL);
+    lk_object_setcfunc_lk(number, "integer?", integerQuestion_number, NULL);
+    lk_object_setcfunc_lk(number, "<", lt_number_number, number, NULL);
+    lk_object_setcfunc_lk(number, "mod", mod_number_number, number, NULL);
+    lk_object_setcfunc_lk(number, "mod!", modB_number_number, number, NULL);
+    lk_object_setcfunc_lk(number, "*", multiply_number_number, number, NULL);
+    lk_object_setcfunc_lk(number, "*=", multiplyB_number_number, number, NULL);
+    lk_object_setcfunc_lk(number, "negate", negate_number, NULL);
+    lk_object_setcfunc_lk(number, "round", round_number, NULL);
+    lk_object_setcfunc_lk(number, "-", subtract_number_number, number, NULL);
+    lk_object_setcfunc_lk(number, "-=", subtractB_number_number, number, NULL);
+    lk_object_setcfunc_lk(number, "toString", to_string_number_number_number, number, number, NULL);
 }
 
 /* new */

@@ -62,9 +62,9 @@ static void setB_vec_number_number(lk_object_t *self, lk_scope_t *local) {
 void lk_vector_libinit(lk_vm_t *vm) {
     lk_object_t *vec = vm->t_vector, *number = vm->t_number;
     lk_lib_setGlobal("Vector", vec);
-    lk_lib_setCFunc(vec, "at", at_vec_number, number, NULL);
-    lk_lib_setCFunc(vec, "grade", grade_vec, NULL);
-    lk_lib_setCFunc(vec, "insert!", insertB_vec_number_number, number, number, NULL);
-    lk_lib_setCFunc(vec, "remove!", removeB_vec_number, number, NULL);
-    lk_lib_setCFunc(vec, "set!", setB_vec_number_number, number, number, NULL);
+    lk_object_setcfunc_lk(vec, "at", at_vec_number, number, NULL);
+    lk_object_setcfunc_lk(vec, "grade", grade_vec, NULL);
+    lk_object_setcfunc_lk(vec, "insert!", insertB_vec_number_number, number, number, NULL);
+    lk_object_setcfunc_lk(vec, "remove!", removeB_vec_number, number, NULL);
+    lk_object_setcfunc_lk(vec, "set!", setB_vec_number_number, number, number, NULL);
 }

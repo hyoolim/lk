@@ -2,7 +2,6 @@
 #define LK_SCOPE_H
 
 /* type */
-typedef struct lk_scope lk_scope_t;
 #define LK_SCOPE(v) ((lk_scope_t *)(v))
 #include "vm.h"
 #include "instr.h"

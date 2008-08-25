@@ -119,15 +119,15 @@ static void wait_vm(lk_object_t *self, lk_scope_t *local) {
 void lk_vm_libinit(lk_vm_t *vm) {
     lk_object_t *tvm = vm->t_vm, *f = vm->t_func, *number = vm->t_number, *str = vm->t_string;
     lk_lib_setGlobal("VirtualMachine", tvm);
-    lk_lib_setCFunc(tvm, "exit", exit_vm, NULL);
-    lk_lib_setCFunc(tvm, "fork", fork_vm, NULL);
-    lk_lib_setCFunc(tvm, "fork", fork_vm_f, f, NULL);
-    lk_lib_setCFunc(tvm, "sleep", sleep_vm_number, number, NULL);
-    lk_lib_setCFunc(tvm, "seconds since epoch", seconds_since_epoch_vm, NULL);
-    lk_lib_setCFunc(tvm, "seconds west of utc", seconds_west_of_utc_vm, NULL);
-    lk_lib_setCFunc(tvm, "system", system_vm, -1);
-    lk_lib_setCFunc(tvm, "system2", system2_vm_str, str, NULL);
-    lk_lib_setCFunc(tvm, "wait", wait_vm, NULL);
+    lk_object_setcfunc_lk(tvm, "exit", exit_vm, NULL);
+    lk_object_setcfunc_lk(tvm, "fork", fork_vm, NULL);
+    lk_object_setcfunc_lk(tvm, "fork", fork_vm_f, f, NULL);
+    lk_object_setcfunc_lk(tvm, "sleep", sleep_vm_number, number, NULL);
+    lk_object_setcfunc_lk(tvm, "seconds since epoch", seconds_since_epoch_vm, NULL);
+    lk_object_setcfunc_lk(tvm, "seconds west of utc", seconds_west_of_utc_vm, NULL);
+    lk_object_setcfunc_lk(tvm, "system", system_vm, -1);
+    lk_object_setcfunc_lk(tvm, "system2", system2_vm_str, str, NULL);
+    lk_object_setcfunc_lk(tvm, "wait", wait_vm, NULL);
 }
 
 /* new */
@@ -285,7 +285,26 @@ lk_scope_t *lk_vm_evalstring(lk_vm_t *self, const char *code) {
     (args)->argc = LIST_ISINIT(&(args)->stack) \
     ? LIST_COUNT(&(args)->stack) : 0; \
     if(LK_OBJ_ISCFUNC(LK_OBJ(func))) { \
-        LK_CFUNC(func)->func((args)->receiver, (args)); \
+        if(LK_CFUNC(func)->cc == LK_CFUNC_CC_VOID) { \
+            switch((args)->argc) { \
+                case 0: LK_CFUNC(func)->cfunc.v0((args)->receiver); break; \
+                case 1: LK_CFUNC(func)->cfunc.v1((args)->receiver, LK_OBJ(LIST_ATPTR(&args->stack, (0)))); break; \
+                case 2: LK_CFUNC(func)->cfunc.v2((args)->receiver, LK_OBJ(LIST_ATPTR(&args->stack, (0))), LK_OBJ(LIST_ATPTR(&args->stack, (1)))); break; \
+                case 3: LK_CFUNC(func)->cfunc.v3((args)->receiver, LK_OBJ(LIST_ATPTR(&args->stack, (0))), LK_OBJ(LIST_ATPTR(&args->stack, (1))), LK_OBJ(LIST_ATPTR(&args->stack, (2)))); break; \
+                default: BUG("cc void not supported"); \
+            } \
+            lk_scope_stackpush((args)->returnto, (args)->receiver); \
+        } else if(LK_CFUNC(func)->cc == LK_CFUNC_CC_RETURN) { \
+            switch((args)->argc) { \
+                case 0: lk_scope_stackpush((args)->returnto, LK_CFUNC(func)->cfunc.r0((args)->receiver)); break; \
+                case 1: lk_scope_stackpush((args)->returnto, LK_CFUNC(func)->cfunc.r1((args)->receiver, LK_OBJ(LIST_ATPTR(&args->stack, (0))))); break; \
+                case 2: lk_scope_stackpush((args)->returnto, LK_CFUNC(func)->cfunc.r2((args)->receiver, LK_OBJ(LIST_ATPTR(&args->stack, (0))), LK_OBJ(LIST_ATPTR(&args->stack, (1))))); break; \
+                case 3: lk_scope_stackpush((args)->returnto, LK_CFUNC(func)->cfunc.r3((args)->receiver, LK_OBJ(LIST_ATPTR(&args->stack, (0))), LK_OBJ(LIST_ATPTR(&args->stack, (1))), LK_OBJ(LIST_ATPTR(&args->stack, (2))))); break; \
+                default: BUG("cc return not supported"); \
+            } \
+        } else { \
+            LK_CFUNC(func)->cfunc.lk((args)->receiver, (args)); \
+        } \
         vm->currentScope = (self); \
     } else { \
         (args)->o.parent = LK_OBJ(LK_KFUNC(func)->scope); \

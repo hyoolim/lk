@@ -3,7 +3,6 @@
 
 /* type */
 typedef struct lk_func lk_func_t;
-typedef struct lk_cfunc lk_cfunc_t;
 typedef struct lk_gfunc lk_gfunc_t;
 typedef struct lk_kfunc lk_kfunc_t;
 typedef struct lk_sig lk_sig_t;
@@ -28,7 +27,22 @@ struct lk_func {
 struct lk_cfunc {
     struct lk_common o;
     struct lk_commonfunc cf;
-    lk_cfuncfunc_t       *func;
+    enum {
+        LK_CFUNC_CC_LK,
+        LK_CFUNC_CC_RETURN,
+        LK_CFUNC_CC_VOID
+    } cc;
+    union {
+        lk_cfunc_lk_t *lk;
+        lk_cfunc_r0_t *r0;
+        lk_cfunc_r1_t *r1;
+        lk_cfunc_r2_t *r2;
+        lk_cfunc_r3_t *r3;
+        lk_cfunc_v0_t *v0;
+        lk_cfunc_v1_t *v1;
+        lk_cfunc_v2_t *v2;
+        lk_cfunc_v3_t *v3;
+    } cfunc;
 };
 #define LK_CFUNC(v) ((lk_cfunc_t *)(v))
 struct lk_gfunc {

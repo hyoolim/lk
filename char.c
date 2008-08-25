@@ -35,11 +35,11 @@ static void to_string_ch(lk_object_t *self, lk_scope_t *local) {
 void lk_char_libinit(lk_vm_t *vm) {
     lk_object_t *ch = vm->t_char, *number = vm->t_number;
     lk_lib_setGlobal("Character", ch);
-    lk_object_setcfunc_lk(ch, "+", add_ch_number, number, NULL);
-    lk_object_setcfunc_lk(ch, "<=>", subtract_ch_ch, ch, NULL);
-    lk_object_setcfunc_lk(ch, "-", subtract_ch_ch, ch, NULL);
-    lk_object_setcfunc_lk(ch, "-", subtract_ch_number, number, NULL);
-    lk_object_setcfunc_lk(ch, "toString", to_string_ch, NULL);
+    lk_object_set_cfunc_lk(ch, "+", add_ch_number, number, NULL);
+    lk_object_set_cfunc_lk(ch, "<=>", subtract_ch_ch, ch, NULL);
+    lk_object_set_cfunc_lk(ch, "-", subtract_ch_ch, ch, NULL);
+    lk_object_set_cfunc_lk(ch, "-", subtract_ch_number, number, NULL);
+    lk_object_set_cfunc_lk(ch, "toString", to_string_ch, NULL);
 }
 
 /* new */

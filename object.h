@@ -52,15 +52,9 @@ struct lk_slot *lk_object_setslot(lk_object_t *self, lk_object_t *k, lk_object_t
 struct lk_slot *lk_object_setslotbycstr(lk_object_t *self, const char *k, lk_object_t *check, lk_object_t *v);
 void lk_object_setvalueonslot(lk_object_t *self, struct lk_slot *slot, lk_object_t *v);
 int lk_object_calcancestors(lk_object_t *self);
-lk_cfunc_t *lk_object_setcfunc_lk(lk_object_t *self, const char *name, lk_cfunc_lk_t *cfunc, ...);
-void lk_object_setcfunc_r0(lk_object_t *self, const char *name, lk_cfunc_r0_t *cfunc);
-void lk_object_setcfunc_r1(lk_object_t *self, const char *name, lk_cfunc_r1_t *cfunc, lk_object_t *a0type);
-void lk_object_setcfunc_r2(lk_object_t *self, const char *name, lk_cfunc_r2_t *cfunc, lk_object_t *a0type, lk_object_t *a1type);
-void lk_object_setcfunc_r3(lk_object_t *self, const char *name, lk_cfunc_r3_t *cfunc, lk_object_t *a0type, lk_object_t *a1type, lk_object_t *a2type);
-void lk_object_setcfunc_v0(lk_object_t *self, const char *name, lk_cfunc_v0_t *cfunc);
-void lk_object_setcfunc_v1(lk_object_t *self, const char *name, lk_cfunc_v1_t *cfunc, lk_object_t *a0type);
-void lk_object_setcfunc_v2(lk_object_t *self, const char *name, lk_cfunc_v2_t *cfunc, lk_object_t *a0type, lk_object_t *a1type);
-void lk_object_setcfunc_v3(lk_object_t *self, const char *name, lk_cfunc_v3_t *cfunc, lk_object_t *a0type, lk_object_t *a1type, lk_object_t *a2type);
+void lk_object_set_cfunc_lk(lk_object_t *self, const char *name, lk_cfunc_lk_t *cfunc, ...);
+void lk_object_set_cfunc_creturn(lk_object_t *self, const char *name, ...);
+void lk_object_set_cfunc_cvoid(lk_object_t *self, const char *name, ...);
 
 /* info */
 int lk_object_isa(lk_object_t *self, lk_object_t *t);

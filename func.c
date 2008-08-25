@@ -133,24 +133,24 @@ void lk_func_libinit(lk_vm_t *vm) {
     lk_object_t *f = vm->t_func, *sig = vm->t_sig;
     /* */
     lk_lib_setGlobal("Function", vm->t_func);
-    lk_object_setcfunc_lk(f, "+", add_f_f, f, NULL);
-    lk_object_setcfunc_lk(f, "+=", addB_f_f, f, NULL);
+    lk_object_set_cfunc_lk(f, "+", add_f_f, f, NULL);
+    lk_object_set_cfunc_lk(f, "+=", addB_f_f, f, NULL);
     lk_lib_setCField(f, "doc", f, offsetof(lk_func_t, cf.doc));
-    lk_object_setcfunc_lk(f, "minimum_argument_size", minimum_argument_size_f, NULL);
-    lk_object_setcfunc_lk(f, "maximum_argument_size", maximum_argument_size_f, NULL);
-    lk_object_setcfunc_lk(f, "signature", signature_f, NULL);
-    lk_object_setcfunc_lk(f, "last_argument", last_argument_f, NULL);
+    lk_object_set_cfunc_lk(f, "minimum_argument_size", minimum_argument_size_f, NULL);
+    lk_object_set_cfunc_lk(f, "maximum_argument_size", maximum_argument_size_f, NULL);
+    lk_object_set_cfunc_lk(f, "signature", signature_f, NULL);
+    lk_object_set_cfunc_lk(f, "last_argument", last_argument_f, NULL);
     /* */
     lk_lib_setGlobal("CFunction", vm->t_cfunc);
     /* */
     lk_lib_setGlobal("GenericFunction", vm->t_gfunc);
-    lk_object_setcfunc_lk(vm->t_gfunc, "functions", functions_gf, NULL);
+    lk_object_set_cfunc_lk(vm->t_gfunc, "functions", functions_gf, NULL);
     /* */
     lk_lib_setGlobal("KineticFunction", vm->t_kfunc);
     /* */
     lk_lib_setGlobal("Signature", vm->t_sig);
-    lk_object_setcfunc_lk(sig, "name", name_sig, NULL);
-    lk_object_setcfunc_lk(sig, "check", check_sig, NULL);
+    lk_object_set_cfunc_lk(sig, "name", name_sig, NULL);
+    lk_object_set_cfunc_lk(sig, "check", check_sig, NULL);
 }
 
 /* new */

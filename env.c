@@ -30,7 +30,7 @@ void lk_env_extinit(lk_vm_t *vm) {
     lk_object_t *obj = vm->t_object, *str = vm->t_string;
     lk_object_t *env = lk_object_allocWithSize(obj, sizeof(lk_env_t));
     lk_lib_setGlobal("Environment", env);
-    lk_object_setcfunc_lk(env, "at", at_env_str, str, NULL);
-    lk_object_setcfunc_lk(env, "size", size_env, NULL);
-    lk_object_setcfunc_lk(env, "keys", keys_env, NULL);
+    lk_object_set_cfunc_lk(env, "at", at_env_str, str, NULL);
+    lk_object_set_cfunc_lk(env, "size", size_env, NULL);
+    lk_object_set_cfunc_lk(env, "keys", keys_env, NULL);
 }

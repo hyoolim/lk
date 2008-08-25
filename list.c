@@ -43,12 +43,12 @@ static void setB_darray_number_number_list(lk_object_t *self, lk_scope_t *local)
 void lk_list_libinit(lk_vm_t *vm) {
     lk_object_t *list = vm->t_list, *obj = vm->t_object, *number = vm->t_number;
     lk_lib_setGlobal("List", list);
-    lk_object_setcfunc_lk(list, "at", at_darray_number, number, NULL);
-    lk_object_setcfunc_lk(list, "*", flatten_list, NULL);
-    lk_object_setcfunc_lk(list, "insert!", insertB_darray_number_obj, number, obj, NULL);
-    lk_object_setcfunc_lk(list, "remove!", removeB_darray_number, number, NULL);
-    lk_object_setcfunc_lk(list, "set!", setB_darray_number_obj, number, obj, NULL);
-    lk_object_setcfunc_lk(list, "set!", setB_darray_number_number_list, number, number, list, NULL);
+    lk_object_set_cfunc_lk(list, "at", at_darray_number, number, NULL);
+    lk_object_set_cfunc_lk(list, "*", flatten_list, NULL);
+    lk_object_set_cfunc_lk(list, "insert!", insertB_darray_number_obj, number, obj, NULL);
+    lk_object_set_cfunc_lk(list, "remove!", removeB_darray_number, number, NULL);
+    lk_object_set_cfunc_lk(list, "set!", setB_darray_number_obj, number, obj, NULL);
+    lk_object_set_cfunc_lk(list, "set!", setB_darray_number_number_list, number, number, list, NULL);
 }
 
 /* new */

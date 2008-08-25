@@ -30,7 +30,7 @@ void lk_library_extinit(lk_vm_t *vm) {
     lk_object_t *ext = lk_object_allocWithSize(vm->t_object, sizeof(lk_library_t));
     lk_object_setfreefunc(ext, free_ext);
     lk_lib_setGlobal("Extension", ext);
-    lk_object_setcfunc_lk(ext, "init!", init_ext_str_str, str, str, NULL);
+    lk_object_set_cfunc_lk(ext, "init!", init_ext_str_str, str, str, NULL);
 }
 
 /* update */

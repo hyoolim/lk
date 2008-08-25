@@ -82,12 +82,12 @@ void lk_socket_extinit(lk_vm_t *vm) {
     /* */
     lk_lib_setGlobal("IpAddress", ip);
     lk_lib_setObject(ip, "ANY", lk_object_alloc(ip));
-    lk_object_setcfunc_lk(ip, "init!", alloc_ip_str, str, NULL);
-    lk_object_setcfunc_lk(ip, "toString", to_string_ip, NULL);
+    lk_object_set_cfunc_lk(ip, "init!", alloc_ip_str, str, NULL);
+    lk_object_set_cfunc_lk(ip, "toString", to_string_ip, NULL);
     /* */
     lk_lib_setGlobal("Socket", vm->t_socket = sock);
-    lk_object_setcfunc_lk(sock, "accept", acce_sock, NULL);
-    lk_object_setcfunc_lk(sock, "bind", bind_sock_ip_number, ip, number, NULL);
-    lk_object_setcfunc_lk(sock, "connect", connect_sock_ip_number, ip, number, NULL);
-    lk_object_setcfunc_lk(sock, "listen", listen_sock, NULL);
+    lk_object_set_cfunc_lk(sock, "accept", acce_sock, NULL);
+    lk_object_set_cfunc_lk(sock, "bind", bind_sock_ip_number, ip, number, NULL);
+    lk_object_set_cfunc_lk(sock, "connect", connect_sock_ip_number, ip, number, NULL);
+    lk_object_set_cfunc_lk(sock, "listen", listen_sock, NULL);
 }

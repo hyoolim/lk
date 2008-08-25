@@ -60,16 +60,16 @@ static void swapB_gl_number_number(lk_object_t *self, lk_scope_t *local) {
 void lk_seq_libinit(lk_vm_t *vm) {
     lk_object_t *gl = vm->t_seq, *number = vm->t_number, *vec = vm->t_vector;
     lk_lib_setGlobal("Sequence", gl);
-    lk_object_setcfunc_lk(gl, "at", at_gl_vec, vec, NULL);
-    lk_object_setcfunc_lk(gl, "clear!", clearB_gl, NULL);
-    lk_object_setcfunc_lk(gl, "<=>", cmp_gl_gl, gl, NULL);
-    lk_object_setcfunc_lk(gl, "++=", concatB_gl_gl, gl, NULL);
-    lk_object_setcfunc_lk(gl, "size", size_gl, NULL);
-    lk_object_setcfunc_lk(gl, "==", eq_gl_gl, gl, NULL);
-    lk_object_setcfunc_lk(gl, "limit!", limitB_gl_number, number, NULL);
-    lk_object_setcfunc_lk(gl, "offset!", offsetB_gl_number, number, NULL);
-    lk_object_setcfunc_lk(gl, "rest!", restB_gl, NULL);
-    lk_object_setcfunc_lk(gl, "reverse!", reverseB_gl, NULL);
-    lk_object_setcfunc_lk(gl, "slice!", sliceB_gl_number_number, number, number, NULL);
-    lk_object_setcfunc_lk(gl, "swap!", swapB_gl_number_number, number, number, NULL);
+    lk_object_set_cfunc_lk(gl, "at", at_gl_vec, vec, NULL);
+    lk_object_set_cfunc_lk(gl, "clear!", clearB_gl, NULL);
+    lk_object_set_cfunc_lk(gl, "<=>", cmp_gl_gl, gl, NULL);
+    lk_object_set_cfunc_lk(gl, "++=", concatB_gl_gl, gl, NULL);
+    lk_object_set_cfunc_lk(gl, "size", size_gl, NULL);
+    lk_object_set_cfunc_lk(gl, "==", eq_gl_gl, gl, NULL);
+    lk_object_set_cfunc_lk(gl, "limit!", limitB_gl_number, number, NULL);
+    lk_object_set_cfunc_lk(gl, "offset!", offsetB_gl_number, number, NULL);
+    lk_object_set_cfunc_lk(gl, "rest!", restB_gl, NULL);
+    lk_object_set_cfunc_lk(gl, "reverse!", reverseB_gl, NULL);
+    lk_object_set_cfunc_lk(gl, "slice!", sliceB_gl_number_number, number, number, NULL);
+    lk_object_set_cfunc_lk(gl, "swap!", swapB_gl_number_number, number, number, NULL);
 }

@@ -29,8 +29,8 @@ struct lk_cfunc {
     struct lk_commonfunc cf;
     enum {
         LK_CFUNC_CC_LK,
-        LK_CFUNC_CC_RETURN,
-        LK_CFUNC_CC_VOID
+        LK_CFUNC_CC_CRETURN,
+        LK_CFUNC_CC_CVOID
     } cc;
     union {
         lk_cfunc_lk_t *lk;

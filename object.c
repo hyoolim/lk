@@ -127,25 +127,25 @@ static void with_obj_f(lk_object_t *self, lk_scope_t *local) {
 void lk_object_libinit(lk_vm_t *vm) {
     lk_object_t *obj = vm->t_object, *str = vm->t_string, *f = vm->t_func;
     lk_lib_setGlobal("Object", obj);
-    lk_object_setcfunc_lk(obj, ".", Dself_obj, NULL);
-    lk_object_setcfunc_lk(obj, ":", Ddefine_obj_str_obj, str, obj, NULL);
-    lk_object_setcfunc_lk(obj, ":=", Ddefine_and_assignB_obj_str_obj, str, obj, NULL);
-    lk_object_setcfunc_lk(obj, ":=", Ddefine_and_assignB_obj_str_obj_obj, str, obj, obj, NULL);
-    lk_object_setcfunc_lk(obj, ".id", Did_obj, NULL);
-    lk_object_setcfunc_lk(obj, ".retrieve", Dretrieve_obj_str, str, NULL);
-    lk_object_setcfunc_lk(obj, ".self", Dself_obj, NULL);
-    lk_object_setcfunc_lk(obj, ".slots", Dslots_obj, NULL);
-    lk_object_setcfunc_lk(obj, "alloc", alloc_obj, NULL);
-    lk_object_setcfunc_lk(obj, "also", also_obj_obj, obj, NULL);
-    lk_object_setcfunc_lk(obj, "ancestor?", ancestor_obj_obj, obj, NULL);
-    lk_object_setcfunc_lk(obj, "ancestors", ancestors_obj, NULL);
-    lk_object_setcfunc_lk(obj, "clone", clone_obj, NULL);
-    lk_object_setcfunc_lk(obj, "do", do_obj_f, f, NULL);
-    lk_object_setcfunc_lk(obj, "extend", do_obj_f, f, NULL);
-    lk_object_setcfunc_lk(obj, "import", import_object_obj, obj, NULL);
-    lk_object_setcfunc_lk(obj, "parents", parents_obj, NULL);
-    lk_object_setcfunc_lk(obj, "parent", parent_object, NULL);
-    lk_object_setcfunc_lk(obj, "with", with_obj_f, f, NULL);
+    lk_object_set_cfunc_lk(obj, ".", Dself_obj, NULL);
+    lk_object_set_cfunc_lk(obj, ":", Ddefine_obj_str_obj, str, obj, NULL);
+    lk_object_set_cfunc_lk(obj, ":=", Ddefine_and_assignB_obj_str_obj, str, obj, NULL);
+    lk_object_set_cfunc_lk(obj, ":=", Ddefine_and_assignB_obj_str_obj_obj, str, obj, obj, NULL);
+    lk_object_set_cfunc_lk(obj, ".id", Did_obj, NULL);
+    lk_object_set_cfunc_lk(obj, ".retrieve", Dretrieve_obj_str, str, NULL);
+    lk_object_set_cfunc_lk(obj, ".self", Dself_obj, NULL);
+    lk_object_set_cfunc_lk(obj, ".slots", Dslots_obj, NULL);
+    lk_object_set_cfunc_lk(obj, "alloc", alloc_obj, NULL);
+    lk_object_set_cfunc_lk(obj, "also", also_obj_obj, obj, NULL);
+    lk_object_set_cfunc_lk(obj, "ancestor?", ancestor_obj_obj, obj, NULL);
+    lk_object_set_cfunc_lk(obj, "ancestors", ancestors_obj, NULL);
+    lk_object_set_cfunc_lk(obj, "clone", clone_obj, NULL);
+    lk_object_set_cfunc_lk(obj, "do", do_obj_f, f, NULL);
+    lk_object_set_cfunc_lk(obj, "extend", do_obj_f, f, NULL);
+    lk_object_set_cfunc_lk(obj, "import", import_object_obj, obj, NULL);
+    lk_object_set_cfunc_lk(obj, "parents", parents_obj, NULL);
+    lk_object_set_cfunc_lk(obj, "parent", parent_object, NULL);
+    lk_object_set_cfunc_lk(obj, "with", with_obj_f, f, NULL);
 }
 
 /* new */
@@ -340,9 +340,8 @@ int lk_object_calcancestors(lk_object_t *self) {
         return 1;
     }
 }
-lk_cfunc_t *lk_object_setcfunc_lk(lk_object_t *self, const char *name, lk_cfunc_lk_t *cfunc, ...) {
+static lk_cfunc_t *lk_object_setcfunc(lk_object_t *self, const char *name, lk_cfunc_lk_t *cfunc, va_list *args) {
     lk_vm_t *vm = LK_VM(self);
-    va_list args;
     int i;
     lk_object_t *arg;
     lk_string_t *nameobj = lk_string_newFromCString(vm, name);
@@ -358,9 +357,8 @@ lk_cfunc_t *lk_object_setcfunc_lk(lk_object_t *self, const char *name, lk_cfunc_
         slot = lk_object_setslot(self, LK_OBJ(nameobj), vm->t_func, LK_OBJ(cfuncobj));
     }
     LK_SLOT_SETOPTION(slot, LK_SLOTOPTION_AUTOSEND);
-    va_start(args, cfunc);
     for(i = 0; ; i ++) {
-        arg = va_arg(args, lk_object_t *);
+        arg = va_arg(*args, lk_object_t *);
         if(arg == NULL) {
             cfuncobj->cf.minargc = cfuncobj->cf.maxargc = i;
             break;
@@ -371,32 +369,25 @@ lk_cfunc_t *lk_object_setcfunc_lk(lk_object_t *self, const char *name, lk_cfunc_
         }
         darray_setptr(cfuncobj->cf.sigs, i, lk_sig_new(vm, NULL, arg));
     }
-    va_end(args);
     return cfuncobj;
 }
-void lk_object_setcfunc_r0(lk_object_t *self, const char *name, lk_cfunc_r0_t *cfunc) {
-    lk_object_setcfunc_lk(self, name, (lk_cfunc_lk_t *)cfunc, NULL)->cc = LK_CFUNC_CC_RETURN;
+void lk_object_set_cfunc_lk(lk_object_t *self, const char *name, lk_cfunc_lk_t *cfunc, ...) {
+    va_list args;
+    va_start(args, cfunc);
+    lk_object_setcfunc(self, name, cfunc, &args);
+    va_end(args);
 }
-void lk_object_setcfunc_r1(lk_object_t *self, const char *name, lk_cfunc_r1_t *cfunc, lk_object_t *a0type) {
-    lk_object_setcfunc_lk(self, name, (lk_cfunc_lk_t *)cfunc, a0type, NULL)->cc = LK_CFUNC_CC_RETURN;
+void lk_object_set_cfunc_creturn(lk_object_t *self, const char *name, ...) {
+    va_list args;
+    va_start(args, name);
+    lk_object_setcfunc(self, name, va_arg(args, lk_cfunc_lk_t *), &args)->cc = LK_CFUNC_CC_CRETURN;
+    va_end(args);
 }
-void lk_object_setcfunc_r2(lk_object_t *self, const char *name, lk_cfunc_r2_t *cfunc, lk_object_t *a0type, lk_object_t *a1type) {
-    lk_object_setcfunc_lk(self, name, (lk_cfunc_lk_t *)cfunc, a0type, a1type, NULL)->cc = LK_CFUNC_CC_RETURN;
-}
-void lk_object_setcfunc_r3(lk_object_t *self, const char *name, lk_cfunc_r3_t *cfunc, lk_object_t *a0type, lk_object_t *a1type, lk_object_t *a2type) {
-    lk_object_setcfunc_lk(self, name, (lk_cfunc_lk_t *)cfunc, a0type, a1type, a2type, NULL)->cc = LK_CFUNC_CC_RETURN;
-}
-void lk_object_setcfunc_v0(lk_object_t *self, const char *name, lk_cfunc_v0_t *cfunc) {
-    lk_object_setcfunc_lk(self, name, (lk_cfunc_lk_t *)cfunc, NULL)->cc = LK_CFUNC_CC_VOID;
-}
-void lk_object_setcfunc_v1(lk_object_t *self, const char *name, lk_cfunc_v1_t *cfunc, lk_object_t *a0type) {
-    lk_object_setcfunc_lk(self, name, (lk_cfunc_lk_t *)cfunc, a0type, NULL)->cc = LK_CFUNC_CC_VOID;
-}
-void lk_object_setcfunc_v2(lk_object_t *self, const char *name, lk_cfunc_v2_t *cfunc, lk_object_t *a0type, lk_object_t *a1type) {
-    lk_object_setcfunc_lk(self, name, (lk_cfunc_lk_t *)cfunc, a0type, a1type, NULL)->cc = LK_CFUNC_CC_VOID;
-}
-void lk_object_setcfunc_v3(lk_object_t *self, const char *name, lk_cfunc_v3_t *cfunc, lk_object_t *a0type, lk_object_t *a1type, lk_object_t *a2type) {
-    lk_object_setcfunc_lk(self, name, (lk_cfunc_lk_t *)cfunc, a0type, a1type, a2type, NULL)->cc = LK_CFUNC_CC_VOID;
+void lk_object_set_cfunc_cvoid(lk_object_t *self, const char *name, ...) {
+    va_list args;
+    va_start(args, name);
+    lk_object_setcfunc(self, name, va_arg(args, lk_cfunc_lk_t *), &args)->cc = LK_CFUNC_CC_CVOID;
+    va_end(args);
 }
 
 /* info */

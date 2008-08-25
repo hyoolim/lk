@@ -56,12 +56,12 @@ static void values_map(lk_object_t *self, lk_scope_t *local) {
 void lk_map_libinit(lk_vm_t *vm) {
     lk_object_t *map = vm->t_map, *obj = vm->t_object;
     lk_lib_setGlobal("Map", map);
-    lk_object_setcfunc_lk(map, "at", at_map_obj, obj, NULL);
-    lk_object_setcfunc_lk(map, "clear!", clearB_map, NULL);
-    lk_object_setcfunc_lk(map, "size", size_map, NULL);
-    lk_object_setcfunc_lk(map, "keys", keys_map, NULL);
-    lk_object_setcfunc_lk(map, "set!", setB_map_obj_obj, obj, obj, NULL);
-    lk_object_setcfunc_lk(map, "values", values_map, NULL);
+    lk_object_set_cfunc_lk(map, "at", at_map_obj, obj, NULL);
+    lk_object_set_cfunc_lk(map, "clear!", clearB_map, NULL);
+    lk_object_set_cfunc_lk(map, "size", size_map, NULL);
+    lk_object_set_cfunc_lk(map, "keys", keys_map, NULL);
+    lk_object_set_cfunc_lk(map, "set!", setB_map_obj_obj, obj, obj, NULL);
+    lk_object_set_cfunc_lk(map, "values", values_map, NULL);
 }
 
 /* new */

@@ -29,7 +29,6 @@ struct lk_prec {
         LK_PREC_ASSOC_NON
     }                assoc;
 };
-#define LK_PREC(v) ((lk_prec_t *)(v))
 
 /* ext map */
 void lk_parser_typeinit(lk_vm_t *vm);

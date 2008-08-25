@@ -1,4 +1,3 @@
-#include "bool.h"
 #include "ext.h"
 
 /* ext map - types */

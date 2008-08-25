@@ -1,12 +1,8 @@
 #ifndef LK_ERROR_H
 #define LK_ERROR_H
+#include "types.h"
 
 /* type */
-typedef struct lk_error lk_error_t;
-#define LK_ERROR(v) ((lk_error_t *)(v))
-#include "vm.h"
-#include "instr.h"
-#include "string.h"
 struct lk_error {
     struct lk_common  o;
     lk_instr_t       *instr;

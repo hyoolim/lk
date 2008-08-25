@@ -1,8 +1,4 @@
-#include "instr.h"
-#include "char.h"
 #include "ext.h"
-#include "number.h"
-#include "string.h"
 #define INSTR (LK_INSTR(self))
 
 /* ext map - types */

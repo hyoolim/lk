@@ -1,11 +1,8 @@
 #ifndef LK_GC_H
 #define LK_GC_H
+#include "types.h"
 
 /* type */
-typedef struct lk_gc lk_gc_t;
-#define LK_GC(self) ((lk_gc_t *)(self))
-#include "vm.h"
-#include "scope.h"
 struct lk_gc {
     struct lk_common o;
     struct lk_objGroup *unused;

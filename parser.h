@@ -1,12 +1,8 @@
 #ifndef LK_PARSER_H
 #define LK_PARSER_H
+#include "types.h"
 
 /* type */
-typedef struct lk_parser lk_parser_t;
-typedef struct lk_prec lk_prec_t;
-#define LK_PARSER(v) ((lk_parser_t *)(v))
-#include "vm.h"
-#include "instr.h"
 struct lk_parser {
     struct lk_common o;
     const lk_string_t *text;

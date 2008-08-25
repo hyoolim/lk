@@ -1,6 +1,4 @@
-#include "char.h"
 #include "ext.h"
-#include "number.h"
 
 /* ext map - types */
 static void alloc_ch(lk_object_t *self, lk_object_t *parent) {

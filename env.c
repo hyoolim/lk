@@ -1,7 +1,4 @@
-#include "env.h"
 #include "ext.h"
-#include "number.h"
-#include "string.h"
 #include <unistd.h>
 
 /* ext map - funcs */

@@ -1,6 +1,4 @@
 #include "ext.h"
-#include "object.h"
-#include "string.h"
 #include <dlfcn.h>
 #include <stdarg.h>
 

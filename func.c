@@ -1,6 +1,4 @@
-#include "func.h"
 #include "ext.h"
-#include "number.h"
 
 /* ext map - types */
 /* */

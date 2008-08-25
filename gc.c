@@ -1,4 +1,3 @@
-#include "gc.h"
 #include "ext.h"
 
 /* ext map - types */

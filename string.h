@@ -1,11 +1,6 @@
 #ifndef LK_STRING_H
 #define LK_STRING_H
-
-/* type */
-typedef struct lk_seq lk_string_t;
-#define LK_STRING(v) ((lk_string_t *)(v))
-#include "vm.h"
-#include "seq.h"
+#include "types.h"
 
 /* ext map */
 void lk_string_typeinit(lk_vm_t *vm);

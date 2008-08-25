@@ -1,14 +1,8 @@
 #ifndef LK_FUNC_H
 #define LK_FUNC_H
+#include "types.h"
 
 /* type */
-typedef struct lk_func lk_func_t;
-typedef struct lk_gfunc lk_gfunc_t;
-typedef struct lk_kfunc lk_kfunc_t;
-typedef struct lk_sig lk_sig_t;
-#include "vm.h"
-#include "scope.h"
-#include "instr.h"
 struct lk_func {
     struct lk_common o;
     struct lk_commonfunc {
@@ -21,9 +15,6 @@ struct lk_func {
         uint8_t      opts;
     }                cf;
 };
-#define LK_FUNC(v) ((lk_func_t *)(v))
-#define LK_FUNCORUNNING  (1 << 0)
-#define LK_FUNCOASSIGNED (1 << 1)
 struct lk_cfunc {
     struct lk_common o;
     struct lk_commonfunc cf;
@@ -44,27 +35,23 @@ struct lk_cfunc {
         lk_cfunc_v3_t *v3;
     } cfunc;
 };
-#define LK_CFUNC(v) ((lk_cfunc_t *)(v))
 struct lk_gfunc {
     struct lk_common o;
     struct lk_commonfunc  cf;
     darray_t            *funcs;
 };
-#define LK_GFUNC(v) ((lk_gfunc_t *)(v))
 struct lk_kfunc {
     struct lk_common o;
     struct lk_commonfunc  cf;
     lk_scope_t           *scope;
     lk_instr_t           *first;
 };
-#define LK_KFUNC(v) ((lk_kfunc_t *)(v))
 struct lk_sig {
     struct lk_common o;
     lk_string_t      *name;
     lk_object_t      *check;
     uint8_t           isself;
 };
-#define LK_SIG(v) ((lk_sig_t *)(v))
 
 /* ext map */
 void lk_func_typeinit(lk_vm_t *vm);

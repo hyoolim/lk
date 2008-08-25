@@ -1,18 +1,35 @@
 #ifndef LK_EXT_H
 #define LK_EXT_H
-#include "vm.h"
+#include "types.h"
+#include "bool.h"
+#include "charset.h"
 #include "error.h"
+#include "file.h"
 #include "func.h"
-#include "number.h"
-#include "gc.h"
+#include "instr.h"
+#include "map.h"
 #include "object.h"
+#include "random.h"
+#include "seq.h"
+#include "string.h"
+#include "vector.h"
+#include "char.h"
+#include "env.h"
+#include "ext.h"
+#include "folder.h"
+#include "gc.h"
+#include "list.h"
+#include "number.h"
+#include "parser.h"
+#include "scope.h"
+#include "socket.h"
+#include "vm.h"
 
 /* type */
-typedef struct lk_library {
+struct lk_library {
     struct lk_common o;
     void             *lib;
-} lk_library_t;
-#define LK_EXT(v) ((lk_library_t *)(v))
+};
 
 /* ext shortcuts */
 #define ARG(i) (assert(local != NULL && 0 <= (i) && (i) < local->argc),  LK_OBJ(LIST_ATPTR(&local->stack, (i))))

@@ -1,9 +1,4 @@
-#include "vm.h"
 #include "ext.h"
-#include "gc.h"
-#include "map.h"
-#include "parser.h"
-#include "string.h"
 
 /* eval */
 int main(int argc, const char **argv) {

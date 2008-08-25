@@ -1,11 +1,6 @@
 #ifndef LK_LIST_H
 #define LK_LIST_H
-
-/* type */
-typedef struct lk_seq lk_list_t;
-#define LK_DARRAY(v) ((lk_list_t *)(v))
-#include "vm.h"
-#include "seq.h"
+#include "types.h"
 
 /* ext map */
 void lk_list_typeinit(lk_vm_t *vm);

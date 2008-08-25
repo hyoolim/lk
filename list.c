@@ -1,6 +1,4 @@
-#include "list.h"
 #include "ext.h"
-#include "number.h"
 
 /* ext map - types */
 static LK_OBJ_DEFMARKFUNC(mark_list) {

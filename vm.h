@@ -2,77 +2,10 @@
 #define LK_VM_H
 
 /* generic lib for handling common types of data */
-#include "base/common.h"
-#include "base/darray.h"
-#include "base/number.h"
-#include "base/qphash.h"
+#include "types.h"
 #include <setjmp.h>
 
-/* type - see further down below for actual def */
-typedef struct lk_vm lk_vm_t;
-typedef struct lk_object lk_object_t;
-#define LK_OBJ(v) ((lk_object_t *)(v))
-
-/* common data for all lk objs */
-typedef void lk_tagallocfunc_t(lk_object_t *self, lk_object_t *parent);
-#define LK_OBJ_DEFMARKFUNC(name) void name(lk_object_t *self, void (*mark)(lk_object_t *self))
-typedef LK_OBJ_DEFMARKFUNC(lk_tagmarkfunc_t);
-typedef void lk_tagfreefunc_t(lk_object_t *self);
-struct lk_tag {
-    int                refc;
-    lk_vm_t           *vm;
-    size_t             size;
-    lk_tagallocfunc_t *allocfunc;
-    lk_tagmarkfunc_t  *markfunc;
-    lk_tagfreefunc_t  *freefunc;
-};
-struct lk_objGroup {
-    lk_object_t *first;
-    lk_object_t *last;
-};
-struct lk_common {
-    lk_object_t            *parent;
-    darray_t              *ancestors;
-    qphash_t               *slots;
-    struct lk_tag          *tag;
-    struct {
-        lk_object_t        *prev;
-        lk_object_t        *next;
-        struct lk_objGroup *objgroup;
-        uint8_t             isref;
-    }                       mark;
-};
-#define LK_VM(v) ((v)->o.tag->vm)
-
-/* used by ext - can't be in ext.h due to bootstrapping issues */
-typedef void lk_libraryinitfunc_t(lk_vm_t *vm);
-typedef struct lk_cfunc lk_cfunc_t;
-typedef struct lk_scope lk_scope_t;
-typedef void lk_cfunc_lk_t(lk_object_t *self, lk_scope_t *local);
-typedef lk_object_t *lk_cfunc_r0_t(lk_object_t *self);
-typedef lk_object_t *lk_cfunc_r1_t(lk_object_t *self, lk_object_t *a0type);
-typedef lk_object_t *lk_cfunc_r2_t(lk_object_t *self, lk_object_t *a0type, lk_object_t *a1type);
-typedef lk_object_t *lk_cfunc_r3_t(lk_object_t *self, lk_object_t *a0type, lk_object_t *a1type, lk_object_t *a2type);
-typedef void lk_cfunc_v0_t(lk_object_t *self);
-typedef void lk_cfunc_v1_t(lk_object_t *self, lk_object_t *a0type);
-typedef void lk_cfunc_v2_t(lk_object_t *self, lk_object_t *a0type, lk_object_t *a1type);
-typedef void lk_cfunc_v3_t(lk_object_t *self, lk_object_t *a0type, lk_object_t *a1type, lk_object_t *a2type);
-
-/* required primitives */
-#include "string.h"
-#include "scope.h"
-#include "gc.h"
-#include "instr.h"
-#include "object.h"
-#include "error.h"
-
-/* todo: figure out a way to move this before req primitives */
-typedef void lk_cfuncfunc_t(lk_object_t *self, lk_scope_t *local);
-
 /* actual def - add header to above #include's on lk_vm_t change */
-struct lk_object {
-    struct lk_common o;
-};
 struct lk_vm {
     struct lk_rsrcchain {
         uint8_t              isstring;

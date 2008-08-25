@@ -1,10 +1,8 @@
 #ifndef LK_MAP_H
 #define LK_MAP_H
+#include "types.h"
 
 /* type */
-typedef struct lk_map lk_map_t;
-#define LK_MAP(v) ((lk_map_t *)(v))
-#include "vm.h"
 struct lk_map {
     struct lk_common o;
     qphash_t         data;

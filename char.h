@@ -1,10 +1,8 @@
 #ifndef LK_CHAR_H
 #define LK_CHAR_H
+#include "types.h"
 
 /* type */
-typedef struct lk_char lk_char_t;
-#define LK_CHAR(object) ((lk_char_t *)(object))
-#include "vm.h"
 struct lk_char {
     struct lk_common o;
     uint32_t         data;

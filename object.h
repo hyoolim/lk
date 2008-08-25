@@ -1,8 +1,11 @@
 #ifndef LK_OBJ_H
 #define LK_OBJ_H
-#include "vm.h"
+#include "types.h"
 
 /* type */
+struct lk_object {
+    struct lk_common o;
+};
 enum lk_slottype {
     LK_SLOTTYPE_LKOBJ,
     LK_SLOTTYPE_CFIELDLKOBJ

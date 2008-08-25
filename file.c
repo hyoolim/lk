@@ -1,8 +1,4 @@
-#include "file.h"
-#include "char.h"
-#include "charset.h"
 #include "ext.h"
-#include "number.h"
 #include <errno.h>
 #include <sys/stat.h>
 #include <unistd.h>

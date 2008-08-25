@@ -1,10 +1,8 @@
 #ifndef LK_NUMBER_H
 #define LK_NUMBER_H
+#include "types.h"
 
 /* type */
-typedef struct lk_number lk_number_t;
-#define LK_NUMBER(self) ((lk_number_t *)(self))
-#include "vm.h"
 struct lk_number {
     struct lk_common o;
     double           data;

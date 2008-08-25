@@ -1,6 +1,4 @@
-#include "error.h"
 #include "ext.h"
-#include "list.h"
 #include <errno.h>
 
 /* ext map - types */

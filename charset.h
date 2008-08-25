@@ -1,13 +1,8 @@
 #ifndef LK_CHARSET_H
 #define LK_CHARSET_H
+#include "types.h"
 
 /* type */
-typedef struct lk_charset lk_charset_t;
-#define LK_CHARSET(object) ((lk_charset_t *)(object))
-#include "vm.h"
-#include "bool.h"
-#include "char.h"
-#include "string.h"
 struct lk_charset {
     struct lk_common o;
     charset_t        data;

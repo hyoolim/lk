@@ -1,4 +1,3 @@
-#include "folder.h"
 #include "ext.h"
 #include <dirent.h>
 #include <errno.h>

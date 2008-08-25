@@ -1,9 +1,4 @@
-#include "object.h"
 #include "ext.h"
-#include "number.h"
-#include "gc.h"
-#include "list.h"
-#include "map.h"
 #include <stdarg.h>
 
 /* ext map - types */

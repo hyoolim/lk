@@ -1,4 +1,3 @@
-#include "charset.h"
 #include "ext.h"
 
 /* init charset type */

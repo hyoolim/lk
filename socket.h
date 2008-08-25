@@ -1,14 +1,8 @@
 #ifndef LK_SOCKET_H
 #define LK_SOCKET_H
+#include "types.h"
 
 /* type */
-typedef struct lk_ipaddr lk_ipaddr_t;
-typedef struct lk_socket lk_socket_t;
-#define LK_IPADDR(v) ((lk_ipaddr_t *)(v))
-#define LK_SOCKET(v) ((lk_socket_t *)(v))
-#include "vm.h"
-#include "file.h"
-#include "string.h"
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>

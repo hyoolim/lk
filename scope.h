@@ -1,11 +1,8 @@
 #ifndef LK_SCOPE_H
 #define LK_SCOPE_H
+#include "types.h"
 
 /* type */
-#define LK_SCOPE(v) ((lk_scope_t *)(v))
-#include "vm.h"
-#include "instr.h"
-#include "list.h"
 struct lk_scope {
     struct lk_common o;
     enum lk_scopetype_t {

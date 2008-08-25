@@ -1,7 +1,4 @@
 #include "ext.h"
-#include "number.h"
-#include "map.h"
-#include "object.h"
 
 /* ext map - types */
 static void alloc_map(lk_object_t *self, lk_object_t *parent) {

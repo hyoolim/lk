@@ -1,6 +1,6 @@
 #include "ext.h"
 
-/* ext map - types */
+/* type */
 static LK_OBJ_DEFMARKFUNC(mark_list) {
     LIST_EACHPTR(DARRAY(self), i, v, mark(v));
 }
@@ -9,44 +9,6 @@ void lk_list_typeinit(lk_vm_t *vm) {
     darray_fin(DARRAY(vm->t_list));
     darray_init(DARRAY(vm->t_list), sizeof(lk_object_t *), 16);
     lk_object_setmarkfunc(vm->t_list, mark_list);
-}
-
-/* ext map - funcs */
-static void at_darray_number(lk_object_t *self, lk_scope_t *local) {
-    lk_object_t *v = darray_getptr(DARRAY(self), CSIZE(ARG(0)));
-    RETURN(v != NULL ? v : NIL);
-}
-static void flatten_list(lk_object_t *self, lk_scope_t *local) {
-    lk_scope_t *caller = local->caller;
-    if(!LIST_ISINIT(&caller->stack)) darray_initptr(&caller->stack);
-    darray_concat(&caller->stack, DARRAY(self));
-    DONE;
-}
-static void insertB_darray_number_obj(lk_object_t *self, lk_scope_t *local) {
-    darray_insertptr(DARRAY(self), CSIZE(ARG(0)), lk_object_addref(self, ARG(0)));
-    RETURN(self);
-}
-static void removeB_darray_number(lk_object_t *self, lk_scope_t *local) {
-    lk_object_t *v = darray_removeptr(DARRAY(self), CSIZE(ARG(0)));
-    RETURN(v != NULL ? v : NIL);
-}
-static void setB_darray_number_obj(lk_object_t *self, lk_scope_t *local) {
-    darray_setptr(DARRAY(self), CSIZE(ARG(0)), ARG(1));
-    RETURN(self);
-}
-static void setB_darray_number_number_list(lk_object_t *self, lk_scope_t *local) {
-    darray_setrange(DARRAY(self), CSIZE(ARG(0)), CSIZE(ARG(1)), DARRAY(ARG(2)));
-    RETURN(self);
-}
-void lk_list_libinit(lk_vm_t *vm) {
-    lk_object_t *list = vm->t_list, *obj = vm->t_object, *number = vm->t_number;
-    lk_lib_setGlobal("List", list);
-    lk_object_set_cfunc_lk(list, "at", at_darray_number, number, NULL);
-    lk_object_set_cfunc_lk(list, "*", flatten_list, NULL);
-    lk_object_set_cfunc_lk(list, "insert!", insertB_darray_number_obj, number, obj, NULL);
-    lk_object_set_cfunc_lk(list, "remove!", removeB_darray_number, number, NULL);
-    lk_object_set_cfunc_lk(list, "set!", setB_darray_number_obj, number, obj, NULL);
-    lk_object_set_cfunc_lk(list, "set!", setB_darray_number_number_list, number, number, list, NULL);
 }
 
 /* new */
@@ -65,4 +27,45 @@ lk_list_t *lk_list_newfromargv(lk_vm_t *vm, int argc, const char **argv) {
         darray_pushptr(DARRAY(self), lk_string_newFromCString(vm, argv[i]));
     }
     return self;
+}
+
+/* update */
+void lk_list_insert_number_object(lk_list_t *self, lk_number_t *index, lk_object_t *value) {
+    darray_insertptr(DARRAY(self), CSIZE(index), lk_object_addref(LK_OBJ(self), value));
+}
+void lk_list_remove_number(lk_list_t *self, lk_number_t *index) {
+    darray_removeptr(DARRAY(self), CSIZE(index));
+}
+void lk_list_set_number_object(lk_list_t *self, lk_number_t *index, lk_object_t *value) {
+    darray_setptr(DARRAY(self), CSIZE(index), value);
+}
+void lk_list_set_number_number_list(lk_list_t *self, lk_number_t *from, lk_number_t *to, lk_list_t *list) {
+    darray_setrange(DARRAY(self), CSIZE(from), CSIZE(to), DARRAY(list));
+}
+
+/* info */
+lk_object_t *lk_list_at_number(lk_list_t *self, lk_number_t *index) {
+    lk_object_t *value = darray_getptr(DARRAY(self), CSIZE(index));
+    return value != NULL ? value : NIL;
+}
+void lk_list_flatten(lk_object_t *self, lk_scope_t *local) {
+    lk_scope_t *caller = local->caller;
+    if(!LIST_ISINIT(&caller->stack)) darray_initptr(&caller->stack);
+    darray_concat(&caller->stack, DARRAY(self));
+}
+
+/* bind all c funcs to lk equiv */
+void lk_list_libinit(lk_vm_t *vm) {
+    lk_object_t *list = vm->t_list, *object = vm->t_object, *number = vm->t_number;
+    lk_lib_setGlobal("List", list);
+
+    /* update */
+    lk_object_set_cfunc_cvoid(list, "insert!", lk_list_insert_number_object, number, object, NULL);
+    lk_object_set_cfunc_cvoid(list, "remove!", lk_list_remove_number, number, NULL);
+    lk_object_set_cfunc_cvoid(list, "set!", lk_list_set_number_object, number, object, NULL);
+    lk_object_set_cfunc_cvoid(list, "set!", lk_list_set_number_number_list, number, number, list, NULL);
+
+    /* info */
+    lk_object_set_cfunc_creturn(list, "at", lk_list_at_number, number, NULL);
+    lk_object_set_cfunc_lk(list, "*", lk_list_flatten, NULL);
 }

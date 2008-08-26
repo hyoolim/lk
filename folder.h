@@ -11,4 +11,10 @@ struct lk_folder {
 /* init */
 void lk_folder_typeinit(lk_vm_t *vm);
 void lk_folder_libinit(lk_vm_t *vm);
+
+/* new */
+void lk_folder_init(lk_object_t *self, lk_string_t *path);
+
+/* info */
+lk_list_t *lk_folder_items(lk_object_t *self);
 #endif

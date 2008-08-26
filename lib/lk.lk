@@ -534,7 +534,7 @@ Scope/extend {
     #/resume := { | .receiver/.return_to = .receiver/proto; .receiver/leave }
     #/retry := { | .receiver/proto/redo; .receiver/resume }
     /read := { args... | STDIN/read(*args) }
-    /readLine := { | STDIN/read(0c\n) }
+    /readLine := { | STDIN/readUntil(0c\n) }
     /while := { cond : True, block | block(); retry }
     /while += { cond : False, block | }
     /write := { args... | STDOUT/write(*args); /. }

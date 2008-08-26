@@ -4,20 +4,22 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-/* ext map - types */
-static LK_OBJ_DEFMARKFUNC(mark_Folder) {
+/* type */
+static LK_OBJ_DEFMARKFUNC(mark_folder) {
     mark(LK_OBJ(LK_FOLDER(self)->path));
 }
 void lk_folder_typeinit(lk_vm_t *vm) {
     vm->t_folder = lk_object_allocWithSize(vm->t_object, sizeof(lk_folder_t));
-    lk_object_setmarkfunc(vm->t_folder, mark_Folder);
+    lk_object_setmarkfunc(vm->t_folder, mark_folder);
 }
 
-/* ext map - funcs */
-static void init_Folder_str(lk_object_t *self, lk_scope_t *local) {
-    LK_FOLDER(self)->path = LK_STRING(ARG(0));
+/* new */
+void lk_folder_init(lk_object_t *self, lk_string_t *path) {
+    LK_FOLDER(self)->path = LK_STRING(path);
 }
-static void items_Folder(lk_object_t *self, lk_scope_t *local) {
+
+/* info */
+lk_list_t *lk_folder_items(lk_object_t *self) {
     lk_list_t *items = lk_list_new(VM);
     lk_string_t *fullPath = lk_string_new(VM);
     DIR *dir = opendir(CSTRING(LK_FOLDER(self)->path));
@@ -37,14 +39,20 @@ static void items_Folder(lk_object_t *self, lk_scope_t *local) {
         }
     }
     if(errno == 0) {
-        RETURN(items);
+        return items;
     } else {
         lk_vm_raiseerrno(VM);
     }
 }
+
+/* bind all c funcs to lk equiv */
 void lk_folder_libinit(lk_vm_t *vm) {
-    lk_object_t *folder = vm->t_folder, *str = vm->t_string;
+    lk_object_t *folder = vm->t_folder, *string = vm->t_string;
     lk_lib_setGlobal("Folder", folder);
-    lk_object_set_cfunc_lk(folder, "init!", init_Folder_str, str, NULL);
-    lk_object_set_cfunc_lk(folder, "items", items_Folder, NULL);
+
+    /* new */
+    lk_object_set_cfunc_cvoid(folder, "init!", lk_folder_init, string, NULL);
+
+    /* info */
+    lk_object_set_cfunc_creturn(folder, "items", lk_folder_items, NULL);
 }

@@ -24,7 +24,7 @@ void lk_charset_subtract_charset(lk_object_t *self, lk_charset_t *other);
 void lk_charset_subtract_string(lk_object_t *self, lk_string_t *other);
 
 /* info */
-lk_string_t *lk_charset_tostring(lk_object_t *self);
 lk_bool_t *lk_charset_has_char(lk_object_t *self, lk_char_t *achar);
 lk_bool_t *lk_charset_has_string(lk_object_t *self, lk_string_t *string);
+lk_string_t *lk_charset_tostring(lk_object_t *self);
 #endif

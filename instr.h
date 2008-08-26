@@ -47,4 +47,8 @@ lk_instr_t *lk_instr_newscopemessage(lk_parser_t *parser, lk_string_t *name);
 
 /* info */
 void lk_instr_print(lk_instr_t *);
+lk_number_t *lk_instr_column(lk_object_t *self);
+lk_number_t *lk_instr_line(lk_object_t *self);
+lk_string_t *lk_instr_message(lk_object_t *self);
+lk_string_t *lk_instr_resource(lk_object_t *self);
 #endif

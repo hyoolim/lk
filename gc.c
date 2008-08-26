@@ -16,18 +16,6 @@ void lk_gc_typeinit(lk_vm_t *vm) {
     lk_object_setfreefunc(LK_OBJ(vm->gc), free_gc);
 }
 
-/* ext map - funcs */
-static void pause_gc(lk_object_t *self, lk_scope_t *local) {
-    lk_gc_pause(LK_GC(self)); RETURN(self); }
-static void resume_gc(lk_object_t *self, lk_scope_t *local) {
-    lk_gc_resume(LK_GC(self)); RETURN(self); }
-void lk_gc_libinit(lk_vm_t *vm) {
-    lk_object_t *gc = LK_OBJ(vm->gc);
-    lk_lib_setGlobal("GarbageCollector", gc);
-    lk_object_set_cfunc_lk(gc, "pause", pause_gc, NULL);
-    lk_object_set_cfunc_lk(gc, "resume", resume_gc, NULL);
-}
-
 /* update */
 void lk_objGroup_freeAll(struct lk_objGroup *self) {
     lk_object_t *c = self->first, *n;
@@ -147,4 +135,14 @@ int lk_objGroup_size(struct lk_objGroup *self) {
     lk_object_t *i;
     for(i = self->first; i != NULL; i = i->o.mark.next) c ++;
     return c;
+}
+
+/* bind all c funcs to lk equiv */
+void lk_gc_libinit(lk_vm_t *vm) {
+    lk_object_t *gc = LK_OBJ(vm->gc);
+    lk_lib_setGlobal("GarbageCollector", gc);
+
+    /* update */
+    lk_object_set_cfunc_cvoid(gc, "pause!", lk_gc_pause, NULL);
+    lk_object_set_cfunc_cvoid(gc, "resume!", lk_gc_resume, NULL);
 }

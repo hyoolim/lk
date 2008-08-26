@@ -21,7 +21,7 @@ loop {
     libdir = readLine/trim || libdir
     write('\n')
     write('Write the config file (Y/n)? ')
-    read(0c\n)/trim/lc != 'n' ? break
+    readLine/trim/lc != 'n' ? break
 }
 
 # save

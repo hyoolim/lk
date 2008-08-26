@@ -1,6 +1,6 @@
 #include "ext.h"
 
-/* init charset type */
+/* type */
 static void alloc_charset(lk_object_t *self, lk_object_t *parent) {
     charset_copy(CHARSET(self), CHARSET(parent));
 }
@@ -40,12 +40,6 @@ void lk_charset_subtract_string(lk_object_t *self, lk_string_t *other) {
 }
 
 /* info */
-lk_string_t *lk_charset_tostring(lk_object_t *self) {
-    darray_t *base = charset_tostring(CHARSET(self));
-    lk_string_t *lk = lk_string_newFromDArray(LK_VM(self), base);
-    darray_free(base);
-    return lk;
-}
 lk_bool_t *lk_charset_has_char(lk_object_t *self, lk_char_t *achar) {
     return charset_has(CHARSET(self), CHAR(achar)) ? TRUE : FALSE;
 }
@@ -56,18 +50,28 @@ lk_bool_t *lk_charset_has_string(lk_object_t *self, lk_string_t *string) {
     });
     return TRUE;
 }
+lk_string_t *lk_charset_tostring(lk_object_t *self) {
+    darray_t *base = charset_tostring(CHARSET(self));
+    lk_string_t *lk = lk_string_newFromDArray(LK_VM(self), base);
+    darray_free(base);
+    return lk;
+}
 
 /* bind all c funcs to lk equiv */
 void lk_charset_libinit(lk_vm_t *vm) {
     lk_object_t *charset = vm->t_charset, *ch = vm->t_char, *string = vm->t_string;
     lk_lib_setGlobal("CharacterSet", charset);
+
+    /* update */
     lk_object_set_cfunc_cvoid(charset, "+=", lk_charset_add_charset, charset, NULL);
     lk_object_set_cfunc_cvoid(charset, "+=", lk_charset_add_string, string, NULL);
-    lk_object_set_cfunc_creturn(charset, "has?", lk_charset_has_char, ch, NULL);
-    lk_object_set_cfunc_creturn(charset, "has?", lk_charset_has_string, string, NULL);
     lk_object_set_cfunc_cvoid(charset, "init!", lk_charset_init_string, string, NULL);
     lk_object_set_cfunc_cvoid(charset, "negate!", lk_charset_negate, NULL);
     lk_object_set_cfunc_cvoid(charset, "-=", lk_charset_subtract_charset, charset, NULL);
     lk_object_set_cfunc_cvoid(charset, "-=", lk_charset_subtract_string, string, NULL);
+
+    /* info */
+    lk_object_set_cfunc_creturn(charset, "has?", lk_charset_has_char, ch, NULL);
+    lk_object_set_cfunc_creturn(charset, "has?", lk_charset_has_string, string, NULL);
     lk_object_set_cfunc_creturn(charset, "toString", lk_charset_tostring, NULL);
 }

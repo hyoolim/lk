@@ -39,6 +39,7 @@ struct lk_vm {
     /* map      */ lk_obj_t *t_map;
     /* obj      */ lk_obj_t *t_obj;
     /* parser   */ lk_obj_t *t_parser, *t_prec;
+    /* pipe     */ lk_obj_t *t_pipe;
     /* socket   */ lk_obj_t *t_socket;
     /* str   */ lk_obj_t *t_str;
     /* vm       */ lk_obj_t *t_vm;

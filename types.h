@@ -27,6 +27,7 @@ typedef struct lk_num lk_num_t;
 typedef struct lk_obj lk_obj_t;
 typedef struct lk_parser lk_parser_t;
 typedef struct lk_prec lk_prec_t;
+typedef struct lk_pipe lk_pipe_t;
 typedef struct lk_rand lk_rand_t;
 typedef struct lk_scope lk_scope_t;
 typedef struct lk_seq lk_seq_t;
@@ -105,6 +106,7 @@ typedef void lk_cfuncfunc_t(lk_obj_t *self, lk_scope_t *local);
 #define LK_OBJ(obj) ((lk_obj_t *)(obj))
 #define LK_PARSER(obj) ((lk_parser_t *)(obj))
 #define LK_PREC(obj) ((lk_prec_t *)(obj))
+#define LK_PIPE(obj) ((lk_pipe_t *)(obj))
 #define LK_RANDOM(obj) ((lk_rand_t *)(obj))
 #define LK_RANDOM_N 624
 #define LK_SCOPE(obj) ((lk_scope_t *)(obj))

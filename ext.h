@@ -21,6 +21,7 @@
 #include "list.h"
 #include "num.h"
 #include "parser.h"
+#include "pipe.h"
 #include "scope.h"
 #include "socket.h"
 #include "vm.h"

@@ -14,15 +14,20 @@ void lk_folder_typeinit(lk_vm_t *vm) {
 }
 
 /* new */
-void lk_folder_init(lk_obj_t *self, lk_str_t *path) {
-    LK_FOLDER(self)->path = LK_STRING(path);
+void lk_folder_init(lk_folder_t *self, lk_str_t *path) {
+    self->path = path;
+}
+
+/* update */
+void lk_folder_create(lk_folder_t *self) {
+    mkdir(CSTRING(self->path), S_IRWXU | S_IRWXG | S_IRWXO);
 }
 
 /* info */
-lk_list_t *lk_folder_items(lk_obj_t *self) {
+lk_list_t *lk_folder_items(lk_folder_t *self) {
     lk_list_t *items = lk_list_new(VM);
     lk_str_t *fullPath = lk_str_new(VM);
-    DIR *dir = opendir(CSTRING(LK_FOLDER(self)->path));
+    DIR *dir = opendir(CSTRING(self->path));
     struct dirent *dirEntry;
     while(dir != NULL) {
         errno = 0;
@@ -30,7 +35,7 @@ lk_list_t *lk_folder_items(lk_obj_t *self) {
         else {
             darray_t *filename = darray_allocFromCString(dirEntry->d_name);
             darray_clear(DARRAY(fullPath));
-            darray_concat(DARRAY(fullPath), DARRAY(LK_FOLDER(self)->path));
+            darray_concat(DARRAY(fullPath), DARRAY(self->path));
             darray_concat(DARRAY(fullPath), DARRAY(VM->str_filesep));
             darray_concat(DARRAY(fullPath), filename);
             darray_pushptr(DARRAY(items), fullPath);
@@ -52,6 +57,9 @@ void lk_folder_libinit(lk_vm_t *vm) {
 
     /* new */
     lk_obj_set_cfunc_cvoid(folder, "init!", lk_folder_init, str, NULL);
+
+    /* update */
+    lk_obj_set_cfunc_cvoid(folder, "create!", lk_folder_create, NULL);
 
     /* info */
     lk_obj_set_cfunc_creturn(folder, "items", lk_folder_items, NULL);

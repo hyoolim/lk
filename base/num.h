@@ -4,22 +4,22 @@
 #include "darray.h"
 
 /* type. */
-typedef enum numbertype {
+typedef enum numtype {
     NUMBERTYPE_INT = 1,
     NUMBERTYPE_FLOAT,
     NUMBERTYPE_NUMBER
-} numbertype_t;
-typedef struct number {
+} numtype_t;
+typedef struct num {
     uint8_t  *buf;
     int  len;
-} number_t;
-typedef union numberifn {
+} num_t;
+typedef union numifn {
     int          i;
     double       f;
-    number_t *n;
-} numberifn_t;
+    num_t *n;
+} numifn_t;
 
 /* new. */
-numbertype_t number_new(int is_big, darray_t *str, numberifn_t *res);
-void number_free(number_t *self);
+numtype_t num_new(int is_big, darray_t *str, numifn_t *res);
+void num_free(num_t *self);
 #endif

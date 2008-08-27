@@ -2,10 +2,10 @@
 
 /* ext map - types */
 void lk_bool_typeinit(lk_vm_t *vm) {
-    vm->t_nil = lk_object_alloc(vm->t_object);
-    vm->t_bool = lk_object_alloc(vm->t_object);
-    vm->t_true = lk_object_alloc(vm->t_bool);
-    vm->t_false = lk_object_alloc(vm->t_bool);
+    vm->t_nil = lk_obj_alloc(vm->t_obj);
+    vm->t_bool = lk_obj_alloc(vm->t_obj);
+    vm->t_true = lk_obj_alloc(vm->t_bool);
+    vm->t_false = lk_obj_alloc(vm->t_bool);
 }
 
 /* ext map - funcs */

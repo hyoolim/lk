@@ -2,15 +2,15 @@
 #define LK_TYPES_H
 #include "base/common.h"
 #include "base/darray.h"
-#include "base/number.h"
+#include "base/num.h"
 #include "base/qphash.h"
 
 /* foward decl of all types */
-typedef struct lk_object lk_bool_t;
+typedef struct lk_obj lk_bool_t;
 typedef struct lk_char lk_char_t;
 typedef struct lk_charset lk_charset_t;
 typedef struct lk_env lk_env_t;
-typedef struct lk_error lk_error_t;
+typedef struct lk_err lk_err_t;
 typedef struct lk_file lk_file_t;
 typedef struct lk_folder lk_folder_t;
 typedef struct lk_func lk_func_t;
@@ -23,24 +23,24 @@ typedef struct lk_instr lk_instr_t;
 typedef struct lk_library lk_library_t;
 typedef struct lk_seq lk_list_t;
 typedef struct lk_map lk_map_t;
-typedef struct lk_number lk_number_t;
-typedef struct lk_object lk_object_t;
+typedef struct lk_num lk_num_t;
+typedef struct lk_obj lk_obj_t;
 typedef struct lk_parser lk_parser_t;
 typedef struct lk_prec lk_prec_t;
-typedef struct lk_random lk_random_t;
+typedef struct lk_rand lk_rand_t;
 typedef struct lk_scope lk_scope_t;
 typedef struct lk_seq lk_seq_t;
 typedef struct lk_socket lk_socket_t;
 typedef struct lk_ipaddr lk_ipaddr_t;
-typedef struct lk_seq lk_string_t;
-typedef struct lk_vector lk_vector_t;
+typedef struct lk_seq lk_str_t;
+typedef struct lk_vec lk_vec_t;
 typedef struct lk_vm lk_vm_t;
 
 /* common data for all lk objs */
-typedef void lk_tagallocfunc_t(lk_object_t *self, lk_object_t *parent);
-#define LK_OBJ_DEFMARKFUNC(name) void name(lk_object_t *self, void (*mark)(lk_object_t *self))
+typedef void lk_tagallocfunc_t(lk_obj_t *self, lk_obj_t *parent);
+#define LK_OBJ_DEFMARKFUNC(name) void name(lk_obj_t *self, void (*mark)(lk_obj_t *self))
 typedef LK_OBJ_DEFMARKFUNC(lk_tagmarkfunc_t);
-typedef void lk_tagfreefunc_t(lk_object_t *self);
+typedef void lk_tagfreefunc_t(lk_obj_t *self);
 struct lk_tag {
     int                refc;
     lk_vm_t           *vm;
@@ -50,17 +50,17 @@ struct lk_tag {
     lk_tagfreefunc_t  *freefunc;
 };
 struct lk_objGroup {
-    lk_object_t *first;
-    lk_object_t *last;
+    lk_obj_t *first;
+    lk_obj_t *last;
 };
 struct lk_common {
-    lk_object_t            *parent;
+    lk_obj_t            *parent;
     darray_t              *ancestors;
     qphash_t               *slots;
     struct lk_tag          *tag;
     struct {
-        lk_object_t        *prev;
-        lk_object_t        *next;
+        lk_obj_t        *prev;
+        lk_obj_t        *next;
         struct lk_objGroup *objgroup;
         uint8_t             isref;
     }                       mark;
@@ -68,50 +68,50 @@ struct lk_common {
 
 /* used by ext - can't be in ext.h due to bootstrapping issues */
 typedef void lk_libraryinitfunc_t(lk_vm_t *vm);
-typedef void lk_cfunc_lk_t(lk_object_t *self, lk_scope_t *local);
-typedef lk_object_t *lk_cfunc_r0_t(lk_object_t *self);
-typedef lk_object_t *lk_cfunc_r1_t(lk_object_t *self, lk_object_t *a0type);
-typedef lk_object_t *lk_cfunc_r2_t(lk_object_t *self, lk_object_t *a0type, lk_object_t *a1type);
-typedef lk_object_t *lk_cfunc_r3_t(lk_object_t *self, lk_object_t *a0type, lk_object_t *a1type, lk_object_t *a2type);
-typedef void lk_cfunc_v0_t(lk_object_t *self);
-typedef void lk_cfunc_v1_t(lk_object_t *self, lk_object_t *a0type);
-typedef void lk_cfunc_v2_t(lk_object_t *self, lk_object_t *a0type, lk_object_t *a1type);
-typedef void lk_cfunc_v3_t(lk_object_t *self, lk_object_t *a0type, lk_object_t *a1type, lk_object_t *a2type);
-typedef void lk_cfuncfunc_t(lk_object_t *self, lk_scope_t *local);
+typedef void lk_cfunc_lk_t(lk_obj_t *self, lk_scope_t *local);
+typedef lk_obj_t *lk_cfunc_r0_t(lk_obj_t *self);
+typedef lk_obj_t *lk_cfunc_r1_t(lk_obj_t *self, lk_obj_t *a0type);
+typedef lk_obj_t *lk_cfunc_r2_t(lk_obj_t *self, lk_obj_t *a0type, lk_obj_t *a1type);
+typedef lk_obj_t *lk_cfunc_r3_t(lk_obj_t *self, lk_obj_t *a0type, lk_obj_t *a1type, lk_obj_t *a2type);
+typedef void lk_cfunc_v0_t(lk_obj_t *self);
+typedef void lk_cfunc_v1_t(lk_obj_t *self, lk_obj_t *a0type);
+typedef void lk_cfunc_v2_t(lk_obj_t *self, lk_obj_t *a0type, lk_obj_t *a1type);
+typedef void lk_cfunc_v3_t(lk_obj_t *self, lk_obj_t *a0type, lk_obj_t *a1type, lk_obj_t *a2type);
+typedef void lk_cfuncfunc_t(lk_obj_t *self, lk_scope_t *local);
 
-#define LK_BOOL(object) ((lk_bool_t *)(object))
-#define LK_CHAR(object) ((lk_char_t *)(object))
-#define LK_CHARSET(object) ((lk_charset_t *)(object))
-#define LK_ENV(object) ((lk_env_t *)(object))
-#define LK_ERROR(object) ((lk_error_t *)(object))
-#define LK_FILE(object) ((lk_file_t *)(object))
-#define LK_FOLDER(object) ((lk_folder_t *)(object))
-#define LK_FUNC(object) ((lk_func_t *)(object))
+#define LK_BOOL(obj) ((lk_bool_t *)(obj))
+#define LK_CHAR(obj) ((lk_char_t *)(obj))
+#define LK_CHARSET(obj) ((lk_charset_t *)(obj))
+#define LK_ENV(obj) ((lk_env_t *)(obj))
+#define LK_ERROR(obj) ((lk_err_t *)(obj))
+#define LK_FILE(obj) ((lk_file_t *)(obj))
+#define LK_FOLDER(obj) ((lk_folder_t *)(obj))
+#define LK_FUNC(obj) ((lk_func_t *)(obj))
 #define LK_FUNCORUNNING  (1 << 0)
 #define LK_FUNCOASSIGNED (1 << 1)
-#define LK_CFUNC(object) ((lk_cfunc_t *)(object))
-#define LK_GFUNC(object) ((lk_gfunc_t *)(object))
-#define LK_KFUNC(object) ((lk_kfunc_t *)(object))
-#define LK_SIG(object) ((lk_sig_t *)(object))
-#define LK_GC(object) ((lk_gc_t *)(object))
-#define LK_INSTR(object) ((lk_instr_t *)(object))
+#define LK_CFUNC(obj) ((lk_cfunc_t *)(obj))
+#define LK_GFUNC(obj) ((lk_gfunc_t *)(obj))
+#define LK_KFUNC(obj) ((lk_kfunc_t *)(obj))
+#define LK_SIG(obj) ((lk_sig_t *)(obj))
+#define LK_GC(obj) ((lk_gc_t *)(obj))
+#define LK_INSTR(obj) ((lk_instr_t *)(obj))
 #define LK_INSTROHASMSGARGS (1 << 0)
 #define LK_INSTROEND        (1 << 1)
-#define LK_EXT(object) ((lk_library_t *)(object))
-#define LK_LIST(object) ((lk_list_t *)(object))
-#define LK_DARRAY(object) ((lk_list_t *)(object))
-#define LK_MAP(object) ((lk_map_t *)(object))
-#define LK_NUMBER(object) ((lk_number_t *)(object))
-#define LK_OBJ(object) ((lk_object_t *)(object))
-#define LK_PARSER(object) ((lk_parser_t *)(object))
-#define LK_PREC(object) ((lk_prec_t *)(object))
-#define LK_RANDOM(object) ((lk_random_t *)(object))
+#define LK_EXT(obj) ((lk_library_t *)(obj))
+#define LK_LIST(obj) ((lk_list_t *)(obj))
+#define LK_DARRAY(obj) ((lk_list_t *)(obj))
+#define LK_MAP(obj) ((lk_map_t *)(obj))
+#define LK_NUMBER(obj) ((lk_num_t *)(obj))
+#define LK_OBJ(obj) ((lk_obj_t *)(obj))
+#define LK_PARSER(obj) ((lk_parser_t *)(obj))
+#define LK_PREC(obj) ((lk_prec_t *)(obj))
+#define LK_RANDOM(obj) ((lk_rand_t *)(obj))
 #define LK_RANDOM_N 624
-#define LK_SCOPE(object) ((lk_scope_t *)(object))
-#define LK_SEQ(object) ((lk_seq_t *)(object))
-#define LK_SOCKET(object) ((lk_socket_t *)(object))
-#define LK_IPADDR(object) ((lk_ipaddr_t *)(object))
-#define LK_STRING(object) ((lk_string_t *)(object))
-#define LK_VECTOR(object) ((lk_vector_t *)(object))
-#define LK_VM(object) ((object)->o.tag->vm)
+#define LK_SCOPE(obj) ((lk_scope_t *)(obj))
+#define LK_SEQ(obj) ((lk_seq_t *)(obj))
+#define LK_SOCKET(obj) ((lk_socket_t *)(obj))
+#define LK_IPADDR(obj) ((lk_ipaddr_t *)(obj))
+#define LK_STRING(obj) ((lk_str_t *)(obj))
+#define LK_VECTOR(obj) ((lk_vec_t *)(obj))
+#define LK_VM(obj) ((obj)->o.tag->vm)
 #endif

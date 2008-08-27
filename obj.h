@@ -3,7 +3,7 @@
 #include "types.h"
 
 /* type */
-struct lk_object {
+struct lk_obj {
     struct lk_common o;
 };
 enum lk_slottype {
@@ -16,9 +16,9 @@ enum lk_slotoption {
 };
 struct lk_slot {
     enum lk_slottype  typeandoption;
-    lk_object_t      *check;
+    lk_obj_t      *check;
     union {
-        lk_object_t  *lkobj;
+        lk_obj_t  *lkobj;
         size_t        coffset;
     }                 value;
 };
@@ -31,55 +31,55 @@ struct lk_slot {
 #define LK_SLOT_CHECKOPTION(self, option) ((self)->typeandoption & (option))
 
 /* ext map */
-void lk_object_typeinit(lk_vm_t *vm);
-void lk_object_libinit(lk_vm_t *vm);
+void lk_obj_typeinit(lk_vm_t *vm);
+void lk_obj_libinit(lk_vm_t *vm);
 
 /* new */
 #define LK_OBJ_MAXRECYCLED 1000
-lk_object_t *lk_object_allocWithSize(lk_object_t *parent, size_t s);
-lk_object_t *lk_object_alloc(lk_object_t *parent);
-lk_object_t *lk_object_clone(lk_object_t *self);
-void lk_object_justfree(lk_object_t *self);
-void lk_object_free(lk_object_t *self);
+lk_obj_t *lk_obj_allocWithSize(lk_obj_t *parent, size_t s);
+lk_obj_t *lk_obj_alloc(lk_obj_t *parent);
+lk_obj_t *lk_obj_clone(lk_obj_t *self);
+void lk_obj_justfree(lk_obj_t *self);
+void lk_obj_free(lk_obj_t *self);
 
 /* update - tag */
 #define LK_OBJ_DEFTAGSETTER(t, field) \
-void lk_object_set ## field(lk_object_t *self, t field)
+void lk_obj_set ## field(lk_obj_t *self, t field)
 LK_OBJ_DEFTAGSETTER(lk_tagallocfunc_t *, allocfunc);
 LK_OBJ_DEFTAGSETTER(lk_tagmarkfunc_t *, markfunc);
 LK_OBJ_DEFTAGSETTER(lk_tagfreefunc_t *, freefunc);
 
 /* update */
-void lk_object_extend(lk_object_t *self, lk_object_t *parent);
-struct lk_slot *lk_object_setslot(lk_object_t *self, lk_object_t *k, lk_object_t *check, lk_object_t *v);
-struct lk_slot *lk_object_setslotbycstr(lk_object_t *self, const char *k, lk_object_t *check, lk_object_t *v);
-void lk_object_setvalueonslot(lk_object_t *self, struct lk_slot *slot, lk_object_t *v);
-int lk_object_calcancestors(lk_object_t *self);
-void lk_object_set_cfunc_lk(lk_object_t *self, const char *name, lk_cfunc_lk_t *cfunc, ...);
-void lk_object_set_cfunc_creturn(lk_object_t *self, const char *name, ...);
-void lk_object_set_cfunc_cvoid(lk_object_t *self, const char *name, ...);
+void lk_obj_extend(lk_obj_t *self, lk_obj_t *parent);
+struct lk_slot *lk_obj_setslot(lk_obj_t *self, lk_obj_t *k, lk_obj_t *check, lk_obj_t *v);
+struct lk_slot *lk_obj_setslotbycstr(lk_obj_t *self, const char *k, lk_obj_t *check, lk_obj_t *v);
+void lk_obj_setvalueonslot(lk_obj_t *self, struct lk_slot *slot, lk_obj_t *v);
+int lk_obj_calcancestors(lk_obj_t *self);
+void lk_obj_set_cfunc_lk(lk_obj_t *self, const char *name, lk_cfunc_lk_t *cfunc, ...);
+void lk_obj_set_cfunc_creturn(lk_obj_t *self, const char *name, ...);
+void lk_obj_set_cfunc_cvoid(lk_obj_t *self, const char *name, ...);
 
 /* info */
-int lk_object_isa(lk_object_t *self, lk_object_t *t);
-struct lk_slot *lk_object_getslot(lk_object_t *self, lk_object_t *k);
-struct lk_slot *lk_object_getslotfromany(lk_object_t *self, lk_object_t *k);
-lk_object_t *lk_object_getvaluefromslot(lk_object_t *self,
+int lk_obj_isa(lk_obj_t *self, lk_obj_t *t);
+struct lk_slot *lk_obj_getslot(lk_obj_t *self, lk_obj_t *k);
+struct lk_slot *lk_obj_getslotfromany(lk_obj_t *self, lk_obj_t *k);
+lk_obj_t *lk_obj_getvaluefromslot(lk_obj_t *self,
                                         struct lk_slot *slot);
-int lk_object_hashcode(const void *k, int cap);
-int lk_object_keycmp(const void *self, const void *other);
+int lk_obj_hashcode(const void *k, int cap);
+int lk_obj_keycmp(const void *self, const void *other);
 #define LK_OBJ_ISTYPE(self, t) \
 (  (self) == (t) \
-|| (t) == LK_VM(self)->t_object \
-/* || (  (t)->o.tag != LK_VM(self)->t_object->o.tag \
+|| (t) == LK_VM(self)->t_obj \
+/* || (  (t)->o.tag != LK_VM(self)->t_obj->o.tag \
    && (self)->o.tag == (t)->o.tag \
    ) */ \
-|| lk_object_isa((self), (t)) \
+|| lk_obj_isa((self), (t)) \
 )
 /*
 #define LK_OBJ_ISA(self, t) ((self) == (t) ? 1 : \
 LK_OBJ_HASONEPARENT((self)->o.parents) && \
 LK_OBJ_ONEPARENT((self)->o.parents) == (t) ? 2 : \
-lk_object_isa((self), (t)))
+lk_obj_isa((self), (t)))
 #define LK_OBJ_HASONEPARENT(pars) ((ptrdiff_t)(pars) & 1)
 #define LK_OBJ_ONEPARENT(pars) LK_OBJ((ptrdiff_t)(pars) & ~1)
 #define LK_OBJ_PROTO(self) LK_OBJ_HASONEPARENT((self)->o.parents) \
@@ -95,7 +95,7 @@ lk_object_isa((self), (t)))
 #define LK_OBJ_ISA(self, t) ( \
     (self) == (t) ? 1 : \
     !LK_OBJ_HASPARENTS(self) && (self)->o.parent == (t) ? 2 : \
-    lk_object_isa((self), (t)) \
+    lk_obj_isa((self), (t)) \
 )
 #define LK_OBJ_ISCFUNC(self) ( \
     (self)->o.tag->allocfunc == LK_VM(self)->t_cfunc->o.tag->allocfunc)

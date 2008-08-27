@@ -1,14 +1,14 @@
-#include "number.h"
+#include "num.h"
 
 /* new. */
-numbertype_t number_new(int is_big, darray_t *str, numberifn_t *res) {
+numtype_t num_new(int is_big, darray_t *str, numifn_t *res) {
     static char underscore = '_' - '0', dot = '.' - '0';
     char digit = '\0';
     int i;
     double f, div = 1;
     int idx = 0, len = LIST_COUNT(str);
 
-    /* try the number as native int. */
+    /* try the num as native int. */
     i = 0;
     for(; idx < len; idx ++) {
         digit = darray_getuchar(str, idx) - '0';
@@ -22,7 +22,7 @@ numbertype_t number_new(int is_big, darray_t *str, numberifn_t *res) {
         return NUMBERTYPE_INT;
     }
 
-    /* try the number as native float/double. */
+    /* try the num as native float/double. */
     if(is_big) goto bignum;
     f = i;
     if(digit == dot) goto point;
@@ -49,10 +49,10 @@ numbertype_t number_new(int is_big, darray_t *str, numberifn_t *res) {
         return NUMBERTYPE_FLOAT;
     }
 
-    /* try the number with supplied bignum lib. */
+    /* try the num with supplied bignum lib. */
     bignum:
-    NYI("No supported big number library.\n");
+    NYI("No supported big num library.\n");
 }
-void number_free(number_t *self) {
-    memory_free(self);
+void num_free(num_t *self) {
+    mem_free(self);
 }

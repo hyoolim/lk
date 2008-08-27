@@ -36,7 +36,7 @@ test: tmp/lk_mini
 
 ## calculated dependencies
 -include $(depends)
--include tmp/configData
+-include tmp/conf.dat
 
 ## make sure tmp folder for build output exists
 tmp/init:
@@ -52,9 +52,9 @@ tmp/%.d: %.c
 	$(COMPILER) -MM -MT tmp/$(patsubst %.c,%.d,$<) -MT tmp/$(patsubst %.c,%.o,$<) -MF $@ $<
 tmp/lk_mini: $(objects) tmp/lk_mini.o
 	$(COMPILER) $(LINKER_FLAGS) -o tmp/lk_mini $(objects) tmp/lk_mini.o
-tmp/configData: tmp/lk_mini config.lk
-	if [ ! -e tmp/configData ]; then tmp/lk_mini lib/lk.lk config.lk tmp/configData; fi;
-tmp/lk.o: lk.c tmp/configData
+tmp/conf.dat: tmp/lk_mini conf.lk
+	if [ ! -e tmp/conf.dat ]; then tmp/lk_mini lib/lk.lk conf.lk tmp/conf.dat; fi;
+tmp/lk.o: lk.c tmp/conf.dat
 	$(COMPILER) $(COMPILER_FLAGS) -c lk.c -o tmp/lk.o -DMF_PREFIX='$(PREFIX)' -DMF_BINDIR='$(BINDIR)' -DMF_LIBDIR='$(LIBDIR)'
 tmp/lk: tmp/lk_mini tmp/lk.o
 	$(COMPILER) $(LINKER_FLAGS) -o tmp/lk $(objects) tmp/lk.o

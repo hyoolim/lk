@@ -3,15 +3,15 @@
 #include "types.h"
 
 /* type */
-struct lk_number {
+struct lk_num {
     struct lk_common o;
     double           data;
 };
 
 /* ext map */
-void lk_number_typeinit(lk_vm_t *vm);
-void lk_number_libinit(lk_vm_t *vm);
+void lk_num_typeinit(lk_vm_t *vm);
+void lk_num_libinit(lk_vm_t *vm);
 
 /* new */
-lk_number_t *lk_number_new(lk_vm_t *vm, double number);
+lk_num_t *lk_num_new(lk_vm_t *vm, double num);
 #endif

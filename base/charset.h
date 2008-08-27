@@ -37,7 +37,7 @@ int charset_size(const charset_t *self);
 
 /* delayed due to cross-dependency */
 #include "darray.h"
-void charset_add_darray(charset_t *self, darray_t *string);
-void charset_subtract_darray(charset_t *self, darray_t *string);
-darray_t *charset_tostring(const charset_t *self);
+void charset_add_darray(charset_t *self, darray_t *str);
+void charset_subtract_darray(charset_t *self, darray_t *str);
+darray_t *charset_tostr(const charset_t *self);
 #endif

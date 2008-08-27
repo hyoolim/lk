@@ -11,7 +11,7 @@ struct lk_func {
         int          maxargc;
         darray_t   *sigs;
         lk_sig_t    *rest;
-        lk_string_t *doc;
+        lk_str_t *doc;
         uint8_t      opts;
     }                cf;
 };
@@ -48,8 +48,8 @@ struct lk_kfunc {
 };
 struct lk_sig {
     struct lk_common o;
-    lk_string_t      *name;
-    lk_object_t      *check;
+    lk_str_t      *name;
+    lk_obj_t      *check;
     uint8_t           isself;
 };
 
@@ -61,10 +61,10 @@ void lk_func_libinit(lk_vm_t *vm);
 lk_cfunc_t *lk_cfunc_new(lk_vm_t * vm, lk_cfuncfunc_t *func, int minargc, int maxargc);
 lk_kfunc_t *lk_kfunc_new(lk_vm_t *vm, lk_scope_t *scope, lk_instr_t *first);
 lk_gfunc_t *lk_gfunc_new(lk_vm_t *vm);
-lk_sig_t *lk_sig_new(lk_vm_t *vm, lk_string_t *name, lk_object_t *type);
+lk_sig_t *lk_sig_new(lk_vm_t *vm, lk_str_t *name, lk_obj_t *type);
 
 /* update */
 lk_gfunc_t *lk_func_combine(lk_func_t *self, lk_func_t *other);
-lk_func_t *lk_func_match(lk_func_t *self, lk_scope_t *args, lk_object_t *recv);
+lk_func_t *lk_func_match(lk_func_t *self, lk_scope_t *args, lk_obj_t *recv);
 void lk_kfunc_updatesig(lk_kfunc_t *self);
 #endif

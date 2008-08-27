@@ -3,7 +3,7 @@
 
 /* new */
 charset_t *charset_alloc(void) {
-    return memory_alloc(sizeof(charset_t));
+    return mem_alloc(sizeof(charset_t));
 }
 charset_t *charset_clone(charset_t *self) {
     charset_t *clone = charset_alloc();
@@ -12,23 +12,23 @@ charset_t *charset_clone(charset_t *self) {
 }
 void charset_copy(charset_t *self, charset_t *from) {
     memcpy(self, from, sizeof(charset_t));
-    self->data = memory_alloc(sizeof(uint32_t) * self->cap);
+    self->data = mem_alloc(sizeof(uint32_t) * self->cap);
     memcpy(CHARSET_DATA(self), CHARSET_DATA(from), sizeof(uint32_t) * self->cap);
     if(CHARSET_ISINVERTED(from)) charset_invert(self);
 }
 void charset_fin(charset_t *self) {
-    memory_free(CHARSET_DATA(self));
+    mem_free(CHARSET_DATA(self));
 }
 void charset_free(charset_t *self) {
     charset_fin(self);
-    memory_free(self);
+    mem_free(self);
 }
 void charset_init(charset_t *self) {
     self->min = UINT32_MAX;
     self->max = 0;
     self->cap = CHARSET_DEFAULTCAP;
     self->size = 0;
-    self->data = memory_alloc(sizeof(uint32_t) * self->cap);
+    self->data = mem_alloc(sizeof(uint32_t) * self->cap);
 }
 charset_t *charset_new(void) {
     charset_t *self = charset_alloc();
@@ -43,7 +43,7 @@ static void resize(charset_t *self) {
     while(self->size >= newcap) newcap *= 2;
     if(newcap > self->cap) {
         self->cap = newcap;
-        self->data = memory_resize(CHARSET_DATA(self), sizeof(uint32_t) * newcap);
+        self->data = mem_resize(CHARSET_DATA(self), sizeof(uint32_t) * newcap);
         if(isinverted) charset_invert(self);
     }
 }
@@ -192,15 +192,15 @@ void charset_add_charset(charset_t *self, charset_t *other) {
     }
 }
 
-/* add all the chars in the specified string to this charset */
-void charset_add_darray(charset_t *self, darray_t *string) {
-    int c = string->size;
+/* add all the chars in the specified str to this charset */
+void charset_add_darray(charset_t *self, darray_t *str) {
+    int c = str->size;
     if(c > 0) {
         int i = 0;
-        uint32_t v = darray_getuchar(string, i);
+        uint32_t v = darray_getuchar(str, i);
         while(i < c) {
-            v = darray_getuchar(string, i ++);
-            (CHARSET_ISINVERTED(self) ? charset_remove : charset_insert)(self, v, i < c && darray_getuchar(string, i) == '-' ? darray_getuchar(string, (i += 2) - 1) : v);
+            v = darray_getuchar(str, i ++);
+            (CHARSET_ISINVERTED(self) ? charset_remove : charset_insert)(self, v, i < c && darray_getuchar(str, i) == '-' ? darray_getuchar(str, (i += 2) - 1) : v);
         }
     }
 }
@@ -233,15 +233,15 @@ void charset_subtract_charset(charset_t *self, charset_t *other) {
     }
 }
 
-/* charset_remove all the chars in the specified string from this charset */
-void charset_subtract_darray(charset_t *self, darray_t *string) {
-    int c = string->size;
+/* charset_remove all the chars in the specified str from this charset */
+void charset_subtract_darray(charset_t *self, darray_t *str) {
+    int c = str->size;
     if(c > 0) {
         int i = 0;
-        uint32_t v = darray_getuchar(string, i);
+        uint32_t v = darray_getuchar(str, i);
         while(i < c) {
-            v = darray_getuchar(string, i ++);
-            (CHARSET_ISINVERTED(self) ? charset_insert : charset_remove)(self, v, i < c && darray_getuchar(string, i) == '-' ? darray_getuchar(string, (i += 2) - 1) : v);
+            v = darray_getuchar(str, i ++);
+            (CHARSET_ISINVERTED(self) ? charset_insert : charset_remove)(self, v, i < c && darray_getuchar(str, i) == '-' ? darray_getuchar(str, (i += 2) - 1) : v);
         }
     }
 }
@@ -295,21 +295,21 @@ int charset_size(const charset_t *self) {
     return total;
 }
 
-/* string representation of the string */
-darray_t *charset_tostring(const charset_t *self) {
-    darray_t *string = darray_alloc_string();
+/* str representation of the str */
+darray_t *charset_tostr(const charset_t *self) {
+    darray_t *str = darray_alloc_str();
     uint32_t from, to;
     uint32_t *curr = CHARSET_DATA(self), *last = curr + self->size;
-    if(CHARSET_ISINVERTED(self)) darray_setuchar(string, string->size, '^');
+    if(CHARSET_ISINVERTED(self)) darray_setuchar(str, str->size, '^');
     for(; curr < last; ) {
         from = *curr ++;
         to = *curr ++;
-        if(from == to) darray_setuchar(string, string->size, from);
+        if(from == to) darray_setuchar(str, str->size, from);
         else {
-            darray_setuchar(string, string->size, from);
-            darray_setuchar(string, string->size, '-');
-            darray_setuchar(string, string->size, to);
+            darray_setuchar(str, str->size, from);
+            darray_setuchar(str, str->size, '-');
+            darray_setuchar(str, str->size, to);
         }
     }
-    return string;
+    return str;
 }

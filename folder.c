@@ -9,19 +9,19 @@ static LK_OBJ_DEFMARKFUNC(mark_folder) {
     mark(LK_OBJ(LK_FOLDER(self)->path));
 }
 void lk_folder_typeinit(lk_vm_t *vm) {
-    vm->t_folder = lk_object_allocWithSize(vm->t_object, sizeof(lk_folder_t));
-    lk_object_setmarkfunc(vm->t_folder, mark_folder);
+    vm->t_folder = lk_obj_allocWithSize(vm->t_obj, sizeof(lk_folder_t));
+    lk_obj_setmarkfunc(vm->t_folder, mark_folder);
 }
 
 /* new */
-void lk_folder_init(lk_object_t *self, lk_string_t *path) {
+void lk_folder_init(lk_obj_t *self, lk_str_t *path) {
     LK_FOLDER(self)->path = LK_STRING(path);
 }
 
 /* info */
-lk_list_t *lk_folder_items(lk_object_t *self) {
+lk_list_t *lk_folder_items(lk_obj_t *self) {
     lk_list_t *items = lk_list_new(VM);
-    lk_string_t *fullPath = lk_string_new(VM);
+    lk_str_t *fullPath = lk_str_new(VM);
     DIR *dir = opendir(CSTRING(LK_FOLDER(self)->path));
     struct dirent *dirEntry;
     while(dir != NULL) {
@@ -34,7 +34,7 @@ lk_list_t *lk_folder_items(lk_object_t *self) {
             darray_concat(DARRAY(fullPath), DARRAY(VM->str_filesep));
             darray_concat(DARRAY(fullPath), filename);
             darray_pushptr(DARRAY(items), fullPath);
-            fullPath = lk_string_new(VM);
+            fullPath = lk_str_new(VM);
             darray_free(filename);
         }
     }
@@ -47,12 +47,12 @@ lk_list_t *lk_folder_items(lk_object_t *self) {
 
 /* bind all c funcs to lk equiv */
 void lk_folder_libinit(lk_vm_t *vm) {
-    lk_object_t *folder = vm->t_folder, *string = vm->t_string;
+    lk_obj_t *folder = vm->t_folder, *str = vm->t_str;
     lk_lib_setGlobal("Folder", folder);
 
     /* new */
-    lk_object_set_cfunc_cvoid(folder, "init!", lk_folder_init, string, NULL);
+    lk_obj_set_cfunc_cvoid(folder, "init!", lk_folder_init, str, NULL);
 
     /* info */
-    lk_object_set_cfunc_creturn(folder, "items", lk_folder_items, NULL);
+    lk_obj_set_cfunc_creturn(folder, "items", lk_folder_items, NULL);
 }

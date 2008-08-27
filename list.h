@@ -12,12 +12,12 @@ lk_list_t *lk_list_newFromDArray(lk_vm_t *vm, darray_t *from);
 lk_list_t *lk_list_newfromargv(lk_vm_t *vm, int argc, const char **argv);
 
 /* update */
-void lk_list_insert_number_object(lk_list_t *self, lk_number_t *index, lk_object_t *value);
-void lk_list_remove_number(lk_list_t *self, lk_number_t *index);
-void lk_list_set_number_object(lk_list_t *self, lk_number_t *index, lk_object_t *value);
-void lk_list_set_number_number_list(lk_list_t *self, lk_number_t *from, lk_number_t *to, lk_list_t *list);
+void lk_list_insert_num_obj(lk_list_t *self, lk_num_t *index, lk_obj_t *value);
+void lk_list_remove_num(lk_list_t *self, lk_num_t *index);
+void lk_list_set_num_obj(lk_list_t *self, lk_num_t *index, lk_obj_t *value);
+void lk_list_set_num_num_list(lk_list_t *self, lk_num_t *from, lk_num_t *to, lk_list_t *list);
 
 /* info */
-lk_object_t *lk_list_at_number(lk_list_t *self, lk_number_t *index);
-void lk_list_flatten(lk_object_t *self, lk_scope_t *local);
+lk_obj_t *lk_list_at_num(lk_list_t *self, lk_num_t *index);
+void lk_list_flatten(lk_obj_t *self, lk_scope_t *local);
 #endif

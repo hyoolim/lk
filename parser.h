@@ -5,8 +5,8 @@
 /* type */
 struct lk_parser {
     struct lk_common o;
-    const lk_string_t *text;
-    const char        *error;
+    const lk_str_t *text;
+    const char        *err;
     qphash_t          *binaryops;
     qphash_t          *precs;
     darray_t         *tokentypes;
@@ -38,6 +38,6 @@ void lk_parser_libinit(lk_vm_t *vm);
 lk_parser_t *lk_parser_new(lk_vm_t *vm);
 
 /* eval */
-lk_instr_t *lk_parser_parse(lk_parser_t *self, const lk_string_t *text);
+lk_instr_t *lk_parser_parse(lk_parser_t *self, const lk_str_t *text);
 lk_instr_t *lk_parser_getmore(lk_parser_t *self);
 #endif

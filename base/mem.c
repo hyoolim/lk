@@ -1,4 +1,4 @@
-#include "memory.h"
+#include "mem.h"
 
 /* new */
 static int allocsize = 0;
@@ -6,7 +6,7 @@ static size_t alloctotal = 0;
 static size_t allocused = 0;
 static size_t allocpeak = 0;
 static void *recycled[MEMORY_MAXRECYCLED];
-void *memory_alloc(size_t size) {
+void *mem_alloc(size_t size) {
     allocsize ++;
     if(size < MEMORY_MAXRECYCLED && recycled[size] != NULL) {
         void *next = *(void **)recycled[size];
@@ -16,7 +16,7 @@ void *memory_alloc(size_t size) {
         return new;
     } else {
         size_t *new = calloc(1, size + sizeof(size_t));
-        if(new == NULL) ERR("Unable to allocate memory!");
+        if(new == NULL) ERR("Unable to allocate mem!");
         *new = size;
         alloctotal += size;
         allocused += size;
@@ -24,7 +24,7 @@ void *memory_alloc(size_t size) {
         return new + 1;
     }
 }
-void memory_free(void *ptr) {
+void mem_free(void *ptr) {
     if(ptr != NULL) {
         int size = *((size_t *)ptr - 1);
         allocsize --;
@@ -38,7 +38,7 @@ void memory_free(void *ptr) {
         }
     }
 }
-void memory_freerecycled(void) {
+void mem_freerecycled(void) {
     int i;
     void *curr;
     for(i = 0; i < MEMORY_MAXRECYCLED; i ++) {
@@ -53,12 +53,12 @@ void memory_freerecycled(void) {
         }
     }
 }
-void *memory_resize(void *old, size_t size) {
-    if(old == NULL) return memory_alloc(size);
+void *mem_resize(void *old, size_t size) {
+    if(old == NULL) return mem_alloc(size);
     else {
         int old_size = *(size_t *)(old = (size_t *)old - 1);
         size_t *new = realloc(old, size + sizeof(size_t));
-        if(new == NULL) ERR("Unable to resize memory!");
+        if(new == NULL) ERR("Unable to resize mem!");
         *new = size;
         alloctotal += size - old_size;
         allocused += size - old_size;
@@ -68,15 +68,15 @@ void *memory_resize(void *old, size_t size) {
 }
 
 /* info */
-int memory_allocsize(void) {
+int mem_allocsize(void) {
     return allocsize;
 }
-size_t memory_alloctotal(void) {
+size_t mem_alloctotal(void) {
     return alloctotal;
 }
-size_t memory_allocused(void) {
+size_t mem_allocused(void) {
     return allocused;
 }
-size_t memory_allocpeak(void) {
+size_t mem_allocpeak(void) {
     return allocpeak;
 }

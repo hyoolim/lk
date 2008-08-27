@@ -14,7 +14,7 @@ static struct setdata *setdata_alloc(int ivlen, int ci,
                                         setkeycmpfunc_t *cmpfunc) {
     struct setdata *self;
     int c = primes[ci];
-    self = memory_alloc(sizeof(struct setdata)
+    self = mem_alloc(sizeof(struct setdata)
                          - sizeof(setitem_t)
                          + (sizeof(setitem_t) + ivlen) * c);
     self->ci = ci;
@@ -27,10 +27,10 @@ static struct setdata *setdata_alloc(int ivlen, int ci,
     return self;
 }
 
-/* simple ref sizeing memory management for clones */
+/* simple ref sizeing mem management for clones */
 static void setdata_free(struct setdata *self) {
     if(self->refc > 0) self->refc --;
-    if(self->refc < 1) memory_free(self);
+    if(self->refc < 1) mem_free(self);
 }
 
 /* create new set data and repopulate */
@@ -64,12 +64,12 @@ static void qphash_resize(qphash_t *self, int ci) {
 /* for set construction/deconstruction */
 qphash_t *qphash_alloc(int ivlen, sethashfunc_t *hashfunc,
                        setkeycmpfunc_t *cmpfunc) {
-    qphash_t *self = memory_alloc(sizeof(qphash_t));
+    qphash_t *self = mem_alloc(sizeof(qphash_t));
     qphash_init(self, ivlen, hashfunc, cmpfunc);
     return self;
 }
 qphash_t *qphash_clone(qphash_t *self) {
-    qphash_t *clone = memory_alloc(sizeof(qphash_t));
+    qphash_t *clone = mem_alloc(sizeof(qphash_t));
     qphash_copy(clone, self);
     return clone;
 }
@@ -81,7 +81,7 @@ void qphash_fin(qphash_t *self) {
 }
 void qphash_free(qphash_t *self) {
     qphash_fin(self);
-    memory_free(self);
+    mem_free(self);
 }
 void qphash_init(qphash_t *self, int ivlen, sethashfunc_t *hashfunc,
                  setkeycmpfunc_t *cmpfunc) {

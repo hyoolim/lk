@@ -1,6 +1,6 @@
 #include "socket.h"
 #include "ext.h"
-#include "number.h"
+#include "num.h"
 #include "list.h"
 #define IPADDR (LK_IPADDR(self))
 #define SOCKET (LK_SOCKET(self))
@@ -10,16 +10,16 @@ FILE *fdopen(int fildes, const char *mode);
 int inet_aton(const char *cp, struct in_addr *pin);
 
 /* ext map - ip addr */
-static void alloc_ip_str(lk_object_t *self, lk_scope_t *local) {
+static void alloc_ip_str(lk_obj_t *self, lk_scope_t *local) {
     inet_aton(darray_toCString(DARRAY(ARG(0))), &IPADDR->addr);
     RETURN(self);
 }
-static void to_string_ip(lk_object_t *self, lk_scope_t *local) {
-    RETURN(lk_string_newFromCString(VM, inet_ntoa(IPADDR->addr)));
+static void to_str_ip(lk_obj_t *self, lk_scope_t *local) {
+    RETURN(lk_str_newFromCString(VM, inet_ntoa(IPADDR->addr)));
 }
 
 /* ext map - socket */
-static void alloc_sock(lk_object_t *self, lk_object_t *parent) {
+static void alloc_sock(lk_obj_t *self, lk_obj_t *parent) {
     int yes = 1;
     SOCKET->fd = socket(AF_INET, SOCK_STREAM, 0);
     SOCKET->in = fdopen(SOCKET->fd, "r");
@@ -30,20 +30,20 @@ static void alloc_sock(lk_object_t *self, lk_object_t *parent) {
         exit(1);
     }
 }
-static void free_sock(lk_object_t *self) {
+static void free_sock(lk_obj_t *self) {
     if(LK_SOCKET(self)->in != NULL) fclose(LK_SOCKET(self)->in);
     if(LK_SOCKET(self)->out != NULL) fclose(LK_SOCKET(self)->out);
 }
-static void acce_sock(lk_object_t *self, lk_scope_t *local) {
+static void acce_sock(lk_obj_t *self, lk_scope_t *local) {
     struct sockaddr remote;
     socklen_t len = sizeof(struct sockaddr);
-    lk_socket_t *conn = LK_SOCKET(lk_object_alloc(VM->t_socket));
+    lk_socket_t *conn = LK_SOCKET(lk_obj_alloc(VM->t_socket));
     conn->fd = accept(SOCKET->fd, &remote, &len);
     conn->in = fdopen(conn->fd, "r");
     conn->out = fdopen(conn->fd, "w");
     RETURN(conn);
 }
-static void bind_sock_ip_number(lk_object_t *self, lk_scope_t *local) {
+static void bind_sock_ip_num(lk_obj_t *self, lk_scope_t *local) {
     struct sockaddr_in my;
     my.sin_family = AF_INET;
     my.sin_port = htons((uint16_t)CNUMBER(ARG(1)));
@@ -55,7 +55,7 @@ static void bind_sock_ip_number(lk_object_t *self, lk_scope_t *local) {
     }
     RETURN(self);
 }
-static void connect_sock_ip_number(lk_object_t *self, lk_scope_t *local) {
+static void connect_sock_ip_num(lk_obj_t *self, lk_scope_t *local) {
     struct sockaddr_in remote;
     remote.sin_family = AF_INET;
     remote.sin_port = htons((uint16_t)CNUMBER(ARG(1)));
@@ -67,27 +67,27 @@ static void connect_sock_ip_number(lk_object_t *self, lk_scope_t *local) {
     }
     RETURN(self);
 }
-static void listen_sock(lk_object_t *self, lk_scope_t *local) {
+static void listen_sock(lk_obj_t *self, lk_scope_t *local) {
     if(listen(SOCKET->fd, 10) == -1) {
         lk_vm_raisecstr(VM, "Cannot listen");
     }
     RETURN(self);
 }
 void lk_socket_extinit(lk_vm_t *vm) {
-    lk_object_t *obj = vm->t_object, *str = vm->t_string, *number = vm->t_number;
-    lk_object_t *ip = lk_object_allocWithSize(obj, sizeof(lk_ipaddr_t));
-    lk_object_t *sock = lk_object_allocWithSize(obj, sizeof(lk_socket_t));
-    lk_object_setallocfunc(sock, alloc_sock);
-    lk_object_setfreefunc(sock, free_sock);
+    lk_obj_t *obj = vm->t_obj, *str = vm->t_str, *num = vm->t_num;
+    lk_obj_t *ip = lk_obj_allocWithSize(obj, sizeof(lk_ipaddr_t));
+    lk_obj_t *sock = lk_obj_allocWithSize(obj, sizeof(lk_socket_t));
+    lk_obj_setallocfunc(sock, alloc_sock);
+    lk_obj_setfreefunc(sock, free_sock);
     /* */
     lk_lib_setGlobal("IpAddress", ip);
-    lk_lib_setObject(ip, "ANY", lk_object_alloc(ip));
-    lk_object_set_cfunc_lk(ip, "init!", alloc_ip_str, str, NULL);
-    lk_object_set_cfunc_lk(ip, "toString", to_string_ip, NULL);
+    lk_lib_setObject(ip, "ANY", lk_obj_alloc(ip));
+    lk_obj_set_cfunc_lk(ip, "init!", alloc_ip_str, str, NULL);
+    lk_obj_set_cfunc_lk(ip, "toString", to_str_ip, NULL);
     /* */
     lk_lib_setGlobal("Socket", vm->t_socket = sock);
-    lk_object_set_cfunc_lk(sock, "accept", acce_sock, NULL);
-    lk_object_set_cfunc_lk(sock, "bind", bind_sock_ip_number, ip, number, NULL);
-    lk_object_set_cfunc_lk(sock, "connect", connect_sock_ip_number, ip, number, NULL);
-    lk_object_set_cfunc_lk(sock, "listen", listen_sock, NULL);
+    lk_obj_set_cfunc_lk(sock, "accept", acce_sock, NULL);
+    lk_obj_set_cfunc_lk(sock, "bind", bind_sock_ip_num, ip, num, NULL);
+    lk_obj_set_cfunc_lk(sock, "connect", connect_sock_ip_num, ip, num, NULL);
+    lk_obj_set_cfunc_lk(sock, "listen", listen_sock, NULL);
 }

@@ -8,11 +8,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/* common fatal errors */
+/* common fatal errs */
 #define ERR(message) do { fprintf(stderr, (message)); abort(); } while(0)
 #define NYI(message) ERR("NYI: " message)
 #define BUG(message) ERR("BUG: " message)
 
-/* memory management */
-#include "memory.h"
+/* mem management */
+#include "mem.h"
 #endif

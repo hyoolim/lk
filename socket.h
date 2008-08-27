@@ -9,8 +9,8 @@
 #include <arpa/inet.h>
 struct lk_socket {
     struct lk_common o;
-    lk_string_t      *path;
-    lk_string_t      *mode;
+    lk_str_t      *path;
+    lk_str_t      *mode;
     int               fd;
     FILE             *in;
     FILE             *out;

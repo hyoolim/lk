@@ -3,23 +3,23 @@
 #include "types.h"
 #include "bool.h"
 #include "charset.h"
-#include "error.h"
+#include "err.h"
 #include "file.h"
 #include "func.h"
 #include "instr.h"
 #include "map.h"
-#include "object.h"
-#include "random.h"
+#include "obj.h"
+#include "rand.h"
 #include "seq.h"
-#include "string.h"
-#include "vector.h"
+#include "str.h"
+#include "vec.h"
 #include "char.h"
 #include "env.h"
 #include "ext.h"
 #include "folder.h"
 #include "gc.h"
 #include "list.h"
-#include "number.h"
+#include "num.h"
 #include "parser.h"
 #include "scope.h"
 #include "socket.h"
@@ -36,7 +36,7 @@ struct lk_library {
 #define DONE return
 #define RETURN(v) \
     do { \
-        lk_object_t *_r = LK_OBJ(v); \
+        lk_obj_t *_r = LK_OBJ(v); \
         assert(_r != NULL); \
         lk_scope_stackpush(local->caller, _r); \
         DONE; \
@@ -63,7 +63,7 @@ struct lk_library {
 void lk_library_extinit(lk_vm_t *vm);
 
 /* update */
-void lk_lib_setObject(lk_object_t *parent, const char *k, lk_object_t *v);
-void lk_lib_setGlobal(const char *k, lk_object_t *v);
-void lk_lib_setCField(lk_object_t *self, const char *k, lk_object_t *t, size_t offset);
+void lk_lib_setObject(lk_obj_t *parent, const char *k, lk_obj_t *v);
+void lk_lib_setGlobal(const char *k, lk_obj_t *v);
+void lk_lib_setCField(lk_obj_t *self, const char *k, lk_obj_t *t, size_t offset);
 #endif

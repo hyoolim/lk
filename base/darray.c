@@ -5,7 +5,7 @@ static struct listdata *listdata_alloc(int ilen, int cap) {
     struct listdata *self;
     int c = 8;
     while(cap > c) c *= 2;
-    self = memory_alloc(sizeof(struct listdata) - sizeof(char) + ilen * c);
+    self = mem_alloc(sizeof(struct listdata) - sizeof(char) + ilen * c);
     self->cap = c;
     self->used = 0;
     self->ilen = ilen;
@@ -14,10 +14,10 @@ static struct listdata *listdata_alloc(int ilen, int cap) {
 }
 static void listdata_free(struct listdata *self) {
     if(self->refc > 0) self->refc --;
-    if(self->refc < 1) memory_free(self);
+    if(self->refc < 1) mem_free(self);
 }
 darray_t *darray_alloc(int ilen, int cap) {
-    darray_t *self = memory_alloc(sizeof(darray_t));
+    darray_t *self = mem_alloc(sizeof(darray_t));
     darray_init(self, ilen, cap);
     return self;
 }
@@ -33,11 +33,11 @@ darray_t *darray_allocfromfile(FILE *stream, size_t rs) {
     self->data->used = fread(self->first, 1, rs, stream);
     return self;
 }
-darray_t *darray_alloc_string(void) {
+darray_t *darray_alloc_str(void) {
     return darray_alloc(sizeof(uint8_t), 10);
 }
 darray_t *darray_clone(darray_t *self) {
-    darray_t *clone = memory_alloc(sizeof(darray_t));
+    darray_t *clone = mem_alloc(sizeof(darray_t));
     darray_copy(clone, self);
     return clone;
 }
@@ -50,7 +50,7 @@ darray_t *darray_allocFromData(const void *data, int len) {
 darray_t *darray_allocFromCString(const char *cstr) {
     return darray_allocFromData(cstr, strlen(cstr));
 }
-darray_t *string_allocfromfile(FILE *stream) {
+darray_t *str_allocfromfile(FILE *stream) {
     if(fseek(stream, 0, SEEK_END) == 0) {
         long size;
         if((size = ftell(stream)) >= 0
@@ -69,7 +69,7 @@ darray_t *string_allocfromfile(FILE *stream) {
     for(i = 0; (ch = fgetc(stream)) != EOF; i ++) { \
         if(i >= c) { \
             do { c *= 2; } while(i >= c); \
-            self->data = memory_resize(self->data, \
+            self->data = mem_resize(self->data, \
             sizeof(struct listdata) - sizeof(char) \
             + self->data->ilen * c); \
             self->data->cap = (c); \
@@ -107,7 +107,7 @@ void darray_fin(darray_t *self) {
 }
 void darray_free(darray_t *self) {
     listdata_free(self->data);
-    memory_free(self);
+    mem_free(self);
 }
 
 /* update */
@@ -138,7 +138,7 @@ static void darray_prepupdate(darray_t *self, int i, int newsize) {
         /* resize existing buf */
         } else {
             ptrdiff_t d = self->first - &bd->item;
-            bd = self->data = memory_resize(bd,
+            bd = self->data = mem_resize(bd,
             sizeof(struct listdata) - sizeof(char) + ilen * newcap);
             bd->cap = newcap;
             self->first = &bd->item + d;
@@ -276,7 +276,7 @@ void darray_reverse(darray_t *self) {
     case sizeof(short): SWAPITEMS(short); break;
     case sizeof(long ): SWAPITEMS(long ); break;
     default: {
-        char *a = memory_alloc(ilen * 2);
+        char *a = mem_alloc(ilen * 2);
         char *b = a + ilen;
         for(; i < c2; i ++) {
             memcpy(a, from + i, ilen);
@@ -284,7 +284,7 @@ void darray_reverse(darray_t *self) {
             memcpy(to + i, b, ilen);
             memcpy(to + c - i - 1, a, ilen);
         }
-        memory_free(a);
+        mem_free(a);
     }
     }
 }
@@ -353,7 +353,7 @@ int darray_compareTo(const darray_t *self, const darray_t *other) {
                 return rd == 0 ? d : rd;
             } else {
                 /*
-                printf("Trying to compare strings"
+                printf("Trying to compare strs"
                 " with different item length\n");
                 printf("self=%p(%i) '", (void *)self, self->data->ilen);
                 darray_printToStream(self, stdout); printf("'\n");

@@ -3,13 +3,13 @@
 #include "types.h"
 
 /* type */
-struct lk_random {
+struct lk_rand {
     struct lk_common  o;
-    lk_number_t      *seed;
+    lk_num_t      *seed;
     int               mti;
     unsigned long     mt[LK_RANDOM_N];
 };
 
 /* ext map */
-void lk_random_extinit(lk_vm_t *vm);
+void lk_rand_extinit(lk_vm_t *vm);
 #endif

@@ -66,25 +66,25 @@ static LK_OBJ_DEFMARKFUNC(mark_sig) {
 }
 void lk_func_typeinit(lk_vm_t *vm) {
     /* */
-    vm->t_func = lk_obj_allocWithSize(vm->t_obj, sizeof(lk_func_t));
+    vm->t_func = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_func_t));
     lk_obj_setallocfunc(vm->t_func, alloc_f);
     lk_obj_setmarkfunc(vm->t_func, mark_f);
     lk_obj_setfreefunc(vm->t_func, free_f);
     /* */
-    vm->t_cfunc = lk_obj_allocWithSize(vm->t_func, sizeof(lk_cfunc_t));
+    vm->t_cfunc = lk_obj_alloc_withsize(vm->t_func, sizeof(lk_cfunc_t));
     lk_obj_setallocfunc(vm->t_cfunc, alloc_cf);
     /* */
-    vm->t_gfunc = lk_obj_allocWithSize(vm->t_func, sizeof(lk_gfunc_t));
+    vm->t_gfunc = lk_obj_alloc_withsize(vm->t_func, sizeof(lk_gfunc_t));
     LK_GFUNC(vm->t_gfunc)->funcs = darray_alloc(sizeof(lk_func_t *), 4);
     lk_obj_setallocfunc(vm->t_gfunc, alloc_gf);
     lk_obj_setmarkfunc(vm->t_gfunc, mark_gf);
     lk_obj_setfreefunc(vm->t_gfunc, free_gf);
     /* */
-    vm->t_kfunc = lk_obj_allocWithSize(vm->t_func, sizeof(lk_kfunc_t));
+    vm->t_kfunc = lk_obj_alloc_withsize(vm->t_func, sizeof(lk_kfunc_t));
     lk_obj_setallocfunc(vm->t_kfunc, alloc_kf);
     lk_obj_setmarkfunc(vm->t_kfunc, mark_kf);
     /* */
-    vm->t_sig = lk_obj_allocWithSize(vm->t_obj, sizeof(lk_sig_t));
+    vm->t_sig = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_sig_t));
     lk_obj_setallocfunc(vm->t_sig, alloc_sig);
     lk_obj_setmarkfunc(vm->t_sig, mark_sig);
 }
@@ -110,18 +110,18 @@ static void maximum_argument_size_f(lk_obj_t *self, lk_scope_t *local) {
 }
 static void signature_f(lk_obj_t *self, lk_scope_t *local) {
     darray_t *sigs = LK_FUNC(self)->cf.sigs;
-    RETURN(sigs != NULL ? lk_list_newFromDArray(VM, sigs) : lk_list_new(VM));
+    RETURN(sigs != NULL ? lk_list_new_fromdarray(VM, sigs) : lk_list_new(VM));
 }
 static void last_argument_f(lk_obj_t *self, lk_scope_t *local) {
     lk_sig_t *last = LK_FUNC(self)->cf.rest;
     RETURN(last != NULL ? LK_OBJ(last) : NIL);
 }
 static void functions_gf(lk_obj_t *self, lk_scope_t *local) {
-    RETURN(lk_list_newFromDArray(VM, LK_GFUNC(self)->funcs));
+    RETURN(lk_list_new_fromdarray(VM, LK_GFUNC(self)->funcs));
 }
 static void name_sig(lk_obj_t *self, lk_scope_t *local) {
     lk_str_t *name = LK_SIG(self)->name;
-    RETURN(name != NULL ? name : lk_str_newFromCString(VM, "_"));
+    RETURN(name != NULL ? name : lk_str_new_fromcstr(VM, "_"));
 }
 static void check_sig(lk_obj_t *self, lk_scope_t *local) {
     lk_obj_t *type = LK_SIG(self)->check;
@@ -130,23 +130,23 @@ static void check_sig(lk_obj_t *self, lk_scope_t *local) {
 void lk_func_libinit(lk_vm_t *vm) {
     lk_obj_t *f = vm->t_func, *sig = vm->t_sig;
     /* */
-    lk_lib_setGlobal("Function", vm->t_func);
+    lk_global_set("Function", vm->t_func);
     lk_obj_set_cfunc_lk(f, "+", add_f_f, f, NULL);
     lk_obj_set_cfunc_lk(f, "+=", addB_f_f, f, NULL);
-    lk_lib_setCField(f, "doc", f, offsetof(lk_func_t, cf.doc));
+    lk_obj_set_cfield(f, "doc", f, offsetof(lk_func_t, cf.doc));
     lk_obj_set_cfunc_lk(f, "minimum_argument_size", minimum_argument_size_f, NULL);
     lk_obj_set_cfunc_lk(f, "maximum_argument_size", maximum_argument_size_f, NULL);
     lk_obj_set_cfunc_lk(f, "signature", signature_f, NULL);
     lk_obj_set_cfunc_lk(f, "last_argument", last_argument_f, NULL);
     /* */
-    lk_lib_setGlobal("CFunction", vm->t_cfunc);
+    lk_global_set("CFunction", vm->t_cfunc);
     /* */
-    lk_lib_setGlobal("GenericFunction", vm->t_gfunc);
+    lk_global_set("GenericFunction", vm->t_gfunc);
     lk_obj_set_cfunc_lk(vm->t_gfunc, "functions", functions_gf, NULL);
     /* */
-    lk_lib_setGlobal("KineticFunction", vm->t_kfunc);
+    lk_global_set("KineticFunction", vm->t_kfunc);
     /* */
-    lk_lib_setGlobal("Signature", vm->t_sig);
+    lk_global_set("Signature", vm->t_sig);
     lk_obj_set_cfunc_lk(sig, "name", name_sig, NULL);
     lk_obj_set_cfunc_lk(sig, "check", check_sig, NULL);
 }
@@ -255,7 +255,7 @@ lk_func_t *lk_func_match(lk_func_t *self, lk_scope_t *args, lk_obj_t *recv) {
             sig = curr->cf.rest;
             if(sig != NULL && sig->name != NULL) {
                 arg = LK_OBJ(LIST_ISINIT(stack)
-                ? lk_list_newFromDArray(vm, stack) : lk_list_new(vm));
+                ? lk_list_new_fromdarray(vm, stack) : lk_list_new(vm));
                 darray_offset(DARRAY(arg), argi);
                 lk_obj_setslot(sig->isself
                 ? recv : LK_OBJ(args), LK_OBJ(sig->name), sig->check, arg);
@@ -284,15 +284,15 @@ void lk_kfunc_updatesig(lk_kfunc_t *self) {
         if((isself = argdef->type == LK_INSTRTYPE_SELFMSG)
         || argdef->type == LK_INSTRTYPE_SCOPEMSG) {
             name = LK_STRING(argdef->v);
-            if(darray_compareToCString(DARRAY(name), ":") == 0) {
+            if(darray_cmp_tocstr(DARRAY(name), ":") == 0) {
                 argdef = argdef->next;
                 if(argdef != NULL && argdef->type == LK_INSTRTYPE_APPLY) {
                     typeinstr = LK_INSTR(argdef->v);
                     name = LK_STRING(typeinstr->v);
                     typeinstr = typeinstr->next;
-                    slot = lk_obj_getslotfromany(LK_OBJ(VM->currentScope), typeinstr->v);
+                    slot = lk_obj_getslotfromany(LK_OBJ(VM->currscope), typeinstr->v);
                     if(slot != NULL) {
-                        type = lk_obj_getvaluefromslot(LK_OBJ(VM->currentScope), slot);
+                        type = lk_obj_getvaluefromslot(LK_OBJ(VM->currscope), slot);
                     } else {
                         printf("Invalid sig, invalid type\n");
                         exit(EXIT_FAILURE);

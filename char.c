@@ -5,7 +5,7 @@ static void alloc_ch(lk_obj_t *self, lk_obj_t *parent) {
     CHAR(self) = CHAR(parent);
 }
 void lk_char_typeinit(lk_vm_t *vm) {
-    vm->t_char = lk_obj_allocWithSize(vm->t_obj, sizeof(lk_char_t));
+    vm->t_char = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_char_t));
     lk_obj_setallocfunc(vm->t_char, alloc_ch);
 }
 
@@ -46,7 +46,7 @@ lk_str_t *lk_char_tostr(lk_obj_t *self) {
 /* bind all c funcs to lk equiv */
 void lk_char_libinit(lk_vm_t *vm) {
     lk_obj_t *ch = vm->t_char, *num = vm->t_num;
-    lk_lib_setGlobal("Character", ch);
+    lk_global_set("Character", ch);
 
     /* update */
     lk_obj_set_cfunc_cvoid(ch, "+=", lk_char_add_num, num, NULL);

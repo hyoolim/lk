@@ -10,7 +10,7 @@ static void free_pipe(lk_obj_t *self) {
     lk_pipe_close(LK_PIPE(self));
 }
 void lk_pipe_typeinit(lk_vm_t *vm) {
-    vm->t_pipe = lk_obj_allocWithSize(vm->t_obj, sizeof(lk_pipe_t));
+    vm->t_pipe = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_pipe_t));
     lk_obj_setmarkfunc(vm->t_pipe, mark_pipe);
     lk_obj_setfreefunc(vm->t_pipe, free_pipe);
 }
@@ -45,7 +45,7 @@ void lk_pipe_write_str(lk_pipe_t *self, lk_str_t *text) {
     if(self->fd == NULL) {
         BUG("WritableFile->st.pipe should NEVER be NULL");
     }
-    darray_printToStream(DARRAY(text), self->fd);
+    darray_print_tostream(DARRAY(text), self->fd);
 }
 
 /* info */
@@ -54,7 +54,7 @@ lk_str_t *lk_pipe_read_num(lk_pipe_t *self, lk_num_t *length) {
         BUG("ReadableFile->st.pipe should NEVER be NULL");
     } else {
         darray_t *c = darray_allocfromfile(self->fd, CNUMBER(length));
-        return c != NULL ? lk_str_newFromDArray(VM, c) : LK_STRING(NIL);
+        return c != NULL ? lk_str_new_fromdarray(VM, c) : LK_STRING(NIL);
     }
 }
 lk_str_t *lk_pipe_readall(lk_pipe_t *self) {
@@ -62,33 +62,33 @@ lk_str_t *lk_pipe_readall(lk_pipe_t *self) {
         BUG("ReadableFile->st.pipe should NEVER be NULL");
     } else {
         darray_t *c = str_allocfromfile(self->fd);
-        return c != NULL ? lk_str_newFromDArray(VM, c) : LK_STRING(NIL);
+        return c != NULL ? lk_str_new_fromdarray(VM, c) : LK_STRING(NIL);
     }
 }
 lk_str_t *lk_pipe_readuntil_char(lk_pipe_t *self, lk_char_t *until) {
     if(self->fd == NULL) {
         BUG("ReadableFile->st.pipe should NEVER be NULL");
     } else {
-        darray_t *c = darray_allocFromFileUntilChar(self->fd, CHAR(until));
-        return c != NULL ? lk_str_newFromDArray(VM, c) : LK_STRING(NIL);
+        darray_t *c = darray_alloc_fromfile_untilchar(self->fd, CHAR(until));
+        return c != NULL ? lk_str_new_fromdarray(VM, c) : LK_STRING(NIL);
     }
 }
 lk_str_t *lk_pipe_readuntil_charset(lk_pipe_t *self, lk_charset_t *until) {
     if(self->fd == NULL) {
         BUG("ReadableFile->st.pipe should NEVER be NULL");
     } else {
-        darray_t *c = darray_allocFromFileUntilCharSet(self->fd, CHARSET(until));
-        return c != NULL ? lk_str_newFromDArray(VM, c) : LK_STRING(NIL);
+        darray_t *c = darray_alloc_fromfile_untilcharset(self->fd, CHARSET(until));
+        return c != NULL ? lk_str_new_fromdarray(VM, c) : LK_STRING(NIL);
     }
 }
 
 /* bind all c funcs to lk equiv */
 void lk_pipe_libinit(lk_vm_t *vm) {
     lk_obj_t *pipe = vm->t_pipe, *str = vm->t_str, *num = vm->t_num, *ch = vm->t_char, *charset = vm->t_charset;
-    lk_lib_setGlobal("Pipe", pipe);
+    lk_global_set("Pipe", pipe);
 
     /* props */
-    lk_lib_setCField(pipe, "command", str, offsetof(lk_pipe_t, cmd));
+    lk_obj_set_cfield(pipe, "command", str, offsetof(lk_pipe_t, cmd));
 
     /* update */
     lk_obj_set_cfunc_cvoid(pipe, "close!", lk_pipe_close, NULL);

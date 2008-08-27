@@ -8,7 +8,7 @@ static void free_charset(lk_obj_t *self) {
     charset_fin(CHARSET(self));
 }
 void lk_charset_typeinit(lk_vm_t *vm) {
-    vm->t_charset = lk_obj_allocWithSize(vm->t_obj, sizeof(lk_charset_t));
+    vm->t_charset = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_charset_t));
     charset_init(CHARSET(vm->t_charset));
     lk_obj_setallocfunc(vm->t_charset, alloc_charset);
     lk_obj_setfreefunc(vm->t_charset, free_charset);
@@ -52,7 +52,7 @@ lk_bool_t *lk_charset_has_str(lk_obj_t *self, lk_str_t *str) {
 }
 lk_str_t *lk_charset_tostr(lk_obj_t *self) {
     darray_t *base = charset_tostr(CHARSET(self));
-    lk_str_t *lk = lk_str_newFromDArray(LK_VM(self), base);
+    lk_str_t *lk = lk_str_new_fromdarray(LK_VM(self), base);
     darray_free(base);
     return lk;
 }
@@ -60,7 +60,7 @@ lk_str_t *lk_charset_tostr(lk_obj_t *self) {
 /* bind all c funcs to lk equiv */
 void lk_charset_libinit(lk_vm_t *vm) {
     lk_obj_t *charset = vm->t_charset, *ch = vm->t_char, *str = vm->t_str;
-    lk_lib_setGlobal("CharacterSet", charset);
+    lk_global_set("CharacterSet", charset);
 
     /* update */
     lk_obj_set_cfunc_cvoid(charset, "+=", lk_charset_add_charset, charset, NULL);

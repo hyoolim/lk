@@ -14,7 +14,7 @@ static void free_map(lk_obj_t *self) {
     qphash_fin(QPHASH(self));
 }
 void lk_map_typeinit(lk_vm_t *vm) {
-    vm->t_map = lk_obj_allocWithSize(vm->t_obj, sizeof(lk_map_t));
+    vm->t_map = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_map_t));
     qphash_init(QPHASH(vm->t_map), sizeof(lk_obj_t *), lk_obj_hashcode, lk_obj_keycmp);
     lk_obj_setallocfunc(vm->t_map, alloc_map);
     lk_obj_setmarkfunc(vm->t_map, mark_map);
@@ -43,7 +43,7 @@ void lk_map_set_str_obj(lk_map_t *self, lk_str_t *key, lk_obj_t *value) {
     *(lk_obj_t **)qphash_set(QPHASH(self), lk_obj_addref(LK_OBJ(self), LK_OBJ(key))) = lk_obj_addref(LK_OBJ(self), value);
 }
 void lk_map_setWithCStringKey(lk_map_t *self, const char *k, lk_obj_t *v) {
-    lk_map_set(self, LK_OBJ(lk_str_newFromCString(LK_VM(self), k)), v);
+    lk_map_set(self, LK_OBJ(lk_str_new_fromcstr(LK_VM(self), k)), v);
 }
 
 /* info */
@@ -56,7 +56,7 @@ lk_obj_t *lk_map_get(lk_map_t *self, lk_obj_t *k) {
     return i != NULL ? SETITEM_VALUE(lk_obj_t *, i) : NULL;
 }
 lk_obj_t *lk_map_getByCStringKey(lk_map_t *self, const char *k) {
-    return lk_map_get(self, LK_OBJ(lk_str_newFromCString(LK_VM(self), k)));
+    return lk_map_get(self, LK_OBJ(lk_str_new_fromcstr(LK_VM(self), k)));
 }
 lk_list_t *lk_map_keys(lk_map_t *self) {
     lk_list_t *keys = lk_list_new(VM);
@@ -75,7 +75,7 @@ lk_list_t *lk_map_values(lk_map_t *self) {
 /* bind all c funcs to lk equiv */
 void lk_map_libinit(lk_vm_t *vm) {
     lk_obj_t *map = vm->t_map, *obj = vm->t_obj, *str = vm->t_str;
-    lk_lib_setGlobal("Map", map);
+    lk_global_set("Map", map);
 
     /* update */
     lk_obj_set_cfunc_cvoid(map, "clear!", lk_map_clear, NULL);

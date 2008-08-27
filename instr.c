@@ -9,7 +9,7 @@ static LK_OBJ_DEFMARKFUNC(mark_instr) {
     if(LK_INSTR(self)->comment != NULL) mark(LK_OBJ(LK_INSTR(self)->comment));
 }
 void lk_instr_typeinit(lk_vm_t *vm) {
-    vm->t_instr = lk_obj_allocWithSize(vm->t_obj, sizeof(lk_instr_t));
+    vm->t_instr = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_instr_t));
     lk_obj_setmarkfunc(vm->t_instr, mark_instr);
 }
 
@@ -39,9 +39,9 @@ lk_str_t *lk_instr_resource(lk_obj_t *self) {
 /* bind all c funcs to lk equiv */
 void lk_instr_libinit(lk_vm_t *vm) {
     lk_obj_t *instr = vm->t_instr;
-    lk_lib_setObject(vm->t_vm, "Instruction", instr);
-    lk_lib_setCField(instr, ".next", instr, offsetof(lk_instr_t, next));
-    lk_lib_setCField(instr, ".previous", instr, offsetof(lk_instr_t, prev));
+    lk_object_set(vm->t_vm, "Instruction", instr);
+    lk_obj_set_cfield(instr, ".next", instr, offsetof(lk_instr_t, next));
+    lk_obj_set_cfield(instr, ".previous", instr, offsetof(lk_instr_t, prev));
 
     /* info */
     lk_obj_set_cfunc_creturn(instr, "COLUMN", lk_instr_column, NULL);
@@ -81,10 +81,10 @@ lk_instr_t *lk_instr_newarglist(lk_parser_t *parser, lk_instr_t *func) {
 }
 lk_instr_t *lk_instr_newstr(lk_parser_t *parser, lk_str_t *s) {
     lk_instr_t *new = instr_new(parser, LK_INSTRTYPE_STRING);
-    new->v = LK_OBJ(s); /* lk_str_newFromDArray(LK_VM(parser), s)); */
+    new->v = LK_OBJ(s); /* lk_str_new_fromdarray(LK_VM(parser), s)); */
     return new;
 }
-lk_instr_t *lk_instr_newNumber(lk_parser_t *parser, double num) {
+lk_instr_t *lk_instr_new_number(lk_parser_t *parser, double num) {
     lk_instr_t *new = instr_new(parser, LK_INSTRTYPE_NUMBER);
     new->v = LK_OBJ(lk_num_new(LK_VM(parser), num));
     return new;
@@ -137,7 +137,7 @@ void lk_instr_print(lk_instr_t *self) {
         break;
     case LK_INSTRTYPE_STRING:
         printf("'");
-        darray_printToStream(DARRAY(self->v), stdout);
+        darray_print_tostream(DARRAY(self->v), stdout);
         printf("'");
         break;
     case LK_INSTRTYPE_NUMBER:
@@ -148,16 +148,16 @@ void lk_instr_print(lk_instr_t *self) {
         break;
     case LK_INSTRTYPE_APPLYMSG:
         printf("/");
-        darray_printToStream(DARRAY(self->v), stdout);
+        darray_print_tostream(DARRAY(self->v), stdout);
         if(!(self->opts & LK_INSTROHASMSGARGS)) printf("[]");
         break;
     case LK_INSTRTYPE_SCOPEMSG:
-        darray_printToStream(DARRAY(self->v), stdout);
+        darray_print_tostream(DARRAY(self->v), stdout);
         if(!(self->opts & LK_INSTROHASMSGARGS)) printf("[]");
         break;
     case LK_INSTRTYPE_SELFMSG:
         printf("./");
-        darray_printToStream(DARRAY(self->v), stdout);
+        darray_print_tostream(DARRAY(self->v), stdout);
         if(!(self->opts & LK_INSTROHASMSGARGS)) printf("[]");
         break;
     case LK_INSTRTYPE_MORE:
@@ -168,7 +168,7 @@ void lk_instr_print(lk_instr_t *self) {
     }
     if(self->comment != NULL) {
         printf(" #*");
-        darray_printToStream(DARRAY(self->comment), stdout);
+        darray_print_tostream(DARRAY(self->comment), stdout);
         printf(" *#");
     }
     printf(self->opts & LK_INSTROEND ? "; " : " ");

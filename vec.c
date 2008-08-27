@@ -61,7 +61,7 @@ static void setB_vec_num_num(lk_obj_t *self, lk_scope_t *local) {
 }
 void lk_vec_libinit(lk_vm_t *vm) {
     lk_obj_t *vec = vm->t_vec, *num = vm->t_num;
-    lk_lib_setGlobal("Vector", vec);
+    lk_global_set("Vector", vec);
     lk_obj_set_cfunc_lk(vec, "at", at_vec_num, num, NULL);
     lk_obj_set_cfunc_lk(vec, "grade", grade_vec, NULL);
     lk_obj_set_cfunc_lk(vec, "insert!", insertB_vec_num_num, num, num, NULL);

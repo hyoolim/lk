@@ -10,7 +10,7 @@ static void free_seq(lk_obj_t *self) {
     darray_fin(DARRAY(self));
 }
 void lk_seq_typeinit(lk_vm_t *vm) {
-    vm->t_seq = lk_obj_allocWithSize(vm->t_obj, sizeof(lk_seq_t));
+    vm->t_seq = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_seq_t));
     darray_init(DARRAY(vm->t_seq), 1, 16);
     lk_obj_setallocfunc(vm->t_seq, alloc_seq);
     lk_obj_setfreefunc(vm->t_seq, free_seq);
@@ -59,7 +59,7 @@ static void swapB_gl_num_num(lk_obj_t *self, lk_scope_t *local) {
 }
 void lk_seq_libinit(lk_vm_t *vm) {
     lk_obj_t *gl = vm->t_seq, *num = vm->t_num, *vec = vm->t_vec;
-    lk_lib_setGlobal("Sequence", gl);
+    lk_global_set("Sequence", gl);
     lk_obj_set_cfunc_lk(gl, "at", at_gl_vec, vec, NULL);
     lk_obj_set_cfunc_lk(gl, "clear!", clearB_gl, NULL);
     lk_obj_set_cfunc_lk(gl, "<=>", cmp_gl_gl, gl, NULL);

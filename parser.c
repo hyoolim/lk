@@ -6,14 +6,14 @@
 /* ext map - types */
 static void setbinaryop(lk_parser_t *self, const char *op, const char *subst) {
     lk_vm_t *vm = LK_VM(self);
-    *(lk_str_t **)qphash_set(self->binaryops, lk_str_newFromCString(vm, op)) = lk_str_newFromCString(vm, subst);
+    *(lk_str_t **)qphash_set(self->binaryops, lk_str_new_fromcstr(vm, op)) = lk_str_new_fromcstr(vm, subst);
 }
 static void setprec(lk_parser_t *self, const char *op, int level, enum lk_precassoc_t assoc) {
     lk_vm_t *vm = LK_VM(self);
     lk_prec_t *prec = LK_PREC(lk_obj_alloc(vm->t_prec));
     prec->level = level;
     prec->assoc = assoc;
-    *(lk_prec_t **)qphash_set(self->precs, lk_str_newFromCString(vm, op)) = prec;
+    *(lk_prec_t **)qphash_set(self->precs, lk_str_new_fromcstr(vm, op)) = prec;
 }
 static void alloc_parser(lk_obj_t *self, lk_obj_t *parent) {
     PARSER->binaryops = qphash_alloc(sizeof(lk_prec_t *), lk_obj_hashcode, lk_obj_keycmp);
@@ -90,8 +90,8 @@ static void free_parser(lk_obj_t *self) {
 }
 void lk_parser_typeinit(lk_vm_t *vm) {
     lk_obj_t *obj = vm->t_obj;
-    vm->t_prec = lk_obj_allocWithSize(obj, sizeof(lk_prec_t));
-    vm->t_parser = lk_obj_allocWithSize(obj, sizeof(lk_parser_t));
+    vm->t_prec = lk_obj_alloc_withsize(obj, sizeof(lk_prec_t));
+    vm->t_parser = lk_obj_alloc_withsize(obj, sizeof(lk_parser_t));
     lk_obj_setallocfunc(vm->t_parser, alloc_parser);
     lk_obj_setmarkfunc(vm->t_parser, mark_parser);
     lk_obj_setfreefunc(vm->t_parser, free_parser);
@@ -99,8 +99,8 @@ void lk_parser_typeinit(lk_vm_t *vm) {
 
 /* ext map - funcs */
 void lk_parser_libinit(lk_vm_t *vm) {
-    lk_lib_setObject(vm->t_vm, "Precedence", vm->t_prec);
-    lk_lib_setObject(vm->t_vm, "Parser", vm->t_parser);
+    lk_object_set(vm->t_vm, "Precedence", vm->t_prec);
+    lk_object_set(vm->t_vm, "Parser", vm->t_parser);
 }
 
 /* new */
@@ -208,13 +208,13 @@ static lk_prec_t *shiftreduce(lk_parser_t *self, lk_instr_t *op) {
             /* rec / arg -> rec /arg */
             if((arg->type == LK_INSTRTYPE_SCOPEMSG
             || arg->type == LK_INSTRTYPE_STRING)
-            && darray_compareToCString(topstr, "send") == 0) {
+            && darray_cmp_tocstr(topstr, "send") == 0) {
                 top = arg;
                 top->type = LK_INSTRTYPE_APPLYMSG;
                 goto gotarg;
             /* rec ? arg -> rec ? { arg } */
             } else if(arg->type != LK_INSTRTYPE_FUNC
-                   && darray_compareToCString(topstr, "?") == 0) {
+                   && darray_cmp_tocstr(topstr, "?") == 0) {
                 arg = lk_instr_newfunc(self, arg);
             }
             arg = lk_instr_newarglist(self, arg);
@@ -430,8 +430,8 @@ static void readtoken(lk_parser_t *self) {
         lk_str_t *tok = LK_STRING(lk_obj_clone(LK_OBJ(self->text)));
         darray_slice(DARRAY(tok), lastpos, self->textpos - lastpos);
         if(type == OP
-        &&(darray_compareToCString(DARRAY(tok), "---") == 0
-        || darray_compareToCString(DARRAY(tok), "|") == 0)) type = FUNC_SEP;
+        &&(darray_cmp_tocstr(DARRAY(tok), "---") == 0
+        || darray_cmp_tocstr(DARRAY(tok), "|") == 0)) type = FUNC_SEP;
         darray_pushptr(self->tokentypes, (void *)type);
         darray_pushptr(self->tokenvalues, tok);
         lk_obj_addref(LK_OBJ(self), LK_OBJ(tok));
@@ -598,7 +598,7 @@ static READFUNC(readunaryop) {
     } else {
         lk_instr_t *arg = darray_peekptr(self->words);
         /* /arg[] -> /arg[] */
-        if(darray_compareToCString(DARRAY(tok), "/") == 0) {
+        if(darray_cmp_tocstr(DARRAY(tok), "/") == 0) {
             arg->type = LK_INSTRTYPE_SELFMSG;
         /* +arg[] -> arg[] /+[] */
         } else {
@@ -626,10 +626,10 @@ static READFUNC(readnum) {
         numifn_t num;
         switch(num_new(0, DARRAY(tok), &num)) {
         case NUMBERTYPE_INT:
-            darray_pushptr(self->words, lk_instr_newNumber(self, num.i));
+            darray_pushptr(self->words, lk_instr_new_number(self, num.i));
             break;
         case NUMBERTYPE_FLOAT:
-            darray_pushptr(self->words, lk_instr_newNumber(self, num.f));
+            darray_pushptr(self->words, lk_instr_new_number(self, num.f));
             break;
         default:
             BUG("Invalid num type while trying to parse code.\n");
@@ -766,7 +766,7 @@ static lk_instr_t *applymacros(lk_parser_t *self, lk_instr_t *it) {
             it->v = LK_OBJ(applymacros(self, LK_INSTR(it->v)));
             /*
         } else if(it->type == LK_INSTRTYPE_SCOPEMSG
-               && darray_compareToCString(DARRAY(it->v), ".") == 0) {
+               && darray_cmp_tocstr(DARRAY(it->v), ".") == 0) {
             lk_instr_t *msg = it->next;
             if(msg != NULL && msg->type == LK_INSTRTYPE_APPLYMSG) {
                 msg->type = LK_INSTRTYPE_SELFMSG;
@@ -775,9 +775,9 @@ static lk_instr_t *applymacros(lk_parser_t *self, lk_instr_t *it) {
             }
             */
         } else if(it->type == LK_INSTRTYPE_APPLYMSG
-               && (darray_compareToCString(DARRAY(it->v), ":") == 0
-               || darray_compareToCString(DARRAY(it->v), "=") == 0
-               || darray_compareToCString(DARRAY(it->v), ":=") == 0)) {
+               && (darray_cmp_tocstr(DARRAY(it->v), ":") == 0
+               || darray_cmp_tocstr(DARRAY(it->v), "=") == 0
+               || darray_cmp_tocstr(DARRAY(it->v), ":=") == 0)) {
             lk_instr_t *name = it->prev, *args = it->next;
             if(name->type == LK_INSTRTYPE_SELFMSG
             || name->type == LK_INSTRTYPE_SCOPEMSG
@@ -793,9 +793,9 @@ static lk_instr_t *applymacros(lk_parser_t *self, lk_instr_t *it) {
                 /* var[] /: @[Object ] /= @[1 ] -> := @['var' Object 1 ] */
                 if(nextop != NULL
                 && nextop->type == LK_INSTRTYPE_APPLYMSG
-                && darray_compareToCString(DARRAY(nextop->v), "=") == 0) {
+                && darray_cmp_tocstr(DARRAY(nextop->v), "=") == 0) {
                     lk_instr_t *a, *nextargs = nextop->next;
-                    it->v = LK_OBJ(lk_str_newFromCString(
+                    it->v = LK_OBJ(lk_str_new_fromcstr(
                     LK_VM(it), ":="));
                     (it->next = nextargs)->prev = it;
                     a = LK_INSTR(args->v);
@@ -809,14 +809,14 @@ static lk_instr_t *applymacros(lk_parser_t *self, lk_instr_t *it) {
                 name = name->prev;
                 name->opts &= ~LK_INSTROHASMSGARGS;
                 (name->next = it)->prev = name;
-                it->v = LK_OBJ(lk_str_newFromCString(LK_VM(it), "set!"));
+                it->v = LK_OBJ(lk_str_new_fromcstr(LK_VM(it), "set!"));
                 a = LK_INSTR(atargs->v);
                 while(a->next != NULL) a = a->next;
                 (a->next = LK_INSTR(args->v))->prev = a;
                 args->v = atargs->v;
             }
         } else if(it->type == LK_INSTRTYPE_APPLYMSG
-               && darray_compareToCString(DARRAY(it->v), "!") == 0) {
+               && darray_cmp_tocstr(DARRAY(it->v), "!") == 0) {
             /* 1 /? @[2 ]  /! @[3 ]   -> 1 /? @[2 3 ] */
             /*   op  add(a) it  args(b) ->   op  args    */
             lk_instr_t *args = it->next;
@@ -829,7 +829,7 @@ static lk_instr_t *applymacros(lk_parser_t *self, lk_instr_t *it) {
                     while(a->next != NULL) a = a->next;
                     /* convert b to func if op is ? for short-circuiting */
                     if(b->type != LK_INSTRTYPE_FUNC
-                    && darray_compareToCString(DARRAY(op->v), "?") == 0) {
+                    && darray_cmp_tocstr(DARRAY(op->v), "?") == 0) {
                         b = lk_instr_newfunc(self, b);
                     }
                     (a->next = b)->prev = a;

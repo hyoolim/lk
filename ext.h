@@ -48,7 +48,7 @@ struct lk_library {
 #define CHARSET(v) (&LK_CHARSET(v)->data)
 #define CNUMBER(v) (LK_NUMBER(v)->data)
 #define CSIZE(v) ((int)CNUMBER(v))
-#define CSTRING(v) (darray_toCString(DARRAY(v)))
+#define CSTRING(v) (darray_tocstr(DARRAY(v)))
 #define DARRAY(v) (&LK_SEQ(v)->data)
 #define FALSE (VM->t_false)
 #define NIL (VM->t_nil)
@@ -64,7 +64,7 @@ struct lk_library {
 void lk_library_extinit(lk_vm_t *vm);
 
 /* update */
-void lk_lib_setObject(lk_obj_t *parent, const char *k, lk_obj_t *v);
-void lk_lib_setGlobal(const char *k, lk_obj_t *v);
-void lk_lib_setCField(lk_obj_t *self, const char *k, lk_obj_t *t, size_t offset);
+void lk_object_set(lk_obj_t *parent, const char *k, lk_obj_t *v);
+void lk_global_set(const char *k, lk_obj_t *v);
+void lk_obj_set_cfield(lk_obj_t *self, const char *k, lk_obj_t *t, size_t offset);
 #endif

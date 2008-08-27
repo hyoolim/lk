@@ -50,7 +50,7 @@ struct lk_tag {
     lk_tagmarkfunc_t  *markfunc;
     lk_tagfreefunc_t  *freefunc;
 };
-struct lk_objGroup {
+struct lk_objgroup {
     lk_obj_t *first;
     lk_obj_t *last;
 };
@@ -62,7 +62,7 @@ struct lk_common {
     struct {
         lk_obj_t        *prev;
         lk_obj_t        *next;
-        struct lk_objGroup *objgroup;
+        struct lk_objgroup *objgroup;
         uint8_t             isref;
     }                       mark;
 };

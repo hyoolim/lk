@@ -27,7 +27,7 @@ static void free_scope(lk_obj_t *self) {
     if(LIST_ISINIT(SCOPESTACK)) darray_fin(SCOPESTACK);
 }
 void lk_scope_typeinit(lk_vm_t *vm) {
-    vm->t_scope = lk_obj_allocWithSize(vm->t_obj, sizeof(lk_scope_t));
+    vm->t_scope = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_scope_t));
     lk_obj_setmarkfunc(vm->t_scope, mark_scope);
     lk_obj_setfreefunc(vm->t_scope, free_scope);
 }
@@ -36,7 +36,7 @@ void lk_scope_typeinit(lk_vm_t *vm) {
 static void Dargs_scope(lk_obj_t *self, lk_scope_t *local) {
     if(!LIST_ISINIT(SCOPESTACK)) RETURN(lk_list_new(VM));
     else {
-        lk_list_t *args = lk_list_newFromDArray(VM, SCOPESTACK);
+        lk_list_t *args = lk_list_new_fromdarray(VM, SCOPESTACK);
         darray_limit(DARRAY(args), SCOPE->argc);
         RETURN(args);
     }
@@ -65,7 +65,7 @@ static void DassignB_scope_str_obj(lk_obj_t *self, lk_scope_t *local) {
 }
 static void include_scope_str_str(lk_obj_t *self, lk_scope_t *local) {
     lk_scope_t *fr = lk_vm_evalfile(VM,
-    darray_toCString(DARRAY(ARG(0))), darray_toCString(DARRAY(ARG(1))));
+    darray_tocstr(DARRAY(ARG(0))), darray_tocstr(DARRAY(ARG(1))));
     if(fr != NULL) {
         qphash_t *from = fr->o.slots;
         if(from != NULL) {
@@ -94,7 +94,7 @@ static void redo_scope(lk_obj_t *self, lk_scope_t *local) {
 }
 static void require_scope_str_str(lk_obj_t *self, lk_scope_t *local) {
     RETURN(lk_vm_evalfile(VM,
-    darray_toCString(DARRAY(ARG(0))), darray_toCString(DARRAY(ARG(1)))));
+    darray_tocstr(DARRAY(ARG(0))), darray_tocstr(DARRAY(ARG(1)))));
 }
 static void rescue_scope_f(lk_obj_t *self, lk_scope_t *local) {
     RETURN(lk_obj_getvaluefromslot(self, lk_obj_setslot(
@@ -131,21 +131,21 @@ static void return_scope(lk_obj_t *self, lk_scope_t *local) {
 void lk_scope_libinit(lk_vm_t *vm) {
     lk_obj_t *scope = vm->t_scope, *obj = vm->t_obj, *instr = vm->t_instr,
                 *str = vm->t_str, *err = vm->t_err, *f = vm->t_func;
-    lk_lib_setGlobal("Scope", scope);
+    lk_global_set("Scope", scope);
     lk_obj_set_cfunc_lk(scope, ".args", Dargs_scope, NULL);
     lk_obj_set_cfunc_lk(scope, "=", DassignB_scope_str_obj, str, obj, NULL);
-    lk_lib_setCField(scope, ".caller", scope, offsetof(lk_scope_t, caller));
-    lk_lib_setCField(scope, ".current", instr, offsetof(lk_scope_t, current));
-    lk_lib_setCField(scope, ".first", instr, offsetof(lk_scope_t, first));
-    lk_lib_setCField(scope, ".scope", obj, offsetof(lk_scope_t, scope));
-    lk_lib_setCField(scope, ".function", obj, offsetof(lk_scope_t, func));
-    lk_lib_setCField(scope, ".next", instr, offsetof(lk_scope_t, next));
-    lk_lib_setCField(scope, ".receiver", obj, offsetof(lk_scope_t, receiver));
-    lk_lib_setCField(scope, ".return_to", scope, offsetof(lk_scope_t, returnto));
+    lk_obj_set_cfield(scope, ".caller", scope, offsetof(lk_scope_t, caller));
+    lk_obj_set_cfield(scope, ".current", instr, offsetof(lk_scope_t, current));
+    lk_obj_set_cfield(scope, ".first", instr, offsetof(lk_scope_t, first));
+    lk_obj_set_cfield(scope, ".scope", obj, offsetof(lk_scope_t, scope));
+    lk_obj_set_cfield(scope, ".function", obj, offsetof(lk_scope_t, func));
+    lk_obj_set_cfield(scope, ".next", instr, offsetof(lk_scope_t, next));
+    lk_obj_set_cfield(scope, ".receiver", obj, offsetof(lk_scope_t, receiver));
+    lk_obj_set_cfield(scope, ".return_to", scope, offsetof(lk_scope_t, returnto));
     lk_obj_set_cfunc_lk(scope, "include", include_scope_str_str, str, str, NULL);
     lk_obj_set_cfunc_lk(scope, "raise", raise_scope_err, err, NULL);
     lk_obj_set_cfunc_lk(scope, "raise", raise_scope_str, str, NULL);
-    lk_lib_setCField(scope, "receiver", obj, offsetof(lk_scope_t, receiver));
+    lk_obj_set_cfield(scope, "receiver", obj, offsetof(lk_scope_t, receiver));
     lk_obj_set_cfunc_lk(scope, "redo", redo_scope, NULL);
     lk_obj_set_cfunc_lk(scope, "require", require_scope_str_str, str, str, NULL);
     lk_obj_set_cfunc_lk(scope, "rescue", rescue_scope_f, f, NULL);
@@ -156,12 +156,12 @@ void lk_scope_libinit(lk_vm_t *vm) {
 
 /* create a new scope based on the current one set in vm */
 lk_scope_t *lk_scope_new(lk_vm_t *vm) {
-    lk_scope_t *parent = vm->currentScope;
+    lk_scope_t *parent = vm->currscope;
     lk_scope_t *self;
 
     /* optimization to reduce the num of scopes created */
     if(parent->child != NULL && parent->child->o.mark.isref == 0) {
-        vm->stat.recycledScopes ++;
+        vm->stat.recycledscopes ++;
         self = parent->child;
         self->o.parent = LK_OBJ(parent);
         darray_clear(&self->stack);
@@ -173,8 +173,8 @@ lk_scope_t *lk_scope_new(lk_vm_t *vm) {
     }
 
     /* init scope struct */
-    vm->stat.totalScopes ++;
-    vm->currentScope = self;
+    vm->stat.totalscopes ++;
+    vm->currscope = self;
     self->type = LK_SCOPETYPE_RETURN;
     self->scope = self;
     self->receiver = LK_OBJ(self);

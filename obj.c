@@ -69,7 +69,7 @@ static void ancestor_obj_obj(lk_obj_t *self, lk_scope_t *local) {
     RETURN(LK_OBJ_ISTYPE(self, ARG(0)) ? VM->t_true : VM->t_false); }
 static void ancestors_obj(lk_obj_t *self, lk_scope_t *local) {
     if(self->o.ancestors != NULL || lk_obj_calcancestors(self)) {
-        RETURN(lk_list_newFromDArray(VM, self->o.ancestors));
+        RETURN(lk_list_new_fromdarray(VM, self->o.ancestors));
     } else {
         printf("BUG: Throw proper ancestor err here\n");
         exit(EXIT_FAILURE);
@@ -102,7 +102,7 @@ static void import_obj_obj(lk_obj_t *self, lk_scope_t *local) {
 }
 static void parents_obj(lk_obj_t *self, lk_scope_t *local) {
     if(LK_OBJ_HASPARENTS(self)) {
-        RETURN(lk_list_newFromDArray(VM, LK_OBJ_PARENTS(self)));
+        RETURN(lk_list_new_fromdarray(VM, LK_OBJ_PARENTS(self)));
     } else {
         lk_list_t *ret = lk_list_new(VM);
         darray_pushptr(DARRAY(ret), self->o.parent);
@@ -121,7 +121,7 @@ static void with_obj_f(lk_obj_t *self, lk_scope_t *local) {
 }
 void lk_obj_libinit(lk_vm_t *vm) {
     lk_obj_t *obj = vm->t_obj, *str = vm->t_str, *f = vm->t_func;
-    lk_lib_setGlobal("Object", obj);
+    lk_global_set("Object", obj);
     lk_obj_set_cfunc_lk(obj, ".", Dself_obj, NULL);
     lk_obj_set_cfunc_lk(obj, ":", Ddefine_obj_str_obj, str, obj, NULL);
     lk_obj_set_cfunc_lk(obj, ":=", Ddefine_and_assignB_obj_str_obj, str, obj, NULL);
@@ -150,7 +150,7 @@ static struct lk_tag *tag_clone(struct lk_tag *self) {
     clone->refc = 1;
     return clone;
 }
-lk_obj_t *lk_obj_allocWithSize(lk_obj_t *parent, size_t s) {
+lk_obj_t *lk_obj_alloc_withsize(lk_obj_t *parent, size_t s) {
     lk_gc_t *gc = LK_VM(parent)->gc;
     lk_obj_t *self = mem_alloc(s);
     struct lk_tag *tag = parent->o.tag;
@@ -161,12 +161,12 @@ lk_obj_t *lk_obj_allocWithSize(lk_obj_t *parent, size_t s) {
     if(tag->allocfunc != NULL) tag->allocfunc(self, parent);
     if(gc != NULL) {
         gc->newvalues ++;
-        lk_objGroup_insert(gc->unused, self);
+        lk_objgroup_insert(gc->unused, self);
     }
     return self;
 }
 lk_obj_t *lk_obj_alloc(lk_obj_t *parent) {
-    return lk_obj_allocWithSize(parent, parent->o.tag->size);
+    return lk_obj_alloc_withsize(parent, parent->o.tag->size);
 }
 lk_obj_t *lk_obj_clone(lk_obj_t *self) {
     lk_obj_t *c = lk_obj_alloc(LK_OBJ_PROTO(self));
@@ -183,7 +183,7 @@ void lk_obj_justfree(lk_obj_t *self) {
     mem_free(self);
 }
 void lk_obj_free(lk_obj_t *self) {
-    lk_objGroup_remove(self);
+    lk_objgroup_remove(self);
     lk_obj_justfree(self);
 }
 
@@ -243,7 +243,7 @@ struct lk_slot *lk_obj_setslot(lk_obj_t *self, lk_obj_t *k,
 struct lk_slot *lk_obj_setslotbycstr(lk_obj_t *self, const char *k,
                                         lk_obj_t *check, lk_obj_t *v) {
     return lk_obj_setslot(self,
-    LK_OBJ(lk_str_newFromCString(LK_VM(self), k)), check, v);
+    LK_OBJ(lk_str_new_fromcstr(LK_VM(self), k)), check, v);
 }
 void lk_obj_setvalueonslot(lk_obj_t *self, struct lk_slot *slot,
                               lk_obj_t *v) {
@@ -339,7 +339,7 @@ static lk_cfunc_t *lk_obj_setcfunc(lk_obj_t *self, const char *name, lk_cfunc_lk
     lk_vm_t *vm = LK_VM(self);
     int i;
     lk_obj_t *arg;
-    lk_str_t *nameobj = lk_str_newFromCString(vm, name);
+    lk_str_t *nameobj = lk_str_new_fromcstr(vm, name);
     lk_cfunc_t *cfuncobj = lk_cfunc_new(vm, cfunc, 0, 0);
     struct lk_slot *slot = lk_obj_getslot(self, LK_OBJ(nameobj));
     if(slot != NULL) {

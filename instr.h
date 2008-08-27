@@ -40,7 +40,7 @@ lk_instr_t *lk_instr_newarglist(lk_parser_t *parser, lk_instr_t *first);
 lk_instr_t *lk_instr_newcomment(lk_parser_t *parser, lk_str_t *s);
 lk_instr_t *lk_instr_newstr(lk_parser_t *parser, lk_str_t *s);
 lk_instr_t *lk_instr_newempty(lk_parser_t *parser);
-lk_instr_t *lk_instr_newNumber(lk_parser_t *parser, double num);
+lk_instr_t *lk_instr_new_number(lk_parser_t *parser, double num);
 lk_instr_t *lk_instr_newchar(lk_parser_t *parser, uint32_t c);
 lk_instr_t *lk_instr_newmessage(lk_parser_t *parser, lk_str_t *name);
 lk_instr_t *lk_instr_newscopemessage(lk_parser_t *parser, lk_str_t *name);

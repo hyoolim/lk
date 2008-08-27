@@ -18,7 +18,7 @@ struct lk_vm {
         struct lk_rsrcchain *rsrc;
     } *rescue;
     lk_instr_t *currinstr;
-    lk_scope_t *currentScope;
+    lk_scope_t *currscope;
     lk_err_t *lasterr;
     lk_gc_t *gc;
     lk_scope_t *global;
@@ -54,9 +54,9 @@ struct lk_vm {
 
     /* statistics */
     struct {
-        long totalInstructions;
-        long totalScopes;
-        long recycledScopes;
+        long totalinstrs;
+        long totalscopes;
+        long recycledscopes;
     } stat;
 };
 

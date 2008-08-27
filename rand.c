@@ -34,14 +34,14 @@ static void nextInteger_rand(lk_obj_t *self, lk_scope_t *local) {
 }
 void lk_rand_extinit(lk_vm_t *vm) {
     lk_obj_t *num = vm->t_num;
-    lk_obj_t *rand = lk_obj_allocWithSize(vm->t_obj, sizeof(lk_rand_t));
+    lk_obj_t *rand = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_rand_t));
     lk_obj_setallocfunc(rand, alloc_rand);
     alloc_rand(rand, NULL);
-    lk_lib_setGlobal("RandomNumberGenerator", rand);
+    lk_global_set("RandomNumberGenerator", rand);
     lk_obj_set_cfunc_lk(rand, "init!", init_rand_num, num, NULL);
     lk_obj_set_cfunc_lk(rand, "nextFloat", nextFloat_rand, NULL);
     lk_obj_set_cfunc_lk(rand, "nextInteger", nextInteger_rand, NULL);
-    lk_lib_setCField(rand, "seed", num, offsetof(lk_rand_t, seed));
+    lk_obj_set_cfield(rand, "seed", num, offsetof(lk_rand_t, seed));
 }
 
 /* modified and cut so that mult rand gen are possible */

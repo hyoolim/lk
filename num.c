@@ -6,7 +6,7 @@ static void alloc_num(lk_obj_t *self, lk_obj_t *parent) {
     CNUMBER(self) = CNUMBER(parent);
 }
 void lk_num_typeinit(lk_vm_t *vm) {
-    vm->t_num = lk_obj_allocWithSize(vm->t_obj, sizeof(lk_num_t));
+    vm->t_num = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_num_t));
     lk_obj_setallocfunc(vm->t_num, alloc_num);
 }
 
@@ -77,13 +77,13 @@ static void subtractB_num_num(lk_obj_t *self, lk_scope_t *local) {
 }
 static void to_str_num_num_num(lk_obj_t *self, lk_scope_t *local) {
     int i = CNUMBER(ARG(0)), f = CNUMBER(ARG(1));
-    char cString[200];
-    snprintf(cString, 200, "%*.*f", i, f, CNUMBER(self));
-    RETURN(lk_str_newFromCString(VM, cString));
+    char cstr[200];
+    snprintf(cstr, 200, "%*.*f", i, f, CNUMBER(self));
+    RETURN(lk_str_new_fromcstr(VM, cstr));
 }
 void lk_num_libinit(lk_vm_t *vm) {
     lk_obj_t *num = vm->t_num;
-    lk_lib_setGlobal("Number", num);
+    lk_global_set("Number", num);
     lk_obj_set_cfunc_lk(num, "abs", abs_num, NULL);
     lk_obj_set_cfunc_lk(num, "+", add_num_num, num, NULL);
     lk_obj_set_cfunc_lk(num, "+=", addB_num_num, num, NULL);

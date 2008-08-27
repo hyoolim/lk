@@ -96,18 +96,18 @@ static void system_vm(lk_obj_t *self, lk_scope_t *local) {
         int i, c = local->argc;
         char **args = mem_alloc(sizeof(char *) * (c + 1));
         for(i = 0; i < c; i ++) {
-            args[i] = (char *)darray_toCString(DARRAY(ARG(i)));
+            args[i] = (char *)darray_tocstr(DARRAY(ARG(i)));
         }
         execvp(args[0], args);
         lk_vm_raiseerrno(VM);
     }
 }
 static void system2_vm_str(lk_obj_t *self, lk_scope_t *local) {
-    FILE *out = popen(darray_toCString(DARRAY(ARG(0))), "r");
+    FILE *out = popen(darray_tocstr(DARRAY(ARG(0))), "r");
     if(out != NULL) {
         char ret[4096];
         char *line = fgets(ret, 4096, out);
-        if(line != NULL) RETURN(lk_str_newFromCString(VM, line));
+        if(line != NULL) RETURN(lk_str_new_fromcstr(VM, line));
     }
     RETURN(NIL);
 }
@@ -118,7 +118,7 @@ static void wait_vm(lk_obj_t *self, lk_scope_t *local) {
 }
 void lk_vm_libinit(lk_vm_t *vm) {
     lk_obj_t *tvm = vm->t_vm, *f = vm->t_func, *num = vm->t_num, *str = vm->t_str;
-    lk_lib_setGlobal("VirtualMachine", tvm);
+    lk_global_set("VirtualMachine", tvm);
     lk_obj_set_cfunc_lk(tvm, "exit", exit_vm, NULL);
     lk_obj_set_cfunc_lk(tvm, "fork", fork_vm, NULL);
     lk_obj_set_cfunc_lk(tvm, "fork", fork_vm_f, f, NULL);
@@ -160,13 +160,13 @@ lk_vm_t *lk_vm_new(void) {
 
     /* init rest of the fields in vm */
     self->global = LK_SCOPE(lk_obj_alloc(self->t_scope));
-    self->currentScope = self->global;
-    lk_lib_setGlobal(".str.class", LK_OBJ(self->str_type = lk_str_newFromCString(self, ".CLASS")));
-    lk_lib_setGlobal(".str.forward", LK_OBJ(self->str_forward = lk_str_newFromCString(self, ".forward")));
-    lk_lib_setGlobal(".str.rescue", LK_OBJ(self->str_rescue = lk_str_newFromCString(self, ".rescue")));
-    lk_lib_setGlobal(".str.on assign", LK_OBJ(self->str_onassign = lk_str_newFromCString(self, ".on_assign")));
-    lk_lib_setGlobal(".str.at", LK_OBJ(self->str_at = lk_str_newFromCString(self, "at")));
-    lk_lib_setGlobal(".str.slash", LK_OBJ(self->str_filesep = lk_str_newFromCString(self, "/")));
+    self->currscope = self->global;
+    lk_global_set(".str.class", LK_OBJ(self->str_type = lk_str_new_fromcstr(self, ".CLASS")));
+    lk_global_set(".str.forward", LK_OBJ(self->str_forward = lk_str_new_fromcstr(self, ".forward")));
+    lk_global_set(".str.rescue", LK_OBJ(self->str_rescue = lk_str_new_fromcstr(self, ".rescue")));
+    lk_global_set(".str.on assign", LK_OBJ(self->str_onassign = lk_str_new_fromcstr(self, ".on_assign")));
+    lk_global_set(".str.at", LK_OBJ(self->str_at = lk_str_new_fromcstr(self, "at")));
+    lk_global_set(".str.slash", LK_OBJ(self->str_filesep = lk_str_new_fromcstr(self, "/")));
 
     /* attach all funcs to primitive types */
     lk_bool_libinit(self);
@@ -199,10 +199,10 @@ lk_vm_t *lk_vm_new(void) {
 }
 void lk_vm_free(lk_vm_t *self) {
     lk_gc_t *gc = self->gc;
-    lk_objGroup_remove(LK_OBJ(gc));
-    lk_objGroup_freeAll(gc->unused);
-    lk_objGroup_freeAll(gc->pending);
-    lk_objGroup_freeAll(gc->used);
+    lk_objgroup_remove(LK_OBJ(gc));
+    lk_gc_free_objgroup(gc->unused);
+    lk_gc_free_objgroup(gc->pending);
+    lk_gc_free_objgroup(gc->used);
     lk_obj_justfree(LK_OBJ(gc));
     mem_free(self);
 
@@ -225,16 +225,16 @@ static lk_scope_t *eval(lk_vm_t *self, lk_str_t *code) {
     return fr;
 }
 lk_scope_t *lk_vm_evalfile(lk_vm_t *self, const char *file, const char *base) {
-    lk_str_t *filename = lk_str_newFromCString(self, file);
+    lk_str_t *filename = lk_str_new_fromcstr(self, file);
     if(base != NULL) {
-        lk_str_t *root = lk_str_newFromCString(self, base);
+        lk_str_t *root = lk_str_new_fromcstr(self, base);
         int pos, i, pslen = LIST_COUNT(DARRAY(self->str_filesep));
-        pos = darray_findDArray(DARRAY(root), DARRAY(self->str_filesep), 0);
+        pos = darray_find_darray(DARRAY(root), DARRAY(self->str_filesep), 0);
         if(pos > 0) {
             lk_str_t *orig = filename;
-            root = lk_str_newFromDArray(self, DARRAY(root));
+            root = lk_str_new_fromdarray(self, DARRAY(root));
             pos += pslen;
-            while((i = darray_findDArray(
+            while((i = darray_find_darray(
             DARRAY(root), DARRAY(self->str_filesep), pos)) > 0) pos = i + pslen;
             darray_slice(DARRAY(root), 0, pos);
             darray_resizeitem(DARRAY(root), DARRAY(orig));
@@ -246,7 +246,7 @@ lk_scope_t *lk_vm_evalfile(lk_vm_t *self, const char *file, const char *base) {
         lk_scope_t *fr;
         struct lk_rsrcchain rsrc;
         FILE *stream;
-        const char *cfilename = darray_toCString(DARRAY(filename));
+        const char *cfilename = darray_tocstr(DARRAY(filename));
         rsrc.isstr = 0;
         rsrc.rsrc = filename;
         rsrc.prev = self->rsrc;
@@ -256,7 +256,7 @@ lk_scope_t *lk_vm_evalfile(lk_vm_t *self, const char *file, const char *base) {
             darray_t *src = str_allocfromfile(stream);
             fclose(stream);
             if(src != NULL) {
-                fr = eval(self, lk_str_newFromDArray(self, src));
+                fr = eval(self, lk_str_new_fromdarray(self, src));
                 darray_free(src);
                 self->rsrc = self->rsrc->prev;
                 return fr;
@@ -276,7 +276,7 @@ lk_scope_t *lk_vm_evalstr(lk_vm_t *self, const char *code) {
     lk_scope_t *fr;
     struct lk_rsrcchain rsrc;
     rsrc.isstr = 1;
-    rsrc.rsrc = lk_str_newFromCString(self, code);
+    rsrc.rsrc = lk_str_new_fromcstr(self, code);
     rsrc.prev = self->rsrc;
     self->rsrc = &rsrc;
     fr = eval(self, rsrc.rsrc);
@@ -307,7 +307,7 @@ lk_scope_t *lk_vm_evalstr(lk_vm_t *self, const char *code) {
         } else { \
             LK_CFUNC(func)->cfunc.lk((args)->receiver, (args)); \
         } \
-        vm->currentScope = (self); \
+        vm->currscope = (self); \
     } else { \
         (args)->o.parent = LK_OBJ(LK_KFUNC(func)->scope); \
         (args)->self = LK_OBJ_ISSCOPE((args)->receiver) \
@@ -318,7 +318,7 @@ lk_scope_t *lk_vm_evalstr(lk_vm_t *self, const char *code) {
     goto nextinstr; \
 } while(0)
 void lk_vm_doevalfunc(lk_vm_t *vm) {
-    lk_scope_t *self = vm->currentScope;
+    lk_scope_t *self = vm->currscope;
     lk_gc_t *gc = vm->gc;
     lk_instr_t *instr;
     lk_scope_t *args;
@@ -369,7 +369,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
     }
     /* like how cpu execs instrs by following a program sizeer */
     if((instr = self->next) == NULL) goto prevscope;
-    vm->stat.totalInstructions ++;
+    vm->stat.totalinstrs ++;
     vm->currinstr = self->current = instr;
     self->next = instr->next;
     switch(instr->type) {
@@ -425,19 +425,19 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
     self = self->returnto;
     if(self == NULL) {
         vm->rescue = vm->rescue->prev;
-        vm->currentScope = vm->currentScope->caller;
+        vm->currscope = vm->currscope->caller;
         return;
     }
     switch(args->type) {
     /* take the scope and return last val */
     case LK_SCOPETYPE_RETURN:
         lk_scope_stackpush(self, lk_scope_stackpeek(args));
-        vm->currentScope = self;
+        vm->currscope = self;
         goto nextinstr;
     /* take the scope and convert to list */
     case LK_SCOPETYPE_LIST:
         lk_scope_stackpush(self, LK_OBJ(lk_scope_stacktolist(args)));
-        vm->currentScope = self;
+        vm->currscope = self;
         goto nextinstr;
     /* take the scope and use as args for msg */
     case LK_SCOPETYPE_APPLY:
@@ -469,7 +469,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         && (instr == NULL
         || instr->next == NULL
         || instr->next->type != LK_INSTRTYPE_APPLYMSG
-        || darray_compareToCString(DARRAY(instr->next->v), "+=") != 0)) {
+        || darray_cmp_tocstr(DARRAY(instr->next->v), "+=") != 0)) {
             callfunc:
             if(args == NULL) args = lk_scope_new(vm);
             func = lk_func_match(LK_FUNC(slotv), args, recv);
@@ -547,7 +547,7 @@ void lk_vm_raisecstr(lk_vm_t *self, const char *message, ...) {
 }
 void lk_vm_raiseerrno(lk_vm_t *self) {
     lk_err_t *err = LK_ERROR(lk_obj_alloc(self->t_err));
-    err->message = lk_str_newFromCString(self, strerror(errno));
+    err->message = lk_str_new_fromcstr(self, strerror(errno));
     lk_vm_raiseerr(self, err);
 }
 void lk_vm_raiseerr(lk_vm_t *self, lk_err_t *err) {
@@ -568,15 +568,15 @@ void lk_vm_abort(lk_vm_t *self, lk_err_t *err) {
         lk_str_t *type = LK_STRING(lk_obj_getvaluefromslot(LK_OBJ(err), slot));
         lk_instr_t *expr = err->instr;
         int i = 0;
-        darray_printToStream(DARRAY(type), stdout);
+        darray_print_tostream(DARRAY(type), stdout);
         fprintf(stdout, "\n* rsrc: ");
-        darray_printToStream(DARRAY(expr->rsrc), stdout);
+        darray_print_tostream(DARRAY(expr->rsrc), stdout);
         fprintf(stdout, "\n* line: %i", expr->line);
         while(expr->prev != NULL) { expr = expr->prev; i ++; }
         fprintf(stdout, "\n* instruction(%i): ", i);
         lk_instr_print(expr);
         fprintf(stdout, "\n* text: ");
-        if(err->message != NULL) darray_printToStream(DARRAY(err->message), stdout);
+        if(err->message != NULL) darray_print_tostream(DARRAY(err->message), stdout);
         printf("\n");
     } else {
         printf("Unknown err!\n");

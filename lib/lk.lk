@@ -538,7 +538,7 @@ Scope/extend {
     /while := { cond : True, block | block(); retry }
     /while += { cond : False, block | }
     /write := { args... | STDOUT/write(*args); /. }
-    /writeLine := { args... | STDOUT/write(*args, NEWLINE); /. }
+    /writeLine := { args... | STDOUT/write(*args, Newline); /. }
 }
 
 # VirtualMachine/GarbageCollector
@@ -555,7 +555,7 @@ File/extend {
     /write += { args... | args/each { v | /write(v/toString) }; /. }
 
     # Calls write on the arguments and nl.
-    /writeLine := { args... | /write(*args, NEWLINE) }
+    /writeLine := { args... | /write(*args, Newline) }
 }
 
 # default error handler

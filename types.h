@@ -68,7 +68,6 @@ struct lk_common {
 };
 
 /* used by ext - can't be in lib.h due to bootstrapping issues */
-typedef void lk_libraryinitfunc_t(lk_vm_t *vm);
 typedef void lk_cfunc_lk_t(lk_obj_t *self, lk_scope_t *local);
 typedef lk_obj_t *lk_cfunc_r0_t(lk_obj_t *self);
 typedef lk_obj_t *lk_cfunc_r1_t(lk_obj_t *self, lk_obj_t *a0type);

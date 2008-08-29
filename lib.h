@@ -1,8 +1,9 @@
-#ifndef LK_EXT_H
-#define LK_EXT_H
+#ifndef LK_LIB_H
+#define LK_LIB_H
 #include "types.h"
 #include "bool.h"
 #include "charset.h"
+#include "dl.h"
 #include "err.h"
 #include "file.h"
 #include "func.h"
@@ -25,12 +26,6 @@
 #include "scope.h"
 #include "socket.h"
 #include "vm.h"
-
-/* type */
-struct lk_library {
-    struct lk_common o;
-    void             *lib;
-};
 
 /* ext shortcuts */
 #define ARG(i) (assert(local != NULL && 0 <= (i) && (i) < local->argc),  LK_OBJ(LIST_ATPTR(&local->stack, (i))))
@@ -59,12 +54,4 @@ struct lk_library {
 #define CHKOPT(v, o) ((v) & (o))
 #define SETOPT(v, o) ((v) |= (o))
 #define CLROPT(v, o) ((v) &= ~(o))
-
-/* ext map */
-void lk_library_extinit(lk_vm_t *vm);
-
-/* update */
-void lk_object_set(lk_obj_t *parent, const char *k, lk_obj_t *v);
-void lk_global_set(const char *k, lk_obj_t *v);
-void lk_obj_set_cfield(lk_obj_t *self, const char *k, lk_obj_t *t, size_t offset);
 #endif

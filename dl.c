@@ -1,36 +1,42 @@
-#include "dl.h"
+#include "lib.h"
 #include <dlfcn.h>
 
 /* type */
 static void free_dl(lk_obj_t *self) {
     if(LK_DL(self)->dl != NULL) {
         dlclose(LK_DL(self)->dl);
+        LK_DL(self)->dl = NULL;
     }
 }
-lk
-static void init_dl_str_str(lk_obj_t *self, lk_scope_t *local) {
-    const char *libpath = darray_tocstr(DARRAY(ARG(0)));
-    void *lib = dlopen(libpath, RTLD_NOW);
-    if(lib != NULL) {
-        const char *initname = darray_tocstr(DARRAY(ARG(1)));
-        union { void *p; lk_dlinitfunc_t *f; } initfunc;
-        initfunc.p = dlsym(lib, initname);
-        LK_DL(self)->lib = lib;
-        if(initfunc.f != NULL) initfunc.f(VM);
-        else {
+void lk_dl_typeinit(lk_vm_t *vm) {
+    vm->t_dl = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_dl_t));
+    lk_obj_setfreefunc(vm->t_dl, free_dl);
+}
+
+/* new */
+void lk_dl_init_withpath_andfunc(lk_dl_t *self, lk_str_t *path, lk_str_t *funcname) {
+    void *dl = dlopen(darray_tocstr(DARRAY(path)), RTLD_NOW);
+    if(dl != NULL) {
+        union { void *p; void (*f)(lk_vm_t *vm); } func;
+        self->dl = dl;
+        func.p = dlsym(dl, darray_tocstr(DARRAY(funcname)));
+        if(func.f != NULL) {
+            func.f(VM);
+        } else {
             printf("dlsym: %s\n", dlerror());
         }
     } else {
         printf("dlopen: %s\n", dlerror());
     }
-    RETURN(self);
 }
+
+/* bind all c funcs to lk equiv */
 void lk_dl_libinit(lk_vm_t *vm) {
-    lk_obj_t *str = vm->t_str;
-    lk_obj_t *dl = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_dl_t));
-    lk_obj_setfreefunc(dl, free_dl);
+    lk_obj_t *dl = vm->t_dl, *str = vm->t_str;
     lk_global_set("DynamicLibrary", dl);
-    lk_obj_set_cfunc_lk(dl, "init!", init_dl_str_str, str, str, NULL);
+
+    /* new */
+    lk_obj_set_cfunc_cvoid(dl, "init!", lk_dl_init_withpath_andfunc, str, str, NULL);
 }
 
 /* update */

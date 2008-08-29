@@ -18,7 +18,7 @@ endif
 ## output files
 sources = $(wildcard base/*.c) $(wildcard *.c)
 objects = $(addprefix tmp/,$(patsubst %.c,%.o,$(sources)))
-depends = $(patsubst %.o,%.d,$(objects))
+depends = $(patsubst %.o,%.d,$(objects)) tmp/exe/lk_mini.d tmp/exe/lk.d
 
 ## main targets
 .PHONY: all clean install test
@@ -50,7 +50,7 @@ $(objects) $(depends): tmp/init
 tmp/%.o: %.c
 	$(COMPILER) $(COMPILER_FLAGS) -c $< -o $@
 tmp/%.d: %.c
-	$(COMPILER) -MM -MT tmp/$(patsubst %.c,%.d,$<) -MT tmp/$(patsubst %.c,%.o,$<) -MF $@ $<
+	$(COMPILER) $(COMPILER_FLAGS) -MM -MT tmp/$(patsubst %.c,%.d,$<) -MT tmp/$(patsubst %.c,%.o,$<) -MF $@ $<
 tmp/exe/lk_mini: $(objects) tmp/exe/lk_mini.o
 	$(COMPILER) $(LINKER_FLAGS) -o tmp/exe/lk_mini $(objects) tmp/exe/lk_mini.o
 tmp/conf.dat: tmp/exe/lk_mini conf.lk

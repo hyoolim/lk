@@ -157,6 +157,7 @@ lk_vm_t *lk_vm_new(void) {
     lk_list_typeinit(self);
     lk_parser_typeinit(self);
     lk_pipe_typeinit(self);
+    lk_dl_typeinit(self);
 
     /* init rest of the fields in vm */
     self->global = LK_SCOPE(lk_obj_alloc(self->t_scope));
@@ -189,10 +190,10 @@ lk_vm_t *lk_vm_new(void) {
     lk_str_libinit(self);
     lk_vm_libinit(self);
     lk_seq_libinit(self);
+    lk_dl_libinit(self);
 
     /* extra libs */
     lk_env_extinit(self);
-    lk_library_extinit(self);
     lk_rand_extinit(self);
     lk_socket_extinit(self);
     return self;

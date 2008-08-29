@@ -304,7 +304,7 @@ void darray_setrange(darray_t *self, int b, int e, darray_t *v) {
     int i, d, sc = self->size, vc = v->size;
     if(b < 0) b += sc;
     if(e < 0) e += vc;
-    d = e - b - vc + 1;
+    d = e - b - vc;
     if(d > 0) for(; d > 0; d --) darray_remove(self, b);
     else if(d < 0) {
         void *t = NULL;

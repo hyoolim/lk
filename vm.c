@@ -8,7 +8,7 @@
 #include "file.h"
 #include "vec.h"
 #include "num.h"
-#include "folder.h"
+#include "dir.h"
 #include "scope.h"
 #include "func.h"
 #include "gc.h"
@@ -148,7 +148,7 @@ lk_vm_t *lk_vm_new(void) {
     lk_charset_typeinit(self);
     lk_err_typeinit(self);
     lk_file_typeinit(self);
-    lk_folder_typeinit(self);
+    lk_dir_typeinit(self);
     lk_vec_typeinit(self);
     lk_num_typeinit(self);
     lk_scope_typeinit(self);
@@ -175,7 +175,7 @@ lk_vm_t *lk_vm_new(void) {
     lk_map_libinit(self);
     lk_err_libinit(self);
     lk_file_libinit(self);
-    lk_folder_libinit(self);
+    lk_dir_libinit(self);
     lk_vec_libinit(self);
     lk_num_libinit(self);
     lk_scope_libinit(self);

@@ -138,6 +138,7 @@ void lk_obj_libinit(lk_vm_t *vm) {
     lk_obj_set_cfunc_lk(obj, "do", do_obj_f, f, NULL);
     lk_obj_set_cfunc_lk(obj, "extend", do_obj_f, f, NULL);
     lk_obj_set_cfunc_lk(obj, "import", import_obj_obj, obj, NULL);
+    lk_obj_set_cfunc_lk(obj, "is?", ancestor_obj_obj, obj, NULL);
     lk_obj_set_cfunc_lk(obj, "parents", parents_obj, NULL);
     lk_obj_set_cfunc_lk(obj, "parent", parent_obj, NULL);
     lk_obj_set_cfunc_lk(obj, "with", with_obj_f, f, NULL);

@@ -6,12 +6,16 @@
 struct lk_file {
     struct lk_common  o;
     lk_str_t         *path;
+    lk_str_t         *name;
     FILE             *fd;
 };
 
 /* init */
 void lk_file_typeinit(lk_vm_t *vm);
 void lk_file_libinit(lk_vm_t *vm);
+
+/* new */
+lk_file_t *lk_file_new_withpath(lk_vm_t *vm, lk_str_t *path);
 
 /* update */
 void lk_file_close(lk_file_t *self);

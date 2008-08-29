@@ -16,7 +16,7 @@
 #include "char.h"
 #include "env.h"
 #include "ext.h"
-#include "folder.h"
+#include "dir.h"
 #include "gc.h"
 #include "list.h"
 #include "num.h"

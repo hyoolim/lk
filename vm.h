@@ -28,7 +28,7 @@ struct lk_vm {
     /* char     */ lk_obj_t *t_char;
     /* charset  */ lk_obj_t *t_charset;
     /* err    */ lk_obj_t *t_err;
-    /* file     */ lk_obj_t *t_file, *t_folder, *t_stdin, *t_stdout, *t_stderr;
+    /* file     */ lk_obj_t *t_file, *t_dir, *t_stdin, *t_stdout, *t_stderr;
     /* vec   */ lk_obj_t *t_vec;
     /* fixnum   */ lk_obj_t *t_num;
     /* scope    */ lk_obj_t *t_scope;

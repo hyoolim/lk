@@ -19,6 +19,33 @@ void lk_file_typeinit(lk_vm_t *vm) {
     LK_FILE(vm->t_stderr = lk_obj_alloc(vm->t_file))->fd = stderr;
 }
 
+/* new */
+lk_file_t *lk_file_new_withpath(lk_vm_t *vm, lk_str_t *path) {
+    lk_file_t *self = LK_FILE(lk_obj_alloc(vm->t_file));
+    lk_file_init_str(self, path);
+    return self;
+}
+void lk_file_init_str(lk_file_t *self, lk_str_t *path) {
+    int at = 0, nextat;
+    if(darray_getuchar(DARRAY(path), 0) == '/') {
+        self->path = path;
+    } else {
+        char buf[1000];
+        if(getcwd(buf, 1000) != NULL) {
+            lk_str_t *abs = lk_str_new_fromcstr(VM, buf);
+            darray_concat(DARRAY(abs), DARRAY(VM->str_filesep));
+            darray_concat(DARRAY(abs), DARRAY(path));
+            self->path = abs;
+        }
+    }
+    while((nextat = darray_find_char(DARRAY(self->path), '/', at)) > -1) {
+        at = nextat + 1;
+    }
+    self->name = lk_str_new_fromdarray(VM, DARRAY(self->path));
+    darray_offset(DARRAY(self->name), at);
+
+}
+
 /* update */
 void lk_file_close(lk_file_t *self) {
     if(self->fd != NULL) {
@@ -37,9 +64,6 @@ void lk_file_flush(lk_file_t *self) {
     if(self->fd != NULL && fflush(self->fd) != 0) {
         lk_vm_raiseerrno(VM);
     }
-}
-void lk_file_init_str(lk_file_t *self, lk_str_t *path) {
-    self->path = path;
 }
 void lk_file_move_str(lk_file_t *self, lk_str_t *dest) {
     if(rename(CSTRING(self->path), CSTRING(dest)) != 0) {
@@ -126,12 +150,15 @@ void lk_file_libinit(lk_vm_t *vm) {
 
     /* props */
     lk_obj_set_cfield(file, "path", str, offsetof(lk_file_t, path));
+    lk_obj_set_cfield(file, "name", str, offsetof(lk_file_t, name));
+
+    /* new */
+    lk_obj_set_cfunc_cvoid(file, "init!", lk_file_init_str, str, NULL);
 
     /* update */
     lk_obj_set_cfunc_cvoid(file, "close!", lk_file_close, NULL);
     lk_obj_set_cfunc_cvoid(file, "delete!", lk_file_delete, NULL);
     lk_obj_set_cfunc_cvoid(file, "flush!", lk_file_flush, NULL);
-    lk_obj_set_cfunc_cvoid(file, "init!", lk_file_init_str, str, NULL);
     lk_obj_set_cfunc_cvoid(file, "move!", lk_file_move_str, str, NULL);
     lk_obj_set_cfunc_cvoid(file, "open", lk_file_open, str, NULL);
     lk_obj_set_cfunc_cvoid(file, "write", lk_file_write_str, str, NULL);

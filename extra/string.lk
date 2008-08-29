@@ -1,48 +1,50 @@
 # String
 #
-'--- ** (repetition) ---'/println
-'Ho! ' ** 3 ->toCode ->println
+writeLine('--- ** (repetition) ---')
+writeLine('Ho! ' ** 3 ->toCode)
 #
-'--- ++ (concat) ---'/println
+writeLine('--- ++ (concat) ---')
 a := 'hello '
 a ++= 'world'
-a ->toCode ->println
+writeLine(a ->toCode)
 #
-'--- <=> (comparison) ---'/println
-'abcdef' <=> 'abcde' ->toCode ->println
-'abcdef' <=> 'abcdef' ->toCode ->println
-'abcdef' <=> 'abcdefg' ->toCode ->println
-'abcdef' <=> 'ABCDEF' ->toCode ->println
+writeLine('--- <=> (comparison) ---')
+writeLine('abcdef' <=> 'abcde' ->toCode)
+writeLine('abcdef' <=> 'abcdef' ->toCode)
+writeLine('abcdef' <=> 'abcdefg' ->toCode)
+writeLine('abcdef' <=> 'ABCDEF' ->toCode)
 #
-'--- each ---'/println
-'hello;world'/each[';'] { v --- '<'/print; v/print; '>'/println }
+writeLine('--- each ---')
+'hello;world'/each(';') { v | writeLine('<', v, '>') }
 #
-'--- index ---'/println
-'hello'/find['e'] ->toCode ->println
-'hello'/find['lo'] ->toCode ->println
-'hello'/find['a'] ->toCode ->println
+writeLine('--- index ---')
+writeLine('hello'/find('e') ->toCode)
+writeLine('hello'/find('lo') ->toCode)
+writeLine('hello'/find('a') ->toCode)
 #
-'--- justifyLeft ---'/println
-'hello'/justifyLeft[4] ->toCode ->println
-'hello'/justifyLeft[20] ->toCode ->println
+writeLine('--- justifyLeft ---')
+writeLine('hello'/justifyLeft(4) ->toCode)
+writeLine('hello'/justifyLeft(20) ->toCode)
 #
-'--- justifyCenter ---'/println
-'hello'/justifyCenter[4] ->toCode ->println
-'hello'/justifyCenter[20] ->toCode ->println
+writeLine('--- justifyCenter ---')
+writeLine('hello'/justifyCenter(4) ->toCode)
+writeLine('hello'/justifyCenter(20) ->toCode)
 #
-'--- justifyRight ---'/println
-'hello'/justifyRight[4] ->toCode ->println
-'hello'/justifyRight[20] ->toCode ->println
+writeLine('--- justifyRight ---')
+writeLine('hello'/justifyRight(4) ->toCode)
+writeLine('hello'/justifyRight(20) ->toCode)
 #
-'--- set! ---'/println
-'hello'/set![2; 4; 'xyz'] ->toCode ->println
-'hello'/set![-4; 2; 'xyz'] ->toCode ->println
-'hello'/set![2; 0; 'xyz'] ->toCode ->println
+writeLine('--- set! ---')
+writeLine('hello'/set!(2, 4, 'xyz') ->toCode)
+writeLine('hello'/set!(-4, 2, 'xyz') ->toCode)
+writeLine('hello'/set!(2, 0, 'xyz') ->toCode)
+writeLine('hello'/set!(0, 0, 'xyz') ->toCode)
+writeLine('hello'/set!(0, 10, 'xyz') ->toCode)
 #
-'--- divide ---'/println
-'nows  the time' % ' ' ->toCode ->println
-'mellow yellow' % 'ello' ->toCode ->println
+writeLine('--- divide ---')
+writeLine('nows  the time' % ' ' ->toCode)
+writeLine('mellow yellow' % 'ello' ->toCode)
 #
-'--- char/toString --'/println
-char := Character/new[] + 48
-char/toString -> println
+writeLine('--- char/toString --')
+char := Character/new() + 48
+writeLine(char/toString)

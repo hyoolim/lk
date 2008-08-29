@@ -12,7 +12,7 @@ typedef struct lk_charset lk_charset_t;
 typedef struct lk_env lk_env_t;
 typedef struct lk_err lk_err_t;
 typedef struct lk_file lk_file_t;
-typedef struct lk_folder lk_folder_t;
+typedef struct lk_dir lk_dir_t;
 typedef struct lk_func lk_func_t;
 typedef struct lk_cfunc lk_cfunc_t;
 typedef struct lk_gfunc lk_gfunc_t;
@@ -86,7 +86,7 @@ typedef void lk_cfuncfunc_t(lk_obj_t *self, lk_scope_t *local);
 #define LK_ENV(obj) ((lk_env_t *)(obj))
 #define LK_ERROR(obj) ((lk_err_t *)(obj))
 #define LK_FILE(obj) ((lk_file_t *)(obj))
-#define LK_FOLDER(obj) ((lk_folder_t *)(obj))
+#define LK_DIR(obj) ((lk_dir_t *)(obj))
 #define LK_FUNC(obj) ((lk_func_t *)(obj))
 #define LK_FUNCORUNNING  (1 << 0)
 #define LK_FUNCOASSIGNED (1 << 1)

@@ -218,6 +218,16 @@ False/extend {
 
 # File
 
+# Directory
+Directory/extend {
+    /files := { /items/keep { i | i/is?(File) } }
+    /filesWithExtension := { extension |
+        !(extension/startsWith('.')) ? { extension = '.' ++ extension }
+        /files/keep { i | i/path/endsWith(extension) }
+    }
+    /directories := { /items/keep { i | i/is?(Directory) } }
+}
+
 # Function
 
 # GenericFunction < Function
@@ -447,6 +457,7 @@ String/extend {
             i = i/succ
         }
     }
+    /endsWith := { suffix | suffix == /at(-(suffix/size), /size) }
     /format := { ... }
     /justifyCenter := { len |
         len < /size ? /. ! {
@@ -465,6 +476,7 @@ String/extend {
     # Replaces all the occurences of from argument in the string
     # with to argument.
     /replace! := { from, to | /. % from ->join(to) }
+    /startsWith := { prefix | prefix == /at(0, prefix/size) }
     /toCode := { | "'" ++ /. ++ "'" }
     /toInteger := { ... }
 

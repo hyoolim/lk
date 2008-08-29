@@ -45,7 +45,7 @@ void lk_str_unescape(lk_str_t *self) {
     uint32_t c;
     for(i = 0; (i = darray_find_char(data, '\\', i)) >= 0; i ++) {
         darray_removeuchar(data, i);
-        switch(c = darray_getuchar(data, i + 1)) {
+        switch(c = darray_getuchar(data, i)) {
             case 'n': darray_setuchar(data, i, '\012'); break;
             case 'r': darray_setuchar(data, i, '\015'); break;
             case 't': darray_setuchar(data, i, '\t'  ); break;

@@ -1,4 +1,4 @@
-#include "ext.h"
+#include "lib.h"
 
 /* ext map - types */
 void lk_bool_typeinit(lk_vm_t *vm) {

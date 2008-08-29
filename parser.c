@@ -1,5 +1,5 @@
 #include "parser.h"
-#include "ext.h"
+#include "lib.h"
 #include "str.h"
 #define PARSER (LK_PARSER(self))
 

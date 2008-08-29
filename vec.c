@@ -1,5 +1,5 @@
 #include "vec.h"
-#include "ext.h"
+#include "lib.h"
 #include "num.h"
 
 /* ext map - types */

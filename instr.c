@@ -1,4 +1,4 @@
-#include "ext.h"
+#include "lib.h"
 
 /* ext map - types */
 static LK_OBJ_DEFMARKFUNC(mark_instr) {

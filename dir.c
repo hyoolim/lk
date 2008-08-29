@@ -1,4 +1,4 @@
-#include "ext.h"
+#include "lib.h"
 #include <dirent.h>
 #include <errno.h>
 #include <sys/stat.h>

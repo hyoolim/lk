@@ -1,4 +1,4 @@
-#include "ext.h"
+#include "lib.h"
 
 /* ext map - types */
 static void free_gc(lk_obj_t *self) {

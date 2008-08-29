@@ -1,19 +1,21 @@
-#include "ext.h"
+#include "dl.h"
 #include <dlfcn.h>
-#include <stdarg.h>
 
-/* ext map - types */
-static void free_ext(lk_obj_t *self) {
-    if(LK_EXT(self)->lib != NULL) dlclose(LK_EXT(self)->lib);
+/* type */
+static void free_dl(lk_obj_t *self) {
+    if(LK_DL(self)->dl != NULL) {
+        dlclose(LK_DL(self)->dl);
+    }
 }
-static void init_ext_str_str(lk_obj_t *self, lk_scope_t *local) {
+lk
+static void init_dl_str_str(lk_obj_t *self, lk_scope_t *local) {
     const char *libpath = darray_tocstr(DARRAY(ARG(0)));
     void *lib = dlopen(libpath, RTLD_NOW);
     if(lib != NULL) {
         const char *initname = darray_tocstr(DARRAY(ARG(1)));
-        union { void *p; lk_libraryinitfunc_t *f; } initfunc;
+        union { void *p; lk_dlinitfunc_t *f; } initfunc;
         initfunc.p = dlsym(lib, initname);
-        LK_EXT(self)->lib = lib;
+        LK_DL(self)->lib = lib;
         if(initfunc.f != NULL) initfunc.f(VM);
         else {
             printf("dlsym: %s\n", dlerror());
@@ -23,12 +25,12 @@ static void init_ext_str_str(lk_obj_t *self, lk_scope_t *local) {
     }
     RETURN(self);
 }
-void lk_library_extinit(lk_vm_t *vm) {
+void lk_dl_libinit(lk_vm_t *vm) {
     lk_obj_t *str = vm->t_str;
-    lk_obj_t *ext = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_library_t));
-    lk_obj_setfreefunc(ext, free_ext);
-    lk_global_set("Extension", ext);
-    lk_obj_set_cfunc_lk(ext, "init!", init_ext_str_str, str, str, NULL);
+    lk_obj_t *dl = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_dl_t));
+    lk_obj_setfreefunc(dl, free_dl);
+    lk_global_set("DynamicLibrary", dl);
+    lk_obj_set_cfunc_lk(dl, "init!", init_dl_str_str, str, str, NULL);
 }
 
 /* update */

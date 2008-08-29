@@ -20,7 +20,7 @@ typedef struct lk_kfunc lk_kfunc_t;
 typedef struct lk_sig lk_sig_t;
 typedef struct lk_gc lk_gc_t;
 typedef struct lk_instr lk_instr_t;
-typedef struct lk_library lk_library_t;
+typedef struct lk_dl lk_dl_t;
 typedef struct lk_seq lk_list_t;
 typedef struct lk_map lk_map_t;
 typedef struct lk_num lk_num_t;
@@ -67,7 +67,7 @@ struct lk_common {
     }                       mark;
 };
 
-/* used by ext - can't be in ext.h due to bootstrapping issues */
+/* used by ext - can't be in lib.h due to bootstrapping issues */
 typedef void lk_libraryinitfunc_t(lk_vm_t *vm);
 typedef void lk_cfunc_lk_t(lk_obj_t *self, lk_scope_t *local);
 typedef lk_obj_t *lk_cfunc_r0_t(lk_obj_t *self);
@@ -98,7 +98,7 @@ typedef void lk_cfuncfunc_t(lk_obj_t *self, lk_scope_t *local);
 #define LK_INSTR(obj) ((lk_instr_t *)(obj))
 #define LK_INSTROHASMSGARGS (1 << 0)
 #define LK_INSTROEND        (1 << 1)
-#define LK_EXT(obj) ((lk_library_t *)(obj))
+#define LK_DL(obj) ((lk_dl_t *)(obj))
 #define LK_LIST(obj) ((lk_list_t *)(obj))
 #define LK_DARRAY(obj) ((lk_list_t *)(obj))
 #define LK_MAP(obj) ((lk_map_t *)(obj))

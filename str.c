@@ -1,7 +1,7 @@
 #include "str.h"
 #include "char.h"
 #include "charset.h"
-#include "ext.h"
+#include "lib.h"
 #include "num.h"
 
 /* type */

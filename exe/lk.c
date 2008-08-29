@@ -1,4 +1,4 @@
-#include "ext.h"
+#include "lib.h"
 
 /* eval */
 int main(int argc, const char **argv) {

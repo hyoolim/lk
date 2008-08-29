@@ -15,7 +15,7 @@
 #include "vec.h"
 #include "char.h"
 #include "env.h"
-#include "ext.h"
+#include "lib.h"
 #include "dir.h"
 #include "gc.h"
 #include "list.h"

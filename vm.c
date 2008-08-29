@@ -4,7 +4,7 @@
 #include "charset.h"
 #include "env.h"
 #include "err.h"
-#include "ext.h"
+#include "lib.h"
 #include "file.h"
 #include "vec.h"
 #include "num.h"

@@ -1,6 +1,6 @@
 #include "scope.h"
 #include "char.h"
-#include "ext.h"
+#include "lib.h"
 #include "num.h"
 #include "gc.h"
 #include "list.h"

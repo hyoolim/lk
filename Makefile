@@ -21,7 +21,7 @@ PREFIX ?= /usr/local
 ## output files
 sources = $(wildcard base/*.c) $(wildcard *.c)
 objects = $(addprefix tmp/,$(patsubst %.c,%.o,$(sources)))
-depends = $(patsubst %.o,%.d,$(objects)) tmp/exe/lk_mini.d tmp/exe/lk.d
+depends = $(patsubst %.o,%.d,$(objects)) tmp/exe/lk.d
 
 ## main targets
 .PHONY: all clean install test uninstall
@@ -31,14 +31,12 @@ clean:
 	rm -rf include
 install: all
 	mkdir -p $(PREFIX)/bin
-	cp tmp/exe/lk_mini $(PREFIX)/bin
 	cp tmp/exe/lk $(PREFIX)/bin
-	mkdir -p $(PREFIX)/lib
-	cp -R lib $(PREFIX)/lib/lk
-test: tmp/exe/lk_mini
-	for test in `find test -name '*.lk'`; do tmp/exe/lk_mini lib/lk.lk $$test; done;
+	mkdir -p $(PREFIX)/lib/lk
+	cp -R lib/* $(PREFIX)/lib/lk
+test: all
+	for test in `find test -name '*.lk'`; do tmp/exe/lk -l lib $$test; done;
 uninstall:
-	rm -rf $(PREFIX)/bin/lk_mini
 	rm -rf $(PREFIX)/bin/lk
 	rm -rf $(PREFIX)/lib/lk
 
@@ -61,9 +59,7 @@ tmp/%.o: %.c
 	$(COMPILER) $(COMPILER_FLAGS) -c $< -o $@
 tmp/%.d: %.c
 	$(COMPILER) $(COMPILER_FLAGS) -MM -MT tmp/$(patsubst %.c,%.d,$<) -MT tmp/$(patsubst %.c,%.o,$<) -MF $@ $<
-tmp/exe/lk_mini: $(objects) tmp/exe/lk_mini.o
-	$(COMPILER) $(LINKER_FLAGS) -o tmp/exe/lk_mini $(objects) tmp/exe/lk_mini.o
 tmp/exe/lk.o: exe/lk.c
 	$(COMPILER) $(COMPILER_FLAGS) -c exe/lk.c -o tmp/exe/lk.o -DPREFIX=\"$(PREFIX)\"
-tmp/exe/lk: tmp/exe/lk_mini tmp/exe/lk.o
+tmp/exe/lk: $(objects) tmp/exe/lk.o
 	$(COMPILER) $(LINKER_FLAGS) -o tmp/exe/lk $(objects) tmp/exe/lk.o

@@ -1,8 +1,8 @@
 # "Classes"
-Able       := Object/with { }
-Comparable := Able/with { }
-Enumerable := Able/with { }
-Range      := Object/with { }
+Global/Able       := Object/with { }
+Global/Comparable := Able/with { }
+Global/Enumerable := Able/with { }
+Global/Range      := Object/with { }
 
 # Boolean
 Boolean/extend {
@@ -597,9 +597,3 @@ rescue { e |
         }
     }
 }
-
-#
-PROGRAM := ARGUMENTS/shift!
-LIBRARY := ARGUMENTS/shift!
-SCRIPT := ARGUMENTS/shift!
-include(SCRIPT, '')

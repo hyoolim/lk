@@ -196,6 +196,7 @@ lk_vm_t *lk_vm_new(void) {
     lk_env_extinit(self);
     lk_rand_extinit(self);
     lk_socket_extinit(self);
+    lk_global_set("Global", self->global);
     return self;
 }
 void lk_vm_free(lk_vm_t *self) {

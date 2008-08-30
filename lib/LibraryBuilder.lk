@@ -1,0 +1,48 @@
+LibraryBuilder := Object/with {
+    /init! := { path |
+        /libDir := Directory/new(path)
+    }
+    /build := {
+
+        # set up
+        writeLine
+        writeLine('Trying to build: ' ++ /libDir/name)
+        include(/libDir/fileNamed('blueprint.lk')/path)
+        writeLine('* libraryName: ', libraryName)
+        writeLine('* cFlags: ', cFlags)
+        writeLine('* ldFlags: ', ldFlags)
+        writeLine
+
+        # sanity check on flags
+        cFlags = (cFlags ++ '-Wall -ansi -pedantic -g -I.') % ' ' ->keep { f | f(0) == 0c- }
+        ldFlags = ldFlags % ' ' ->keep { f | f(0) == 0c- }
+
+        # compile the c files
+        objFiles := [ ]
+        /libDir/filesWithExt('c')/each { cFile |
+            objFile := /libDir/fileNamed(cFile/name ++ '.o')
+            objFiles/push!(objFile)
+            writeLine([ 'cc', *cFlags, '-c', cFile/path, '-o', objFile/path, *ldFlags ]/join(' '))
+            #VirtualMachine/system('cc', *cFlags, '-c', cFile/path, '-o', objFile/path, *ldFlags) != 0 ? {
+            #    raise('Unable to compile C file: ' ++ cFile/name)
+            #}
+        }
+
+        # build the dl
+        libFile := /libDir/fileNamed(libraryName ++ '.so')
+        writeLine([ 'cc', *cFlags, '-dynamic', '-bundle', '-undefined', 'suppress', '-flat_namespace', '-o', libFile/path, *(objFiles/map { f | f/path }), *ldFlags ]/join(' '))
+        #VirtualMachine/system('cc', *cFlags, '-o', libFile/path, *(objFiles/map { f | f/path }), *ldFlags) != 0 ? {
+        #    raise('Unable to build the library: ' ++ libFile/name)
+        #}
+
+        # clean up obj files
+        objFiles/each { f | f/delete! }
+        writeLine('-' ** 70, Newline)
+    }
+    /clean := {
+        /libDir/filesWithExt('dll')/each { f | f/delete! }
+        /libDir/filesWithExt('dylib')/each { f | f/delete! }
+        /libDir/filesWithExt('so')/each { f | f/delete! }
+    }
+}
+LibraryBuilder/new('lib/MySQL')/build

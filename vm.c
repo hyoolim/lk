@@ -227,7 +227,7 @@ static lk_scope_t *eval(lk_vm_t *self, lk_str_t *code) {
 }
 lk_scope_t *lk_vm_evalfile(lk_vm_t *self, const char *file, const char *base) {
     lk_str_t *filename = lk_str_new_fromcstr(self, file);
-    if(base != NULL) {
+    if(base != NULL && file[0] != '/') {
         lk_str_t *root = lk_str_new_fromcstr(self, base);
         int pos, i, pslen = LIST_COUNT(DARRAY(self->str_filesep));
         pos = darray_find_darray(DARRAY(root), DARRAY(self->str_filesep), 0);

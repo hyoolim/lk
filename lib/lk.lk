@@ -220,12 +220,19 @@ False/extend {
 
 # Directory
 Directory/extend {
+    /directories := { /items/keep { i | i/is?(Directory) } }
+    /directoryNamed := { name | Directory/new(/path ++ '/' ++ name) }
     /files := { /items/keep { i | i/is?(File) } }
+    /fileNamed := { name | File/new(/path ++ '/' ++ name) }
     /filesWithExtension := { extension |
         !(extension/startsWith('.')) ? { extension = '.' ++ extension }
         /files/keep { i | i/path/endsWith(extension) }
     }
-    /directories := { /items/keep { i | i/is?(Directory) } }
+
+    # short names
+    /dirs := { args | /directories(*args) }
+    /dirNamed := { args | /directoryNamed(*args) }
+    /filesWithExt := { args... | /filesWithExtension(*args) }
 }
 
 # Function

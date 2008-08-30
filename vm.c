@@ -294,6 +294,8 @@ lk_scope_t *lk_vm_evalstr(lk_vm_t *self, const char *code) {
                 case 1: LK_CFUNC(func)->cfunc.v1((args)->receiver, LK_OBJ(LIST_ATPTR(&args->stack, (0)))); break; \
                 case 2: LK_CFUNC(func)->cfunc.v2((args)->receiver, LK_OBJ(LIST_ATPTR(&args->stack, (0))), LK_OBJ(LIST_ATPTR(&args->stack, (1)))); break; \
                 case 3: LK_CFUNC(func)->cfunc.v3((args)->receiver, LK_OBJ(LIST_ATPTR(&args->stack, (0))), LK_OBJ(LIST_ATPTR(&args->stack, (1))), LK_OBJ(LIST_ATPTR(&args->stack, (2)))); break; \
+                case 4: LK_CFUNC(func)->cfunc.v4((args)->receiver, LK_OBJ(LIST_ATPTR(&args->stack, (0))), LK_OBJ(LIST_ATPTR(&args->stack, (1))), LK_OBJ(LIST_ATPTR(&args->stack, (2))), LK_OBJ(LIST_ATPTR(&args->stack, 3))); break; \
+                case 5: LK_CFUNC(func)->cfunc.v5((args)->receiver, LK_OBJ(LIST_ATPTR(&args->stack, (0))), LK_OBJ(LIST_ATPTR(&args->stack, (1))), LK_OBJ(LIST_ATPTR(&args->stack, (2))), LK_OBJ(LIST_ATPTR(&args->stack, 3)), LK_OBJ(LIST_ATPTR(&args->stack, 4))); break; \
                 default: BUG("cc void not supported"); \
             } \
             lk_scope_stackpush((args)->returnto, (args)->receiver); \
@@ -303,6 +305,8 @@ lk_scope_t *lk_vm_evalstr(lk_vm_t *self, const char *code) {
                 case 1: lk_scope_stackpush((args)->returnto, LK_CFUNC(func)->cfunc.r1((args)->receiver, LK_OBJ(LIST_ATPTR(&args->stack, (0))))); break; \
                 case 2: lk_scope_stackpush((args)->returnto, LK_CFUNC(func)->cfunc.r2((args)->receiver, LK_OBJ(LIST_ATPTR(&args->stack, (0))), LK_OBJ(LIST_ATPTR(&args->stack, (1))))); break; \
                 case 3: lk_scope_stackpush((args)->returnto, LK_CFUNC(func)->cfunc.r3((args)->receiver, LK_OBJ(LIST_ATPTR(&args->stack, (0))), LK_OBJ(LIST_ATPTR(&args->stack, (1))), LK_OBJ(LIST_ATPTR(&args->stack, (2))))); break; \
+                case 4: lk_scope_stackpush((args)->returnto, LK_CFUNC(func)->cfunc.r4((args)->receiver, LK_OBJ(LIST_ATPTR(&args->stack, (0))), LK_OBJ(LIST_ATPTR(&args->stack, (1))), LK_OBJ(LIST_ATPTR(&args->stack, (2))), LK_OBJ(LIST_ATPTR(&args->stack, 3)))); break; \
+                case 5: lk_scope_stackpush((args)->returnto, LK_CFUNC(func)->cfunc.r5((args)->receiver, LK_OBJ(LIST_ATPTR(&args->stack, (0))), LK_OBJ(LIST_ATPTR(&args->stack, (1))), LK_OBJ(LIST_ATPTR(&args->stack, (2))), LK_OBJ(LIST_ATPTR(&args->stack, 3)), LK_OBJ(LIST_ATPTR(&args->stack, 4)))); break; \
                 default: BUG("cc return not supported"); \
             } \
         } else { \

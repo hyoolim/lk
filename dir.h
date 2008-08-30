@@ -19,6 +19,7 @@ void lk_dir_init(lk_dir_t *self, lk_str_t *path);
 
 /* update */
 void lk_dir_create(lk_dir_t *self);
+void lk_dir_work(lk_dir_t *self);
 
 /* info */
 lk_list_t *lk_dir_items(lk_dir_t *self);

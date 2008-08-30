@@ -1,3 +1,3 @@
 libraryName := 'liblkmysql'
-cFlags := VirtualMachine/system2('mysql_config --cflags') || VirtualMachine/system2('mysql_config5 --cflags') || '' ->trim
-ldFlags := VirtualMachine/system2('mysql_config --libs') || VirtualMachine/system2('mysql_config5 --libs') || '' ->trim
+cFlags := '-Wall -ansi -pedantic -g ' ++ (VirtualMachine/system2('mysql_config --cflags') || VirtualMachine/system2('mysql_config5 --cflags') || '')/trim
+ldFlags := (VirtualMachine/system2('mysql_config --libs') || VirtualMachine/system2('mysql_config5 --libs') || '')/trim

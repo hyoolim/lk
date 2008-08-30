@@ -5,8 +5,11 @@ LibraryBuilder := Object/with {
     /build := {
 
         # set up
+        /libDir/work!
         writeLine
-        writeLine('Trying to build: ' ++ /libDir/name)
+        writeLine(heading := 'Trying to build: ' ++ /libDir/name)
+        writeLine('-' ** heading/size)
+        writeLine
         include(/libDir/fileNamed('blueprint.lk')/path)
         writeLine('* libraryName: ', libraryName)
         writeLine('* cFlags: ', cFlags)
@@ -14,30 +17,30 @@ LibraryBuilder := Object/with {
         writeLine
 
         # sanity check on flags
-        cFlags = (cFlags ++ '-Wall -ansi -pedantic -g -I.') % ' ' ->keep { f | f(0) == 0c- }
-        ldFlags = ldFlags % ' ' ->keep { f | f(0) == 0c- }
+        cFlags = (cFlags ++ ' -I../../include') % ' '
+        ldFlags = ldFlags % ' '
 
         # compile the c files
         objFiles := [ ]
         /libDir/filesWithExt('c')/each { cFile |
             objFile := /libDir/fileNamed(cFile/name ++ '.o')
             objFiles/push!(objFile)
-            writeLine([ 'cc', *cFlags, '-c', cFile/path, '-o', objFile/path, *ldFlags ]/join(' '))
-            #VirtualMachine/system('cc', *cFlags, '-c', cFile/path, '-o', objFile/path, *ldFlags) != 0 ? {
-            #    raise('Unable to compile C file: ' ++ cFile/name)
-            #}
+            VirtualMachine/system('cc', *cFlags, '-c', cFile/name, '-o', objFile/name, *ldFlags) != 0 ? {
+                raise('Unable to compile C file: ' ++ cFile/name)
+            }
         }
 
         # build the dl
         libFile := /libDir/fileNamed(libraryName ++ '.so')
-        writeLine([ 'cc', *cFlags, '-dynamic', '-bundle', '-undefined', 'suppress', '-flat_namespace', '-o', libFile/path, *(objFiles/map { f | f/path }), *ldFlags ]/join(' '))
-        #VirtualMachine/system('cc', *cFlags, '-o', libFile/path, *(objFiles/map { f | f/path }), *ldFlags) != 0 ? {
-        #    raise('Unable to build the library: ' ++ libFile/name)
-        #}
+        VirtualMachine/system('cc', *cFlags, '-dynamic', '-bundle', '-undefined', 'suppress', '-flat_namespace', '-o', libFile/name, *(objFiles/map { f | f/name }), *ldFlags) != 0 ? {
+            raise('Unable to build the library: ' ++ libFile/name)
+        }
 
         # clean up obj files
-        objFiles/each { f | f/delete! }
-        writeLine('-' ** 70, Newline)
+        # objFiles/each { f | f/delete! }
+        writeLine
+        writeLine('-' ** heading/size)
+        writeLine
     }
     /clean := {
         /libDir/filesWithExt('dll')/each { f | f/delete! }

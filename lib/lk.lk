@@ -493,23 +493,28 @@ String/extend {
 
     # Removes all the whitespaces from beginning and end of the string.
     /trim! := { | /trimLeft!/trimRight! }
+    whitespaces := CharacterSet/new(' \n\r\t')
 
     # Removes all the whitespaces from beginning of the string.
-    /trimLeft! := { |
-        [ ' ', '\n', '\r', '\t' ]/each { v |
-            /slice(0, 1) == v ?
-                { /slice!(1, /size - 1); /trimLeft! }
+    /trimLeft! := {
+        0/to(/size - 1)/each { i |
+            !(whitespaces/has?(/at(i))) ? {
+                /offset!(i)
+                return(/.)
+            }
         }
-        /.
+        /limit!(0)
     }
 
     # Removes all the whitespaces from end of the string.
-    /trimRight! := { |
-        [ ' ', '\n', '\r', '\t' ]/each { v |
-            /slice(/size - 1, 1) == v ?
-                { /slice!(0, /size - 1); /trimRight!  }
+    /trimRight! := {
+        1/to(/size)/each { i |
+            !(whitespaces/has?(/at(/size - i))) ? {
+                /limit!(/size - i + 1)
+                return(/.)
+            }
         }
-        /.
+        /limit!(0)
     }
     /uc := { args... | /clone/uc!(*args) }
 

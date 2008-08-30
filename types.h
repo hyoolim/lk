@@ -73,10 +73,14 @@ typedef lk_obj_t *lk_cfunc_r0_t(lk_obj_t *self);
 typedef lk_obj_t *lk_cfunc_r1_t(lk_obj_t *self, lk_obj_t *a0type);
 typedef lk_obj_t *lk_cfunc_r2_t(lk_obj_t *self, lk_obj_t *a0type, lk_obj_t *a1type);
 typedef lk_obj_t *lk_cfunc_r3_t(lk_obj_t *self, lk_obj_t *a0type, lk_obj_t *a1type, lk_obj_t *a2type);
+typedef lk_obj_t *lk_cfunc_r4_t(lk_obj_t *self, lk_obj_t *a0type, lk_obj_t *a1type, lk_obj_t *a2type, lk_obj_t *a3type);
+typedef lk_obj_t *lk_cfunc_r5_t(lk_obj_t *self, lk_obj_t *a0type, lk_obj_t *a1type, lk_obj_t *a2type, lk_obj_t *a3type, lk_obj_t *a4type);
 typedef void lk_cfunc_v0_t(lk_obj_t *self);
 typedef void lk_cfunc_v1_t(lk_obj_t *self, lk_obj_t *a0type);
 typedef void lk_cfunc_v2_t(lk_obj_t *self, lk_obj_t *a0type, lk_obj_t *a1type);
 typedef void lk_cfunc_v3_t(lk_obj_t *self, lk_obj_t *a0type, lk_obj_t *a1type, lk_obj_t *a2type);
+typedef void lk_cfunc_v4_t(lk_obj_t *self, lk_obj_t *a0type, lk_obj_t *a1type, lk_obj_t *a2type, lk_obj_t *a3type);
+typedef void lk_cfunc_v5_t(lk_obj_t *self, lk_obj_t *a0type, lk_obj_t *a1type, lk_obj_t *a2type, lk_obj_t *a3type, lk_obj_t *a4type);
 typedef void lk_cfuncfunc_t(lk_obj_t *self, lk_scope_t *local);
 
 #define LK_BOOL(obj) ((lk_bool_t *)(obj))

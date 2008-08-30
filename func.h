@@ -29,10 +29,14 @@ struct lk_cfunc {
         lk_cfunc_r1_t *r1;
         lk_cfunc_r2_t *r2;
         lk_cfunc_r3_t *r3;
+        lk_cfunc_r4_t *r4;
+        lk_cfunc_r5_t *r5;
         lk_cfunc_v0_t *v0;
         lk_cfunc_v1_t *v1;
         lk_cfunc_v2_t *v2;
         lk_cfunc_v3_t *v3;
+        lk_cfunc_v4_t *v4;
+        lk_cfunc_v5_t *v5;
     } cfunc;
 };
 struct lk_gfunc {

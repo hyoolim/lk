@@ -43,6 +43,11 @@ void lk_dir_init(lk_dir_t *self, lk_str_t *path) {
 void lk_dir_create(lk_dir_t *self) {
     mkdir(CSTRING(self->path), S_IRWXU | S_IRWXG | S_IRWXO);
 }
+void lk_dir_work(lk_dir_t *self) {
+    if(chdir(CSTRING(self->path)) != 0) {
+        lk_vm_raiseerrno(VM);
+    }
+}
 
 /* info */
 lk_list_t *lk_dir_items(lk_dir_t *self) {
@@ -85,6 +90,7 @@ void lk_dir_libinit(lk_vm_t *vm) {
 
     /* update */
     lk_obj_set_cfunc_cvoid(dir, "create!", lk_dir_create, NULL);
+    lk_obj_set_cfunc_cvoid(dir, "work!", lk_dir_work, NULL);
 
     /* info */
     lk_obj_set_cfunc_creturn(dir, "items", lk_dir_items, NULL);

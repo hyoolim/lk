@@ -1,0 +1,1 @@
+DynamicLibrary/new(RESOURCE/reverse/at(RESOURCE/reverse/find('/', 0) + 1, RESOURCE/size - 1)/reverse ++ '/liblkmysql.so', 'lk_mysql_libinit')

@@ -7,6 +7,7 @@
 typedef struct {
     struct lk_common  o;
     MYSQL            *conn;
+    int               nconn;
     lk_str_t         *query;
     MYSQL_RES        *result;
     MYSQL_FIELD      *fields;

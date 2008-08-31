@@ -4,6 +4,7 @@
 /* new */
 void lk_mysql_init(lk_mysql_t *self, lk_str_t *host, lk_str_t *user, lk_str_t *pw, lk_str_t *db, lk_num_t *port) {
     self->conn = mysql_init(NULL);
+    self->nconn = 1;
     if(mysql_real_connect(self->conn, CSTRING(host), CSTRING(user), CSTRING(pw), CSTRING(db), CNUMBER(port), NULL, 0) == NULL) {
         lk_vm_raisecstr(VM, "Unable to connect to the database: %s", lk_str_new_fromcstr(VM, mysql_error(self->conn)));
     }
@@ -49,6 +50,7 @@ lk_obj_t *lk_mysql_fetch(lk_mysql_t *self) {
 /* bind all c funcs to lk equiv */
 static void alloc_mysql(lk_obj_t *self, lk_obj_t *parent) {
     LK_MYSQL(self)->conn = LK_MYSQL(parent)->conn;
+    LK_MYSQL(self)->nconn ++;
     if(LK_MYSQL(self)->query != NULL) {
         LK_MYSQL(self)->query = LK_STRING(lk_obj_clone(LK_OBJ(LK_MYSQL(parent)->query)));
     }
@@ -61,8 +63,9 @@ static void free_mysql(lk_obj_t *self) {
         mysql_free_result(LK_MYSQL(self)->result);
     }
     if(LK_MYSQL(self)->conn != NULL) {
-        printf("closing\n");
-        mysql_close(LK_MYSQL(self)->conn);
+        if(-- LK_MYSQL(self)->nconn <= 0) {
+            mysql_close(LK_MYSQL(self)->conn);
+        }
     }
 }
 void lk_mysql_libinit(lk_vm_t *vm) {

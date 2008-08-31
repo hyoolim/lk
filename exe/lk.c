@@ -9,7 +9,7 @@ int main(int argc, const char **argv) {
 
     /* options for vm */
     lk_object_set(LK_OBJ(vm->t_dl), "paths", LK_OBJ(libpaths));
-    darray_insertptr(DARRAY(libpaths), 0, lk_str_new_fromcstr(vm, PREFIX "/lib/lk"));
+    darray_insertptr(DARRAY(libpaths), 0, lk_str_new_fromcstr(vm, LK_INSTALL_PATH "/lib/lk"));
     for(; i < argc; i ++) {
         if(argv[i][0] != '-') {
             break;

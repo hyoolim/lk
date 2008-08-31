@@ -230,8 +230,8 @@ Directory/extend {
     }
 
     # short names
-    /dirs := { args | /directories(*args) }
-    /dirNamed := { args | /directoryNamed(*args) }
+    /dirs := { args... | /directories(*args) }
+    /dirNamed := { args... | /directoryNamed(*args) }
     /filesWithExt := { args... | /filesWithExtension(*args) }
 }
 
@@ -583,7 +583,7 @@ File/extend {
 }
 
 # default error handler
-rescue { e |
+Global/rescue { e |
     STDERR/writeLine('Error/', e/.CLASS, ': ', e)
     f := .
     c := f/.caller ->nil? ->not? ? loop {
@@ -594,6 +594,26 @@ rescue { e |
         } ! {
             i := c/.current
             STDERR/writeLine('    @ ', i/RESOURCE, ' ', i/LINE, ': ', i/MESSAGE, f/.args/toCode)
+        }
+    }
+}
+Global/.forward := {
+    libName := .caller/.current/MESSAGE
+    DynamicLibrary/paths/each { path |
+        libDir := Directory/new(path)
+        lkFile := libDir/fileNamed(libName ++ '.lk')
+        lkFile/exists? ? {
+            Global/include(lkFile/path)
+            return(Global/.retrieve(libName))
+        } ! {
+            libDir/fileNamed(libName)/exists? ? {
+                libDir/dirNamed(libName)/filesWithExt('.lk')/each { lkFile |
+                    lkFile/name != 'blueprint.lk' ? {
+                        Global/include(lkFile/path)
+                    }
+                }
+                return(Global/.retrieve(libName))
+            }
         }
     }
 }

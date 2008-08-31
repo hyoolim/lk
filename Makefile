@@ -15,8 +15,8 @@ ifneq (,$(findstring $(OS),Linux))
 LINKER_FLAGS += -lm
 endif
 
-## install
-PREFIX ?= /usr/local
+## options to pass onto lk
+LK_INSTALL_PATH ?= /usr/local
 
 ## output files
 sources = $(wildcard base/*.c) $(wildcard *.c)
@@ -24,21 +24,28 @@ objects = $(addprefix tmp/,$(patsubst %.c,%.o,$(sources)))
 depends = $(patsubst %.o,%.d,$(objects)) tmp/exe/lk.d
 
 ## main targets
-.PHONY: all clean install test uninstall
-all: tmp/exe/lk
+.PHONY: all clean exe install lib test uninstall
+all: exe lib
 clean:
 	rm -rf tmp
 	rm -rf include
+	rm -rf lib/*/*.dll
+	rm -rf lib/*/*.dylib
+	rm -rf lib/*/*.so
+	rm -rf lib/*/*.o
+exe: tmp/exe/lk
 install: all
-	mkdir -p $(PREFIX)/bin
-	cp tmp/exe/lk $(PREFIX)/bin
-	mkdir -p $(PREFIX)/lib/lk
-	cp -R lib/* $(PREFIX)/lib/lk
-test: all
+	mkdir -p $(LK_INSTALL_PATH)/bin
+	cp tmp/exe/lk $(LK_INSTALL_PATH)/bin
+	mkdir -p $(LK_INSTALL_PATH)/lib/lk
+	cp -R lib/* $(LK_INSTALL_PATH)/lib/lk
+lib: exe
+	tmp/exe/lk -l lib buildlibs.lk
+test: exe
 	for test in `find test -name '*.lk'`; do tmp/exe/lk -l lib $$test; done;
 uninstall:
-	rm -rf $(PREFIX)/bin/lk
-	rm -rf $(PREFIX)/lib/lk
+	rm -rf $(LK_INSTALL_PATH)/bin/lk
+	rm -rf $(LK_INSTALL_PATH)/lib/lk
 
 ## calculated dependencies
 -include $(depends)
@@ -60,6 +67,6 @@ tmp/%.o: %.c
 tmp/%.d: %.c
 	$(COMPILER) $(COMPILER_FLAGS) -MM -MT tmp/$(patsubst %.c,%.d,$<) -MT tmp/$(patsubst %.c,%.o,$<) -MF $@ $<
 tmp/exe/lk.o: exe/lk.c
-	$(COMPILER) $(COMPILER_FLAGS) -c exe/lk.c -o tmp/exe/lk.o -DPREFIX=\"$(PREFIX)\"
+	$(COMPILER) $(COMPILER_FLAGS) -c exe/lk.c -o tmp/exe/lk.o -DLK_INSTALL_PATH=\"$(LK_INSTALL_PATH)\"
 tmp/exe/lk: $(objects) tmp/exe/lk.o
 	$(COMPILER) $(LINKER_FLAGS) -o tmp/exe/lk $(objects) tmp/exe/lk.o

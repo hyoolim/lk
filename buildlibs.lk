@@ -1,0 +1,3 @@
+Directory/new('lib')/dirs/each { libDir |
+    LibraryBuilder/new(libDir/path)/build
+}

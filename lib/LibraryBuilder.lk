@@ -37,7 +37,7 @@ LibraryBuilder := Object/with {
         }
 
         # clean up obj files
-        # objFiles/each { f | f/delete! }
+        objFiles/each { f | f/delete! }
         writeLine
         writeLine('-' ** heading/size)
         writeLine
@@ -48,4 +48,3 @@ LibraryBuilder := Object/with {
         /libDir/filesWithExt('so')/each { f | f/delete! }
     }
 }
-LibraryBuilder/new('lib/MySQL')/build

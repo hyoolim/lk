@@ -21,7 +21,7 @@ lk_str_t *lk_str_new_fromdarray(lk_vm_t *vm, darray_t *list) {
     return self;
 }
 lk_str_t *lk_str_new_fromdata(lk_vm_t *vm, const void *data, int len) {
-    darray_t *l = darray_alloc_fromdata(data, len);
+    darray_t *l = darray_str_alloc_fromdata(data, len);
     lk_str_t *s = lk_str_new_fromdarray(vm, l);
     darray_free(l);
     return s;
@@ -32,7 +32,7 @@ lk_str_t *lk_str_new_fromcstr(lk_vm_t *vm, const char *cstr) {
 
 /* update */
 void lk_str_set_at_char(lk_str_t *self, lk_num_t *at, lk_char_t *replacement) {
-    darray_setuchar(DARRAY(self), CSIZE(at), CHAR(replacement));
+    darray_str_set(DARRAY(self), CSIZE(at), CHAR(replacement));
 }
 void lk_str_set_range_str(lk_str_t *self, lk_num_t *from, lk_num_t *to, lk_str_t *replacement) {
     darray_t *x = DARRAY(self), *y = DARRAY(replacement);
@@ -43,27 +43,27 @@ void lk_str_unescape(lk_str_t *self) {
     darray_t *data = DARRAY(self);
     int i;
     uint32_t c;
-    for(i = 0; (i = darray_find_char(data, '\\', i)) >= 0; i ++) {
-        darray_removeuchar(data, i);
-        switch(c = darray_getuchar(data, i)) {
-            case 'n': darray_setuchar(data, i, '\012'); break;
-            case 'r': darray_setuchar(data, i, '\015'); break;
-            case 't': darray_setuchar(data, i, '\t'  ); break;
-            default : darray_setuchar(data, i, c     ); break;
+    for(i = 0; (i = darray_str_find(data, '\\', i)) >= 0; i ++) {
+        darray_str_remove(data, i);
+        switch(c = darray_str_get(data, i)) {
+            case 'n': darray_str_set(data, i, '\012'); break;
+            case 'r': darray_str_set(data, i, '\015'); break;
+            case 't': darray_str_set(data, i, '\t'  ); break;
+            default : darray_str_set(data, i, c     ); break;
         }
     }
 }
 
 /* info */
 lk_char_t *lk_str_at(lk_str_t *self, lk_num_t *at) {
-    return lk_char_new(VM, darray_getuchar(DARRAY(self), CSIZE(at)));
+    return lk_char_new(VM, darray_str_get(DARRAY(self), CSIZE(at)));
 }
 lk_obj_t *lk_str_find_char_starting(lk_str_t *self, lk_char_t *pattern, lk_num_t *starting) {
-    int i = darray_find_char(DARRAY(self), CHAR(pattern), CSIZE(starting));
+    int i = darray_str_find(DARRAY(self), CHAR(pattern), CSIZE(starting));
     return i >= 0 ? LK_OBJ(lk_num_new(VM, i)) : NIL;
 }
 lk_obj_t *lk_str_find_charset_starting(lk_str_t *self, lk_charset_t *pattern, lk_num_t *starting) {
-    int i = darray_find_charset(DARRAY(self), CHARSET(pattern), CSIZE(starting));
+    int i = darray_str_findset(DARRAY(self), CHARSET(pattern), CSIZE(starting));
     return i >= 0 ? LK_OBJ(lk_num_new(VM, i)) : NIL;
 }
 lk_obj_t *lk_str_find_str_starting(lk_str_t *self, lk_str_t *pattern, lk_num_t *starting) {

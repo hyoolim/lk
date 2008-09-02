@@ -27,7 +27,7 @@ lk_file_t *lk_file_new_withpath(lk_vm_t *vm, lk_str_t *path) {
 }
 void lk_file_init_str(lk_file_t *self, lk_str_t *path) {
     int at = 0, nextat;
-    if(darray_getuchar(DARRAY(path), 0) == '/') {
+    if(darray_str_get(DARRAY(path), 0) == '/') {
         self->path = path;
     } else {
         char buf[1000];
@@ -38,7 +38,7 @@ void lk_file_init_str(lk_file_t *self, lk_str_t *path) {
             self->path = abs;
         }
     }
-    while((nextat = darray_find_char(DARRAY(self->path), '/', at)) > -1) {
+    while((nextat = darray_str_find(DARRAY(self->path), '/', at)) > -1) {
         at = nextat + 1;
     }
     self->name = lk_str_new_fromdarray(VM, DARRAY(self->path));
@@ -101,7 +101,7 @@ lk_str_t *lk_file_read_num(lk_file_t *self, lk_num_t *length) {
     if(self->fd == NULL) {
         BUG("ReadableFile->st.file should NEVER be NULL");
     } else {
-        darray_t *c = darray_allocfromfile(self->fd, CNUMBER(length));
+        darray_t *c = darray_str_alloc_fromfile_withsize(self->fd, CNUMBER(length));
         return c != NULL ? lk_str_new_fromdarray(VM, c) : LK_STRING(NIL);
     }
 }
@@ -109,7 +109,7 @@ lk_str_t *lk_file_readall(lk_file_t *self) {
     if(self->fd == NULL) {
         BUG("ReadableFile->st.file should NEVER be NULL");
     } else {
-        darray_t *c = str_allocfromfile(self->fd);
+        darray_t *c = darray_str_alloc_fromfile(self->fd);
         return c != NULL ? lk_str_new_fromdarray(VM, c) : LK_STRING(NIL);
     }
 }
@@ -117,7 +117,7 @@ lk_str_t *lk_file_readuntil_char(lk_file_t *self, lk_char_t *until) {
     if(self->fd == NULL) {
         BUG("ReadableFile->st.file should NEVER be NULL");
     } else {
-        darray_t *c = darray_alloc_fromfile_untilchar(self->fd, CHAR(until));
+        darray_t *c = darray_str_alloc_fromfile_untilchar(self->fd, CHAR(until));
         return c != NULL ? lk_str_new_fromdarray(VM, c) : LK_STRING(NIL);
     }
 }
@@ -125,7 +125,7 @@ lk_str_t *lk_file_readuntil_charset(lk_file_t *self, lk_charset_t *until) {
     if(self->fd == NULL) {
         BUG("ReadableFile->st.file should NEVER be NULL");
     } else {
-        darray_t *c = darray_alloc_fromfile_untilcharset(self->fd, CHARSET(until));
+        darray_t *c = darray_str_alloc_fromfile_untilcharset(self->fd, CHARSET(until));
         return c != NULL ? lk_str_new_fromdarray(VM, c) : LK_STRING(NIL);
     }
 }

@@ -58,7 +58,7 @@ void lk_gc_mark_objused(lk_obj_t *self) {
         lk_objgroup_remove(self);
         lk_objgroup_insert(gc->used, self);
         if(LK_OBJ_HASPARENTS(self)) {
-            LIST_EACHPTR(LK_OBJ_PARENTS(self), i, v,
+            DARRAY_EACHPTR(LK_OBJ_PARENTS(self), i, v,
                 lk_gc_mark_objpending(LK_OBJ(v));
             );
         } else {

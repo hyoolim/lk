@@ -9,7 +9,7 @@ int main(int argc, const char **argv) {
 
     /* options for vm */
     lk_object_set(LK_OBJ(vm->t_dl), "paths", LK_OBJ(libpaths));
-    darray_insertptr(DARRAY(libpaths), 0, lk_str_new_fromcstr(vm, LK_INSTALL_PATH "/lib/lk"));
+    darray_ptr_insert(DARRAY(libpaths), 0, lk_str_new_fromcstr(vm, LK_INSTALL_PATH "/lib/lk"));
     for(; i < argc; i ++) {
         if(argv[i][0] != '-') {
             break;
@@ -17,7 +17,7 @@ int main(int argc, const char **argv) {
             switch(argv[i][1]) {
                 case 'l':
                     if(++ i < argc) {
-                        darray_insertptr(DARRAY(libpaths), 0, lk_str_new_fromcstr(vm, argv[i]));
+                        darray_ptr_insert(DARRAY(libpaths), 0, lk_str_new_fromcstr(vm, argv[i]));
                     } else {
                         fprintf(stderr, "%s: -l requires an argument\n", argv[0]);
                         lk_vm_free(vm);
@@ -49,23 +49,23 @@ int main(int argc, const char **argv) {
     lk_global_set("arguments", LK_OBJ(args));
     lk_global_set("args", LK_OBJ(args));
     for(; i < argc; i ++) {
-        darray_pushptr(DARRAY(args), lk_str_new_fromcstr(vm, argv[i]));
+        darray_ptr_push(DARRAY(args), lk_str_new_fromcstr(vm, argv[i]));
     }
 
     /* load the initial lib */
-    LIST_EACHPTR(DARRAY(libpaths), i, path,
+    DARRAY_EACHPTR(DARRAY(libpaths), i, path,
         tmp = lk_file_new_withpath(vm, LK_STRING(lk_obj_clone(LK_OBJ(path))));
         darray_concat(DARRAY(tmp->path), DARRAY(vm->str_filesep));
         darray_concat(DARRAY(tmp->path), DARRAY(initfile));
         if(lk_file_isexists(tmp) == vm->t_true) {
-            lk_vm_evalfile(vm, darray_tocstr(DARRAY(tmp->path)), "");
+            lk_vm_evalfile(vm, darray_str_tocstr(DARRAY(tmp->path)), "");
             break;
         }
     );
 
     /* run the script */
     lk_gc_resume(vm->gc);
-    lk_vm_evalfile(vm, darray_tocstr(DARRAY(script)), "");
+    lk_vm_evalfile(vm, darray_str_tocstr(DARRAY(script)), "");
     lk_vm_free(vm);
     mem_freerecycled();
     return EXIT_SUCCESS;

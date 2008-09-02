@@ -1,5 +1,5 @@
-#ifndef LK_LIST_H
-#define LK_LIST_H
+#ifndef LK_DARRAY_H
+#define LK_DARRAY_H
 #include "types.h"
 
 /* type */

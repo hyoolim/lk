@@ -96,14 +96,14 @@ static void system_vm(lk_obj_t *self, lk_scope_t *local) {
         int i, c = local->argc;
         char **args = mem_alloc(sizeof(char *) * (c + 1));
         for(i = 0; i < c; i ++) {
-            args[i] = (char *)darray_tocstr(DARRAY(ARG(i)));
+            args[i] = (char *)darray_str_tocstr(DARRAY(ARG(i)));
         }
         execvp(args[0], args);
         lk_vm_raiseerrno(VM);
     }
 }
 static void system2_vm_str(lk_obj_t *self, lk_scope_t *local) {
-    FILE *out = popen(darray_tocstr(DARRAY(ARG(0))), "r");
+    FILE *out = popen(darray_str_tocstr(DARRAY(ARG(0))), "r");
     if(out != NULL) {
         char ret[4096];
         char *line = fgets(ret, 4096, out);
@@ -230,7 +230,7 @@ lk_scope_t *lk_vm_evalfile(lk_vm_t *self, const char *file, const char *base) {
     lk_str_t *filename = lk_str_new_fromcstr(self, file);
     if(base != NULL && file[0] != '/') {
         lk_str_t *root = lk_str_new_fromcstr(self, base);
-        int pos, i, pslen = LIST_COUNT(DARRAY(self->str_filesep));
+        int pos, i, pslen = DARRAY_COUNT(DARRAY(self->str_filesep));
         pos = darray_find_darray(DARRAY(root), DARRAY(self->str_filesep), 0);
         if(pos > 0) {
             lk_str_t *orig = filename;
@@ -248,14 +248,14 @@ lk_scope_t *lk_vm_evalfile(lk_vm_t *self, const char *file, const char *base) {
         lk_scope_t *fr;
         struct lk_rsrcchain rsrc;
         FILE *stream;
-        const char *cfilename = darray_tocstr(DARRAY(filename));
+        const char *cfilename = darray_str_tocstr(DARRAY(filename));
         rsrc.isstr = 0;
         rsrc.rsrc = filename;
         rsrc.prev = self->rsrc;
         self->rsrc = &rsrc;
         stream = fopen(cfilename, "r");
         if(stream != NULL) {
-            darray_t *src = str_allocfromfile(stream);
+            darray_t *src = darray_str_alloc_fromfile(stream);
             fclose(stream);
             if(src != NULL) {
                 fr = eval(self, lk_str_new_fromdarray(self, src));
@@ -286,28 +286,28 @@ lk_scope_t *lk_vm_evalstr(lk_vm_t *self, const char *code) {
     return fr;
 }
 #define CALLFUNC(self, func, args) do { \
-    (args)->argc = LIST_ISINIT(&(args)->stack) \
-    ? LIST_COUNT(&(args)->stack) : 0; \
+    (args)->argc = DARRAY_ISINIT(&(args)->stack) \
+    ? DARRAY_COUNT(&(args)->stack) : 0; \
     if(LK_OBJ_ISCFUNC(LK_OBJ(func))) { \
         if(LK_CFUNC(func)->cc == LK_CFUNC_CC_CVOID) { \
             switch((args)->argc) { \
                 case 0: LK_CFUNC(func)->cfunc.v0((args)->receiver); break; \
-                case 1: LK_CFUNC(func)->cfunc.v1((args)->receiver, LK_OBJ(LIST_ATPTR(&args->stack, (0)))); break; \
-                case 2: LK_CFUNC(func)->cfunc.v2((args)->receiver, LK_OBJ(LIST_ATPTR(&args->stack, (0))), LK_OBJ(LIST_ATPTR(&args->stack, (1)))); break; \
-                case 3: LK_CFUNC(func)->cfunc.v3((args)->receiver, LK_OBJ(LIST_ATPTR(&args->stack, (0))), LK_OBJ(LIST_ATPTR(&args->stack, (1))), LK_OBJ(LIST_ATPTR(&args->stack, (2)))); break; \
-                case 4: LK_CFUNC(func)->cfunc.v4((args)->receiver, LK_OBJ(LIST_ATPTR(&args->stack, (0))), LK_OBJ(LIST_ATPTR(&args->stack, (1))), LK_OBJ(LIST_ATPTR(&args->stack, (2))), LK_OBJ(LIST_ATPTR(&args->stack, 3))); break; \
-                case 5: LK_CFUNC(func)->cfunc.v5((args)->receiver, LK_OBJ(LIST_ATPTR(&args->stack, (0))), LK_OBJ(LIST_ATPTR(&args->stack, (1))), LK_OBJ(LIST_ATPTR(&args->stack, (2))), LK_OBJ(LIST_ATPTR(&args->stack, 3)), LK_OBJ(LIST_ATPTR(&args->stack, 4))); break; \
+                case 1: LK_CFUNC(func)->cfunc.v1((args)->receiver, LK_OBJ(DARRAY_ATPTR(&args->stack, (0)))); break; \
+                case 2: LK_CFUNC(func)->cfunc.v2((args)->receiver, LK_OBJ(DARRAY_ATPTR(&args->stack, (0))), LK_OBJ(DARRAY_ATPTR(&args->stack, (1)))); break; \
+                case 3: LK_CFUNC(func)->cfunc.v3((args)->receiver, LK_OBJ(DARRAY_ATPTR(&args->stack, (0))), LK_OBJ(DARRAY_ATPTR(&args->stack, (1))), LK_OBJ(DARRAY_ATPTR(&args->stack, (2)))); break; \
+                case 4: LK_CFUNC(func)->cfunc.v4((args)->receiver, LK_OBJ(DARRAY_ATPTR(&args->stack, (0))), LK_OBJ(DARRAY_ATPTR(&args->stack, (1))), LK_OBJ(DARRAY_ATPTR(&args->stack, (2))), LK_OBJ(DARRAY_ATPTR(&args->stack, 3))); break; \
+                case 5: LK_CFUNC(func)->cfunc.v5((args)->receiver, LK_OBJ(DARRAY_ATPTR(&args->stack, (0))), LK_OBJ(DARRAY_ATPTR(&args->stack, (1))), LK_OBJ(DARRAY_ATPTR(&args->stack, (2))), LK_OBJ(DARRAY_ATPTR(&args->stack, 3)), LK_OBJ(DARRAY_ATPTR(&args->stack, 4))); break; \
                 default: BUG("cc void not supported"); \
             } \
             lk_scope_stackpush((args)->returnto, (args)->receiver); \
         } else if(LK_CFUNC(func)->cc == LK_CFUNC_CC_CRETURN) { \
             switch((args)->argc) { \
                 case 0: lk_scope_stackpush((args)->returnto, LK_CFUNC(func)->cfunc.r0((args)->receiver)); break; \
-                case 1: lk_scope_stackpush((args)->returnto, LK_CFUNC(func)->cfunc.r1((args)->receiver, LK_OBJ(LIST_ATPTR(&args->stack, (0))))); break; \
-                case 2: lk_scope_stackpush((args)->returnto, LK_CFUNC(func)->cfunc.r2((args)->receiver, LK_OBJ(LIST_ATPTR(&args->stack, (0))), LK_OBJ(LIST_ATPTR(&args->stack, (1))))); break; \
-                case 3: lk_scope_stackpush((args)->returnto, LK_CFUNC(func)->cfunc.r3((args)->receiver, LK_OBJ(LIST_ATPTR(&args->stack, (0))), LK_OBJ(LIST_ATPTR(&args->stack, (1))), LK_OBJ(LIST_ATPTR(&args->stack, (2))))); break; \
-                case 4: lk_scope_stackpush((args)->returnto, LK_CFUNC(func)->cfunc.r4((args)->receiver, LK_OBJ(LIST_ATPTR(&args->stack, (0))), LK_OBJ(LIST_ATPTR(&args->stack, (1))), LK_OBJ(LIST_ATPTR(&args->stack, (2))), LK_OBJ(LIST_ATPTR(&args->stack, 3)))); break; \
-                case 5: lk_scope_stackpush((args)->returnto, LK_CFUNC(func)->cfunc.r5((args)->receiver, LK_OBJ(LIST_ATPTR(&args->stack, (0))), LK_OBJ(LIST_ATPTR(&args->stack, (1))), LK_OBJ(LIST_ATPTR(&args->stack, (2))), LK_OBJ(LIST_ATPTR(&args->stack, 3)), LK_OBJ(LIST_ATPTR(&args->stack, 4)))); break; \
+                case 1: lk_scope_stackpush((args)->returnto, LK_CFUNC(func)->cfunc.r1((args)->receiver, LK_OBJ(DARRAY_ATPTR(&args->stack, (0))))); break; \
+                case 2: lk_scope_stackpush((args)->returnto, LK_CFUNC(func)->cfunc.r2((args)->receiver, LK_OBJ(DARRAY_ATPTR(&args->stack, (0))), LK_OBJ(DARRAY_ATPTR(&args->stack, (1))))); break; \
+                case 3: lk_scope_stackpush((args)->returnto, LK_CFUNC(func)->cfunc.r3((args)->receiver, LK_OBJ(DARRAY_ATPTR(&args->stack, (0))), LK_OBJ(DARRAY_ATPTR(&args->stack, (1))), LK_OBJ(DARRAY_ATPTR(&args->stack, (2))))); break; \
+                case 4: lk_scope_stackpush((args)->returnto, LK_CFUNC(func)->cfunc.r4((args)->receiver, LK_OBJ(DARRAY_ATPTR(&args->stack, (0))), LK_OBJ(DARRAY_ATPTR(&args->stack, (1))), LK_OBJ(DARRAY_ATPTR(&args->stack, (2))), LK_OBJ(DARRAY_ATPTR(&args->stack, 3)))); break; \
+                case 5: lk_scope_stackpush((args)->returnto, LK_CFUNC(func)->cfunc.r5((args)->receiver, LK_OBJ(DARRAY_ATPTR(&args->stack, (0))), LK_OBJ(DARRAY_ATPTR(&args->stack, (1))), LK_OBJ(DARRAY_ATPTR(&args->stack, (2))), LK_OBJ(DARRAY_ATPTR(&args->stack, 3)), LK_OBJ(DARRAY_ATPTR(&args->stack, 4)))); break; \
                 default: BUG("cc return not supported"); \
             } \
         } else { \
@@ -475,7 +475,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         && (instr == NULL
         || instr->next == NULL
         || instr->next->type != LK_INSTRTYPE_APPLYMSG
-        || darray_cmp_tocstr(DARRAY(instr->next->v), "+=") != 0)) {
+        || darray_str_cmp_cstr(DARRAY(instr->next->v), "+=") != 0)) {
             callfunc:
             if(args == NULL) args = lk_scope_new(vm);
             func = lk_func_match(LK_FUNC(slotv), args, recv);
@@ -492,8 +492,8 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
                 if(LK_OBJ_ISA(slotv, t_func) > 2) {
                     goto callfunc;
                 /* call at/apply if there are args */
-                } else if(LIST_ISINIT(&args->stack)
-                       && LIST_COUNT(&args->stack) > 0) {
+                } else if(DARRAY_ISINIT(&args->stack)
+                       && DARRAY_COUNT(&args->stack) > 0) {
                     msgn = vm->str_at;
                     recv = r = slotv;
                     ancs = NULL;
@@ -506,9 +506,9 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         }
         parent:
         if((ancs = r->o.ancestors) != NULL) {
-            ancc = LIST_COUNT(ancs);
+            ancc = DARRAY_COUNT(ancs);
             for(anci = 1; anci < ancc; anci ++) {
-                r = LIST_ATPTR(ancs, anci);
+                r = DARRAY_ATPTR(ancs, anci);
                 if((slots = r->o.slots) == NULL) continue;
                 if((si = qphash_get(slots, msg->v)) == NULL) continue;
                 goto found;
@@ -518,7 +518,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
             goto findslot;
         }
         /* forward: */
-        if(LIST_EQ(DARRAY(msgn), DARRAY(vm->str_forward))) {
+        if(DARRAY_EQ(DARRAY(msgn), DARRAY(vm->str_forward))) {
             lk_vm_raisecstr(vm, "Cannot find slot named %s", msg->v);
         } else {
             msgn = vm->str_forward;
@@ -545,7 +545,7 @@ void lk_vm_raisecstr(lk_vm_t *self, const char *message, ...) {
                 break;
             }
         } else {
-            darray_pushuchar(DARRAY(err->message), *message);
+            darray_str_push(DARRAY(err->message), *message);
         }
     }
     va_end(ap);

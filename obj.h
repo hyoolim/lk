@@ -83,13 +83,13 @@ lk_obj_isa((self), (t)))
 #define LK_OBJ_HASONEPARENT(pars) ((ptrdiff_t)(pars) & 1)
 #define LK_OBJ_ONEPARENT(pars) LK_OBJ((ptrdiff_t)(pars) & ~1)
 #define LK_OBJ_PROTO(self) LK_OBJ_HASONEPARENT((self)->o.parents) \
-? LK_OBJ_ONEPARENT((self)->o.parents) : LIST_ATPTR((self)->o.parents, 0)
+? LK_OBJ_ONEPARENT((self)->o.parents) : DARRAY_ATPTR((self)->o.parents, 0)
  */
 #define LK_OBJ_HASPARENTS(self) ((ptrdiff_t)((self)->o.parent) & 1)
 #define LK_OBJ_PARENTS(self) ((darray_t *)((ptrdiff_t)((self)->o.parent) & ~1))
 #define LK_OBJ_PROTO(self) ( \
     LK_OBJ_HASPARENTS(self) \
-    ? darray_getptr(LK_OBJ_PARENTS(self), -1) \
+    ? darray_ptr_get(LK_OBJ_PARENTS(self), -1) \
     : (self)->o.parent \
 )
 #define LK_OBJ_ISA(self, t) ( \

@@ -21,7 +21,7 @@ lk_dir_t *lk_dir_new_withpath(lk_vm_t *vm, lk_str_t *path) {
 }
 void lk_dir_init(lk_dir_t *self, lk_str_t *path) {
     int at = 0, nextat;
-    if(darray_getuchar(DARRAY(path), 0) == '/') {
+    if(darray_str_get(DARRAY(path), 0) == '/') {
         self->path = path;
     } else {
         char buf[1000];
@@ -32,7 +32,7 @@ void lk_dir_init(lk_dir_t *self, lk_str_t *path) {
             self->path = abs;
         }
     }
-    while((nextat = darray_find_char(DARRAY(self->path), '/', at)) > -1) {
+    while((nextat = darray_str_find(DARRAY(self->path), '/', at)) > -1) {
         at = nextat + 1;
     }
     self->name = lk_str_new_fromdarray(VM, DARRAY(self->path));
@@ -67,9 +67,9 @@ lk_list_t *lk_dir_items(lk_dir_t *self) {
             darray_setrange(DARRAY(path), 0, 0, DARRAY(VM->str_filesep));
             darray_setrange(DARRAY(path), 0, 0, DARRAY(self->path));
             if(stat(CSTRING(path), &info) == 0 && S_ISDIR(info.st_mode)) {
-                darray_pushptr(DARRAY(items), lk_dir_new_withpath(VM, path));
+                darray_ptr_push(DARRAY(items), lk_dir_new_withpath(VM, path));
             } else {
-                darray_pushptr(DARRAY(items), lk_file_new_withpath(VM, path));
+                darray_ptr_push(DARRAY(items), lk_file_new_withpath(VM, path));
             }
         }
     }

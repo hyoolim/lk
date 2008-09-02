@@ -197,10 +197,10 @@ void charset_add_darray(charset_t *self, darray_t *str) {
     int c = str->size;
     if(c > 0) {
         int i = 0;
-        uint32_t v = darray_getuchar(str, i);
+        uint32_t v = darray_str_get(str, i);
         while(i < c) {
-            v = darray_getuchar(str, i ++);
-            (CHARSET_ISINVERTED(self) ? charset_remove : charset_insert)(self, v, i < c && darray_getuchar(str, i) == '-' ? darray_getuchar(str, (i += 2) - 1) : v);
+            v = darray_str_get(str, i ++);
+            (CHARSET_ISINVERTED(self) ? charset_remove : charset_insert)(self, v, i < c && darray_str_get(str, i) == '-' ? darray_str_get(str, (i += 2) - 1) : v);
         }
     }
 }
@@ -238,10 +238,10 @@ void charset_subtract_darray(charset_t *self, darray_t *str) {
     int c = str->size;
     if(c > 0) {
         int i = 0;
-        uint32_t v = darray_getuchar(str, i);
+        uint32_t v = darray_str_get(str, i);
         while(i < c) {
-            v = darray_getuchar(str, i ++);
-            (CHARSET_ISINVERTED(self) ? charset_insert : charset_remove)(self, v, i < c && darray_getuchar(str, i) == '-' ? darray_getuchar(str, (i += 2) - 1) : v);
+            v = darray_str_get(str, i ++);
+            (CHARSET_ISINVERTED(self) ? charset_insert : charset_remove)(self, v, i < c && darray_str_get(str, i) == '-' ? darray_str_get(str, (i += 2) - 1) : v);
         }
     }
 }
@@ -297,18 +297,18 @@ int charset_size(const charset_t *self) {
 
 /* str representation of the str */
 darray_t *charset_tostr(const charset_t *self) {
-    darray_t *str = darray_alloc_str();
+    darray_t *str = darray_str_alloc();
     uint32_t from, to;
     uint32_t *curr = CHARSET_DATA(self), *last = curr + self->size;
-    if(CHARSET_ISINVERTED(self)) darray_setuchar(str, str->size, '^');
+    if(CHARSET_ISINVERTED(self)) darray_str_set(str, str->size, '^');
     for(; curr < last; ) {
         from = *curr ++;
         to = *curr ++;
-        if(from == to) darray_setuchar(str, str->size, from);
+        if(from == to) darray_str_set(str, str->size, from);
         else {
-            darray_setuchar(str, str->size, from);
-            darray_setuchar(str, str->size, '-');
-            darray_setuchar(str, str->size, to);
+            darray_str_set(str, str->size, from);
+            darray_str_set(str, str->size, '-');
+            darray_str_set(str, str->size, to);
         }
     }
     return str;

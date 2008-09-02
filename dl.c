@@ -15,11 +15,11 @@ void lk_dl_typeinit(lk_vm_t *vm) {
 
 /* new */
 void lk_dl_init_withpath_andfunc(lk_dl_t *self, lk_str_t *path, lk_str_t *funcname) {
-    void *dl = dlopen(darray_tocstr(DARRAY(path)), RTLD_NOW);
+    void *dl = dlopen(darray_str_tocstr(DARRAY(path)), RTLD_NOW);
     if(dl != NULL) {
         union { void *p; void (*f)(lk_vm_t *vm); } func;
         self->dl = dl;
-        func.p = dlsym(dl, darray_tocstr(DARRAY(funcname)));
+        func.p = dlsym(dl, darray_str_tocstr(DARRAY(funcname)));
         if(func.f != NULL) {
             func.f(VM);
         } else {

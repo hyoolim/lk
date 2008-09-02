@@ -102,9 +102,9 @@ lk_instr_t *lk_instr_newmessage(lk_parser_t *parser, lk_str_t *name) {
     new->v = LK_OBJ(name);
     {
         darray_t *cs = parser->comments;
-        lk_str_t *c = darray_removeptr(cs, 0);
+        lk_str_t *c = darray_ptr_remove(cs, 0);
         while(cs->size > 0) {
-            darray_concat(DARRAY(c), DARRAY(darray_removeptr(cs, 0)));
+            darray_concat(DARRAY(c), DARRAY(darray_ptr_remove(cs, 0)));
         }
         new->comment = c;
     }

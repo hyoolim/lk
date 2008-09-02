@@ -21,19 +21,19 @@ darray_t *darray_alloc(int ilen, int cap) {
     darray_init(self, ilen, cap);
     return self;
 }
-darray_t *darray_allocptr(void) {
-    return darray_allocptrwithcap(10);
+darray_t *darray_ptr_alloc(void) {
+    return darray_ptr_alloc_withcap(10);
 }
-darray_t *darray_allocptrwithcap(int cap) {
+darray_t *darray_ptr_alloc_withcap(int cap) {
     return darray_alloc(sizeof(void *), cap);
 }
-darray_t *darray_allocfromfile(FILE *stream, size_t rs) {
+darray_t *darray_str_alloc_fromfile_withsize(FILE *stream, size_t rs) {
     darray_t *self = darray_alloc(1, rs);
     self->size =
     self->data->used = fread(self->first, 1, rs, stream);
     return self;
 }
-darray_t *darray_alloc_str(void) {
+darray_t *darray_str_alloc(void) {
     return darray_alloc(sizeof(uint8_t), 10);
 }
 darray_t *darray_clone(darray_t *self) {
@@ -41,16 +41,16 @@ darray_t *darray_clone(darray_t *self) {
     darray_copy(clone, self);
     return clone;
 }
-darray_t *darray_alloc_fromdata(const void *data, int len) {
+darray_t *darray_str_alloc_fromdata(const void *data, int len) {
     darray_t *self = darray_alloc(sizeof(uint8_t), len);
     memcpy(self->first, data, len);
     self->data->used = self->size = len;
     return self;
 }
-darray_t *darray_allocFromCString(const char *cstr) {
-    return darray_alloc_fromdata(cstr, strlen(cstr));
+darray_t *darray_str_alloc_fromcstr(const char *cstr) {
+    return darray_str_alloc_fromdata(cstr, strlen(cstr));
 }
-darray_t *str_allocfromfile(FILE *stream) {
+darray_t *darray_str_alloc_fromfile(FILE *stream) {
     if(fseek(stream, 0, SEEK_END) == 0) {
         long size;
         if((size = ftell(stream)) >= 0
@@ -81,11 +81,11 @@ darray_t *str_allocfromfile(FILE *stream) {
     self->size = self->data->used = i + 1; \
     return self; \
 } while(0)
-darray_t *darray_alloc_fromfile_untilchar(FILE *stream, uint32_t pat) {
+darray_t *darray_str_alloc_fromfile_untilchar(FILE *stream, uint32_t pat) {
     if(feof(stream)) return NULL;
     UNTIL(ch == pat);
 }
-darray_t *darray_alloc_fromfile_untilcharset(FILE *stream, const charset_t *pat) {
+darray_t *darray_str_alloc_fromfile_untilcharset(FILE *stream, const charset_t *pat) {
     if(feof(stream)) return NULL;
     UNTIL(charset_has(pat, ch));
 }
@@ -94,7 +94,7 @@ void darray_init(darray_t *self, int ilen, int cap) {
     self->first = &self->data->item;
     self->size = 0;
 }
-void darray_initptr(darray_t *self) {
+void darray_ptr_init(darray_t *self) {
     darray_init(self, sizeof(void *), 10);
 }
 void darray_copy(darray_t *self, darray_t *src) {
@@ -112,14 +112,14 @@ void darray_free(darray_t *self) {
 
 /* update */
 #define SETITEM(self, t, i, v) do { \
-    *(t *)LIST_AT(self, i) = *(t *)v; \
+    *(t *)DARRAY_AT(self, i) = *(t *)v; \
 } while(0)
 #define SETANYITEM(self, i, v) do { \
     switch((self)->data->ilen) { \
     case sizeof(char ): SETITEM((self), char,  (i), (v)); break; \
     case sizeof(short): SETITEM((self), short, (i), (v)); break; \
     case sizeof(long ): SETITEM((self), long,  (i), (v)); break; \
-    default: memmove(LIST_AT( \
+    default: memmove(DARRAY_AT( \
     self, i), (v), (self)->data->ilen); break; \
     } \
 } while(0)
@@ -173,19 +173,19 @@ void darray_insert(darray_t *self, int i, void *v) {
     }
     SETANYITEM(self, i, v);
 }
-void darray_insertptr(darray_t *self, int i, void *v) {
+void darray_ptr_insert(darray_t *self, int i, void *v) {
     darray_insert(self, i, (void *)&v);
 }
 #define INSERTUINT(self, t, i, v) do { \
     t nv = (v); \
     darray_insert(self, (i), (void *)&nv); \
 } while(0);
-void darray_insertuchar(darray_t *self, int i, uint32_t v) {
+void darray_str_insert(darray_t *self, int i, uint32_t v) {
     switch(self->data->ilen) {
     case sizeof(uint8_t ): INSERTUINT(self, uint8_t,  i, v); break;
     case sizeof(uint16_t): INSERTUINT(self, uint16_t, i, v); break;
     case sizeof(uint32_t): INSERTUINT(self, uint32_t, i, v); break;
-    default: BUG("Invalid ilen in darray_insertuchar\n");
+    default: BUG("Invalid ilen in darray_str_insert\n");
     }
 }
 void darray_limit(darray_t *self, int n) {
@@ -201,23 +201,23 @@ void darray_offset(darray_t *self, int n) {
         self->size -= n;
     }
 }
-void *darray_peekptr(darray_t *self) {
-    return darray_getptr((self), (self)->size - 1);
+void *darray_ptr_peek(darray_t *self) {
+    return darray_ptr_get((self), (self)->size - 1);
 }
-uint32_t darray_peekuchar(darray_t *self) {
-    return darray_getuchar((self), (self)->size - 1);
+uint32_t darray_str_peek(darray_t *self) {
+    return darray_str_get((self), (self)->size - 1);
 }
-void *darray_popptr(darray_t *self) {
-    return darray_removeptr(self, self->size - 1);
+void *darray_ptr_pop(darray_t *self) {
+    return darray_ptr_remove(self, self->size - 1);
 }
-uint32_t darray_popuchar(darray_t *self) {
-    return darray_removeuchar(self, self->size - 1);
+uint32_t darray_str_pop(darray_t *self) {
+    return darray_str_remove(self, self->size - 1);
 }
-void darray_pushptr(darray_t *self, void *v) {
-    darray_setptr(self, self->size, v);
+void darray_ptr_push(darray_t *self, void *v) {
+    darray_ptr_set(self, self->size, v);
 }
-void darray_pushuchar(darray_t *self, uint32_t v) {
-    darray_setuchar(self, self->size, v);
+void darray_str_push(darray_t *self, uint32_t v) {
+    darray_str_set(self, self->size, v);
 }
 void darray_remove(darray_t *self, int i) {
     int size = self->size;
@@ -230,13 +230,13 @@ void darray_remove(darray_t *self, int i) {
         self->first + ilen * (i + 1), ilen * (size - i));
     }
 }
-void *darray_removeptr(darray_t *self, int i) {
-    void *item = darray_getptr(self, i);
+void *darray_ptr_remove(darray_t *self, int i) {
+    void *item = darray_ptr_get(self, i);
     darray_remove(self, i);
     return item;
 }
-uint32_t darray_removeuchar(darray_t *self, int i) {
-    uint32_t v = darray_getuchar(self, i);
+uint32_t darray_str_remove(darray_t *self, int i) {
+    uint32_t v = darray_str_get(self, i);
     darray_remove(self, i);
     return v;
 }
@@ -297,7 +297,7 @@ void darray_set(darray_t *self, int i, void *v) {
     }
     SETANYITEM(self, i, v);
 }
-void darray_setptr(darray_t *self, int i, void *v) {
+void darray_ptr_set(darray_t *self, int i, void *v) {
     darray_set(self, i, (void *)&v);
 }
 void darray_setrange(darray_t *self, int b, int e, darray_t *v) {
@@ -316,32 +316,32 @@ void darray_setrange(darray_t *self, int b, int e, darray_t *v) {
     t nv = (v); \
     darray_set(self, (i), (void *)&nv); \
 } while(0);
-void darray_setuchar(darray_t *self, int i, uint32_t v) {
+void darray_str_set(darray_t *self, int i, uint32_t v) {
     switch(self->data->ilen) {
     case sizeof(uint8_t ): SETUINT(self, uint8_t,  i, v); break;
     case sizeof(uint16_t): SETUINT(self, uint16_t, i, v); break;
     case sizeof(uint32_t): SETUINT(self, uint32_t, i, v); break;
-    default: BUG("Invalid ilen in darray_setuchar\n");
+    default: BUG("Invalid ilen in darray_str_set\n");
     }
 }
-void *darray_shiftptr(darray_t *self) {
-    return darray_removeptr(self, 0);
+void *darray_ptr_shift(darray_t *self) {
+    return darray_ptr_remove(self, 0);
 }
 void darray_slice(darray_t *self, int offset, int limit) {
     darray_offset(self, offset);
     darray_limit(self, limit);
 }
-const char *darray_tocstr(darray_t *self) {
-    darray_setuchar(self, self->size, '\0');
+const char *darray_str_tocstr(darray_t *self) {
+    darray_str_set(self, self->size, '\0');
     self->size --;
     return self->first;
 }
-void darray_unshiftptr(darray_t *self, void *v) {
-    darray_insertptr(self, 0, v);
+void darray_ptr_unshift(darray_t *self, void *v) {
+    darray_ptr_insert(self, 0, v);
 }
 
 /* info */
-int darray_compareTo(const darray_t *self, const darray_t *other) {
+int darray_cmp(const darray_t *self, const darray_t *other) {
     if(self == other) return 0;
     else {
         int sc = self->size, oc = other->size, d = sc - oc;
@@ -369,7 +369,7 @@ int darray_compareTo(const darray_t *self, const darray_t *other) {
         if(cd != 0) return cd; \
     } \
 } while(0)
-int darray_cmp_tocstr(const darray_t *self, const char *other) {
+int darray_str_cmp_cstr(const darray_t *self, const char *other) {
     int sc = self->size, oc = strlen(other), d = sc - oc;
     int len = d > 0 ? oc : sc;
     uint8_t ilen = self->data->ilen;
@@ -378,27 +378,27 @@ int darray_cmp_tocstr(const darray_t *self, const char *other) {
     if(     ilen == sizeof(uint8_t )) COMPARECSTRING(uint8_t );
     else if(ilen == sizeof(uint16_t)) COMPARECSTRING(uint16_t);
     else if(ilen == sizeof(uint32_t)) COMPARECSTRING(uint16_t);
-    else BUG("Invalid ilen in darray_cmp_tocstr\n");
+    else BUG("Invalid ilen in darray_str_cmp_cstr\n");
     return d;
 }
 #define MATCHCHAR(type) do { \
     for(; o < c; o ++) if(((type *)buf)[o] == pat) return o; \
 } while(0)
-int darray_find_char(const darray_t *self, uint32_t pat, int o) {
+int darray_str_find(const darray_t *self, uint32_t pat, int o) {
     void *buf = self->first;
     int c = self->size;
     switch(self->data->ilen) {
     case sizeof(uint8_t ): MATCHCHAR(uint8_t ); break;
     case sizeof(uint16_t): MATCHCHAR(uint16_t); break;
     case sizeof(uint32_t): MATCHCHAR(uint32_t); break;
-    default: BUG("Invalid ilen in darray_find_char\n");
+    default: BUG("Invalid ilen in darray_str_find\n");
     }
     return -1;
 }
 #define MATCHCHARSET(type) do { \
     for(; o < c; o ++) if(charset_has(pat, ((type *)buf)[o])) return o; \
 } while(0)
-int darray_find_charset(const darray_t *self, const charset_t *pat, int o) {
+int darray_str_findset(const darray_t *self, const charset_t *pat, int o) {
     void *buf = self->first;
     int c = self->size;
     switch(self->data->ilen) {
@@ -413,7 +413,7 @@ int darray_find_darray(const darray_t *self, const darray_t *pat, int o) {
     int self_c = self->size, pat_c = pat->size;
     if(pat_c == 0) return o < self_c ? o : -1;
     if(pat_c > self_c) return -1;
-    if(pat_c == 1) return darray_find_char(self, darray_getuchar(pat, 0), o);
+    if(pat_c == 1) return darray_str_find(self, darray_str_get(pat, 0), o);
     else {
         switch(self->data->ilen) {
         case sizeof(uint8_t): {
@@ -442,20 +442,20 @@ int darray_find_darray(const darray_t *self, const darray_t *pat, int o) {
 void *darray_get(const darray_t *self, int i) {
     int size = self->size;
     if(i < 0) i += size;
-    return i < 0 || i >= size ? NULL : LIST_AT(self, i);
+    return i < 0 || i >= size ? NULL : DARRAY_AT(self, i);
 }
-void *darray_getptr(const darray_t *self, int i) {
+void *darray_ptr_get(const darray_t *self, int i) {
     void **vptr = (void **)darray_get(self, i);
     return vptr != NULL ? *vptr : NULL;
 }
-uint32_t darray_getuchar(const darray_t *self, int i) {
+uint32_t darray_str_get(const darray_t *self, int i) {
     void *vptr = darray_get(self, i);
     if(vptr == NULL) return 0;
     switch(self->data->ilen) {
     case sizeof(uint8_t ): return *(uint8_t  *)vptr;
     case sizeof(uint16_t): return *(uint16_t *)vptr;
     case sizeof(uint32_t): return *(uint32_t *)vptr;
-    default: BUG("Invalid ilen in darray_getuchar\n");
+    default: BUG("Invalid ilen in darray_str_get\n");
     }
 }
 int darray_hc(const darray_t *self) {

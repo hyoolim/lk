@@ -6,12 +6,12 @@ numtype_t num_new(int is_big, darray_t *str, numifn_t *res) {
     char digit = '\0';
     int i;
     double f, div = 1;
-    int idx = 0, len = LIST_COUNT(str);
+    int idx = 0, len = DARRAY_COUNT(str);
 
     /* try the num as native int. */
     i = 0;
     for(; idx < len; idx ++) {
-        digit = darray_getuchar(str, idx) - '0';
+        digit = darray_str_get(str, idx) - '0';
         if(digit == underscore) continue;
         if(digit < 0 || digit > 9) break;
         if(i > INT_MAX / 10) break; else i *= 10;
@@ -27,7 +27,7 @@ numtype_t num_new(int is_big, darray_t *str, numifn_t *res) {
     f = i;
     if(digit == dot) goto point;
     for(; idx < len; idx ++) {
-        digit = darray_getuchar(str, idx) - '0';
+        digit = darray_str_get(str, idx) - '0';
         if(digit == underscore) continue;
         if(digit < 0 || digit > 9) break;
         if(f > DBL_MAX / 10) break; else f *= 10;
@@ -36,7 +36,7 @@ numtype_t num_new(int is_big, darray_t *str, numifn_t *res) {
     if(digit == dot) {
         point:
             for(idx ++; idx < len; idx ++) {
-                digit = darray_getuchar(str, idx) - '0';
+                digit = darray_str_get(str, idx) - '0';
                 if(digit == underscore) continue;
                 if(digit < 0 || digit > 9) break;
                 if(f > DBL_MAX / 10) { idx = len; break; } else f *= 10;

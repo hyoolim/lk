@@ -39,7 +39,7 @@ lk_num_t *lk_char_compare_char(lk_obj_t *self, lk_char_t *other) {
 }
 lk_str_t *lk_char_tostr(lk_obj_t *self) {
     lk_str_t *str = lk_str_new(VM);
-    darray_setuchar(DARRAY(str), 0, CHAR(self));
+    darray_str_set(DARRAY(str), 0, CHAR(self));
     return str;
 }
 

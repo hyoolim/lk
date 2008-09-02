@@ -19,7 +19,7 @@ lk_mysql_t *lk_mysql_query(lk_mysql_t *self, lk_str_t *query) {
 lk_obj_t *lk_mysql_fetch(lk_mysql_t *self) {
     if(self->result == NULL) {
         darray_t *query = DARRAY(self->query);
-        if(mysql_real_query(self->conn, darray_tocstr(query), LIST_COUNT(query)) == 0) {
+        if(mysql_real_query(self->conn, darray_str_tocstr(query), DARRAY_COUNT(query)) == 0) {
             self->result = mysql_store_result(self->conn);
             if(self->result != NULL) {
                 self->fields = mysql_fetch_fields(self->result);
@@ -36,7 +36,7 @@ lk_obj_t *lk_mysql_fetch(lk_mysql_t *self) {
             unsigned long *lengths = mysql_fetch_lengths(self->result);
             lk_list_t *row = lk_list_new(VM);
             for(i = 0; i < self->nfields; i ++) {
-                darray_pushptr(DARRAY(row), lk_str_new_fromdata(VM, fields[i], lengths[i]));
+                darray_ptr_push(DARRAY(row), lk_str_new_fromdata(VM, fields[i], lengths[i]));
             }
             return LK_OBJ(row);
         } else {

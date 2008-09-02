@@ -28,7 +28,7 @@
 #include "vm.h"
 
 /* ext shortcuts */
-#define ARG(i) (assert(local != NULL && 0 <= (i) && (i) < local->argc),  LK_OBJ(LIST_ATPTR(&local->stack, (i))))
+#define ARG(i) (assert(local != NULL && 0 <= (i) && (i) < local->argc),  LK_OBJ(DARRAY_ATPTR(&local->stack, (i))))
 #define DONE return
 #define RETURN(v) \
     do { \
@@ -43,7 +43,7 @@
 #define CHARSET(v) (&LK_CHARSET(v)->data)
 #define CNUMBER(v) (LK_NUMBER(v)->data)
 #define CSIZE(v) ((int)CNUMBER(v))
-#define CSTRING(v) (darray_tocstr(DARRAY(v)))
+#define CSTRING(v) (darray_str_tocstr(DARRAY(v)))
 #define DARRAY(v) (&LK_SEQ(v)->data)
 #define FALSE (VM->t_false)
 #define NIL (VM->t_nil)

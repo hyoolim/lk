@@ -11,7 +11,7 @@ int inet_aton(const char *cp, struct in_addr *pin);
 
 /* ext map - ip addr */
 static void alloc_ip_str(lk_obj_t *self, lk_scope_t *local) {
-    inet_aton(darray_tocstr(DARRAY(ARG(0))), &IPADDR->addr);
+    inet_aton(darray_str_tocstr(DARRAY(ARG(0))), &IPADDR->addr);
     RETURN(self);
 }
 static void to_str_ip(lk_obj_t *self, lk_scope_t *local) {

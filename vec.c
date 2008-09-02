@@ -14,11 +14,11 @@ static void at_vec_num(lk_obj_t *self, lk_scope_t *local) {
     int *v = darray_get(DARRAY(self), CSIZE(ARG(0)));
     RETURN(v != NULL ? LK_OBJ(lk_num_new(VM, *v)) : NIL);
 }
-#define AT(i) (*(int *)LIST_AT(values, *(int *)LIST_AT(indexes, (i))))
+#define AT(i) (*(int *)DARRAY_AT(values, *(int *)DARRAY_AT(indexes, (i))))
 #define SWAP(x, y) do { \
-    t = *(int *)LIST_AT(indexes, (x)); \
-    *(int *)LIST_AT(indexes, (x)) = *(int *)LIST_AT(indexes, (y)); \
-    *(int *)LIST_AT(indexes, (y)) = t; \
+    t = *(int *)DARRAY_AT(indexes, (x)); \
+    *(int *)DARRAY_AT(indexes, (x)) = *(int *)DARRAY_AT(indexes, (y)); \
+    *(int *)DARRAY_AT(indexes, (y)) = t; \
 } while(0)
 static void quicksort_hoare(darray_t *values, darray_t *indexes, int low, int hi) {
     if(low < hi) {
@@ -36,9 +36,9 @@ static void quicksort_hoare(darray_t *values, darray_t *indexes, int low, int hi
 static void grade_vec(lk_obj_t *self, lk_scope_t *local) {
     lk_vec_t *indexes = LK_VECTOR(lk_obj_alloc(VM->t_vec));
     darray_t *sl = DARRAY(self), *il = DARRAY(indexes);
-    darray_resize(il, LIST_COUNT(sl));
-    LIST_EACH(il, i, v, *(int *)v = i);
-    quicksort_hoare(sl, il, 0, LIST_COUNT(il) - 1);
+    darray_resize(il, DARRAY_COUNT(sl));
+    DARRAY_EACH(il, i, v, *(int *)v = i);
+    quicksort_hoare(sl, il, 0, DARRAY_COUNT(il) - 1);
     RETURN(indexes);
 }
 static void insertB_vec_num_num(lk_obj_t *self, lk_scope_t *local) {

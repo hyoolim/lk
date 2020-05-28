@@ -1,0 +1,6 @@
+include
+lib/*/*.dll
+lib/*/*.dylib
+lib/*/*.so
+lib/*/*.o
+tmp

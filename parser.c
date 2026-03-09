@@ -139,7 +139,7 @@ typedef READFUNC(readfunc_t);
 /* chars */
 #define UPPER "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #define LOWER "abcdefghijklmnopqrstuvwxyz"
-#define ALPHA "." UPPER LOWER
+#define ALPHA "._" UPPER LOWER
 #define DIGIT "0123456789"
 #define ALNUM ALPHA DIGIT
 #define LETTER "_" ALNUM

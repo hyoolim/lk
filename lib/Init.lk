@@ -8,7 +8,7 @@ Global/Range      := Object/with { }
 Boolean/extend {
 
     # Always returns itself.
-    /toBoolean := { | /. }
+    /toBoolean := { | /_self }
 
     # Returns true or false.
     /toCode := { | /toString }
@@ -35,27 +35,27 @@ Comparable/extend {
 
     # Returns true if it's in between min and max, using < and >
     # operators for comparison, false otherwise.
-    /between? := { min, max | min <= /. && /. <= max }
+    /between? := { min, max | min <= /_self && /_self <= max }
 
     # Returns true if it's equal to the other, using <=> operator
     # for comparison, false otherwise.
-    /'==' := { other | (/. <=> other) == 0 }
+    /'==' := { other | (/_self <=> other) == 0 }
 
     # Returns true if it's greater than or equal to the other, using
     # < operator for comparison, false otherwise.
-    /'>=' := { other | /. < other ->not? }
+    /'>=' := { other | /_self < other ->not? }
 
     # Returns true if it's greater than the other, using <=> operator for
     # comparison, false otherwise.
-    /'>' := { other | (/. <=> other) > 0 }
+    /'>' := { other | (/_self <=> other) > 0 }
 
     # Returns true if it's less than or equal to the other, using
     # > operator for comparison, false otherwise.
-    /'<=' := { other | /. > other ->not? }
+    /'<=' := { other | /_self > other ->not? }
 
     # Returns true if it's less than the other, using <=> operator for
     # comparison, false otherwise.
-    /'<' := { other | (/. <=> other) < 0 }
+    /'<' := { other | (/_self <=> other) < 0 }
 }
 
 # Map
@@ -109,7 +109,7 @@ Enumerable/extend {
     }
 
     # Alias for any? slot.
-    /has? := /.retrieve('any?')
+    /has? := /_retrieve('any?')
 
     # Returns a list of all items equal to matchValue argument,
     # using == operator for comparison.
@@ -249,7 +249,7 @@ Sequence/extend {
             { while(i < /size) { block(i, /at(i)); i = i/succ } }
     }
     /'==' += { to | False }
-    /fill! := { do | /each { i, v | /set!(i, do) }; /. }
+    /fill! := { do | /each { i, v | /set!(i, do) }; /_self }
 
     # Returns the first item in the list.
     /first := { | /at(0) }
@@ -260,14 +260,14 @@ Sequence/extend {
 
     # Replaces each item in the list with the value returned from
     # running using argument.
-    /map! := { using | /each { i, v | /set!(i, using(v)) }; /. }
+    /map! := { using | /each { i, v | /set!(i, using(v)) }; /_self }
     /offset := { args... | /clone/offset!(*args) }
 
     # Removes the last item in the list and returns it.
     /pop! := { | value := /at(-1); /limit!(-1); value }
 
     # Inserts the value argument to the end of the list.
-    /push! := { value | /set!(/size, value); /. }
+    /push! := { value | /set!(/size, value); /_self }
     /quicksort! := { | /quicksort! { x, y | x <=> y } }
     /quicksort! += { cmp | /quicksort!(cmp, 0, /size - 1) }
     /quicksort! += { cmp, low, hi |
@@ -285,11 +285,11 @@ Sequence/extend {
             /quicksort!(cmp, low, l - 1)
             /quicksort!(cmp, l + 1, hi)
         }
-        /.
+        /_self
     }
     /'**' := { size |
         size == 0 ? return(/clone/clear!)
-        2/to(size)/reduce(/clone) { a, v | a ++= /. }
+        2/to(size)/reduce(/clone) { a, v | a ++= /_self }
     }
 
     # Returns all but the first item in the list.
@@ -300,16 +300,16 @@ Sequence/extend {
     /shift! := { | value := /at(0); /remove!(0); value }
     /slice := { args... | /clone/slice!(*args) }
     /slice! += { a : Range | /slice!(a/from, a/to) }
-    /sort! := /.retrieve('quicksort!')
+    /sort! := /_retrieve('quicksort!')
 
     # Returns true if there are any items in the list, false otherwise.
     /toBoolean := { | /size != 0 }
 
     # Inserts the value argument before the first item in the list.
-    /unshift! := { value | /insert!(0, value); /. }
+    /unshift! := { value | /insert!(0, value); /_self }
 
     # Alias for slice slot.
-    /at += /.retrieve('slice')
+    /at += /_retrieve('slice')
     /also(Comparable)
     /also(Enumerable)
 }
@@ -322,7 +322,7 @@ Sequence/extend {
 List/extend {
     /'<=>' := { to |
         d := to/size - /size
-        d > 0 ? to ! /. ->each { i, v |
+        d > 0 ? to ! /_self ->each { i, v |
             d := v <=> to(i)
             d != 0 ? return(d)
         }
@@ -368,10 +368,10 @@ Number/extend {
     # Returns the absolute value of the number.
     /finite? := True
     /inf? := False
-    /succ := { | /. + 1 }
-    /toBoolean := { | /. != 0 }
+    /succ := { | /_self + 1 }
+    /toBoolean := { | /_self != 0 }
     /toCode := { | /toString }
-    /toNumber := { | /. }
+    /toNumber := { | /_self }
     /toString += { | /integer? ? /toString(0, 0) ! /toString(0, 6) }
     /also(Comparable)
 }
@@ -388,23 +388,23 @@ Object/extend {
     # Returns other if the receiver evaluates
     # to true or false otherwise.
     /'&&' := { other | /toBoolean ? other ! False }
-    /'==' := { to | /.id == to/.id }
-    /in? := { list | list/has?(/.) }
+    /'==' := { to | /_id == to/_id }
+    /in? := { list | list/has?(/_self) }
 
     # Default init function that never does anything.
     /init! := { | }
-    /'~=' := /.retrieve('==')
+    /'~=' := /_retrieve('==')
     /'?' := { args... | /toBoolean/'?'(*args) }
-    /'!=' := { to | /. == to ->not? }
+    /'!=' := { to | /_self == to ->not? }
     /new := { args... | new := /alloc; new/init!(*args); new }
     /nil? := False
-    /'||' := { other | /toBoolean ? /. ! other }
-    /'|||' := { other | /nil? ? other ! /. }
+    /'||' := { other | /toBoolean ? /_self ! other }
+    /'|||' := { other | /nil? ? other ! /_self }
     /'-' += { other | /clone() -= other }
-    /to := { to | Range/new(/., to) }
+    /to := { to | Range/new(/_self, to) }
     /toBoolean := True
     /toCode := { | '<<' ++ /toString ++ '>>' }
-    /toString := { | /.CLASS ++ '#' ++ /.id/toString }
+    /toString := { | /_CLASS ++ '#' ++ /_id/toString }
 }
 
 # Random
@@ -454,7 +454,7 @@ String/extend {
     }
     /each := { delim, block | /each(delim, 1 % 0, block) }
     /each += { delim, max, block |
-        t := /.; i := 0; pos := 0; dl := delim/size || 1
+        t := /_self; i := 0; pos := 0; dl := delim/size || 1
         loop {
             e := /find(delim, pos)
             e/nil? || i >= max ?
@@ -467,13 +467,13 @@ String/extend {
     /endsWith := { suffix | suffix == /at(-(suffix/size), /size) }
     /format := { ... }
     /justifyCenter := { len |
-        len < /size ? /. ! {
+        len < /size ? /_self ! {
             len = len - /size
-            (' ' ** (len % 2)) ++ /. ++ (' ' ** (len - (len % 2)))
+            (' ' ** (len % 2)) ++ /_self ++ (' ' ** (len - (len % 2)))
         }
     }
-    /justifyLeft := { len | len < /size ? /. ! /. ++ (' ' ** (len - /size)) }
-    /justifyRight := { len | len < /size ? /. ! (' ' ** (len - /size)) ++ /. }
+    /justifyLeft := { len | len < /size ? /_self ! /_self ++ (' ' ** (len - /size)) }
+    /justifyRight := { len | len < /size ? /_self ! (' ' ** (len - /size)) ++ /_self }
     /lc := { args... | /clone/lc!(*args) }
 
     # Lowercases all the letters in the string.
@@ -482,13 +482,13 @@ String/extend {
 
     # Replaces all the occurences of from argument in the string
     # with to argument.
-    /replace! := { from, to | /. % from ->join(to) }
+    /replace! := { from, to | /_self % from ->join(to) }
     /startsWith := { prefix | prefix == /at(0, prefix/size) }
-    /toCode := { | "'" ++ /. ++ "'" }
+    /toCode := { | "'" ++ /_self ++ "'" }
     /toInteger := { ... }
 
     # Returns itself.
-    /toString := { | /. }
+    /toString := { | /_self }
     /trim := { args... | /clone/trim!(*args) }
 
     # Removes all the whitespaces from beginning and end of the string.
@@ -500,7 +500,7 @@ String/extend {
         0/to(/size - 1)/each { i |
             !(whitespaces/has?(/at(i))) ? {
                 /offset!(i)
-                return(/.)
+                return(/_self)
             }
         }
         /limit!(0)
@@ -511,7 +511,7 @@ String/extend {
         1/to(/size)/each { i |
             !(whitespaces/has?(/at(/size - i))) ? {
                 /limit!(/size - i + 1)
-                return(/.)
+                return(/_self)
             }
         }
         /limit!(0)
@@ -547,7 +547,7 @@ Scope/extend {
     # Never does anything.
     /if += { cond : False, block | }
     /include += { file | /include(file, RESOURCE) }
-    /leave := { | .receiver/.next = Nil }
+    /leave := { | _receiver/_next = Nil }
 
     # Calls the block forever.
     /loop := { block | rescue { e : breaker | }; once { block(); redo } }
@@ -555,14 +555,14 @@ Scope/extend {
     # Calls the block once.
     /once := { block | block() }
     /require += { file | /require(file, RESOURCE) }
-    #/resume := { | .receiver/.return_to = .receiver/proto; .receiver/leave }
+    #/resume := { | _receiver/_return_to = .receiver/proto; .receiver/leave }
     #/retry := { | .receiver/proto/redo; .receiver/resume }
     /read := { args... | STDIN/read(*args) }
     /readLine := { | STDIN/readUntil(0c\n) }
     /while := { cond : True, block | block(); retry }
     /while += { cond : False, block | }
-    /write := { args... | STDOUT/write(*args); /. }
-    /writeLine := { args... | STDOUT/write(*args, Newline); /. }
+    /write := { args... | STDOUT/write(*args); /_self }
+    /writeLine := { args... | STDOUT/write(*args, Newline); /_self }
 }
 
 # VirtualMachine/GarbageCollector
@@ -576,7 +576,7 @@ File/extend {
 
     # Convert each of the arguments into Strings
     # and calls write on them.
-    /write += { args... | args/each { v | /write(v/toString) }; /. }
+    /write += { args... | args/each { v | /write(v/toString) }; /_self }
 
     # Calls write on the arguments and nl.
     /writeLine := { args... | /write(*args, Newline) }
@@ -584,27 +584,27 @@ File/extend {
 
 # default error handler
 Global/rescue { e |
-    STDERR/writeLine('Error/', e/.CLASS, ': ', e)
+    STDERR/writeLine('Error/', e/_CLASS, ': ', e)
     f := .
-    c := f/.caller ->nil? ->not? ? loop {
+    c := f/_caller ->nil? ->not? ? loop {
         f = c
-        c = c/.caller ->nil? ? break
-        f/.function/nil? ? {
+        c = c/_caller ->nil? ? break
+        f/_function/nil? ? {
             STDERR/writeLine('    @ CFunction')
         } ! {
-            i := c/.current
-            STDERR/writeLine('    @ ', i/RESOURCE, ' ', i/LINE, ': ', i/MESSAGE, f/.args/toCode)
+            i := c/_current
+            STDERR/writeLine('    @ ', i/RESOURCE, ' ', i/LINE, ': ', i/MESSAGE, f/_args/toCode)
         }
     }
 }
-Global/.forward := {
-    libName := .caller/.current/MESSAGE
+Global/_forward := {
+    libName := _caller/_current/MESSAGE
     DynamicLibrary/paths/each { path |
         libDir := Directory/new(path)
         lkFile := libDir/fileNamed(libName ++ '.lk')
         lkFile/exists? ? {
             Global/include(lkFile/path)
-            return(Global/.retrieve(libName))
+            return(Global/_retrieve(libName))
         } ! {
             libDir/fileNamed(libName)/exists? ? {
                 libDir/dirNamed(libName)/filesWithExt('.lk')/each { lkFile |
@@ -612,7 +612,7 @@ Global/.forward := {
                         Global/include(lkFile/path)
                     }
                 }
-                return(Global/.retrieve(libName))
+                return(Global/_retrieve(libName))
             }
         }
     }

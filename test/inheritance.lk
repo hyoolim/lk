@@ -1,7 +1,7 @@
 include('tester.lk')
 Tester/new('Inheritance')/do {
 O := Object/new
-O/toString := { /.CLASS }
+O/toString := { /_CLASS }
 A := O/new
 B := O/new
 C := O/new

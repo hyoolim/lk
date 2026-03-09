@@ -126,10 +126,10 @@ void lk_obj_libinit(lk_vm_t *vm) {
     lk_obj_set_cfunc_lk(obj, ":", Ddefine_obj_str_obj, str, obj, NULL);
     lk_obj_set_cfunc_lk(obj, ":=", Ddefine_and_assignB_obj_str_obj, str, obj, NULL);
     lk_obj_set_cfunc_lk(obj, ":=", Ddefine_and_assignB_obj_str_obj_obj, str, obj, obj, NULL);
-    lk_obj_set_cfunc_lk(obj, ".id", Did_obj, NULL);
-    lk_obj_set_cfunc_lk(obj, ".retrieve", Dretrieve_obj_str, str, NULL);
-    lk_obj_set_cfunc_lk(obj, ".self", Dself_obj, NULL);
-    lk_obj_set_cfunc_lk(obj, ".slots", Dslots_obj, NULL);
+    lk_obj_set_cfunc_lk(obj, "_id", Did_obj, NULL);
+    lk_obj_set_cfunc_lk(obj, "_retrieve", Dretrieve_obj_str, str, NULL);
+    lk_obj_set_cfunc_lk(obj, "_self", Dself_obj, NULL);
+    lk_obj_set_cfunc_lk(obj, "_slots", Dslots_obj, NULL);
     lk_obj_set_cfunc_lk(obj, "alloc", alloc_obj, NULL);
     lk_obj_set_cfunc_lk(obj, "also", also_obj_obj, obj, NULL);
     lk_obj_set_cfunc_lk(obj, "ancestor?", ancestor_obj_obj, obj, NULL);

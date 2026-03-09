@@ -132,16 +132,16 @@ void lk_scope_libinit(lk_vm_t *vm) {
     lk_obj_t *scope = vm->t_scope, *obj = vm->t_obj, *instr = vm->t_instr,
                 *str = vm->t_str, *err = vm->t_err, *f = vm->t_func;
     lk_global_set("Scope", scope);
-    lk_obj_set_cfunc_lk(scope, ".args", Dargs_scope, NULL);
+    lk_obj_set_cfunc_lk(scope, "_args", Dargs_scope, NULL);
     lk_obj_set_cfunc_lk(scope, "=", DassignB_scope_str_obj, str, obj, NULL);
-    lk_obj_set_cfield(scope, ".caller", scope, offsetof(lk_scope_t, caller));
-    lk_obj_set_cfield(scope, ".current", instr, offsetof(lk_scope_t, current));
-    lk_obj_set_cfield(scope, ".first", instr, offsetof(lk_scope_t, first));
-    lk_obj_set_cfield(scope, ".scope", obj, offsetof(lk_scope_t, scope));
-    lk_obj_set_cfield(scope, ".function", obj, offsetof(lk_scope_t, func));
-    lk_obj_set_cfield(scope, ".next", instr, offsetof(lk_scope_t, next));
-    lk_obj_set_cfield(scope, ".receiver", obj, offsetof(lk_scope_t, receiver));
-    lk_obj_set_cfield(scope, ".return_to", scope, offsetof(lk_scope_t, returnto));
+    lk_obj_set_cfield(scope, "_caller", scope, offsetof(lk_scope_t, caller));
+    lk_obj_set_cfield(scope, "_current", instr, offsetof(lk_scope_t, current));
+    lk_obj_set_cfield(scope, "_first", instr, offsetof(lk_scope_t, first));
+    lk_obj_set_cfield(scope, "_scope", obj, offsetof(lk_scope_t, scope));
+    lk_obj_set_cfield(scope, "_function", obj, offsetof(lk_scope_t, func));
+    lk_obj_set_cfield(scope, "_next", instr, offsetof(lk_scope_t, next));
+    lk_obj_set_cfield(scope, "_receiver", obj, offsetof(lk_scope_t, receiver));
+    lk_obj_set_cfield(scope, "_return_to", scope, offsetof(lk_scope_t, returnto));
     lk_obj_set_cfunc_lk(scope, "include", include_scope_str_str, str, str, NULL);
     lk_obj_set_cfunc_lk(scope, "raise", raise_scope_err, err, NULL);
     lk_obj_set_cfunc_lk(scope, "raise", raise_scope_str, str, NULL);

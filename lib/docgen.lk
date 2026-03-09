@@ -18,22 +18,22 @@ DocumentGeneratorFile := File/with {
     }
     /write_reference := { class ---
         ancestors := class/ancestors
-        /write['<div class="class_'; class/.CLASS; '">']
-        /write['<h1 class="class_name">'; class/.CLASS; '</h1>']
+        /write['<div class="class_'; class/_CLASS; '">']
+        /write['<h1 class="class_name">'; class/_CLASS; '</h1>']
 
         ## inheritance tree
         /write['<ul class="inheritance_tree">']
         ancestors/rest/map { ancestor ---
-            /write['<li class="ancestor_'; ancestor/.CLASS;
-            '"><a href="./'; ancestor/.CLASS; '.html">'; ancestor/.CLASS; '</a>']
+            /write['<li class="ancestor_'; ancestor/_CLASS;
+            '"><a href="./'; ancestor/_CLASS; '.html">'; ancestor/_CLASS; '</a>']
         }
         /write['</ul>']
 
         ## every slot accessible from this class
         slots := [ ]
         ancestors/each { ancestor ---
-            ancestor/.slots/each { slot ---
-                slots/push![[ancestor/.id == class/.id ? class ! ancestor; slot]]
+            ancestor/_slots/each { slot ---
+                slots/push![[ancestor/_id == class/_id ? class ! ancestor; slot]]
             }
         }
         slots = slots/sort { x; y --- x[1] <=> y[1] }
@@ -41,9 +41,9 @@ DocumentGeneratorFile := File/with {
         /write['<h2 class="slots_header">Slots</h2>']
         /write['<p class="slot_names">']
         slots/each { slot ---
-            /write['<span class="slot_for_'; slot[0]/.CLASS; '">']
-            slot[0]/.id != class/.id ? {
-                /write['<em>'; slot[0]/.CLASS; '/</em>']
+            /write['<span class="slot_for_'; slot[0]/_CLASS; '">']
+            slot[0]/_id != class/_id ? {
+                /write['<em>'; slot[0]/_CLASS; '/</em>']
             }
             /write['<a href="#'; slot[1]/replace[non_words; '_']; '">';
             slot[1]; '</a>, </span>']
@@ -56,10 +56,10 @@ DocumentGeneratorFile := File/with {
             slot_name := slot[1]
             write_description := { function ---
                 /write['<div class="slot_description slot_for_';
-                slot_class/.CLASS; '">']
+                slot_class/_CLASS; '">']
                 /write['<h3 class="slot_name">']
-                slot_class/.id != class/.id ? {
-                    /write['<em>'; slot_class/.CLASS; '/</em>']
+                slot_class/_id != class/_id ? {
+                    /write['<em>'; slot_class/_CLASS; '/</em>']
                 }
                 /write['<a name="';
                 slot_name/replace[non_words; '_']; '">'; slot_name]
@@ -71,8 +71,8 @@ DocumentGeneratorFile := File/with {
                             /write['<span class="arg">'; sig_name]
                             sig_type := sig/type
                             sig_type/nil?/not? && Object != sig_type ? {
-                                /write[' : <a href="./'; sig_type/.CLASS;
-                                '.html">'; sig_type/.CLASS; '</a>']
+                                /write[' : <a href="./'; sig_type/_CLASS;
+                                '.html">'; sig_type/_CLASS; '</a>']
                             }
                             /write['; </span>']
                         }
@@ -97,7 +97,7 @@ DocumentGeneratorFile := File/with {
                 /write['</p>']
                 /write['</div>']
             }
-            slot_class/.retrieve[slot_name]/do {
+            slot_class/_retrieve[slot_name]/do {
                 /ancestor?[GenericFunction] ? {
                     /functions/each { f --- write_description[f] }
                 } ! {
@@ -151,7 +151,7 @@ DocumentGeneratorFile/new[root ++ '/index.html']/do {
     Vector
     VirtualMachine
     ]/each { class ---
-        name := class/.CLASS
+        name := class/_CLASS
         /write['<li><a href="./'; name; '.html">'; name; '</a></li>']
         writeLine['Writing '; name]
         DocumentGeneratorFile/new[root ++ '/' ++ name ++ '.html']/do {

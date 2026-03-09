@@ -40,8 +40,8 @@ lk_str_t *lk_instr_resource(lk_obj_t *self) {
 void lk_instr_libinit(lk_vm_t *vm) {
     lk_obj_t *instr = vm->t_instr;
     lk_object_set(vm->t_vm, "Instruction", instr);
-    lk_obj_set_cfield(instr, ".next", instr, offsetof(lk_instr_t, next));
-    lk_obj_set_cfield(instr, ".previous", instr, offsetof(lk_instr_t, prev));
+    lk_obj_set_cfield(instr, "_next", instr, offsetof(lk_instr_t, next));
+    lk_obj_set_cfield(instr, "_previous", instr, offsetof(lk_instr_t, prev));
 
     /* info */
     lk_obj_set_cfunc_creturn(instr, "COLUMN", lk_instr_column, NULL);

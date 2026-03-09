@@ -162,10 +162,10 @@ lk_vm_t *lk_vm_new(void) {
     /* init rest of the fields in vm */
     self->global = LK_SCOPE(lk_obj_alloc(self->t_scope));
     self->currscope = self->global;
-    lk_global_set(".str.class", LK_OBJ(self->str_type = lk_str_new_fromcstr(self, ".CLASS")));
-    lk_global_set(".str.forward", LK_OBJ(self->str_forward = lk_str_new_fromcstr(self, ".forward")));
-    lk_global_set(".str.rescue", LK_OBJ(self->str_rescue = lk_str_new_fromcstr(self, ".rescue")));
-    lk_global_set(".str.on assign", LK_OBJ(self->str_onassign = lk_str_new_fromcstr(self, ".on_assign")));
+    lk_global_set(".str.class", LK_OBJ(self->str_type = lk_str_new_fromcstr(self, "_CLASS")));
+    lk_global_set(".str.forward", LK_OBJ(self->str_forward = lk_str_new_fromcstr(self, "_forward")));
+    lk_global_set(".str.rescue", LK_OBJ(self->str_rescue = lk_str_new_fromcstr(self, "_rescue")));
+    lk_global_set(".str.on assign", LK_OBJ(self->str_onassign = lk_str_new_fromcstr(self, "_on_assign")));
     lk_global_set(".str.at", LK_OBJ(self->str_at = lk_str_new_fromcstr(self, "at")));
     lk_global_set(".str.slash", LK_OBJ(self->str_filesep = lk_str_new_fromcstr(self, "/")));
 

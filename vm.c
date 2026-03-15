@@ -285,39 +285,53 @@ lk_scope_t *lk_vm_evalstr(lk_vm_t *self, const char *code) {
     self->rsrc = self->rsrc->prev;
     return fr;
 }
+/* dispatch a C function call with up to 5 arguments.
+   argc must be set on args before calling. */
+static void call_cfunc(lk_vm_t *vm, lk_scope_t *self,
+                       lk_cfunc_t *cf, lk_scope_t *args) {
+    lk_obj_t *recv = args->receiver;
+    int argc = args->argc;
+#define A(i) LK_OBJ(DARRAY_ATPTR(&args->stack, (i)))
+    if(cf->cc == LK_CFUNC_CC_CVOID) {
+        switch(argc) {
+        case 0: cf->cfunc.v0(recv); break;
+        case 1: cf->cfunc.v1(recv, A(0)); break;
+        case 2: cf->cfunc.v2(recv, A(0), A(1)); break;
+        case 3: cf->cfunc.v3(recv, A(0), A(1), A(2)); break;
+        case 4: cf->cfunc.v4(recv, A(0), A(1), A(2), A(3)); break;
+        case 5: cf->cfunc.v5(recv, A(0), A(1), A(2), A(3), A(4)); break;
+        default: BUG("cc void not supported");
+        }
+        lk_scope_stackpush(args->returnto, recv);
+    } else if(cf->cc == LK_CFUNC_CC_CRETURN) {
+        lk_obj_t *result;
+        switch(argc) {
+        case 0: result = cf->cfunc.r0(recv); break;
+        case 1: result = cf->cfunc.r1(recv, A(0)); break;
+        case 2: result = cf->cfunc.r2(recv, A(0), A(1)); break;
+        case 3: result = cf->cfunc.r3(recv, A(0), A(1), A(2)); break;
+        case 4: result = cf->cfunc.r4(recv, A(0), A(1), A(2), A(3)); break;
+        case 5: result = cf->cfunc.r5(recv, A(0), A(1), A(2), A(3), A(4)); break;
+        default: BUG("cc return not supported");
+        }
+        lk_scope_stackpush(args->returnto, result);
+    } else {
+        cf->cfunc.lk(recv, args);
+    }
+#undef A
+    vm->currscope = self;
+}
+/* CALLFUNC must stay a macro: the kfunc branch mutates `self` (a local in the
+   eval loop) and both branches end with goto nextinstr. */
 #define CALLFUNC(self, func, args) do { \
     (args)->argc = DARRAY_ISINIT(&(args)->stack) \
-    ? DARRAY_COUNT(&(args)->stack) : 0; \
+        ? DARRAY_COUNT(&(args)->stack) : 0; \
     if(LK_OBJ_ISCFUNC(LK_OBJ(func))) { \
-        if(LK_CFUNC(func)->cc == LK_CFUNC_CC_CVOID) { \
-            switch((args)->argc) { \
-                case 0: LK_CFUNC(func)->cfunc.v0((args)->receiver); break; \
-                case 1: LK_CFUNC(func)->cfunc.v1((args)->receiver, LK_OBJ(DARRAY_ATPTR(&args->stack, (0)))); break; \
-                case 2: LK_CFUNC(func)->cfunc.v2((args)->receiver, LK_OBJ(DARRAY_ATPTR(&args->stack, (0))), LK_OBJ(DARRAY_ATPTR(&args->stack, (1)))); break; \
-                case 3: LK_CFUNC(func)->cfunc.v3((args)->receiver, LK_OBJ(DARRAY_ATPTR(&args->stack, (0))), LK_OBJ(DARRAY_ATPTR(&args->stack, (1))), LK_OBJ(DARRAY_ATPTR(&args->stack, (2)))); break; \
-                case 4: LK_CFUNC(func)->cfunc.v4((args)->receiver, LK_OBJ(DARRAY_ATPTR(&args->stack, (0))), LK_OBJ(DARRAY_ATPTR(&args->stack, (1))), LK_OBJ(DARRAY_ATPTR(&args->stack, (2))), LK_OBJ(DARRAY_ATPTR(&args->stack, 3))); break; \
-                case 5: LK_CFUNC(func)->cfunc.v5((args)->receiver, LK_OBJ(DARRAY_ATPTR(&args->stack, (0))), LK_OBJ(DARRAY_ATPTR(&args->stack, (1))), LK_OBJ(DARRAY_ATPTR(&args->stack, (2))), LK_OBJ(DARRAY_ATPTR(&args->stack, 3)), LK_OBJ(DARRAY_ATPTR(&args->stack, 4))); break; \
-                default: BUG("cc void not supported"); \
-            } \
-            lk_scope_stackpush((args)->returnto, (args)->receiver); \
-        } else if(LK_CFUNC(func)->cc == LK_CFUNC_CC_CRETURN) { \
-            switch((args)->argc) { \
-                case 0: lk_scope_stackpush((args)->returnto, LK_CFUNC(func)->cfunc.r0((args)->receiver)); break; \
-                case 1: lk_scope_stackpush((args)->returnto, LK_CFUNC(func)->cfunc.r1((args)->receiver, LK_OBJ(DARRAY_ATPTR(&args->stack, (0))))); break; \
-                case 2: lk_scope_stackpush((args)->returnto, LK_CFUNC(func)->cfunc.r2((args)->receiver, LK_OBJ(DARRAY_ATPTR(&args->stack, (0))), LK_OBJ(DARRAY_ATPTR(&args->stack, (1))))); break; \
-                case 3: lk_scope_stackpush((args)->returnto, LK_CFUNC(func)->cfunc.r3((args)->receiver, LK_OBJ(DARRAY_ATPTR(&args->stack, (0))), LK_OBJ(DARRAY_ATPTR(&args->stack, (1))), LK_OBJ(DARRAY_ATPTR(&args->stack, (2))))); break; \
-                case 4: lk_scope_stackpush((args)->returnto, LK_CFUNC(func)->cfunc.r4((args)->receiver, LK_OBJ(DARRAY_ATPTR(&args->stack, (0))), LK_OBJ(DARRAY_ATPTR(&args->stack, (1))), LK_OBJ(DARRAY_ATPTR(&args->stack, (2))), LK_OBJ(DARRAY_ATPTR(&args->stack, 3)))); break; \
-                case 5: lk_scope_stackpush((args)->returnto, LK_CFUNC(func)->cfunc.r5((args)->receiver, LK_OBJ(DARRAY_ATPTR(&args->stack, (0))), LK_OBJ(DARRAY_ATPTR(&args->stack, (1))), LK_OBJ(DARRAY_ATPTR(&args->stack, (2))), LK_OBJ(DARRAY_ATPTR(&args->stack, 3)), LK_OBJ(DARRAY_ATPTR(&args->stack, 4)))); break; \
-                default: BUG("cc return not supported"); \
-            } \
-        } else { \
-            LK_CFUNC(func)->cfunc.lk((args)->receiver, (args)); \
-        } \
-        vm->currscope = (self); \
+        call_cfunc(vm, self, LK_CFUNC(func), args); \
     } else { \
         (args)->o.parent = LK_OBJ(LK_KFUNC(func)->scope); \
         (args)->self = LK_OBJ_ISSCOPE((args)->receiver) \
-        ? LK_KFUNC(func)->scope->self : (args)->receiver; \
+            ? LK_KFUNC(func)->scope->self : (args)->receiver; \
         (args)->first = (args)->next = LK_KFUNC(func)->first; \
         (self) = (args); \
     } \

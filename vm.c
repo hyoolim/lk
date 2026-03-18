@@ -125,7 +125,7 @@ void lk_vm_libinit(lk_vm_t *vm) {
     lk_obj_set_cfunc_lk(tvm, "sleep", sleep_vm_num, num, NULL);
     lk_obj_set_cfunc_lk(tvm, "seconds since epoch", seconds_since_epoch_vm, NULL);
     lk_obj_set_cfunc_lk(tvm, "seconds west of utc", seconds_west_of_utc_vm, NULL);
-    lk_obj_set_cfunc_lk(tvm, "system", system_vm, -1);
+    lk_obj_set_cfunc_lk(tvm, "system", system_vm, (lk_obj_t *)-1);
     lk_obj_set_cfunc_lk(tvm, "system2", system2_vm_str, str, NULL);
     lk_obj_set_cfunc_lk(tvm, "wait", wait_vm, NULL);
 }

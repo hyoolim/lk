@@ -151,7 +151,7 @@ void lk_scope_libinit(lk_vm_t *vm) {
     lk_obj_set_cfunc_lk(scope, "rescue", rescue_scope_f, f, NULL);
     lk_obj_set_cfunc_lk(scope, "RESOURCE", RESOURCE_scope, NULL);
     lk_obj_set_cfunc_lk(scope, "retry", retry_scope, NULL);
-    lk_obj_set_cfunc_lk(scope, "return", return_scope, -1);
+    lk_obj_set_cfunc_lk(scope, "return", return_scope, (lk_obj_t *)-1);
 }
 
 /* create a new scope based on the current one set in vm */

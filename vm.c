@@ -360,7 +360,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
     rescue.rsrc = vm->rsrc;
     vm->rescue = &rescue;
     if(setjmp(rescue.buf)) {
-        recv = LK_OBJ(self->scope);
+        recv = vm->currscope != NULL ? LK_OBJ(vm->currscope) : LK_OBJ(self->scope);
         args = lk_scope_new(vm);
         lk_scope_stackpush(args, LK_OBJ(vm->lasterr));
         for(; recv != NULL; recv = LK_OBJ(LK_SCOPE(recv)->returnto)) {
@@ -589,12 +589,19 @@ void lk_vm_abort(lk_vm_t *self, lk_err_t *err) {
         lk_instr_t *expr = err->instr;
         int i = 0;
         darray_print_tostream(DARRAY(type), stdout);
-        fprintf(stdout, "\n* rsrc: ");
-        darray_print_tostream(DARRAY(expr->rsrc), stdout);
-        fprintf(stdout, "\n* line: %i", expr->line);
-        while(expr->prev != NULL) { expr = expr->prev; i ++; }
-        fprintf(stdout, "\n* instruction(%i): ", i);
-        lk_instr_print(expr);
+        if(expr == NULL) {
+            fprintf(stdout, "\n* rsrc: (no instr)");
+        } else {
+            fprintf(stdout, "\n* rsrc: ");
+            if(expr->rsrc != NULL)
+                darray_print_tostream(DARRAY(expr->rsrc), stdout);
+            else
+                fprintf(stdout, "(null)");
+            fprintf(stdout, "\n* line: %i", expr->line);
+            while(expr->prev != NULL) { expr = expr->prev; i++; }
+            fprintf(stdout, "\n* instruction(%i): ", i);
+            lk_instr_print(expr);
+        }
         fprintf(stdout, "\n* text: ");
         if(err->message != NULL) darray_print_tostream(DARRAY(err->message), stdout);
         printf("\n");

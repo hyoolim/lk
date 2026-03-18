@@ -116,7 +116,7 @@ static void retry_scope(lk_obj_t *self, lk_scope_t *local) {
 static void return_scope(lk_obj_t *self, lk_scope_t *local) {
     lk_scope_t *f = SCOPE;
     for(; ; f = LK_OBJ_PROTO(f)) {
-        if(f == NULL) lk_vm_abort(VM, NULL);
+        if(f == NULL || f->func == NULL) lk_vm_abort(VM, NULL);
         if(CHKOPT(LK_FUNC(f->func)->cf.opts, LK_FUNCOASSIGNED)) break;
     }
     f = f->returnto;

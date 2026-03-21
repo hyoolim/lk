@@ -1,5 +1,5 @@
-#ifndef MEMORY_H
-#define MEMORY_H
+#ifndef MEM_H
+#define MEM_H
 #include "common.h"
 #include <string.h>
 

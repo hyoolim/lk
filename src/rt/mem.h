@@ -6,9 +6,9 @@
 // Allocator — each allocation is prefixed with a size_t header:
 //   [ size_t size | user data ... ]
 //                   ^-- returned pointer
-// Small allocations (size < MEMORY_MAX_RECYCLED) are kept in a per-thread
+// Small allocations (size < MEM_MAX_RECYCLED) are kept in a per-thread
 // free list indexed by size, avoiding OS calls on reuse
-#define MEMORY_MAX_RECYCLED 1000
+#define MEM_MAX_RECYCLED 1000
 void *mem_alloc(size_t size);
 void mem_free(void *ptr);
 void mem_free_recycled(void); // Release the calling thread's recycler to the OS

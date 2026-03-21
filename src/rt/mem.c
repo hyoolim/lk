@@ -11,7 +11,7 @@ static _Atomic size_t alloc_recycled = 0;
 // Per-thread free lists indexed by allocation size. Thread-local means the
 // hot path (small allocs/frees) is fully lock-free with no cross-thread contention.
 // Blocks freed on one thread are not reused by another
-static _Thread_local void *recycled[MEMORY_MAX_RECYCLED];
+static _Thread_local void *recycled[MEM_MAX_RECYCLED];
 
 // CAS loop because the check and update must be atomic together
 static void update_peak(void) {
@@ -19,8 +19,7 @@ static void update_peak(void) {
     size_t peak = atomic_load_explicit(&alloc_peak, memory_order_relaxed);
 
     while (used > peak) {
-        if (atomic_compare_exchange_weak_explicit(&alloc_peak, &peak, used,
-                memory_order_relaxed, memory_order_relaxed))
+        if (atomic_compare_exchange_weak_explicit(&alloc_peak, &peak, used, memory_order_relaxed, memory_order_relaxed))
             break;
     }
 }
@@ -29,7 +28,7 @@ void *mem_alloc(size_t size) {
     assert(size > 0);
     atomic_fetch_add_explicit(&alloc_count, 1, memory_order_relaxed);
 
-    if (size < MEMORY_MAX_RECYCLED && recycled[size] != NULL) {
+    if (size < MEM_MAX_RECYCLED && recycled[size] != NULL) {
         // Pop from free list — first word of each recycled block stores the next pointer
         void *next = *(void **)recycled[size];
         void *new = recycled[size];
@@ -58,7 +57,7 @@ void mem_free(void *ptr) {
         size_t size = *((size_t *)ptr - 1);
         atomic_fetch_sub_explicit(&alloc_count, 1, memory_order_relaxed);
 
-        if (size < MEMORY_MAX_RECYCLED) {
+        if (size < MEM_MAX_RECYCLED) {
             // Push onto free list — threads the next pointer through the block
             *(void **)ptr = recycled[size];
             recycled[size] = ptr;
@@ -77,7 +76,7 @@ void mem_free(void *ptr) {
 // Releases the calling thread's recycler — each thread owns its own,
 // so callers on different threads free independent sets of blocks
 void mem_free_recycled(void) {
-    for (int i = 0; i < MEMORY_MAX_RECYCLED; i++) {
+    for (int i = 0; i < MEM_MAX_RECYCLED; i++) {
         void *curr = recycled[i];
 
         if (curr != NULL) {
@@ -100,7 +99,7 @@ void *mem_resize(void *old, size_t size) {
     size_t *old_header = (size_t *)old - 1;
     size_t old_size = *old_header;
 
-    if (size < MEMORY_MAX_RECYCLED && recycled[size] != NULL) {
+    if (size < MEM_MAX_RECYCLED && recycled[size] != NULL) {
         // Serve new size from recycler, copy data, then recycle or free old
         void *next = *(void **)recycled[size];
         void *new = recycled[size];
@@ -112,7 +111,7 @@ void *mem_resize(void *old, size_t size) {
             memset((char *)new + old_size, 0, size - old_size); // Zero-init growth
         atomic_fetch_sub_explicit(&alloc_recycled, size, memory_order_relaxed);
 
-        if (old_size < MEMORY_MAX_RECYCLED) {
+        if (old_size < MEM_MAX_RECYCLED) {
             *(void **)old = recycled[old_size];
             recycled[old_size] = old;
             atomic_fetch_add_explicit(&alloc_recycled, old_size, memory_order_relaxed);

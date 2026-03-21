@@ -41,13 +41,17 @@ num_type_t num_new(darray_t *str, num_t *res) {
             if (digit < 0 || digit > 9)
                 break;
 
-            if (f > DBL_MAX / 10)
+            if (f > DBL_MAX / 10) {
+                idx = len;
                 break;
+            }
 
             f *= 10;
 
-            if (f > DBL_MAX - digit)
+            if (f > DBL_MAX - digit) {
+                idx = len;
                 break;
+            }
 
             f += digit;
         }

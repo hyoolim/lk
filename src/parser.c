@@ -808,7 +808,7 @@ static READFUNC(readnum) {
     else {
         num_t num;
 
-        switch (num_new(0, DARRAY(tok), &num)) {
+        switch (num_new(DARRAY(tok), &num)) {
         case NUM_TYPE_INT:
             darray_ptr_push(self->words, lk_instr_new_number(self, num.i));
             break;

@@ -101,7 +101,7 @@ lk_charset_t *lk_str_to_charset(lk_str_t *self) {
 lk_num_t *lk_str_to_num(lk_str_t *self) {
     num_t num;
 
-    switch (num_new(0, DARRAY(self), &num)) {
+    switch (num_new(DARRAY(self), &num)) {
     case NUM_TYPE_INT:
         return lk_num_new(VM, num.i);
     case NUM_TYPE_DOUBLE:

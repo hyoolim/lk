@@ -1,9 +1,9 @@
 #ifndef LK_TYPES_H
 #define LK_TYPES_H
-#include "base/common.h"
-#include "base/darray.h"
-#include "base/num.h"
-#include "base/qphash.h"
+#include "rt/common.h"
+#include "rt/darray.h"
+#include "rt/num.h"
+#include "rt/qphash.h"
 
 // foward decl of all types
 typedef struct lk_obj lk_bool_t;

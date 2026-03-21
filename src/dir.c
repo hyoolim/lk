@@ -4,7 +4,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-/* type */
+// type
 static LK_OBJ_DEFMARKFUNC(mark_dir) {
     mark(LK_OBJ(LK_DIR(self)->path));
 }
@@ -13,7 +13,7 @@ void lk_dir_typeinit(lk_vm_t *vm) {
     lk_obj_setmarkfunc(vm->t_dir, mark_dir);
 }
 
-/* new */
+// new
 lk_dir_t *lk_dir_new_withpath(lk_vm_t *vm, lk_str_t *path) {
     lk_dir_t *self = LK_DIR(lk_obj_alloc(vm->t_dir));
     lk_dir_init(self, path);
@@ -39,7 +39,7 @@ void lk_dir_init(lk_dir_t *self, lk_str_t *path) {
     darray_offset(DARRAY(self->name), at);
 }
 
-/* update */
+// update
 void lk_dir_create(lk_dir_t *self) {
     mkdir(CSTRING(self->path), S_IRWXU | S_IRWXG | S_IRWXO);
 }
@@ -49,7 +49,7 @@ void lk_dir_work(lk_dir_t *self) {
     }
 }
 
-/* info */
+// info
 lk_list_t *lk_dir_items(lk_dir_t *self) {
     lk_list_t *items = lk_list_new(VM);
     DIR *dd = opendir(CSTRING(self->path));
@@ -76,22 +76,22 @@ lk_list_t *lk_dir_items(lk_dir_t *self) {
     return items;
 }
 
-/* bind all c funcs to lk equiv */
+// bind all c funcs to lk equiv
 void lk_dir_libinit(lk_vm_t *vm) {
     lk_obj_t *dir = vm->t_dir, *str = vm->t_str;
     lk_global_set("Directory", dir);
 
-    /* props */
+    // props
     lk_obj_set_cfield(dir, "name", str, offsetof(lk_dir_t, name));
     lk_obj_set_cfield(dir, "path", str, offsetof(lk_dir_t, path));
 
-    /* new */
+    // new
     lk_obj_set_cfunc_cvoid(dir, "init!", lk_dir_init, str, NULL);
 
-    /* update */
+    // update
     lk_obj_set_cfunc_cvoid(dir, "create!", lk_dir_create, NULL);
     lk_obj_set_cfunc_cvoid(dir, "work!", lk_dir_work, NULL);
 
-    /* info */
+    // info
     lk_obj_set_cfunc_creturn(dir, "items", lk_dir_items, NULL);
 }

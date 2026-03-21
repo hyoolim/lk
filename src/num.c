@@ -1,7 +1,7 @@
 #include "lib.h"
 #include <math.h>
 
-/* ext map - types */
+// ext map - types
 static void alloc_num(lk_obj_t *self, lk_obj_t *parent) {
     CNUMBER(self) = CNUMBER(parent);
 }
@@ -10,7 +10,7 @@ void lk_num_typeinit(lk_vm_t *vm) {
     lk_obj_setallocfunc(vm->t_num, alloc_num);
 }
 
-/* ext map - funcs */
+// ext map - funcs
 static void abs_num(lk_obj_t *self, lk_scope_t *local) {
     RETURN(lk_num_new(VM, fabs(CNUMBER(self))));
 }
@@ -107,7 +107,7 @@ void lk_num_libinit(lk_vm_t *vm) {
     lk_obj_set_cfunc_lk(num, "toString", to_str_num_num_num, num, num, NULL);
 }
 
-/* new */
+// new
 lk_num_t *lk_num_new(lk_vm_t *vm, double num) {
     lk_num_t *self = LK_NUMBER(lk_obj_alloc(vm->t_num));
     CNUMBER(self) = num;

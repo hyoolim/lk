@@ -1,14 +1,14 @@
 #ifndef LK_VM_H
 #define LK_VM_H
 
-/* generic lib for handling common types of data */
+// generic lib for handling common types of data
 #include "types.h"
 #include <setjmp.h>
 
-/* actual def - add header to above #include's on lk_vm_t change */
+// actual def - add header to above #include's on lk_vm_t change
 struct lk_vm {
     struct lk_rsrcchain {
-        uint8_t isstr;
+        bool isstr;
         lk_str_t *rsrc;
         struct lk_rsrcchain *prev;
     } *rsrc;
@@ -23,29 +23,29 @@ struct lk_vm {
     lk_gc_t *gc;
     lk_scope_t *global;
 
-    /* freq used primitive types */
-    /* bool     */ lk_obj_t *t_nil, *t_bool, *t_true, *t_false;
-    /* char     */ lk_obj_t *t_char;
-    /* charset  */ lk_obj_t *t_charset;
-    /* dl       */ lk_obj_t *t_dl;
-    /* err    */ lk_obj_t *t_err;
-    /* file     */ lk_obj_t *t_file, *t_dir, *t_stdin, *t_stdout, *t_stderr;
-    /* vec   */ lk_obj_t *t_vec;
-    /* fixnum   */ lk_obj_t *t_num;
-    /* scope    */ lk_obj_t *t_scope;
-    /* func     */ lk_obj_t *t_func, *t_sig, *t_lfunc, *t_cfunc, *t_gfunc;
-    /* seq      */ lk_obj_t *t_seq;
-    /* instr    */ lk_obj_t *t_instr;
-    /* list     */ lk_obj_t *t_list;
-    /* map      */ lk_obj_t *t_map;
-    /* obj      */ lk_obj_t *t_obj;
-    /* parser   */ lk_obj_t *t_parser, *t_prec;
-    /* pipe     */ lk_obj_t *t_pipe;
-    /* socket   */ lk_obj_t *t_socket;
-    /* str   */ lk_obj_t *t_str;
-    /* vm       */ lk_obj_t *t_vm;
+    // freq used primitive types
+    lk_obj_t *t_nil, *t_bool, *t_true, *t_false; // bool
+    lk_obj_t *t_char;                              // char
+    lk_obj_t *t_charset;                           // charset
+    lk_obj_t *t_dl;                                // dl
+    lk_obj_t *t_err;                               // err
+    lk_obj_t *t_file, *t_dir, *t_stdin, *t_stdout, *t_stderr; // file
+    lk_obj_t *t_vec;                               // vec
+    lk_obj_t *t_num;                               // fixnum
+    lk_obj_t *t_scope;                             // scope
+    lk_obj_t *t_func, *t_sig, *t_lfunc, *t_cfunc, *t_gfunc;   // func
+    lk_obj_t *t_seq;                               // seq
+    lk_obj_t *t_instr;                             // instr
+    lk_obj_t *t_list;                              // list
+    lk_obj_t *t_map;                               // map
+    lk_obj_t *t_obj;                               // obj
+    lk_obj_t *t_parser, *t_prec;                   // parser
+    lk_obj_t *t_pipe;                              // pipe
+    lk_obj_t *t_socket;                            // socket
+    lk_obj_t *t_str;                               // str
+    lk_obj_t *t_vm;                                // vm
 
-    /* freq used strs */
+    // freq used strs
     lk_str_t *str_type;
     lk_str_t *str_forward;
     lk_str_t *str_rescue;
@@ -53,7 +53,7 @@ struct lk_vm {
     lk_str_t *str_at;
     lk_str_t *str_filesep;
 
-    /* statistics */
+    // statistics
     struct {
         long totalinstrs;
         long totalscopes;
@@ -61,15 +61,15 @@ struct lk_vm {
     } stat;
 };
 
-/* ext map */
+// ext map
 void lk_vm_typeinit(lk_vm_t *vm);
 void lk_vm_libinit(lk_vm_t *vm);
 
-/* new */
+// new
 lk_vm_t *lk_vm_new(void);
 void lk_vm_free(lk_vm_t *self);
 
-/* eval */
+// eval
 lk_scope_t *lk_vm_evalfile(lk_vm_t *self, const char *file, const char *base);
 lk_scope_t *lk_vm_evalstr(lk_vm_t *self, const char *code);
 void lk_vm_doevalfunc(lk_vm_t *vm);

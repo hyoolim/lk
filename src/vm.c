@@ -29,12 +29,12 @@
 #include <time.h>
 #include <unistd.h>
 
-/* ext map - types */
+// ext map - types
 void lk_vm_typeinit(lk_vm_t *vm) {
     vm->t_vm = lk_obj_alloc(vm->t_obj);
 }
 
-/* ext map - funcs */
+// ext map - funcs
 static void exit_vm(lk_obj_t *self, lk_scope_t *local) {
     lk_vm_exit(VM);
     DONE;
@@ -135,11 +135,11 @@ void lk_vm_libinit(lk_vm_t *vm) {
     lk_obj_set_cfunc_lk(tvm, "wait", wait_vm, NULL);
 }
 
-/* new */
+// new
 lk_vm_t *lk_vm_new(void) {
     lk_vm_t *self = mem_alloc(sizeof(lk_vm_t));
 
-    /* must be loaded before other primitive types */
+    // must be loaded before other primitive types
     lk_obj_typeinit(self);
     lk_gc_typeinit(self);
     lk_vm_typeinit(self);
@@ -147,7 +147,7 @@ lk_vm_t *lk_vm_new(void) {
     lk_map_typeinit(self);
     lk_str_typeinit(self);
 
-    /* init all other primitive types */
+    // init all other primitive types
     lk_bool_typeinit(self);
     lk_char_typeinit(self);
     lk_charset_typeinit(self);
@@ -164,7 +164,7 @@ lk_vm_t *lk_vm_new(void) {
     lk_pipe_typeinit(self);
     lk_dl_typeinit(self);
 
-    /* init rest of the fields in vm */
+    // init rest of the fields in vm
     self->global = LK_SCOPE(lk_obj_alloc(self->t_scope));
     self->currscope = self->global;
     lk_global_set(".str.class", LK_OBJ(self->str_type = lk_str_new_fromcstr(self, "_CLASS")));
@@ -174,7 +174,7 @@ lk_vm_t *lk_vm_new(void) {
     lk_global_set(".str.at", LK_OBJ(self->str_at = lk_str_new_fromcstr(self, "at")));
     lk_global_set(".str.slash", LK_OBJ(self->str_filesep = lk_str_new_fromcstr(self, "/")));
 
-    /* attach all funcs to primitive types */
+    // attach all funcs to primitive types
     lk_bool_libinit(self);
     lk_char_libinit(self);
     lk_charset_libinit(self);
@@ -197,7 +197,7 @@ lk_vm_t *lk_vm_new(void) {
     lk_seq_libinit(self);
     lk_dl_libinit(self);
 
-    /* extra libs */
+    // extra libs
     lk_env_extinit(self);
     lk_rand_extinit(self);
     lk_socket_extinit(self);
@@ -221,7 +221,7 @@ void lk_vm_free(lk_vm_t *self) {
     */
 }
 
-/* eval */
+// eval
 static lk_scope_t *eval(lk_vm_t *self, lk_str_t *code) {
     lk_parser_t *p = lk_parser_new(self);
     lk_instr_t *func = lk_parser_parse(p, code);
@@ -369,9 +369,9 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
     lk_gc_t *gc = vm->gc;
     lk_instr_t *instr;
     lk_scope_t *args;
-    /* freq used types */
+    // freq used types
     lk_obj_t *t_func = vm->t_func;
-    /* used in slot resolution */
+    // used in slot resolution
     lk_instr_t *msg;
     lk_str_t *msgn;
     qphash_t *slots;
@@ -381,7 +381,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
     int anci, ancc;
     lk_obj_t *recv, *r, *slotv;
     lk_func_t *func;
-    /* rescue err and run approp func */
+    // rescue err and run approp func
     struct lk_rescue rescue;
     rescue.prev = vm->rescue;
     rescue.rsrc = vm->rsrc;
@@ -404,7 +404,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
                 continue;
             args->receiver = recv;
             args->returnto = LK_SCOPE(recv)->returnto;
-            args->func = slotv; /* LK_OBJ(func); */
+            args->func = slotv; // LK_OBJ(func);
             CALLFUNC(self, func, args);
         }
         vm->rescue = vm->rescue->prev;
@@ -412,20 +412,20 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         lk_vm_raiseerr(vm, vm->lasterr);
     }
 nextinstr:
-    /* gc mem? sweep triggered by mark if necessary */
+    // gc mem? sweep triggered by mark if necessary
     if (gc->newvalues > 5000) {
         lk_gc_mark(gc);
         gc->newvalues = 0;
     }
-    /* like how cpu execs instrs by following a program sizeer */
+    // like how cpu execs instrs by following a program sizeer
     if ((instr = self->next) == NULL)
         goto prevscope;
     vm->stat.totalinstrs++;
     vm->currinstr = self->current = instr;
     self->next = instr->next;
     switch (instr->type) {
-    /* skip comments */
-    /* msg represents a possiblity, a function to be exec'd */
+    // skip comments
+    // msg represents a possiblity, a function to be exec'd
     case LK_INSTRTYPE_SELFMSG:
         lk_scope_stackpush(self, self->self != NULL ? self->self : NIL);
         goto sendmsg;
@@ -448,13 +448,13 @@ nextinstr:
         args->receiver = self->receiver;
         self = args;
         goto nextinstr;
-    /* "literals" are actually generators */
+    // "literals" are actually generators
     case LK_INSTRTYPE_NUMBER:
     case LK_INSTRTYPE_STRING:
     case LK_INSTRTYPE_CHAR:
         lk_scope_stackpush(self, lk_obj_clone(instr->v));
         goto nextinstr;
-    /* funcs also need ref to env for closures to work */
+    // funcs also need ref to env for closures to work
     case LK_INSTRTYPE_FUNC: {
         lk_lfunc_t *clone = LK_LFUNC(lk_obj_clone(instr->v));
         lk_lfunc_updatesig(clone);
@@ -464,15 +464,15 @@ nextinstr:
         lk_scope_stackpush(self, LK_OBJ(clone));
         goto nextinstr;
     }
-    /* read more instr from the parser */
+    // read more instr from the parser
     case LK_INSTRTYPE_MORE:
         self->next = lk_parser_getmore(LK_PARSER(instr->v));
         goto nextinstr;
-    /* should never happen */
+    // should never happen
     default:
         BUG("Invalid instruction type");
     }
-/* return from func */
+// return from func
 prevscope:
     args = self;
     self = self->returnto;
@@ -482,17 +482,17 @@ prevscope:
         return;
     }
     switch (args->type) {
-    /* take the scope and return last val */
+    // take the scope and return last val
     case LK_SCOPETYPE_RETURN:
         lk_scope_stackpush(self, lk_scope_stackpeek(args));
         vm->currscope = self;
         goto nextinstr;
-    /* take the scope and convert to list */
+    // take the scope and convert to list
     case LK_SCOPETYPE_LIST:
         lk_scope_stackpush(self, LK_OBJ(lk_scope_stacktolist(args)));
         vm->currscope = self;
         goto nextinstr;
-    /* take the scope and use as args for msg */
+    // take the scope and use as args for msg
     case LK_SCOPETYPE_APPLY:
     apply:
         /*
@@ -518,7 +518,7 @@ prevscope:
     found:
         slot = LK_SLOT(SETITEM_VALUEPTR(si));
         slotv = lk_obj_getvaluefromslot(recv, slot);
-        /* slot contains func obj - call? */
+        // slot contains func obj - call?
         if (LK_OBJ_ISA(slotv, t_func) > 2 && LK_SLOT_CHECKOPTION(slot, LK_SLOTOPTION_AUTOSEND) &&
             (instr == NULL || instr->next == NULL || instr->next->type != LK_INSTRTYPE_APPLYMSG ||
              darray_str_cmp_cstr(DARRAY(instr->next->v), "+=") != 0)) {
@@ -531,15 +531,15 @@ prevscope:
             args->type = LK_SCOPETYPE_RETURN;
             args->scope = args;
             args->receiver = recv;
-            args->func = slotv; /* LK_OBJ(func); */
+            args->func = slotv; // LK_OBJ(func);
             CALLFUNC(self, func, args);
         } else {
-            /* called like a func? */
+            // called like a func?
             if (args != NULL) {
-                /* slot contains func */
+                // slot contains func
                 if (LK_OBJ_ISA(slotv, t_func) > 2) {
                     goto callfunc;
-                    /* call at/apply if there are args */
+                    // call at/apply if there are args
                 } else if (DARRAY_ISINIT(&args->stack) && DARRAY_COUNT(&args->stack) > 0) {
                     msgn = vm->str_at;
                     recv = r = slotv;
@@ -566,7 +566,7 @@ prevscope:
             r = r->o.parent;
             goto findslot;
         }
-        /* forward: */
+        // forward:
         if (DARRAY_EQ(DARRAY(msgn), DARRAY(vm->str_forward))) {
             lk_vm_raisecstr(vm, "Cannot find slot named %s", msg->v);
         } else {
@@ -575,7 +575,7 @@ prevscope:
             ancs = NULL;
             goto findslot;
         }
-    /* should never happen */
+    // should never happen
     default:
         BUG("Invalid scope type");
     }

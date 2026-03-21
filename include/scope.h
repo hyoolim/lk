@@ -2,7 +2,7 @@
 #define LK_SCOPE_H
 #include "types.h"
 
-/* type */
+// type
 struct lk_scope {
     struct lk_common o;
     enum lk_scopetype_t { LK_SCOPETYPE_APPLY = 1, LK_SCOPETYPE_LIST, LK_SCOPETYPE_RETURN } type;
@@ -21,11 +21,11 @@ struct lk_scope {
     int argc;
 };
 
-/* ext map */
+// ext map
 void lk_scope_typeinit(lk_vm_t *vm);
 void lk_scope_libinit(lk_vm_t *vm);
 
-/* update */
+// update
 lk_scope_t *lk_scope_new(lk_vm_t *vm);
 void lk_scope_stackpush(lk_scope_t *self, lk_obj_t *v);
 lk_obj_t *lk_scope_stackpop(lk_scope_t *self);

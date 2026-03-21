@@ -2,7 +2,7 @@
 #include <errno.h>
 #include <unistd.h>
 
-/* type */
+// type
 static LK_OBJ_DEFMARKFUNC(mark_pipe) {
     mark(LK_OBJ(LK_PIPE(self)->cmd));
 }
@@ -15,7 +15,7 @@ void lk_pipe_typeinit(lk_vm_t *vm) {
     lk_obj_setfreefunc(vm->t_pipe, free_pipe);
 }
 
-/* update */
+// update
 void lk_pipe_close(lk_pipe_t *self) {
     if (self->fd != NULL) {
         if (pclose(self->fd) != 0) {
@@ -48,7 +48,7 @@ void lk_pipe_write_str(lk_pipe_t *self, lk_str_t *text) {
     darray_print_tostream(DARRAY(text), self->fd);
 }
 
-/* info */
+// info
 lk_str_t *lk_pipe_read_num(lk_pipe_t *self, lk_num_t *length) {
     if (self->fd == NULL) {
         BUG("ReadableFile->st.pipe should NEVER be NULL");
@@ -82,22 +82,22 @@ lk_str_t *lk_pipe_readuntil_charset(lk_pipe_t *self, lk_charset_t *until) {
     }
 }
 
-/* bind all c funcs to lk equiv */
+// bind all c funcs to lk equiv
 void lk_pipe_libinit(lk_vm_t *vm) {
     lk_obj_t *pipe = vm->t_pipe, *str = vm->t_str, *num = vm->t_num, *ch = vm->t_char, *charset = vm->t_charset;
     lk_global_set("Pipe", pipe);
 
-    /* props */
+    // props
     lk_obj_set_cfield(pipe, "command", str, offsetof(lk_pipe_t, cmd));
 
-    /* update */
+    // update
     lk_obj_set_cfunc_cvoid(pipe, "close!", lk_pipe_close, NULL);
     lk_obj_set_cfunc_cvoid(pipe, "flush!", lk_pipe_flush, NULL);
     lk_obj_set_cfunc_cvoid(pipe, "init!", lk_pipe_init_str, str, NULL);
     lk_obj_set_cfunc_cvoid(pipe, "open", lk_pipe_open, str, NULL);
     lk_obj_set_cfunc_cvoid(pipe, "write", lk_pipe_write_str, str, NULL);
 
-    /* info */
+    // info
     lk_obj_set_cfunc_creturn(pipe, "read", lk_pipe_read_num, num, NULL);
     lk_obj_set_cfunc_creturn(pipe, "readAll", lk_pipe_readall, NULL);
     lk_obj_set_cfunc_creturn(pipe, "readUntil", lk_pipe_readuntil_char, ch, NULL);

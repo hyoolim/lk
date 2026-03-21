@@ -9,7 +9,7 @@
 #define SCOPE (LK_SCOPE(self))
 #define SCOPESTACK (&SCOPE->stack)
 
-/* ext map - types */
+// ext map - types
 static LK_OBJ_DEFMARKFUNC(mark_scope) {
     if (DARRAY_ISINIT(SCOPESTACK))
         DARRAY_EACHPTR(SCOPESTACK, i, v, mark(v));
@@ -34,7 +34,7 @@ void lk_scope_typeinit(lk_vm_t *vm) {
     lk_obj_setfreefunc(vm->t_scope, free_scope);
 }
 
-/* ext map - funcs */
+// ext map - funcs
 static void Dargs_scope(lk_obj_t *self, lk_scope_t *local) {
     if (!DARRAY_ISINIT(SCOPESTACK))
         RETURN(lk_list_new(VM));
@@ -156,12 +156,12 @@ void lk_scope_libinit(lk_vm_t *vm) {
     lk_obj_set_cfunc_lk(scope, "return", return_scope, (lk_obj_t *)-1);
 }
 
-/* create a new scope based on the current one set in vm */
+// create a new scope based on the current one set in vm
 lk_scope_t *lk_scope_new(lk_vm_t *vm) {
     lk_scope_t *parent = vm->currscope;
     lk_scope_t *self;
 
-    /* optimization to reduce the num of scopes created */
+    // optimization to reduce the num of scopes created
     if (parent->child != NULL && parent->child->o.mark.isref == 0) {
         vm->stat.recycledscopes++;
         self = parent->child;
@@ -174,7 +174,7 @@ lk_scope_t *lk_scope_new(lk_vm_t *vm) {
         self = parent->child = LK_SCOPE(lk_obj_alloc(LK_OBJ(parent)));
     }
 
-    /* init scope struct */
+    // init scope struct
     vm->stat.totalscopes++;
     vm->currscope = self;
     self->type = LK_SCOPETYPE_RETURN;
@@ -191,7 +191,7 @@ void lk_scope_stackpush(lk_scope_t *self, lk_obj_t *v) {
     darray_ptr_push(&self->stack, lk_obj_addref(LK_OBJ(self), v));
 }
 
-/* update */
+// update
 lk_obj_t *lk_scope_stackpop(lk_scope_t *self) {
     assert(DARRAY_ISINIT(&self->stack));
     assert(DARRAY_COUNT(&self->stack) > 0);

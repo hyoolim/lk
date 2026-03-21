@@ -4,14 +4,14 @@
 #include "lib.h"
 #include "num.h"
 
-/* type */
+// type
 void lk_str_typeinit(lk_vm_t *vm) {
     vm->t_str = lk_obj_alloc(vm->t_seq);
     darray_fin(DARRAY(vm->t_str));
     darray_init(DARRAY(vm->t_str), sizeof(uint8_t), 16);
 }
 
-/* new */
+// new
 lk_str_t *lk_str_new(lk_vm_t *vm) {
     return LK_STRING(lk_obj_alloc(vm->t_str));
 }
@@ -30,7 +30,7 @@ lk_str_t *lk_str_new_fromcstr(lk_vm_t *vm, const char *cstr) {
     return lk_str_new_fromdata(vm, cstr, strlen(cstr));
 }
 
-/* update */
+// update
 void lk_str_set_at_char(lk_str_t *self, lk_num_t *at, lk_char_t *replacement) {
     darray_str_set(DARRAY(self), CSIZE(at), CHAR(replacement));
 }
@@ -62,7 +62,7 @@ void lk_str_unescape(lk_str_t *self) {
     }
 }
 
-/* info */
+// info
 lk_char_t *lk_str_at(lk_str_t *self, lk_num_t *at) {
     return lk_char_new(VM, darray_str_get(DARRAY(self), CSIZE(at)));
 }
@@ -95,17 +95,17 @@ lk_num_t *lk_str_tonum(lk_str_t *self) {
     }
 }
 
-/* bind all c funcs to lk equiv */
+// bind all c funcs to lk equiv
 void lk_str_libinit(lk_vm_t *vm) {
     lk_obj_t *str = vm->t_str, *num = vm->t_num, *charset = vm->t_charset, *ch = vm->t_char;
     lk_global_set("Newline", LK_OBJ(lk_str_new_fromcstr(vm, "\n")));
     lk_global_set("String", str);
 
-    /* update */
+    // update
     lk_obj_set_cfunc_cvoid(str, "set!", lk_str_set_at_char, num, ch, NULL);
     lk_obj_set_cfunc_cvoid(str, "set!", lk_str_set_range_str, num, num, str, NULL);
 
-    /* info */
+    // info
     lk_obj_set_cfunc_creturn(str, "at", lk_str_at, num, NULL);
     lk_obj_set_cfunc_creturn(str, "find", lk_str_find_char_starting, ch, num, NULL);
     lk_obj_set_cfunc_creturn(str, "find", lk_str_find_charset_starting, charset, num, NULL);

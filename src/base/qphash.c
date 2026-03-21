@@ -1,12 +1,12 @@
 #include "qphash.h"
 
-/* set cap needs to be primes for quadratic probing to work */
+// set cap needs to be primes for quadratic probing to work
 static unsigned long primes[] = {11,        19,        37,        67,         131,     283,      521,      1033,
                                  2053,      4099,      8219,      16427,      32771,   65581,    131101,   262147,
                                  524309,    1048583,   2097169,   4194319,    8388617, 16777259, 33554467, 67108879,
                                  134217757, 268435459, 536870923, 1073741909, 0};
 
-/* create set data depending on item size */
+// create set data depending on item size
 static struct setdata *setdata_alloc(int ivlen, int ci, sethashfunc_t *hashfunc, setkeycmpfunc_t *cmpfunc) {
     struct setdata *self;
     int c = primes[ci];
@@ -21,7 +21,7 @@ static struct setdata *setdata_alloc(int ivlen, int ci, sethashfunc_t *hashfunc,
     return self;
 }
 
-/* simple ref sizeing mem management for clones */
+// simple ref sizeing mem management for clones
 static void setdata_free(struct setdata *self) {
     if (self->refc > 0)
         self->refc--;
@@ -29,7 +29,7 @@ static void setdata_free(struct setdata *self) {
         mem_free(self);
 }
 
-/* create new set data and repopulate */
+// create new set data and repopulate
 static void qphash_resize(qphash_t *self, int ci) {
     struct setdata *olddata = self->data, *newdata;
     sethashfunc_t *hashfunc = olddata->hashfunc;
@@ -53,7 +53,7 @@ static void qphash_resize(qphash_t *self, int ci) {
     self->data = newdata;
 }
 
-/* for set construction/deconstruction */
+// for set construction/deconstruction
 qphash_t *qphash_alloc(int ivlen, sethashfunc_t *hashfunc, setkeycmpfunc_t *cmpfunc) {
     qphash_t *self = mem_alloc(sizeof(qphash_t));
     qphash_init(self, ivlen, hashfunc, cmpfunc);
@@ -78,7 +78,7 @@ void qphash_init(qphash_t *self, int ivlen, sethashfunc_t *hashfunc, setkeycmpfu
     self->data = setdata_alloc(ivlen, 0, hashfunc, cmpfunc);
 }
 
-/* set manipulation */
+// set manipulation
 void qphash_clear(qphash_t *self) {
     struct setdata *data = self->data;
     data->size = 0;
@@ -132,7 +132,7 @@ void qphash_unset(qphash_t *self, const void *key) {
     }
 }
 
-/* default hash and keycmp */
+// default hash and keycmp
 int qphash_hash(const void *key, int cap) {
     return (ptrdiff_t)key % cap;
 }

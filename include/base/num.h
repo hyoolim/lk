@@ -3,7 +3,7 @@
 #include "common.h"
 #include "darray.h"
 
-/* type. */
+// type.
 typedef enum numtype { NUMBERTYPE_INT = 1, NUMBERTYPE_FLOAT, NUMBERTYPE_NUMBER } numtype_t;
 typedef struct num {
     uint8_t *buf;
@@ -15,7 +15,7 @@ typedef union numifn {
     num_t *n;
 } numifn_t;
 
-/* new. */
+// new.
 numtype_t num_new(int is_big, darray_t *str, numifn_t *res);
 void num_free(num_t *self);
 #endif

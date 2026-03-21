@@ -1,6 +1,6 @@
 #include "num.h"
 
-/* new. */
+// new.
 numtype_t num_new(int is_big, darray_t *str, numifn_t *res) {
     static char underscore = '_' - '0', dot = '.' - '0';
     char digit = '\0';
@@ -8,7 +8,7 @@ numtype_t num_new(int is_big, darray_t *str, numifn_t *res) {
     double f, div = 1;
     int idx = 0, len = DARRAY_COUNT(str);
 
-    /* try the num as native int. */
+    // try the num as native int.
     i = 0;
     for (; idx < len; idx++) {
         digit = darray_str_get(str, idx) - '0';
@@ -30,7 +30,7 @@ numtype_t num_new(int is_big, darray_t *str, numifn_t *res) {
         return NUMBERTYPE_INT;
     }
 
-    /* try the num as native float/double. */
+    // try the num as native float/double.
     if (is_big)
         goto bignum;
     f = i;
@@ -77,7 +77,7 @@ numtype_t num_new(int is_big, darray_t *str, numifn_t *res) {
         return NUMBERTYPE_FLOAT;
     }
 
-/* try the num with supplied bignum lib. */
+// try the num with supplied bignum lib.
 bignum:
     NYI("No supported big num library.\n");
 }

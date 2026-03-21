@@ -1,7 +1,7 @@
 #include "lib.h"
 #include <stdarg.h>
 
-/* ext map - types */
+// ext map - types
 void lk_obj_typeinit(lk_vm_t *vm) {
     lk_obj_t *o = vm->t_obj = mem_alloc(sizeof(lk_obj_t));
     o->o.tag = mem_alloc(sizeof(struct lk_tag));
@@ -12,7 +12,7 @@ void lk_obj_typeinit(lk_vm_t *vm) {
     darray_ptr_push(o->o.ancestors = darray_ptr_alloc(), o);
 }
 
-/* ext map - funcs */
+// ext map - funcs
 static void Ddefine_and_assignB_obj_str_obj_obj(lk_obj_t *self, lk_scope_t *local);
 static void Ddefine_obj_str_obj(lk_obj_t *self, lk_scope_t *local) {
     local->argc++;
@@ -146,7 +146,7 @@ void lk_obj_libinit(lk_vm_t *vm) {
     lk_obj_set_cfunc_lk(obj, "with", with_obj_f, f, NULL);
 }
 
-/* new */
+// new
 static struct lk_tag *tag_clone(struct lk_tag *self) {
     struct lk_tag *clone = mem_alloc(sizeof(struct lk_tag));
     memcpy(clone, self, sizeof(struct lk_tag));
@@ -199,7 +199,7 @@ void lk_obj_free(lk_obj_t *self) {
     lk_obj_justfree(self);
 }
 
-/* update - tag */
+// update - tag
 #define LK_OBJ_IMPLTAGSETTER(t, field) \
     LK_OBJ_DEFTAGSETTER(t, field) { \
         struct lk_tag *tag = self->o.tag; \
@@ -216,7 +216,7 @@ LK_OBJ_IMPLTAGSETTER(lk_tagallocfunc_t *, allocfunc);
 LK_OBJ_IMPLTAGSETTER(lk_tagmarkfunc_t *, markfunc);
 LK_OBJ_IMPLTAGSETTER(lk_tagfreefunc_t *, freefunc);
 
-/* update */
+// update
 void lk_obj_extend(lk_obj_t *self, lk_obj_t *parent) {
     darray_t *parents;
     if (LK_OBJ_HASPARENTS(self)) {
@@ -402,7 +402,7 @@ void lk_obj_set_cfunc_cvoid(lk_obj_t *self, const char *name, ...) {
     va_end(args);
 }
 
-/* info */
+// info
 #define FIND(nil, check) \
     do { \
         while (1) { \

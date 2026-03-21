@@ -1,7 +1,7 @@
 #include "lib.h"
 #include <dlfcn.h>
 
-/* type */
+// type
 static void free_dl(lk_obj_t *self) {
     if (LK_DL(self)->dl != NULL) {
         dlclose(LK_DL(self)->dl);
@@ -13,7 +13,7 @@ void lk_dl_typeinit(lk_vm_t *vm) {
     lk_obj_setfreefunc(vm->t_dl, free_dl);
 }
 
-/* new */
+// new
 void lk_dl_init_withpath_andfunc(lk_dl_t *self, lk_str_t *path, lk_str_t *funcname) {
     void *dl = dlopen(darray_str_tocstr(DARRAY(path)), RTLD_NOW);
     if (dl != NULL) {
@@ -33,16 +33,16 @@ void lk_dl_init_withpath_andfunc(lk_dl_t *self, lk_str_t *path, lk_str_t *funcna
     }
 }
 
-/* bind all c funcs to lk equiv */
+// bind all c funcs to lk equiv
 void lk_dl_libinit(lk_vm_t *vm) {
     lk_obj_t *dl = vm->t_dl, *str = vm->t_str;
     lk_global_set("DynamicLibrary", dl);
 
-    /* new */
+    // new
     lk_obj_set_cfunc_cvoid(dl, "init!", lk_dl_init_withpath_andfunc, str, str, NULL);
 }
 
-/* update */
+// update
 void lk_object_set(lk_obj_t *parent, const char *k, lk_obj_t *v) {
     lk_vm_t *vm = LK_VM(parent);
     lk_str_t *k_kc = lk_str_new_fromcstr(vm, k);

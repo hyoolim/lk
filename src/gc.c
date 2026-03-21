@@ -1,6 +1,6 @@
 #include "lib.h"
 
-/* ext map - types */
+// ext map - types
 static void free_gc(lk_obj_t *self) {
     mem_free(LK_GC(self)->unused);
     mem_free(LK_GC(self)->pending);
@@ -16,7 +16,7 @@ void lk_gc_typeinit(lk_vm_t *vm) {
     lk_obj_setfreefunc(LK_OBJ(vm->gc), free_gc);
 }
 
-/* update */
+// update
 void lk_gc_free_objgroup(struct lk_objgroup *self) {
     lk_obj_t *c = self->first, *n;
     for (; c != NULL; c = n) {
@@ -137,7 +137,7 @@ void lk_gc_sweep(lk_gc_t *self) {
     }
 }
 
-/* info */
+// info
 int lk_objgroup_size(struct lk_objgroup *self) {
     int c = 0;
     lk_obj_t *i;
@@ -146,12 +146,12 @@ int lk_objgroup_size(struct lk_objgroup *self) {
     return c;
 }
 
-/* bind all c funcs to lk equiv */
+// bind all c funcs to lk equiv
 void lk_gc_libinit(lk_vm_t *vm) {
     lk_obj_t *gc = LK_OBJ(vm->gc);
     lk_global_set("GarbageCollector", gc);
 
-    /* update */
+    // update
     lk_obj_set_cfunc_cvoid(gc, "pause!", lk_gc_pause, NULL);
     lk_obj_set_cfunc_cvoid(gc, "resume!", lk_gc_resume, NULL);
 }

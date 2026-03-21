@@ -1,6 +1,6 @@
 #include "mem.h"
 
-/* new */
+// new
 static int allocsize = 0;
 static size_t alloctotal = 0;
 static size_t allocused = 0;
@@ -72,7 +72,7 @@ void *mem_resize(void *old, size_t size) {
     }
 }
 
-/* info */
+// info
 int mem_allocsize(void) {
     return allocsize;
 }

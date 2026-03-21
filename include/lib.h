@@ -27,7 +27,7 @@
 #include "vec.h"
 #include "vm.h"
 
-/* ext shortcuts */
+// ext shortcuts
 #define ARG(i) (assert(local != NULL && 0 <= (i) && (i) < local->argc), LK_OBJ(DARRAY_ATPTR(&local->stack, (i))))
 #define DONE return
 #define RETURN(v) \

@@ -3,7 +3,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-/* type */
+// type
 static LK_OBJ_DEFMARKFUNC(mark_file) {
     mark(LK_OBJ(LK_FILE(self)->path));
 }
@@ -19,7 +19,7 @@ void lk_file_typeinit(lk_vm_t *vm) {
     LK_FILE(vm->t_stderr = lk_obj_alloc(vm->t_file))->fd = stderr;
 }
 
-/* new */
+// new
 lk_file_t *lk_file_new_withpath(lk_vm_t *vm, lk_str_t *path) {
     lk_file_t *self = LK_FILE(lk_obj_alloc(vm->t_file));
     lk_file_init_str(self, path);
@@ -45,7 +45,7 @@ void lk_file_init_str(lk_file_t *self, lk_str_t *path) {
     darray_offset(DARRAY(self->name), at);
 }
 
-/* update */
+// update
 void lk_file_close(lk_file_t *self) {
     if (self->fd != NULL) {
         if (fclose(self->fd) != 0) {
@@ -85,7 +85,7 @@ void lk_file_write_str(lk_file_t *self, lk_str_t *text) {
     darray_print_tostream(DARRAY(text), self->fd);
 }
 
-/* info */
+// info
 lk_bool_t *lk_file_isdirectory(lk_file_t *self) {
     struct stat info;
     return stat(CSTRING(self->path), &info) == 0 && S_ISDIR(info.st_mode) ? TRUE : FALSE;
@@ -142,19 +142,19 @@ lk_bool_t *lk_file_iswritable(lk_file_t *self) {
     return access(CSTRING(self->path), W_OK) == 0 ? TRUE : FALSE;
 }
 
-/* bind all c funcs to lk equiv */
+// bind all c funcs to lk equiv
 void lk_file_libinit(lk_vm_t *vm) {
     lk_obj_t *file = vm->t_file, *str = vm->t_str, *num = vm->t_num, *ch = vm->t_char, *charset = vm->t_charset;
     lk_global_set("File", file);
 
-    /* props */
+    // props
     lk_obj_set_cfield(file, "path", str, offsetof(lk_file_t, path));
     lk_obj_set_cfield(file, "name", str, offsetof(lk_file_t, name));
 
-    /* new */
+    // new
     lk_obj_set_cfunc_cvoid(file, "init!", lk_file_init_str, str, NULL);
 
-    /* update */
+    // update
     lk_obj_set_cfunc_cvoid(file, "close!", lk_file_close, NULL);
     lk_obj_set_cfunc_cvoid(file, "delete!", lk_file_delete, NULL);
     lk_obj_set_cfunc_cvoid(file, "flush!", lk_file_flush, NULL);
@@ -162,7 +162,7 @@ void lk_file_libinit(lk_vm_t *vm) {
     lk_obj_set_cfunc_cvoid(file, "open", lk_file_open, str, NULL);
     lk_obj_set_cfunc_cvoid(file, "write", lk_file_write_str, str, NULL);
 
-    /* info */
+    // info
     lk_obj_set_cfunc_creturn(file, "directory?", lk_file_isdirectory, NULL);
     lk_obj_set_cfunc_creturn(file, "executable?", lk_file_isexecutable, NULL);
     lk_obj_set_cfunc_creturn(file, "exists?", lk_file_isexists, NULL);
@@ -174,7 +174,7 @@ void lk_file_libinit(lk_vm_t *vm) {
     lk_obj_set_cfunc_creturn(file, "size", lk_file_size, NULL);
     lk_obj_set_cfunc_creturn(file, "writable?", lk_file_iswritable, NULL);
 
-    /* standard pipes */
+    // standard pipes
     lk_global_set("STDIN", vm->t_stdin);
     lk_global_set("STDOUT", vm->t_stdout);
     lk_global_set("STDERR", vm->t_stderr);

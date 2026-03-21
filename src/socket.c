@@ -5,11 +5,11 @@
 #define IPADDR (LK_IPADDR(self))
 #define SOCKET (LK_SOCKET(self))
 
-/* non-ansi */
+// non-ansi
 FILE *fdopen(int fildes, const char *mode);
 int inet_aton(const char *cp, struct in_addr *pin);
 
-/* ext map - ip addr */
+// ext map - ip addr
 static void alloc_ip_str(lk_obj_t *self, lk_scope_t *local) {
     inet_aton(darray_str_tocstr(DARRAY(ARG(0))), &IPADDR->addr);
     RETURN(self);
@@ -18,7 +18,7 @@ static void to_str_ip(lk_obj_t *self, lk_scope_t *local) {
     RETURN(lk_str_new_fromcstr(VM, inet_ntoa(IPADDR->addr)));
 }
 
-/* ext map - socket */
+// ext map - socket
 static void alloc_sock(lk_obj_t *self, lk_obj_t *parent) {
     int yes = 1;
     SOCKET->fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -78,12 +78,12 @@ void lk_socket_extinit(lk_vm_t *vm) {
     lk_obj_t *sock = lk_obj_alloc_withsize(obj, sizeof(lk_socket_t));
     lk_obj_setallocfunc(sock, alloc_sock);
     lk_obj_setfreefunc(sock, free_sock);
-    /* */
+    // 
     lk_global_set("IpAddress", ip);
     lk_object_set(ip, "ANY", lk_obj_alloc(ip));
     lk_obj_set_cfunc_lk(ip, "init!", alloc_ip_str, str, NULL);
     lk_obj_set_cfunc_lk(ip, "toString", to_str_ip, NULL);
-    /* */
+    // 
     lk_global_set("Socket", vm->t_socket = sock);
     lk_obj_set_cfunc_lk(sock, "accept", acce_sock, NULL);
     lk_obj_set_cfunc_lk(sock, "bind", bind_sock_ip_num, ip, num, NULL);

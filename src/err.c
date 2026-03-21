@@ -1,7 +1,7 @@
 #include "lib.h"
 #include <errno.h>
 
-/* ext map - types */
+// ext map - types
 static LK_OBJ_DEFMARKFUNC(err_mark) {
     mark(LK_OBJ(LK_ERROR(self)->instr));
     mark(LK_OBJ(LK_ERROR(self)->message));
@@ -11,7 +11,7 @@ void lk_err_typeinit(lk_vm_t *vm) {
     lk_obj_setmarkfunc(vm->t_err, err_mark);
 }
 
-/* ext map - funcs */
+// ext map - funcs
 void lk_err_libinit(lk_vm_t *vm) {
     lk_obj_t *err = vm->t_err, *instr = vm->t_instr, *str = vm->t_str;
     lk_global_set("Error", err);
@@ -21,7 +21,7 @@ void lk_err_libinit(lk_vm_t *vm) {
     lk_global_set("NameError", LK_OBJ(lk_err_new(vm, vm->t_err, NULL)));
 }
 
-/* new */
+// new
 lk_err_t *lk_err_new(lk_vm_t *vm, lk_obj_t *parent, const char *message) {
     lk_err_t *self = LK_ERROR(lk_obj_alloc(parent));
     self->instr = vm->currinstr;

@@ -1,6 +1,6 @@
 #include "lib.h"
 
-/* ext map - types */
+// ext map - types
 static LK_OBJ_DEFMARKFUNC(mark_instr) {
     mark(LK_OBJ(LK_INSTR(self)->prev));
     mark(LK_OBJ(LK_INSTR(self)->next));
@@ -14,7 +14,7 @@ void lk_instr_typeinit(lk_vm_t *vm) {
     lk_obj_setmarkfunc(vm->t_instr, mark_instr);
 }
 
-/* info */
+// info
 lk_num_t *lk_instr_column(lk_obj_t *self) {
     return lk_num_new(VM, LK_INSTR(self)->column);
 }
@@ -39,21 +39,21 @@ lk_str_t *lk_instr_resource(lk_obj_t *self) {
     return LK_INSTR(self)->rsrc;
 }
 
-/* bind all c funcs to lk equiv */
+// bind all c funcs to lk equiv
 void lk_instr_libinit(lk_vm_t *vm) {
     lk_obj_t *instr = vm->t_instr;
     lk_object_set(vm->t_vm, "Instruction", instr);
     lk_obj_set_cfield(instr, "_next", instr, offsetof(lk_instr_t, next));
     lk_obj_set_cfield(instr, "_previous", instr, offsetof(lk_instr_t, prev));
 
-    /* info */
+    // info
     lk_obj_set_cfunc_creturn(instr, "COLUMN", lk_instr_column, NULL);
     lk_obj_set_cfunc_creturn(instr, "LINE", lk_instr_line, NULL);
     lk_obj_set_cfunc_creturn(instr, "MESSAGE", lk_instr_message, NULL);
     lk_obj_set_cfunc_creturn(instr, "RESOURCE", lk_instr_resource, NULL);
 }
 
-/* new */
+// new
 static lk_instr_t *instr_new(lk_parser_t *parser, enum lk_instrtype_t type) {
     lk_vm_t *vm = LK_VM(parser);
     lk_instr_t *self = LK_INSTR(lk_obj_alloc(vm->t_instr));
@@ -84,7 +84,7 @@ lk_instr_t *lk_instr_newarglist(lk_parser_t *parser, lk_instr_t *func) {
 }
 lk_instr_t *lk_instr_newstr(lk_parser_t *parser, lk_str_t *s) {
     lk_instr_t *new = instr_new(parser, LK_INSTRTYPE_STRING);
-    new->v = LK_OBJ(s); /* lk_str_new_fromdarray(LK_VM(parser), s)); */
+    new->v = LK_OBJ(s); // lk_str_new_fromdarray(LK_VM(parser), s));
     return new;
 }
 lk_instr_t *lk_instr_new_number(lk_parser_t *parser, double num) {
@@ -119,7 +119,7 @@ lk_instr_t *lk_instr_newscopemessage(lk_parser_t *parser, lk_str_t *name) {
     return new;
 }
 
-/* info */
+// info
 void lk_instr_print(lk_instr_t *self) {
     if (self == NULL)
         return;

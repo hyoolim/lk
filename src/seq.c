@@ -2,7 +2,7 @@
 #include "lib.h"
 #include "num.h"
 
-/* ext map - types */
+// ext map - types
 static void alloc_seq(lk_obj_t *self, lk_obj_t *parent) {
     darray_copy(DARRAY(self), DARRAY(parent));
 }
@@ -16,7 +16,7 @@ void lk_seq_typeinit(lk_vm_t *vm) {
     lk_obj_setfreefunc(vm->t_seq, free_seq);
 }
 
-/* ext map - funcs */
+// ext map - funcs
 static void at_gl_vec(lk_obj_t *self, lk_scope_t *local) {
     lk_list_t *ret = LK_DARRAY(lk_obj_clone(self));
     darray_t *sl = DARRAY(self), *rl = DARRAY(ret), *indexes = DARRAY(ARG(0));

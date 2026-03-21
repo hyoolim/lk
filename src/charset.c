@@ -1,6 +1,6 @@
 #include "lib.h"
 
-/* type */
+// type
 static void alloc_charset(lk_obj_t *self, lk_obj_t *parent) {
     charset_copy(CHARSET(self), CHARSET(parent));
 }
@@ -14,7 +14,7 @@ void lk_charset_typeinit(lk_vm_t *vm) {
     lk_obj_setfreefunc(vm->t_charset, free_charset);
 }
 
-/* new */
+// new
 lk_charset_t *lk_charset_new(lk_vm_t *vm) {
     return LK_CHARSET(lk_obj_alloc(vm->t_charset));
 }
@@ -22,7 +22,7 @@ void lk_charset_init_str(lk_obj_t *self, lk_str_t *str) {
     charset_add_darray(CHARSET(self), DARRAY(str));
 }
 
-/* update */
+// update
 void lk_charset_add_charset(lk_obj_t *self, lk_charset_t *other) {
     charset_add_charset(CHARSET(self), CHARSET(other));
 }
@@ -39,7 +39,7 @@ void lk_charset_subtract_str(lk_obj_t *self, lk_str_t *other) {
     charset_subtract_darray(CHARSET(self), DARRAY(other));
 }
 
-/* info */
+// info
 lk_bool_t *lk_charset_has_char(lk_obj_t *self, lk_char_t *achar) {
     return charset_has(CHARSET(self), CHAR(achar)) ? TRUE : FALSE;
 }
@@ -58,12 +58,12 @@ lk_str_t *lk_charset_tostr(lk_obj_t *self) {
     return lk;
 }
 
-/* bind all c funcs to lk equiv */
+// bind all c funcs to lk equiv
 void lk_charset_libinit(lk_vm_t *vm) {
     lk_obj_t *charset = vm->t_charset, *ch = vm->t_char, *str = vm->t_str;
     lk_global_set("CharacterSet", charset);
 
-    /* update */
+    // update
     lk_obj_set_cfunc_cvoid(charset, "+=", lk_charset_add_charset, charset, NULL);
     lk_obj_set_cfunc_cvoid(charset, "+=", lk_charset_add_str, str, NULL);
     lk_obj_set_cfunc_cvoid(charset, "init!", lk_charset_init_str, str, NULL);
@@ -71,7 +71,7 @@ void lk_charset_libinit(lk_vm_t *vm) {
     lk_obj_set_cfunc_cvoid(charset, "-=", lk_charset_subtract_charset, charset, NULL);
     lk_obj_set_cfunc_cvoid(charset, "-=", lk_charset_subtract_str, str, NULL);
 
-    /* info */
+    // info
     lk_obj_set_cfunc_creturn(charset, "has?", lk_charset_has_char, ch, NULL);
     lk_obj_set_cfunc_creturn(charset, "has?", lk_charset_has_str, str, NULL);
     lk_obj_set_cfunc_creturn(charset, "toString", lk_charset_tostr, NULL);

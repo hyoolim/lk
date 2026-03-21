@@ -2,14 +2,14 @@
 #include "lib.h"
 #include "num.h"
 
-/* ext map - types */
+// ext map - types
 void lk_vec_typeinit(lk_vm_t *vm) {
     vm->t_vec = lk_obj_alloc(vm->t_seq);
     darray_fin(DARRAY(vm->t_vec));
     darray_init(DARRAY(vm->t_vec), sizeof(int), 16);
 }
 
-/* ext map - funcs */
+// ext map - funcs
 static void at_vec_num(lk_obj_t *self, lk_scope_t *local) {
     int *v = darray_get(DARRAY(self), CSIZE(ARG(0)));
     RETURN(v != NULL ? LK_OBJ(lk_num_new(VM, *v)) : NIL);

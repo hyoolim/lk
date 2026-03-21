@@ -5,7 +5,7 @@
 #include "base/num.h"
 #include "base/qphash.h"
 
-/* foward decl of all types */
+// foward decl of all types
 typedef struct lk_obj lk_bool_t;
 typedef struct lk_char lk_char_t;
 typedef struct lk_charset lk_charset_t;
@@ -37,7 +37,7 @@ typedef struct lk_seq lk_str_t;
 typedef struct lk_vec lk_vec_t;
 typedef struct lk_vm lk_vm_t;
 
-/* common data for all lk objs */
+// common data for all lk objs
 typedef void lk_tagallocfunc_t(lk_obj_t *self, lk_obj_t *parent);
 #define LK_OBJ_DEFMARKFUNC(name) void name(lk_obj_t *self, void (*mark)(lk_obj_t * self))
 typedef LK_OBJ_DEFMARKFUNC(lk_tagmarkfunc_t);
@@ -63,11 +63,11 @@ struct lk_common {
         lk_obj_t *prev;
         lk_obj_t *next;
         struct lk_objgroup *objgroup;
-        uint8_t isref;
+        bool isref;
     } mark;
 };
 
-/* used by ext - can't be in lib.h due to bootstrapping issues */
+// used by ext - can't be in lib.h due to bootstrapping issues
 typedef void lk_cfunc_lk_t(lk_obj_t *self, lk_scope_t *local);
 typedef lk_obj_t *lk_cfunc_r0_t(lk_obj_t *self);
 typedef lk_obj_t *lk_cfunc_r1_t(lk_obj_t *self, lk_obj_t *a0type);

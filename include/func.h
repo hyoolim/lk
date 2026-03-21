@@ -2,7 +2,7 @@
 #define LK_FUNC_H
 #include "types.h"
 
-/* type */
+// type
 struct lk_func {
     struct lk_common o;
     struct lk_commonfunc {
@@ -50,20 +50,20 @@ struct lk_sig {
     struct lk_common o;
     lk_str_t *name;
     lk_obj_t *check;
-    uint8_t isself;
+    bool isself;
 };
 
-/* ext map */
+// ext map
 void lk_func_typeinit(lk_vm_t *vm);
 void lk_func_libinit(lk_vm_t *vm);
 
-/* new */
+// new
 lk_cfunc_t *lk_cfunc_new(lk_vm_t *vm, lk_cfuncfunc_t *func, int minargc, int maxargc);
 lk_lfunc_t *lk_lfunc_new(lk_vm_t *vm, lk_scope_t *scope, lk_instr_t *first);
 lk_gfunc_t *lk_gfunc_new(lk_vm_t *vm);
 lk_sig_t *lk_sig_new(lk_vm_t *vm, lk_str_t *name, lk_obj_t *type);
 
-/* update */
+// update
 lk_gfunc_t *lk_func_combine(lk_func_t *self, lk_func_t *other);
 lk_func_t *lk_func_match(lk_func_t *self, lk_scope_t *args, lk_obj_t *recv);
 void lk_lfunc_updatesig(lk_lfunc_t *self);

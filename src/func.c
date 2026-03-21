@@ -1,7 +1,7 @@
 #include "lib.h"
 
-/* ext map - types */
-/* */
+// ext map - types
+// 
 static void alloc_f(lk_obj_t *self, lk_obj_t *parent) {
     LK_FUNC(self)->cf.sigdef = LK_FUNC(parent)->cf.sigdef;
     LK_FUNC(self)->cf.minargc = LK_FUNC(parent)->cf.minargc;
@@ -22,14 +22,14 @@ static void free_f(lk_obj_t *self) {
         darray_free(LK_FUNC(self)->cf.sigs);
 }
 
-/* */
+// 
 static void alloc_cf(lk_obj_t *self, lk_obj_t *parent) {
     alloc_f(self, parent);
     LK_CFUNC(self)->cc = LK_CFUNC(parent)->cc;
     LK_CFUNC(self)->cfunc = LK_CFUNC(parent)->cfunc;
 }
 
-/* */
+// 
 static void alloc_gf(lk_obj_t *self, lk_obj_t *parent) {
     alloc_f(self, parent);
     LK_GFUNC(self)->funcs = darray_clone(LK_GFUNC(parent)->funcs);
@@ -43,7 +43,7 @@ static void free_gf(lk_obj_t *self) {
     darray_free(LK_GFUNC(self)->funcs);
 }
 
-/* */
+// 
 static void alloc_lf(lk_obj_t *self, lk_obj_t *parent) {
     alloc_f(self, parent);
     LK_LFUNC(self)->scope = LK_LFUNC(parent)->scope;
@@ -55,7 +55,7 @@ static LK_OBJ_DEFMARKFUNC(mark_lf) {
     mark(LK_OBJ(LK_LFUNC(self)->first));
 }
 
-/* */
+// 
 static void alloc_sig(lk_obj_t *self, lk_obj_t *parent) {
     LK_SIG(self)->name = LK_SIG(parent)->name;
     LK_SIG(self)->check = LK_SIG(parent)->check;
@@ -66,31 +66,31 @@ static LK_OBJ_DEFMARKFUNC(mark_sig) {
     mark(LK_OBJ(LK_SIG(self)->check));
 }
 void lk_func_typeinit(lk_vm_t *vm) {
-    /* */
+    // 
     vm->t_func = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_func_t));
     lk_obj_setallocfunc(vm->t_func, alloc_f);
     lk_obj_setmarkfunc(vm->t_func, mark_f);
     lk_obj_setfreefunc(vm->t_func, free_f);
-    /* */
+    // 
     vm->t_cfunc = lk_obj_alloc_withsize(vm->t_func, sizeof(lk_cfunc_t));
     lk_obj_setallocfunc(vm->t_cfunc, alloc_cf);
-    /* */
+    // 
     vm->t_gfunc = lk_obj_alloc_withsize(vm->t_func, sizeof(lk_gfunc_t));
     LK_GFUNC(vm->t_gfunc)->funcs = darray_alloc(sizeof(lk_func_t *), 4);
     lk_obj_setallocfunc(vm->t_gfunc, alloc_gf);
     lk_obj_setmarkfunc(vm->t_gfunc, mark_gf);
     lk_obj_setfreefunc(vm->t_gfunc, free_gf);
-    /* */
+    // 
     vm->t_lfunc = lk_obj_alloc_withsize(vm->t_func, sizeof(lk_lfunc_t));
     lk_obj_setallocfunc(vm->t_lfunc, alloc_lf);
     lk_obj_setmarkfunc(vm->t_lfunc, mark_lf);
-    /* */
+    // 
     vm->t_sig = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_sig_t));
     lk_obj_setallocfunc(vm->t_sig, alloc_sig);
     lk_obj_setmarkfunc(vm->t_sig, mark_sig);
 }
 
-/* ext map - funcs */
+// ext map - funcs
 static void add_f_f(lk_obj_t *self, lk_scope_t *local) {
     RETURN(lk_func_combine(LK_FUNC(self), LK_FUNC(ARG(0))));
 }
@@ -130,7 +130,7 @@ static void check_sig(lk_obj_t *self, lk_scope_t *local) {
 }
 void lk_func_libinit(lk_vm_t *vm) {
     lk_obj_t *f = vm->t_func, *sig = vm->t_sig;
-    /* */
+    // 
     lk_global_set("Function", vm->t_func);
     lk_obj_set_cfunc_lk(f, "+", add_f_f, f, NULL);
     lk_obj_set_cfunc_lk(f, "+=", addB_f_f, f, NULL);
@@ -139,26 +139,26 @@ void lk_func_libinit(lk_vm_t *vm) {
     lk_obj_set_cfunc_lk(f, "maximum_argument_size", maximum_argument_size_f, NULL);
     lk_obj_set_cfunc_lk(f, "signature", signature_f, NULL);
     lk_obj_set_cfunc_lk(f, "last_argument", last_argument_f, NULL);
-    /* */
+    // 
     lk_global_set("CFunction", vm->t_cfunc);
-    /* */
+    // 
     lk_global_set("GenericFunction", vm->t_gfunc);
     lk_obj_set_cfunc_lk(vm->t_gfunc, "functions", functions_gf, NULL);
-    /* */
+    // 
     lk_global_set("LinkFunction", vm->t_lfunc);
-    /* */
+    // 
     lk_global_set("Signature", vm->t_sig);
     lk_obj_set_cfunc_lk(sig, "name", name_sig, NULL);
     lk_obj_set_cfunc_lk(sig, "check", check_sig, NULL);
 }
 
-/* new */
+// new
 lk_cfunc_t *lk_cfunc_new(lk_vm_t *vm, lk_cfunc_lk_t *cfunc, int minargc, int maxargc) {
     lk_cfunc_t *self = LK_CFUNC(lk_obj_alloc(vm->t_cfunc));
     self->cfunc.lk = cfunc;
     self->cf.minargc = minargc;
     self->cf.maxargc = maxargc;
-    /* if(minargc > 0) self->cf.sigs = darray_ptr_alloc_withcap(minargc); */
+    // if(minargc > 0) self->cf.sigs = darray_ptr_alloc_withcap(minargc);
     self->cf.sigs = darray_ptr_alloc_withcap(minargc);
     return self;
 }
@@ -180,7 +180,7 @@ lk_sig_t *lk_sig_new(lk_vm_t *vm, lk_str_t *name, lk_obj_t *type) {
     return self;
 }
 
-/* update */
+// update
 lk_gfunc_t *lk_func_combine(lk_func_t *self, lk_func_t *other) {
     lk_vm_t *vm = LK_VM(self);
     darray_t *funcs;

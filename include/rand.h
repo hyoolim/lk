@@ -2,7 +2,7 @@
 #define LK_RANDOM_H
 #include "types.h"
 
-/* type */
+// type
 struct lk_rand {
     struct lk_common o;
     lk_num_t *seed;
@@ -10,6 +10,6 @@ struct lk_rand {
     unsigned long mt[LK_RANDOM_N];
 };
 
-/* ext map */
+// ext map
 void lk_rand_extinit(lk_vm_t *vm);
 #endif

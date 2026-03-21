@@ -2,7 +2,7 @@
 #define LK_FILE_H
 #include "types.h"
 
-/* type */
+// type
 struct lk_file {
     struct lk_common o;
     lk_str_t *path;
@@ -10,14 +10,14 @@ struct lk_file {
     FILE *fd;
 };
 
-/* init */
+// init
 void lk_file_typeinit(lk_vm_t *vm);
 void lk_file_libinit(lk_vm_t *vm);
 
-/* new */
+// new
 lk_file_t *lk_file_new_withpath(lk_vm_t *vm, lk_str_t *path);
 
-/* update */
+// update
 void lk_file_close(lk_file_t *self);
 void lk_file_delete(lk_file_t *self);
 void lk_file_flush(lk_file_t *self);
@@ -26,7 +26,7 @@ void lk_file_move_str(lk_file_t *self, lk_str_t *dest);
 void lk_file_open(lk_file_t *self, lk_str_t *mode);
 void lk_file_write_str(lk_file_t *self, lk_str_t *text);
 
-/* info */
+// info
 lk_bool_t *lk_file_isdirectory(lk_file_t *self);
 lk_bool_t *lk_file_isexecutable(lk_file_t *self);
 lk_bool_t *lk_file_isexists(lk_file_t *self);

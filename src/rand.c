@@ -3,16 +3,16 @@
 #include <sys/time.h>
 #include <time.h>
 
-/* private func - see below for real impl */
+// private func - see below for real impl
 static void init_genrand(lk_rand_t *self, unsigned long s);
 static unsigned long genrand_int32(lk_rand_t *self);
-/* static long genrand_int31(lk_rand_t *self); */
+// static long genrand_int31(lk_rand_t *self);
 static double genrand_real1(lk_rand_t *self);
 /* static double genrand_real2(lk_rand_t *self);
 static double genrand_real3(lk_rand_t *self);
 static double genrand_res53(lk_rand_t *self); */
 
-/* ext map */
+// ext map
 static void alloc_rand(lk_obj_t *self, lk_obj_t *parent) {
     static int n = 0;
     struct timeval tv;
@@ -44,7 +44,7 @@ void lk_rand_extinit(lk_vm_t *vm) {
     lk_obj_set_cfield(rand, "seed", num, offsetof(lk_rand_t, seed));
 }
 
-/* modified and cut so that mult rand gen are possible */
+// modified and cut so that mult rand gen are possible
 /*
    A C-program for MT19937, with initialization improved 2002/1/26.
    Coded by Takuji Nishimura and Makoto Matsumoto.
@@ -87,42 +87,42 @@ void lk_rand_extinit(lk_vm_t *vm) {
    email: m-mat @ math.sci.hiroshima-u.ac.jp (remove space)
 */
 
-/* Period parameters */
+// Period parameters
 #define N LK_RANDOM_N
 #define M 397
-#define MATRIX_A 0x9908b0dfUL   /* constant vec a */
-#define UPPER_MASK 0x80000000UL /* most significant w-r bits */
-#define LOWER_MASK 0x7fffffffUL /* least significant r bits */
+#define MATRIX_A 0x9908b0dfUL   // constant vec a
+#define UPPER_MASK 0x80000000UL // most significant w-r bits
+#define LOWER_MASK 0x7fffffffUL // least significant r bits
 
-/* */
+// 
 #define mt self->mt
 #define mti self->mti
 
-/* initializes mt[N] with a seed */
+// initializes mt[N] with a seed
 static void init_genrand(lk_rand_t *self, unsigned long s) {
     mt[0] = s & 0xffffffffUL;
     for (mti = 1; mti < N; mti++) {
         mt[mti] = (1812433253UL * (mt[mti - 1] ^ (mt[mti - 1] >> 30)) + mti);
-        /* See Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier. */
-        /* In the previous versions, MSBs of the seed affect   */
-        /* only MSBs of the array mt[].                        */
-        /* 2002/01/09 modified by Makoto Matsumoto             */
+        // See Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier.
+        // In the previous versions, MSBs of the seed affect
+        // only MSBs of the array mt[].
+        // 2002/01/09 modified by Makoto Matsumoto
         mt[mti] &= 0xffffffffUL;
-        /* for >32 bit machines */
+        // for >32 bit machines
     }
 }
 
-/* generates a rand num on [0,0xffffffff]-interval */
+// generates a rand num on [0,0xffffffff]-interval
 static unsigned long genrand_int32(lk_rand_t *self) {
     unsigned long y;
     static unsigned long mag01[2] = {0x0UL, MATRIX_A};
-    /* mag01[x] = x * MATRIX_A  for x=0,1 */
+    // mag01[x] = x * MATRIX_A  for x=0,1
 
-    if (mti >= N) { /* generate N words at one time */
+    if (mti >= N) { // generate N words at one time
         int kk;
 
-        if (mti == N + 1)               /* if init_genrand() has not been called, */
-            init_genrand(self, 5489UL); /* a default initial seed is used */
+        if (mti == N + 1)               // if init_genrand() has not been called,
+            init_genrand(self, 5489UL); // a default initial seed is used
 
         for (kk = 0; kk < N - M; kk++) {
             y = (mt[kk] & UPPER_MASK) | (mt[kk + 1] & LOWER_MASK);
@@ -140,7 +140,7 @@ static unsigned long genrand_int32(lk_rand_t *self) {
 
     y = mt[mti++];
 
-    /* Tempering */
+    // Tempering
     y ^= (y >> 11);
     y ^= (y << 7) & 0x9d2c5680UL;
     y ^= (y << 15) & 0xefc60000UL;
@@ -149,30 +149,30 @@ static unsigned long genrand_int32(lk_rand_t *self) {
     return y;
 }
 
-/* generates a rand num on [0,0x7fffffff]-interval */
+// generates a rand num on [0,0x7fffffff]-interval
 /* static long genrand_int31(lk_rand_t *self) {
     return (long)(genrand_int32(self)>>1);
 } */
 
-/* generates a rand num on [0,1]-real-interval */
+// generates a rand num on [0,1]-real-interval
 static double genrand_real1(lk_rand_t *self) {
     return genrand_int32(self) * (1.0 / 4294967295.0);
-    /* divided by 2^32-1 */
+    // divided by 2^32-1
 }
 
-/* generates a rand num on [0,1)-real-interval */
+// generates a rand num on [0,1)-real-interval
 /* static double genrand_real2(lk_rand_t *self) {
     return genrand_int32(self)*(1.0/4294967296.0);
     * divided by 2^32 *
 } */
 
-/* generates a rand num on (0,1)-real-interval */
+// generates a rand num on (0,1)-real-interval
 /* static double genrand_real3(lk_rand_t *self) {
     return (((double)genrand_int32(self)) + 0.5)*(1.0/4294967296.0);
     * divided by 2^32 *
 } */
 
-/* generates a rand num on [0,1) with 53-bit resolution*/
+// generates a rand num on [0,1) with 53-bit resolution
 /* static double genrand_res53(lk_rand_t *self) {
     unsigned long a=genrand_int32(self)>>5, b=genrand_int32(self)>>6;
     return(a*67108864.0+b)*(1.0/9007199254740992.0);

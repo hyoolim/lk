@@ -1,7 +1,7 @@
 #include "lib.h"
 #include <unistd.h>
 
-/* ext map - funcs */
+// ext map - funcs
 static void at_env_str(lk_obj_t *self, lk_scope_t *local) {
     const char *k = darray_str_tocstr(DARRAY(ARG(0)));
     const char *v = getenv(k);

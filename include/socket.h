@@ -2,7 +2,7 @@
 #define LK_SOCKET_H
 #include "types.h"
 
-/* type */
+// type
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -20,6 +20,6 @@ struct lk_ipaddr {
     struct in_addr addr;
 };
 
-/* ext map */
+// ext map
 void lk_socket_extinit(lk_vm_t *vm);
 #endif

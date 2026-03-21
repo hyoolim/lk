@@ -2,7 +2,7 @@
 #define LK_INSTR_H
 #include "types.h"
 
-/* type */
+// type
 struct lk_instr {
     struct lk_common o;
     enum lk_instrtype_t {
@@ -28,11 +28,11 @@ struct lk_instr {
     uint8_t opts;
 };
 
-/* ext map */
+// ext map
 void lk_instr_typeinit(lk_vm_t *vm);
 void lk_instr_libinit(lk_vm_t *vm);
 
-/* new */
+// new
 lk_instr_t *lk_instr_new(lk_parser_t *parser);
 lk_instr_t *lk_instr_newmore(lk_parser_t *parser);
 lk_instr_t *lk_instr_newfunc(lk_parser_t *parser, lk_instr_t *first);
@@ -45,7 +45,7 @@ lk_instr_t *lk_instr_newchar(lk_parser_t *parser, uint32_t c);
 lk_instr_t *lk_instr_newmessage(lk_parser_t *parser, lk_str_t *name);
 lk_instr_t *lk_instr_newscopemessage(lk_parser_t *parser, lk_str_t *name);
 
-/* info */
+// info
 void lk_instr_print(lk_instr_t *);
 lk_num_t *lk_instr_column(lk_obj_t *self);
 lk_num_t *lk_instr_line(lk_obj_t *self);

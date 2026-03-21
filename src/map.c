@@ -1,6 +1,6 @@
 #include "lib.h"
 
-/* type */
+// type
 static void alloc_map(lk_obj_t *self, lk_obj_t *parent) {
     qphash_copy(QPHASH(self), QPHASH(parent));
 }
@@ -18,7 +18,7 @@ void lk_map_typeinit(lk_vm_t *vm) {
     lk_obj_setfreefunc(vm->t_map, free_map);
 }
 
-/* new */
+// new
 lk_map_t *lk_map_new(lk_vm_t *vm) {
     return LK_MAP(lk_obj_alloc(vm->t_map));
 }
@@ -28,7 +28,7 @@ lk_map_t *lk_map_newfromset(lk_vm_t *vm, qphash_t *from) {
     return self;
 }
 
-/* update */
+// update
 void lk_map_clear(lk_map_t *self) {
     qphash_clear(QPHASH(self));
 }
@@ -43,7 +43,7 @@ void lk_map_setWithCStringKey(lk_map_t *self, const char *k, lk_obj_t *v) {
     lk_map_set(self, LK_OBJ(lk_str_new_fromcstr(LK_VM(self), k)), v);
 }
 
-/* info */
+// info
 lk_obj_t *lk_map_at_str(lk_map_t *self, lk_str_t *key) {
     setitem_t *item = qphash_get(QPHASH(self), key);
     return item != NULL ? SETITEM_VALUE(lk_obj_t *, item) : NIL;
@@ -69,16 +69,16 @@ lk_list_t *lk_map_values(lk_map_t *self) {
     return values;
 }
 
-/* bind all c funcs to lk equiv */
+// bind all c funcs to lk equiv
 void lk_map_libinit(lk_vm_t *vm) {
     lk_obj_t *map = vm->t_map, *obj = vm->t_obj, *str = vm->t_str;
     lk_global_set("Map", map);
 
-    /* update */
+    // update
     lk_obj_set_cfunc_cvoid(map, "clear!", lk_map_clear, NULL);
     lk_obj_set_cfunc_cvoid(map, "set!", lk_map_set_str_obj, str, obj, NULL);
 
-    /* info */
+    // info
     lk_obj_set_cfunc_creturn(map, "at", lk_map_at_str, str, NULL);
     lk_obj_set_cfunc_creturn(map, "size", lk_map_size, NULL);
     lk_obj_set_cfunc_creturn(map, "keys", lk_map_keys, NULL);

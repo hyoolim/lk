@@ -7,7 +7,7 @@ int main(int argc, const char **argv) {
     lk_str_t *script, *initfile = lk_str_new_fromcstr(vm, "Init.lk");
     lk_file_t *tmp;
 
-    /* options for vm */
+    // options for vm
     lk_object_set(LK_OBJ(vm->t_dl), "paths", LK_OBJ(libpaths));
     darray_ptr_insert(DARRAY(libpaths), 0, lk_str_new_fromcstr(vm, LK_INSTALL_PATH "/lib/lk"));
     for (; i < argc; i++) {
@@ -36,7 +36,7 @@ int main(int argc, const char **argv) {
         }
     }
 
-    /* get script name */
+    // get script name
     if (i >= argc) {
         fprintf(stderr, "%s: script file is required\n", argv[0]);
         lk_vm_free(vm);
@@ -45,14 +45,14 @@ int main(int argc, const char **argv) {
     }
     script = lk_str_new_fromcstr(vm, argv[i++]);
 
-    /* pass rest of the arguments to lk program */
+    // pass rest of the arguments to lk program
     lk_global_set("arguments", LK_OBJ(args));
     lk_global_set("args", LK_OBJ(args));
     for (; i < argc; i++) {
         darray_ptr_push(DARRAY(args), lk_str_new_fromcstr(vm, argv[i]));
     }
 
-    /* load the initial lib */
+    // load the initial lib
     DARRAY_EACHPTR(
         DARRAY(libpaths), i, path, tmp = lk_file_new_withpath(vm, LK_STRING(lk_obj_clone(LK_OBJ(path))));
         darray_concat(DARRAY(tmp->path), DARRAY(vm->str_filesep));
@@ -62,7 +62,7 @@ int main(int argc, const char **argv) {
             break;
         });
 
-    /* run the script */
+    // run the script
     lk_gc_resume(vm->gc);
     lk_vm_evalfile(vm, darray_str_tocstr(DARRAY(script)), "");
     lk_vm_free(vm);

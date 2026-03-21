@@ -1,6 +1,6 @@
 #include "darray.h"
 
-/* new */
+// new
 static struct listdata *listdata_alloc(int ilen, int cap) {
     struct listdata *self;
     int c = 8;
@@ -116,7 +116,7 @@ void darray_free(darray_t *self) {
     mem_free(self);
 }
 
-/* update */
+// update
 #define SETITEM(self, t, i, v) \
     do { \
         *(t *)DARRAY_AT(self, i) = *(t *)v; \
@@ -145,21 +145,21 @@ static void darray_prepupdate(darray_t *self, int i, int newsize) {
         do {
             newcap *= 2;
         } while (newsize > newcap);
-        /* buf shared? alloc new */
+        // buf shared? alloc new
         if (bd->refc > 1) {
         newlistdata:
             bd->refc--;
             bd = self->data = listdata_alloc(ilen, newcap);
             memcpy(&bd->item, self->first, ilen * self->size);
             self->first = &bd->item;
-            /* resize existing buf */
+            // resize existing buf
         } else {
             ptrdiff_t d = self->first - &bd->item;
             bd = self->data = mem_resize(bd, sizeof(struct listdata) - sizeof(char) + ilen * newcap);
             bd->cap = newcap;
             self->first = &bd->item + d;
         }
-        /* new buf if replacing existing item in shared buf */
+        // new buf if replacing existing item in shared buf
     } else if (bd->refc > 1 && i < bd->used) {
         goto newlistdata;
     }
@@ -398,7 +398,7 @@ void darray_ptr_unshift(darray_t *self, void *v) {
     darray_ptr_insert(self, 0, v);
 }
 
-/* info */
+// info
 int darray_cmp(const darray_t *self, const darray_t *other) {
     if (self == other)
         return 0;

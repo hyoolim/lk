@@ -87,7 +87,7 @@ lk_obj_t *lk_str_find_charset_starting(lk_str_t *self, lk_charset_t *pattern, lk
 }
 
 lk_obj_t *lk_str_find_str_starting(lk_str_t *self, lk_str_t *pattern, lk_num_t *starting) {
-    int i = vec_find_darray(VEC(self), VEC(pattern), CSIZE(starting));
+    int i = vec_find_vec(VEC(self), VEC(pattern), CSIZE(starting));
     return i >= 0 ? LK_OBJ(lk_num_new(VM, i)) : NIL;
 }
 

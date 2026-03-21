@@ -272,7 +272,7 @@ lk_scope_t *lk_vm_eval_file(lk_vm_t *self, const char *file, const char *base) {
     if (base != NULL && file[0] != '/') {
         lk_str_t *root = lk_str_new_from_cstr(self, base);
         int pslen = VEC_COUNT(VEC(self->str_filesep));
-        int pos = vec_find_darray(VEC(root), VEC(self->str_filesep), 0);
+        int pos = vec_find_vec(VEC(root), VEC(self->str_filesep), 0);
 
         if (pos > 0) {
             lk_str_t *orig = filename;
@@ -280,7 +280,7 @@ lk_scope_t *lk_vm_eval_file(lk_vm_t *self, const char *file, const char *base) {
             root = lk_str_new_from_darray(self, VEC(root));
             pos += pslen;
 
-            for (int i; (i = vec_find_darray(VEC(root), VEC(self->str_filesep), pos)) > 0;)
+            for (int i; (i = vec_find_vec(VEC(root), VEC(self->str_filesep), pos)) > 0;)
                 pos = i + pslen;
 
             vec_slice(VEC(root), 0, pos);

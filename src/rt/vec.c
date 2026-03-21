@@ -1,12 +1,14 @@
 #include "vec.h"
 
-// new
+#pragma region vec
+
 static struct vec_buf *vec_buf_alloc(int ilen, int cap) {
     struct vec_buf *self;
     int c = 8;
 
     while (cap > c)
         c *= 2;
+    // sizeof(struct vec_buf) - sizeof(char) accounts for the `item` placeholder already in the struct
     self = mem_alloc(sizeof(struct vec_buf) - sizeof(char) + ilen * c);
     self->capacity = c;
     self->used = 0;
@@ -26,104 +28,23 @@ vec_t *vec_alloc(int ilen, int cap) {
     return self;
 }
 
-vec_t *vec_ptr_alloc(void) {
-    return vec_ptr_alloc_withcap(10);
-}
-
-vec_t *vec_ptr_alloc_withcap(int cap) {
-    return vec_alloc(sizeof(void *), cap);
-}
-
-vec_t *vec_str_alloc_fromfile_withsize(FILE *stream, size_t rs) {
-    vec_t *self = vec_alloc(1, rs);
-    self->size = self->buf->used = fread(self->first, 1, rs, stream);
-    return self;
-}
-
-vec_t *vec_str_alloc(void) {
-    return vec_alloc(sizeof(uint8_t), 10);
-}
-
 vec_t *vec_clone(vec_t *self) {
     vec_t *clone = mem_alloc(sizeof(vec_t));
     vec_copy(clone, self);
     return clone;
 }
 
-vec_t *vec_str_alloc_fromdata(const void *data, int len) {
-    vec_t *self = vec_alloc(sizeof(uint8_t), len);
-    memcpy(self->first, data, len);
-    self->buf->used = self->size = len;
-    return self;
-}
-
-vec_t *vec_str_alloc_fromcstr(const char *cstr) {
-    return vec_str_alloc_fromdata(cstr, strlen(cstr));
-}
-
-vec_t *vec_str_alloc_fromfile(FILE *stream) {
-    if (fseek(stream, 0, SEEK_END) == 0) {
-        long size;
-
-        if ((size = ftell(stream)) >= 0 && fseek(stream, 0, SEEK_SET) == 0) {
-            vec_t *self = vec_alloc(sizeof(uint8_t), size);
-            fread(self->first, 1, size, stream);
-            self->size = self->buf->used = size;
-            return self;
-        }
-    }
-    return NULL;
-}
-
-#define UNTIL(check) \
-    do { \
-        int i, c = 64; \
-        vec_t *self = vec_alloc(sizeof(uint8_t), c); \
-        int ch; \
-        for (i = 0; (ch = fgetc(stream)) != EOF; i++) { \
-            if (i >= c) { \
-                do { \
-                    c *= 2; \
-                } while (i >= c); \
-                self->buf = \
-                    mem_resize(self->buf, sizeof(struct vec_buf) - sizeof(char) + self->buf->item_size * c); \
-                self->buf->capacity = (c); \
-                self->first = &(self)->buf->item; \
-            } \
-            ((char *)self->first)[i] = ch; \
-            if ((check)) \
-                break; \
-        } \
-        self->size = self->buf->used = ch == EOF ? i : i + 1; \
-        return self; \
-    } while (0)
-
-vec_t *vec_str_alloc_fromfile_untilchar(FILE *stream, uint32_t pat) {
-    if (feof(stream))
-        return NULL;
-    UNTIL((uint32_t)ch == pat);
-}
-
-vec_t *vec_str_alloc_fromfile_untilcharset(FILE *stream, const charset_t *pat) {
-    if (feof(stream))
-        return NULL;
-    UNTIL(charset_has(pat, ch));
+// Shallow copy — shares src's buf (COW: writes trigger a new allocation in vec_prepupdate)
+void vec_copy(vec_t *self, vec_t *src) {
+    (self->buf = src->buf)->ref_count++;
+    self->first = src->first;
+    self->size = src->size;
 }
 
 void vec_init(vec_t *self, int ilen, int cap) {
     self->buf = vec_buf_alloc(ilen, cap);
     self->first = &self->buf->item;
     self->size = 0;
-}
-
-void vec_ptr_init(vec_t *self) {
-    vec_init(self, sizeof(void *), 10);
-}
-
-void vec_copy(vec_t *self, vec_t *src) {
-    (self->buf = src->buf)->ref_count++;
-    self->first = src->first;
-    self->size = src->size;
 }
 
 void vec_fin(vec_t *self) {
@@ -134,29 +55,6 @@ void vec_free(vec_t *self) {
     vec_buf_free(self->buf);
     mem_free(self);
 }
-
-// update
-#define SETITEM(self, t, i, v) \
-    do { \
-        *(t *)VEC_AT(self, i) = *(t *)v; \
-    } while (0)
-#define SETANYITEM(self, i, v) \
-    do { \
-        switch ((self)->buf->item_size) { \
-        case sizeof(char): \
-            SETITEM((self), char, (i), (v)); \
-            break; \
-        case sizeof(short): \
-            SETITEM((self), short, (i), (v)); \
-            break; \
-        case sizeof(long): \
-            SETITEM((self), long, (i), (v)); \
-            break; \
-        default: \
-            memmove(VEC_AT(self, i), (v), (self)->buf->item_size); \
-            break; \
-        } \
-    } while (0)
 
 static void vec_prepupdate(vec_t *self, int i, int newsize) {
     struct vec_buf *bd = self->buf;
@@ -207,6 +105,28 @@ void vec_concat(vec_t *self, vec_t *v) {
         NYI("Cannot concat differently sized buffers");
 }
 
+#define SETITEM(self, t, i, v) \
+    do { \
+        *(t *)VEC_AT(self, i) = *(t *)v; \
+    } while (0)
+#define SETANYITEM(self, i, v) \
+    do { \
+        switch ((self)->buf->item_size) { \
+        case sizeof(char): \
+            SETITEM((self), char, (i), (v)); \
+            break; \
+        case sizeof(short): \
+            SETITEM((self), short, (i), (v)); \
+            break; \
+        case sizeof(long): \
+            SETITEM((self), long, (i), (v)); \
+            break; \
+        default: \
+            memmove(VEC_AT(self, i), (v), (self)->buf->item_size); \
+            break; \
+        } \
+    } while (0)
+
 void vec_insert(vec_t *self, int i, void *v) {
     int size = self->size;
 
@@ -223,32 +143,6 @@ void vec_insert(vec_t *self, int i, void *v) {
         memmove(self->first + ilen * (i + 1), self->first + ilen * i, ilen * (size - i));
     }
     SETANYITEM(self, i, v);
-}
-
-void vec_ptr_insert(vec_t *self, int i, void *v) {
-    vec_insert(self, i, (void *)&v);
-}
-
-#define INSERTUINT(self, t, i, v) \
-    do { \
-        t nv = (v); \
-        vec_insert(self, (i), (void *)&nv); \
-    } while (0);
-
-void vec_str_insert(vec_t *self, int i, uint32_t v) {
-    switch (self->buf->item_size) {
-    case sizeof(uint8_t):
-        INSERTUINT(self, uint8_t, i, v);
-        break;
-    case sizeof(uint16_t):
-        INSERTUINT(self, uint16_t, i, v);
-        break;
-    case sizeof(uint32_t):
-        INSERTUINT(self, uint32_t, i, v);
-        break;
-    default:
-        BUG("Invalid ilen in vec_str_insert\n");
-    }
 }
 
 void vec_limit(vec_t *self, int n) {
@@ -272,30 +166,6 @@ void vec_offset(vec_t *self, int n) {
     }
 }
 
-void *vec_ptr_peek(vec_t *self) {
-    return vec_ptr_get((self), (self)->size - 1);
-}
-
-uint32_t vec_str_peek(vec_t *self) {
-    return vec_str_get((self), (self)->size - 1);
-}
-
-void *vec_ptr_pop(vec_t *self) {
-    return vec_ptr_remove(self, self->size - 1);
-}
-
-uint32_t vec_str_pop(vec_t *self) {
-    return vec_str_remove(self, self->size - 1);
-}
-
-void vec_ptr_push(vec_t *self, void *v) {
-    vec_ptr_set(self, self->size, v);
-}
-
-void vec_str_push(vec_t *self, uint32_t v) {
-    vec_str_set(self, self->size, v);
-}
-
 void vec_remove(vec_t *self, int i) {
     int size = self->size;
 
@@ -311,18 +181,6 @@ void vec_remove(vec_t *self, int i) {
         if (i < newsize)
             memmove(self->first + ilen * i, self->first + ilen * (i + 1), ilen * (newsize - i));
     }
-}
-
-void *vec_ptr_remove(vec_t *self, int i) {
-    void *item = vec_ptr_get(self, i);
-    vec_remove(self, i);
-    return item;
-}
-
-uint32_t vec_str_remove(vec_t *self, int i) {
-    uint32_t v = vec_str_get(self, i);
-    vec_remove(self, i);
-    return v;
 }
 
 void vec_resize(vec_t *self, int s) {
@@ -403,10 +261,6 @@ void vec_set(vec_t *self, int i, void *v) {
     SETANYITEM(self, i, v);
 }
 
-void vec_ptr_set(vec_t *self, int i, void *v) {
-    vec_set(self, i, (void *)&v);
-}
-
 void vec_setrange(vec_t *self, int b, int e, vec_t *v) {
     int i, d, sc = self->size, vc = v->size;
 
@@ -428,6 +282,244 @@ void vec_setrange(vec_t *self, int b, int e, vec_t *v) {
 
     for (i = 0; i < vc; i++)
         vec_set(self, b++, vec_get(v, i));
+}
+
+void vec_slice(vec_t *self, int offset, int limit) {
+    vec_offset(self, offset);
+    vec_limit(self, limit);
+}
+
+int vec_cmp(const vec_t *self, const vec_t *other) {
+    if (self == other)
+        return 0;
+    else {
+        int sc = self->size, oc = other->size, d = sc - oc;
+
+        if (self->first == other->first)
+            return d;
+        else {
+            int m = d > 0 ? oc : sc;
+
+            if (self->buf->item_size == other->buf->item_size) {
+                int rd = memcmp(self->first, other->first, m);
+                return rd == 0 ? d : rd;
+
+            } else {
+                abort();
+            }
+        }
+    }
+}
+
+int vec_find_vec(const vec_t *self, const vec_t *pat, int o) {
+    int self_c = self->size, pat_c = pat->size;
+
+    if (pat_c == 0)
+        return o < self_c ? o : -1;
+    if (pat_c > self_c)
+        return -1;
+    if (pat_c == 1)
+        return vec_str_find(self, vec_str_get(pat, 0), o);
+    else {
+        switch (self->buf->item_size) {
+        case sizeof(uint8_t): {
+            // Boyer-Moore-Horspool
+            uint8_t *s = (uint8_t *)self->first;
+            uint8_t *p = (uint8_t *)pat->first;
+            int i, j, k, skip[256];
+
+            for (k = 0; k < 256; k++)
+                skip[k] = pat_c;
+
+            for (k = 0; k < pat_c - 1; k++)
+                skip[p[k]] = pat_c - k - 1;
+
+            for (k = o + pat_c - 1; k < self_c; k += skip[s[k] & 255]) {
+                for (j = pat_c - 1, i = k; j >= 0 && s[i] == p[j]; j--)
+                    i--;
+
+                if (j == -1)
+                    return i + 1;
+            }
+            break;
+        }
+        default:
+            BUG("Invalid ilen in vec_find_vec\n");
+        }
+        return -1;
+    }
+}
+
+void *vec_get(const vec_t *self, int i) {
+    int size = self->size;
+
+    if (i < 0)
+        i += size;
+    return i < 0 || i >= size ? NULL : VEC_AT(self, i);
+}
+
+int vec_hc(const vec_t *self) {
+    register const uint8_t *beg = (uint8_t *)self->first;
+    register const uint8_t *end = beg + self->buf->item_size * self->size;
+    int hc = 5381;
+
+    for (; beg < end; beg++) {
+        hc += hc << 5;
+        hc += *beg;
+    }
+    return hc > 0 ? hc : -hc;
+}
+
+#define WRITEITEM(self, stream, t, f) \
+    do { \
+        t *i = (t *)(self)->first, *end = i + (self)->size; \
+        for (; i < end; i++) \
+            fprintf((stream), " " f, (t) * i); \
+        fprintf((stream), "\n"); \
+    } while (0)
+
+void vec_write(const vec_t *self, FILE *stream) {
+    struct vec_buf *bd = self->buf;
+    int ilen = bd->item_size;
+    char *first = self->first;
+
+    fprintf(stream, "vec_t(%p", (void *)self);
+    fprintf(stream, ", first=%p", (void *)first);
+    fprintf(stream, "(%i)", (int)((first - &bd->item) / ilen));
+    fprintf(stream, ", size=%i", self->size);
+    fprintf(stream, ")\n-> buf(%p", (void *)bd);
+    fprintf(stream, ", capacity=%i", bd->capacity);
+    fprintf(stream, ", used=%i", bd->used);
+    fprintf(stream, ", item_size=%i", ilen);
+    fprintf(stream, ", ref_count=%i", bd->ref_count);
+    fprintf(stream, ")\n->");
+
+    switch (ilen) {
+    case sizeof(char):
+        WRITEITEM(self, stream, char, "%hi");
+        break;
+    case sizeof(short):
+        WRITEITEM(self, stream, short, "%hi");
+        break;
+    case sizeof(long):
+        WRITEITEM(self, stream, long, "%li");
+        break;
+    default:
+        WRITEITEM(self, stream, long, "%lx");
+        break;
+    }
+}
+
+void vec_print_tostream(const vec_t *self, FILE *stream) {
+    fwrite(self->first, self->buf->item_size, self->size, stream);
+}
+
+#pragma endregion
+#pragma region string
+
+#define UNTIL(check) \
+    do { \
+        int i, c = 64; \
+        vec_t *self = vec_alloc(sizeof(uint8_t), c); \
+        int ch; \
+        for (i = 0; (ch = fgetc(stream)) != EOF; i++) { \
+            if (i >= c) { \
+                do { \
+                    c *= 2; \
+                } while (i >= c); \
+                self->buf = mem_resize(self->buf, sizeof(struct vec_buf) - sizeof(char) + self->buf->item_size * c); \
+                self->buf->capacity = (c); \
+                self->first = &(self)->buf->item; \
+            } \
+            ((char *)self->first)[i] = ch; \
+            if ((check)) \
+                break; \
+        } \
+        self->size = self->buf->used = ch == EOF ? i : i + 1; \
+        return self; \
+    } while (0)
+
+vec_t *vec_str_alloc(void) {
+    return vec_alloc(sizeof(uint8_t), 10);
+}
+
+vec_t *vec_str_alloc_fromcstr(const char *cstr) {
+    return vec_str_alloc_fromdata(cstr, strlen(cstr));
+}
+
+vec_t *vec_str_alloc_fromdata(const void *data, int len) {
+    vec_t *self = vec_alloc(sizeof(uint8_t), len);
+    memcpy(self->first, data, len);
+    self->buf->used = self->size = len;
+    return self;
+}
+
+vec_t *vec_str_alloc_fromfile(FILE *stream) {
+    if (fseek(stream, 0, SEEK_END) == 0) {
+        long size;
+
+        if ((size = ftell(stream)) >= 0 && fseek(stream, 0, SEEK_SET) == 0) {
+            vec_t *self = vec_alloc(sizeof(uint8_t), size);
+            fread(self->first, 1, size, stream);
+            self->size = self->buf->used = size;
+            return self;
+        }
+    }
+    return NULL;
+}
+
+vec_t *vec_str_alloc_fromfile_untilchar(FILE *stream, uint32_t pat) {
+    if (feof(stream))
+        return NULL;
+    UNTIL((uint32_t)ch == pat);
+}
+
+vec_t *vec_str_alloc_fromfile_withsize(FILE *stream, size_t rs) {
+    vec_t *self = vec_alloc(1, rs);
+    self->size = self->buf->used = fread(self->first, 1, rs, stream);
+    return self;
+}
+
+vec_t *vec_str_alloc_fromfile_untilcharset(FILE *stream, const charset_t *pat) {
+    if (feof(stream))
+        return NULL;
+    UNTIL(charset_has(pat, ch));
+}
+
+#define INSERTUINT(self, t, i, v) \
+    do { \
+        t nv = (v); \
+        vec_insert(self, (i), (void *)&nv); \
+    } while (0);
+
+void vec_str_insert(vec_t *self, int i, uint32_t v) {
+    switch (self->buf->item_size) {
+    case sizeof(uint8_t):
+        INSERTUINT(self, uint8_t, i, v);
+        break;
+    case sizeof(uint16_t):
+        INSERTUINT(self, uint16_t, i, v);
+        break;
+    case sizeof(uint32_t):
+        INSERTUINT(self, uint32_t, i, v);
+        break;
+    default:
+        BUG("Invalid ilen in vec_str_insert\n");
+    }
+}
+
+uint32_t vec_str_pop(vec_t *self) {
+    return vec_str_remove(self, self->size - 1);
+}
+
+void vec_str_push(vec_t *self, uint32_t v) {
+    vec_str_set(self, self->size, v);
+}
+
+uint32_t vec_str_remove(vec_t *self, int i) {
+    uint32_t v = vec_str_get(self, i);
+    vec_remove(self, i);
+    return v;
 }
 
 #define SETUINT(self, t, i, v) \
@@ -452,54 +544,14 @@ void vec_str_set(vec_t *self, int i, uint32_t v) {
     }
 }
 
-void *vec_ptr_shift(vec_t *self) {
-    return vec_ptr_remove(self, 0);
-}
-
-void vec_slice(vec_t *self, int offset, int limit) {
-    vec_offset(self, offset);
-    vec_limit(self, limit);
+uint32_t vec_str_peek(vec_t *self) {
+    return vec_str_get((self), (self)->size - 1);
 }
 
 const char *vec_str_tocstr(vec_t *self) {
     vec_str_set(self, self->size, '\0');
     self->size--;
     return self->first;
-}
-
-void vec_ptr_unshift(vec_t *self, void *v) {
-    vec_ptr_insert(self, 0, v);
-}
-
-// info
-int vec_cmp(const vec_t *self, const vec_t *other) {
-    if (self == other)
-        return 0;
-    else {
-        int sc = self->size, oc = other->size, d = sc - oc;
-
-        if (self->first == other->first)
-            return d;
-        else {
-            int m = d > 0 ? oc : sc;
-
-            if (self->buf->item_size == other->buf->item_size) {
-                int rd = memcmp(self->first, other->first, m);
-                return rd == 0 ? d : rd;
-
-            } else {
-                /*
-                printf("Trying to compare strs"
-                " with different item length\n");
-                printf("self=%p(%i) '", (void *)self, self->buf->item_size);
-                vec_print_tostream(self, stdout); printf("'\n");
-                printf("other=%p(%i) '", (void *)other, other->buf->item_size);
-                vec_print_tostream(other, stdout); printf("'\n");
-                 */
-                abort();
-            }
-        }
-    }
 }
 
 #define COMPARECSTRING(type) \
@@ -556,6 +608,23 @@ int vec_str_find(const vec_t *self, uint32_t pat, int o) {
     return -1;
 }
 
+uint32_t vec_str_get(const vec_t *self, int i) {
+    void *vptr = vec_get(self, i);
+
+    if (vptr == NULL)
+        return 0;
+    switch (self->buf->item_size) {
+    case sizeof(uint8_t):
+        return *(uint8_t *)vptr;
+    case sizeof(uint16_t):
+        return *(uint16_t *)vptr;
+    case sizeof(uint32_t):
+        return *(uint32_t *)vptr;
+    default:
+        BUG("Invalid ilen in vec_str_get\n");
+    }
+}
+
 #define MATCHCHARSET(type) \
     do { \
         for (; o < c; o++) \
@@ -583,56 +652,53 @@ int vec_str_findset(const vec_t *self, const charset_t *pat, int o) {
     return -1;
 }
 
-int vec_find_darray(const vec_t *self, const vec_t *pat, int o) {
-    int self_c = self->size, pat_c = pat->size;
+#pragma endregion
+#pragma region ptr list
 
-    if (pat_c == 0)
-        return o < self_c ? o : -1;
-    if (pat_c > self_c)
-        return -1;
-    if (pat_c == 1)
-        return vec_str_find(self, vec_str_get(pat, 0), o);
-    else {
-        switch (self->buf->item_size) {
-        case sizeof(uint8_t): {
-            /* Boyer-Moore-Horspool
-             * see: http://www.dcc.uchile.cl/~rbaeza/handbook
-                    /algs/7/713b.srch.p.html
-             * and: ftp://sunsite.dcc.uchile.cl/pub/users/rbaeza
-                    /handbook/algs/7/713b.srch.c
-             */
-            uint8_t *s = (uint8_t *)self->first;
-            uint8_t *p = (uint8_t *)pat->first;
-            int i, j, k, skip[256];
-
-            for (k = 0; k < 256; k++)
-                skip[k] = pat_c;
-
-            for (k = 0; k < pat_c - 1; k++)
-                skip[p[k]] = pat_c - k - 1;
-
-            for (k = o + pat_c - 1; k < self_c; k += skip[s[k] & 255]) {
-                for (j = pat_c - 1, i = k; j >= 0 && s[i] == p[j]; j--)
-                    i--;
-
-                if (j == -1)
-                    return i + 1;
-            }
-            break;
-        }
-        default:
-            BUG("Invalid ilen in vec_find_darray\n");
-        }
-        return -1;
-    }
+void vec_ptr_init(vec_t *self) {
+    vec_init(self, sizeof(void *), 10);
 }
 
-void *vec_get(const vec_t *self, int i) {
-    int size = self->size;
+vec_t *vec_ptr_alloc(void) {
+    return vec_ptr_alloc_withcap(10);
+}
 
-    if (i < 0)
-        i += size;
-    return i < 0 || i >= size ? NULL : VEC_AT(self, i);
+vec_t *vec_ptr_alloc_withcap(int cap) {
+    return vec_alloc(sizeof(void *), cap);
+}
+
+void vec_ptr_insert(vec_t *self, int i, void *v) {
+    vec_insert(self, i, (void *)&v);
+}
+
+void *vec_ptr_pop(vec_t *self) {
+    return vec_ptr_remove(self, self->size - 1);
+}
+
+void vec_ptr_push(vec_t *self, void *v) {
+    vec_ptr_set(self, self->size, v);
+}
+
+void *vec_ptr_remove(vec_t *self, int i) {
+    void *item = vec_ptr_get(self, i);
+    vec_remove(self, i);
+    return item;
+}
+
+void vec_ptr_set(vec_t *self, int i, void *v) {
+    vec_set(self, i, (void *)&v);
+}
+
+void *vec_ptr_shift(vec_t *self) {
+    return vec_ptr_remove(self, 0);
+}
+
+void vec_ptr_unshift(vec_t *self, void *v) {
+    vec_ptr_insert(self, 0, v);
+}
+
+void *vec_ptr_peek(vec_t *self) {
+    return vec_ptr_get((self), (self)->size - 1);
 }
 
 void *vec_ptr_get(const vec_t *self, int i) {
@@ -640,75 +706,4 @@ void *vec_ptr_get(const vec_t *self, int i) {
     return vptr != NULL ? *vptr : NULL;
 }
 
-uint32_t vec_str_get(const vec_t *self, int i) {
-    void *vptr = vec_get(self, i);
-
-    if (vptr == NULL)
-        return 0;
-    switch (self->buf->item_size) {
-    case sizeof(uint8_t):
-        return *(uint8_t *)vptr;
-    case sizeof(uint16_t):
-        return *(uint16_t *)vptr;
-    case sizeof(uint32_t):
-        return *(uint32_t *)vptr;
-    default:
-        BUG("Invalid ilen in vec_str_get\n");
-    }
-}
-
-int vec_hc(const vec_t *self) {
-    register const uint8_t *beg = (uint8_t *)self->first;
-    register const uint8_t *end = beg + self->buf->item_size * self->size;
-    int hc = 5381;
-
-    for (; beg < end; beg++) {
-        hc += hc << 5;
-        hc += *beg;
-    }
-    return hc > 0 ? hc : -hc;
-}
-
-#define WRITEITEM(self, stream, t, f) \
-    do { \
-        t *i = (t *)(self)->first, *end = i + (self)->size; \
-        for (; i < end; i++) \
-            fprintf((stream), " " f, (t) * i); \
-        fprintf((stream), "\n"); \
-    } while (0)
-
-void vec_write(const vec_t *self, FILE *stream) {
-    struct vec_buf *bd = self->buf;
-    int ilen = bd->item_size;
-    char *first = self->first;
-
-    fprintf(stream, "vec_t(%p", (void *)self);
-    fprintf(stream, ", first=%p", (void *)first);
-    fprintf(stream, "(%i)", (int)((first - &bd->item) / ilen));
-    fprintf(stream, ", size=%i", self->size);
-    fprintf(stream, ")\n-> data(%p", (void *)bd);
-    fprintf(stream, ", cap=%i", bd->capacity);
-    fprintf(stream, ", used=%i", bd->used);
-    fprintf(stream, ", ilen=%i", ilen);
-    fprintf(stream, ", refc=%i", bd->ref_count);
-    fprintf(stream, ")\n->");
-
-    switch (ilen) {
-    case sizeof(char):
-        WRITEITEM(self, stream, char, "%hi");
-        break;
-    case sizeof(short):
-        WRITEITEM(self, stream, short, "%hi");
-        break;
-    case sizeof(long):
-        WRITEITEM(self, stream, long, "%li");
-        break;
-    default:
-        WRITEITEM(self, stream, long, "%lx");
-        break;
-    }
-}
-
-void vec_print_tostream(const vec_t *self, FILE *stream) {
-    fwrite(self->first, self->buf->item_size, self->size, stream);
-}
+#pragma endregion

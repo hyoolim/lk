@@ -22,3 +22,4 @@ C11. Style choices worth noting:
 ## Conventions
 - All lk object structs begin with `struct lk_common o` as their first member
 - Boolean fields use `bool`, not `int` or `uint8_t`
+- Use `#pragma region <name>` / `#pragma endregion` for IDE folding section markers (clang silently ignores them)

@@ -11,8 +11,7 @@ C11. Style choices worth noting:
 
 ## Blank line rules
 - One blank line between functions
-- One blank line between a block of variable declarations and the first non-declaration statement
-- One blank line before and after multiline statements (if/for/while/switch) — except no preceding blank line if it's the first thing in a block, and no trailing blank line if it's the last
+- One blank line before and after all control flow statements (if/for/while/switch), including braceless ones — except no preceding blank line if it's the first thing in a block, and no trailing blank line if it's the last
 - One blank line before `else`, regardless of whether braces are involved (`} else {`, `} else`, `else {`, bare `else`)
 - One blank line before a comment, except when it's the first thing in a block
 

@@ -7,8 +7,8 @@ static size_t allocused = 0;
 static size_t allocpeak = 0;
 static void *recycled[MEMORY_MAXRECYCLED];
 void *mem_alloc(size_t size) {
-    allocsize ++;
-    if(size < MEMORY_MAXRECYCLED && recycled[size] != NULL) {
+    allocsize++;
+    if (size < MEMORY_MAXRECYCLED && recycled[size] != NULL) {
         void *next = *(void **)recycled[size];
         void *new = recycled[size];
         recycled[size] = next;
@@ -16,19 +16,21 @@ void *mem_alloc(size_t size) {
         return new;
     } else {
         size_t *new = calloc(1, size + sizeof(size_t));
-        if(new == NULL) ERR("Unable to allocate mem!");
+        if (new == NULL)
+            ERR("Unable to allocate mem!");
         *new = size;
         alloctotal += size;
         allocused += size;
-        if(allocused > allocpeak) allocpeak = allocused;
+        if (allocused > allocpeak)
+            allocpeak = allocused;
         return new + 1;
     }
 }
 void mem_free(void *ptr) {
-    if(ptr != NULL) {
+    if (ptr != NULL) {
         int size = *((size_t *)ptr - 1);
-        allocsize --;
-        if(size < MEMORY_MAXRECYCLED) {
+        allocsize--;
+        if (size < MEMORY_MAXRECYCLED) {
             *(void **)ptr = recycled[size];
             recycled[size] = ptr;
         } else {
@@ -41,10 +43,10 @@ void mem_free(void *ptr) {
 void mem_freerecycled(void) {
     int i;
     void *curr;
-    for(i = 0; i < MEMORY_MAXRECYCLED; i ++) {
+    for (i = 0; i < MEMORY_MAXRECYCLED; i++) {
         curr = recycled[i];
-        if(curr != NULL) {
-            while(curr != NULL) {
+        if (curr != NULL) {
+            while (curr != NULL) {
                 recycled[i] = *(void **)curr;
                 free((size_t *)curr - 1);
                 allocused -= i;
@@ -54,15 +56,18 @@ void mem_freerecycled(void) {
     }
 }
 void *mem_resize(void *old, size_t size) {
-    if(old == NULL) return mem_alloc(size);
+    if (old == NULL)
+        return mem_alloc(size);
     else {
         int old_size = *(size_t *)(old = (size_t *)old - 1);
         size_t *new = realloc(old, size + sizeof(size_t));
-        if(new == NULL) ERR("Unable to resize mem!");
+        if (new == NULL)
+            ERR("Unable to resize mem!");
         *new = size;
         alloctotal += size - old_size;
         allocused += size - old_size;
-        if(allocused > allocpeak) allocpeak = allocused;
+        if (allocused > allocpeak)
+            allocpeak = allocused;
         return new + 1;
     }
 }

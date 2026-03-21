@@ -4,8 +4,8 @@
 
 /* type */
 struct lk_dl {
-    struct lk_common  o;
-    void             *dl;
+    struct lk_common o;
+    void *dl;
 };
 
 /* init */

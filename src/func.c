@@ -6,19 +6,20 @@ static void alloc_f(lk_obj_t *self, lk_obj_t *parent) {
     LK_FUNC(self)->cf.sigdef = LK_FUNC(parent)->cf.sigdef;
     LK_FUNC(self)->cf.minargc = LK_FUNC(parent)->cf.minargc;
     LK_FUNC(self)->cf.maxargc = LK_FUNC(parent)->cf.maxargc;
-    if(LK_FUNC(self)->cf.sigs != NULL
-    ) LK_FUNC(self)->cf.sigs = darray_clone(LK_FUNC(parent)->cf.sigs);
+    if (LK_FUNC(self)->cf.sigs != NULL)
+        LK_FUNC(self)->cf.sigs = darray_clone(LK_FUNC(parent)->cf.sigs);
     LK_FUNC(self)->cf.rest = LK_FUNC(parent)->cf.rest;
     LK_FUNC(self)->cf.opts = LK_FUNC(parent)->cf.opts;
 }
 static LK_OBJ_DEFMARKFUNC(mark_f) {
     mark(LK_OBJ(LK_FUNC(self)->cf.sigdef));
-    if(LK_FUNC(self)->cf.sigs != NULL
-    ) DARRAY_EACHPTR(LK_FUNC(self)->cf.sigs, i, v, mark(v));
+    if (LK_FUNC(self)->cf.sigs != NULL)
+        DARRAY_EACHPTR(LK_FUNC(self)->cf.sigs, i, v, mark(v));
     mark(LK_OBJ(LK_FUNC(self)->cf.rest));
 }
 static void free_f(lk_obj_t *self) {
-    if(LK_FUNC(self)->cf.sigs != NULL) darray_free(LK_FUNC(self)->cf.sigs);
+    if (LK_FUNC(self)->cf.sigs != NULL)
+        darray_free(LK_FUNC(self)->cf.sigs);
 }
 
 /* */
@@ -94,7 +95,7 @@ static void add_f_f(lk_obj_t *self, lk_scope_t *local) {
     RETURN(lk_func_combine(LK_FUNC(self), LK_FUNC(ARG(0))));
 }
 static void addB_f_f(lk_obj_t *self, lk_scope_t *local) {
-    if(local->caller == NULL && local->caller->lastslot == NULL) {
+    if (local->caller == NULL && local->caller->lastslot == NULL) {
         lk_vm_raisecstr(VM, "Cannot add to the function without a slot");
     } else {
         lk_gfunc_t *new = lk_func_combine(LK_FUNC(self), LK_FUNC(ARG(0)));
@@ -187,35 +188,38 @@ lk_gfunc_t *lk_func_combine(lk_func_t *self, lk_func_t *other) {
     lk_sig_t *arg;
     int func_i, func_c, arg_i;
     int dist, other_dist = 0;
-    if(!LK_OBJ_ISGFUNC(LK_OBJ(self))) {
+    if (!LK_OBJ_ISGFUNC(LK_OBJ(self))) {
         lk_gfunc_t *gf = lk_gfunc_new(vm);
         darray_ptr_push(gf->funcs, self);
-        if(CHKOPT(LK_FUNC(self)->cf.opts, LK_FUNCOASSIGNED)) {
+        if (CHKOPT(LK_FUNC(self)->cf.opts, LK_FUNCOASSIGNED)) {
             SETOPT(LK_FUNC(gf)->cf.opts, LK_FUNCOASSIGNED);
         }
         self = LK_FUNC(gf);
     }
     funcs = LK_GFUNC(self)->funcs;
-    if(other->cf.sigs != NULL) {
-        for(arg_i = 0; arg_i < DARRAY_COUNT(other->cf.sigs); arg_i ++) {
+    if (other->cf.sigs != NULL) {
+        for (arg_i = 0; arg_i < DARRAY_COUNT(other->cf.sigs); arg_i++) {
             arg = DARRAY_ATPTR(other->cf.sigs, arg_i);
             other_dist += lk_obj_isa(arg->check, vm->t_obj);
         }
     }
     func_c = DARRAY_COUNT(funcs);
-    for(func_i = 0; func_i < func_c; func_i ++) {
+    for (func_i = 0; func_i < func_c; func_i++) {
         func = DARRAY_ATPTR(funcs, func_i);
         dist = 0;
-        if(func->cf.sigs != NULL) {
-            for(arg_i = 0; arg_i < DARRAY_COUNT(func->cf.sigs); arg_i ++) {
+        if (func->cf.sigs != NULL) {
+            for (arg_i = 0; arg_i < DARRAY_COUNT(func->cf.sigs); arg_i++) {
                 arg = DARRAY_ATPTR(func->cf.sigs, arg_i);
                 dist += lk_obj_isa(arg->check, vm->t_obj);
             }
         }
-        if(other_dist >= dist) break;
+        if (other_dist >= dist)
+            break;
     }
-    if(func_i < func_c) darray_ptr_insert(funcs, func_i, other);
-    else darray_ptr_push(funcs, other);
+    if (func_i < func_c)
+        darray_ptr_insert(funcs, func_i, other);
+    else
+        darray_ptr_push(funcs, other);
     return LK_GFUNC(self);
 }
 lk_func_t *lk_func_match(lk_func_t *self, lk_scope_t *args, lk_obj_t *recv) {
@@ -225,46 +229,49 @@ lk_func_t *lk_func_match(lk_func_t *self, lk_scope_t *args, lk_obj_t *recv) {
     lk_func_t *curr;
     lk_sig_t *sig;
     lk_obj_t *arg;
-    if(LK_OBJ_ISGFUNC(LK_OBJ(self))) {
+    if (LK_OBJ_ISGFUNC(LK_OBJ(self))) {
         funcs = LK_GFUNC(self)->funcs;
-        funci = 0; funcc = DARRAY_COUNT(funcs);
+        funci = 0;
+        funcc = DARRAY_COUNT(funcs);
         curr = DARRAY_ATPTR(funcs, funci);
     } else {
         funcs = NULL;
-        funci = 0; funcc = 1;
+        funci = 0;
+        funcc = 1;
         curr = self;
     }
-    findfunc:
+findfunc:
     stack = &args->stack;
     argc = DARRAY_COUNT(stack);
-    if(curr->cf.minargc <= argc && argc <= curr->cf.maxargc) {
+    if (curr->cf.minargc <= argc && argc <= curr->cf.maxargc) {
         sigs = curr->cf.sigs;
-        if(sigs != NULL) {
-            for(; argi < DARRAY_COUNT(sigs); argi ++) {
+        if (sigs != NULL) {
+            for (; argi < DARRAY_COUNT(sigs); argi++) {
                 sig = DARRAY_ATPTR(sigs, argi);
                 arg = DARRAY_ATPTR(stack, argi);
-                if(sig == NULL || sig->check == NULL) goto bindarg;
-                if(LK_OBJ_ISTYPE(arg, sig->check)) goto bindarg;
+                if (sig == NULL || sig->check == NULL)
+                    goto bindarg;
+                if (LK_OBJ_ISTYPE(arg, sig->check))
+                    goto bindarg;
                 goto nextfunc;
-                bindarg:
-                if(sig->name != NULL) lk_obj_setslot(sig->isself
-                ? recv : LK_OBJ(args), LK_OBJ(sig->name), sig->check, arg);
+            bindarg:
+                if (sig->name != NULL)
+                    lk_obj_setslot(sig->isself ? recv : LK_OBJ(args), LK_OBJ(sig->name), sig->check, arg);
             }
         }
-        if(curr->cf.rest != NULL) {
+        if (curr->cf.rest != NULL) {
             sig = curr->cf.rest;
-            if(sig != NULL && sig->name != NULL) {
-                arg = LK_OBJ(DARRAY_ISINIT(stack)
-                ? lk_list_new_fromdarray(vm, stack) : lk_list_new(vm));
+            if (sig != NULL && sig->name != NULL) {
+                arg = LK_OBJ(DARRAY_ISINIT(stack) ? lk_list_new_fromdarray(vm, stack) : lk_list_new(vm));
                 darray_offset(DARRAY(arg), argi);
-                lk_obj_setslot(sig->isself
-                ? recv : LK_OBJ(args), LK_OBJ(sig->name), sig->check, arg);
+                lk_obj_setslot(sig->isself ? recv : LK_OBJ(args), LK_OBJ(sig->name), sig->check, arg);
             }
         }
         return curr;
     }
-    nextfunc:
-    if(++ funci >= funcc) return NULL;
+nextfunc:
+    if (++funci >= funcc)
+        return NULL;
     curr = DARRAY_ATPTR(funcs, funci);
     goto findfunc;
 }
@@ -276,22 +283,21 @@ void lk_lfunc_updatesig(lk_lfunc_t *self) {
     lk_str_t *name;
     lk_obj_t *type;
     lk_sig_t *sig;
-    if(argdef != NULL && argdef->type == LK_INSTRTYPE_STRING) {
+    if (argdef != NULL && argdef->type == LK_INSTRTYPE_STRING) {
         self->cf.doc = LK_STRING(argdef->v);
         argdef = argdef->next;
     }
-    for(; argdef != NULL; argdef = argdef->next) {
-        if((isself = argdef->type == LK_INSTRTYPE_SELFMSG)
-        || argdef->type == LK_INSTRTYPE_SCOPEMSG) {
+    for (; argdef != NULL; argdef = argdef->next) {
+        if ((isself = argdef->type == LK_INSTRTYPE_SELFMSG) || argdef->type == LK_INSTRTYPE_SCOPEMSG) {
             name = LK_STRING(argdef->v);
-            if(darray_str_cmp_cstr(DARRAY(name), ":") == 0) {
+            if (darray_str_cmp_cstr(DARRAY(name), ":") == 0) {
                 argdef = argdef->next;
-                if(argdef != NULL && argdef->type == LK_INSTRTYPE_APPLY) {
+                if (argdef != NULL && argdef->type == LK_INSTRTYPE_APPLY) {
                     typeinstr = LK_INSTR(argdef->v);
                     name = LK_STRING(typeinstr->v);
                     typeinstr = typeinstr->next;
                     slot = lk_obj_getslotfromany(LK_OBJ(VM->currscope), typeinstr->v);
-                    if(slot != NULL) {
+                    if (slot != NULL) {
                         type = lk_obj_getvaluefromslot(LK_OBJ(VM->currscope), slot);
                     } else {
                         printf("Invalid sig, invalid type\n");
@@ -304,14 +310,12 @@ void lk_lfunc_updatesig(lk_lfunc_t *self) {
             } else {
                 type = VM->t_obj;
             }
-            lk_obj_addref(LK_OBJ(self), LK_OBJ(
-            sig = lk_sig_new(VM, name, type)));
+            lk_obj_addref(LK_OBJ(self), LK_OBJ(sig = lk_sig_new(VM, name, type)));
             sig->isself = isself;
-            if(sigs == NULL) sigs = self->cf.sigs = darray_ptr_alloc();
-            if(DARRAY_COUNT(DARRAY(name)) > 3
-            && darray_str_get(DARRAY(name), -1) == '.'
-            && darray_str_get(DARRAY(name), -2) == '.'
-            && darray_str_get(DARRAY(name), -3) == '.') {
+            if (sigs == NULL)
+                sigs = self->cf.sigs = darray_ptr_alloc();
+            if (DARRAY_COUNT(DARRAY(name)) > 3 && darray_str_get(DARRAY(name), -1) == '.' &&
+                darray_str_get(DARRAY(name), -2) == '.' && darray_str_get(DARRAY(name), -3) == '.') {
                 sig->name = name = LK_STRING(lk_obj_clone(LK_OBJ(name)));
                 darray_limit(DARRAY(name), -3);
                 self->cf.minargc = DARRAY_COUNT(sigs);
@@ -326,6 +330,5 @@ void lk_lfunc_updatesig(lk_lfunc_t *self) {
             exit(EXIT_FAILURE);
         }
     }
-    self->cf.minargc =
-    self->cf.maxargc = sigs != NULL ? DARRAY_COUNT(sigs) : 0;
+    self->cf.minargc = self->cf.maxargc = sigs != NULL ? DARRAY_COUNT(sigs) : 0;
 }

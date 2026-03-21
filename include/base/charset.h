@@ -4,11 +4,11 @@
 
 /* type */
 typedef struct {
-    int       cap;
+    int cap;
     uint32_t *data;
-    uint32_t  max;
-    uint32_t  min;
-    int       size;
+    uint32_t max;
+    uint32_t min;
+    int size;
 } charset_t;
 #define CHARSET_DATA(self) ((uint32_t *)((ptrdiff_t)(self)->data & ~1))
 #define CHARSET_ISINVERTED(self) ((ptrdiff_t)(self)->data & 1)

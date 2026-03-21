@@ -8,13 +8,13 @@
 /* actual def - add header to above #include's on lk_vm_t change */
 struct lk_vm {
     struct lk_rsrcchain {
-        uint8_t              isstr;
-        lk_str_t         *rsrc;
+        uint8_t isstr;
+        lk_str_t *rsrc;
         struct lk_rsrcchain *prev;
     } *rsrc;
     struct lk_rescue {
-        jmp_buf              buf;
-        struct lk_rescue    *prev;
+        jmp_buf buf;
+        struct lk_rescue *prev;
         struct lk_rsrcchain *rsrc;
     } *rescue;
     lk_instr_t *currinstr;

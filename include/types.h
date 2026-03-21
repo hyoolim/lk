@@ -39,32 +39,32 @@ typedef struct lk_vm lk_vm_t;
 
 /* common data for all lk objs */
 typedef void lk_tagallocfunc_t(lk_obj_t *self, lk_obj_t *parent);
-#define LK_OBJ_DEFMARKFUNC(name) void name(lk_obj_t *self, void (*mark)(lk_obj_t *self))
+#define LK_OBJ_DEFMARKFUNC(name) void name(lk_obj_t *self, void (*mark)(lk_obj_t * self))
 typedef LK_OBJ_DEFMARKFUNC(lk_tagmarkfunc_t);
 typedef void lk_tagfreefunc_t(lk_obj_t *self);
 struct lk_tag {
-    int                refc;
-    lk_vm_t           *vm;
-    size_t             size;
+    int refc;
+    lk_vm_t *vm;
+    size_t size;
     lk_tagallocfunc_t *allocfunc;
-    lk_tagmarkfunc_t  *markfunc;
-    lk_tagfreefunc_t  *freefunc;
+    lk_tagmarkfunc_t *markfunc;
+    lk_tagfreefunc_t *freefunc;
 };
 struct lk_objgroup {
     lk_obj_t *first;
     lk_obj_t *last;
 };
 struct lk_common {
-    lk_obj_t            *parent;
-    darray_t              *ancestors;
-    qphash_t               *slots;
-    struct lk_tag          *tag;
+    lk_obj_t *parent;
+    darray_t *ancestors;
+    qphash_t *slots;
+    struct lk_tag *tag;
     struct {
-        lk_obj_t        *prev;
-        lk_obj_t        *next;
+        lk_obj_t *prev;
+        lk_obj_t *next;
         struct lk_objgroup *objgroup;
-        uint8_t             isref;
-    }                       mark;
+        uint8_t isref;
+    } mark;
 };
 
 /* used by ext - can't be in lib.h due to bootstrapping issues */
@@ -74,13 +74,15 @@ typedef lk_obj_t *lk_cfunc_r1_t(lk_obj_t *self, lk_obj_t *a0type);
 typedef lk_obj_t *lk_cfunc_r2_t(lk_obj_t *self, lk_obj_t *a0type, lk_obj_t *a1type);
 typedef lk_obj_t *lk_cfunc_r3_t(lk_obj_t *self, lk_obj_t *a0type, lk_obj_t *a1type, lk_obj_t *a2type);
 typedef lk_obj_t *lk_cfunc_r4_t(lk_obj_t *self, lk_obj_t *a0type, lk_obj_t *a1type, lk_obj_t *a2type, lk_obj_t *a3type);
-typedef lk_obj_t *lk_cfunc_r5_t(lk_obj_t *self, lk_obj_t *a0type, lk_obj_t *a1type, lk_obj_t *a2type, lk_obj_t *a3type, lk_obj_t *a4type);
+typedef lk_obj_t *
+lk_cfunc_r5_t(lk_obj_t *self, lk_obj_t *a0type, lk_obj_t *a1type, lk_obj_t *a2type, lk_obj_t *a3type, lk_obj_t *a4type);
 typedef void lk_cfunc_v0_t(lk_obj_t *self);
 typedef void lk_cfunc_v1_t(lk_obj_t *self, lk_obj_t *a0type);
 typedef void lk_cfunc_v2_t(lk_obj_t *self, lk_obj_t *a0type, lk_obj_t *a1type);
 typedef void lk_cfunc_v3_t(lk_obj_t *self, lk_obj_t *a0type, lk_obj_t *a1type, lk_obj_t *a2type);
 typedef void lk_cfunc_v4_t(lk_obj_t *self, lk_obj_t *a0type, lk_obj_t *a1type, lk_obj_t *a2type, lk_obj_t *a3type);
-typedef void lk_cfunc_v5_t(lk_obj_t *self, lk_obj_t *a0type, lk_obj_t *a1type, lk_obj_t *a2type, lk_obj_t *a3type, lk_obj_t *a4type);
+typedef void
+lk_cfunc_v5_t(lk_obj_t *self, lk_obj_t *a0type, lk_obj_t *a1type, lk_obj_t *a2type, lk_obj_t *a3type, lk_obj_t *a4type);
 typedef void lk_cfuncfunc_t(lk_obj_t *self, lk_scope_t *local);
 
 #define LK_BOOL(obj) ((lk_bool_t *)(obj))
@@ -91,7 +93,7 @@ typedef void lk_cfuncfunc_t(lk_obj_t *self, lk_scope_t *local);
 #define LK_FILE(obj) ((lk_file_t *)(obj))
 #define LK_DIR(obj) ((lk_dir_t *)(obj))
 #define LK_FUNC(obj) ((lk_func_t *)(obj))
-#define LK_FUNCORUNNING  (1 << 0)
+#define LK_FUNCORUNNING (1 << 0)
 #define LK_FUNCOASSIGNED (1 << 1)
 #define LK_CFUNC(obj) ((lk_cfunc_t *)(obj))
 #define LK_GFUNC(obj) ((lk_gfunc_t *)(obj))
@@ -100,7 +102,7 @@ typedef void lk_cfuncfunc_t(lk_obj_t *self, lk_scope_t *local);
 #define LK_GC(obj) ((lk_gc_t *)(obj))
 #define LK_INSTR(obj) ((lk_instr_t *)(obj))
 #define LK_INSTROHASMSGARGS (1 << 0)
-#define LK_INSTROEND        (1 << 1)
+#define LK_INSTROEND (1 << 1)
 #define LK_DL(obj) ((lk_dl_t *)(obj))
 #define LK_LIST(obj) ((lk_list_t *)(obj))
 #define LK_DARRAY(obj) ((lk_list_t *)(obj))

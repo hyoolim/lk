@@ -18,7 +18,7 @@ static void alloc_rand(lk_obj_t *self, lk_obj_t *parent) {
     struct timeval tv;
     int seed;
     gettimeofday(&tv, 0);
-    seed = tv.tv_sec ^ tv.tv_usec ^ n ++;
+    seed = tv.tv_sec ^ tv.tv_usec ^ n++;
     LK_RANDOM(self)->seed = lk_num_new(LK_VM(self), seed);
     init_genrand(LK_RANDOM(self), seed);
 }
@@ -45,15 +45,15 @@ void lk_rand_extinit(lk_vm_t *vm) {
 }
 
 /* modified and cut so that mult rand gen are possible */
-/* 
+/*
    A C-program for MT19937, with initialization improved 2002/1/26.
    Coded by Takuji Nishimura and Makoto Matsumoto.
 
-   Before using, initialize the state by using init_genrand(seed)  
+   Before using, initialize the state by using init_genrand(seed)
    or init_by_array(init_key, key_length).
 
    Copyright (C) 1997 - 2002, Makoto Matsumoto and Takuji Nishimura,
-   All rights reserved.                          
+   All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions
@@ -66,8 +66,8 @@ void lk_rand_extinit(lk_vm_t *vm) {
         notice, this list of conditions and the following disclaimer in the
         documentation and/or other materials provided with the distribution.
 
-     3. The names of its contributors may not be used to endorse or promote 
-        products derived from this software without specific prior written 
+     3. The names of its contributors may not be used to endorse or promote
+        products derived from this software without specific prior written
         permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -87,7 +87,7 @@ void lk_rand_extinit(lk_vm_t *vm) {
    email: m-mat @ math.sci.hiroshima-u.ac.jp (remove space)
 */
 
-/* Period parameters */  
+/* Period parameters */
 #define N LK_RANDOM_N
 #define M 397
 #define MATRIX_A 0x9908b0dfUL   /* constant vec a */
@@ -100,10 +100,9 @@ void lk_rand_extinit(lk_vm_t *vm) {
 
 /* initializes mt[N] with a seed */
 static void init_genrand(lk_rand_t *self, unsigned long s) {
-    mt[0]= s & 0xffffffffUL;
-    for (mti=1; mti<N; mti++) {
-        mt[mti] = 
-        (1812433253UL * (mt[mti-1] ^ (mt[mti-1] >> 30)) + mti); 
+    mt[0] = s & 0xffffffffUL;
+    for (mti = 1; mti < N; mti++) {
+        mt[mti] = (1812433253UL * (mt[mti - 1] ^ (mt[mti - 1] >> 30)) + mti);
         /* See Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier. */
         /* In the previous versions, MSBs of the seed affect   */
         /* only MSBs of the array mt[].                        */
@@ -116,29 +115,29 @@ static void init_genrand(lk_rand_t *self, unsigned long s) {
 /* generates a rand num on [0,0xffffffff]-interval */
 static unsigned long genrand_int32(lk_rand_t *self) {
     unsigned long y;
-    static unsigned long mag01[2]={0x0UL, MATRIX_A};
+    static unsigned long mag01[2] = {0x0UL, MATRIX_A};
     /* mag01[x] = x * MATRIX_A  for x=0,1 */
 
     if (mti >= N) { /* generate N words at one time */
         int kk;
 
-        if (mti == N+1)   /* if init_genrand() has not been called, */
+        if (mti == N + 1)               /* if init_genrand() has not been called, */
             init_genrand(self, 5489UL); /* a default initial seed is used */
 
-        for (kk=0;kk<N-M;kk++) {
-            y = (mt[kk]&UPPER_MASK)|(mt[kk+1]&LOWER_MASK);
-            mt[kk] = mt[kk+M] ^ (y >> 1) ^ mag01[y & 0x1UL];
+        for (kk = 0; kk < N - M; kk++) {
+            y = (mt[kk] & UPPER_MASK) | (mt[kk + 1] & LOWER_MASK);
+            mt[kk] = mt[kk + M] ^ (y >> 1) ^ mag01[y & 0x1UL];
         }
-        for (;kk<N-1;kk++) {
-            y = (mt[kk]&UPPER_MASK)|(mt[kk+1]&LOWER_MASK);
-            mt[kk] = mt[kk+(M-N)] ^ (y >> 1) ^ mag01[y & 0x1UL];
+        for (; kk < N - 1; kk++) {
+            y = (mt[kk] & UPPER_MASK) | (mt[kk + 1] & LOWER_MASK);
+            mt[kk] = mt[kk + (M - N)] ^ (y >> 1) ^ mag01[y & 0x1UL];
         }
-        y = (mt[N-1]&UPPER_MASK)|(mt[0]&LOWER_MASK);
-        mt[N-1] = mt[M-1] ^ (y >> 1) ^ mag01[y & 0x1UL];
+        y = (mt[N - 1] & UPPER_MASK) | (mt[0] & LOWER_MASK);
+        mt[N - 1] = mt[M - 1] ^ (y >> 1) ^ mag01[y & 0x1UL];
 
         mti = 0;
     }
-  
+
     y = mt[mti++];
 
     /* Tempering */
@@ -157,24 +156,24 @@ static unsigned long genrand_int32(lk_rand_t *self) {
 
 /* generates a rand num on [0,1]-real-interval */
 static double genrand_real1(lk_rand_t *self) {
-    return genrand_int32(self)*(1.0/4294967295.0); 
-    /* divided by 2^32-1 */ 
+    return genrand_int32(self) * (1.0 / 4294967295.0);
+    /* divided by 2^32-1 */
 }
 
 /* generates a rand num on [0,1)-real-interval */
 /* static double genrand_real2(lk_rand_t *self) {
-    return genrand_int32(self)*(1.0/4294967296.0); 
+    return genrand_int32(self)*(1.0/4294967296.0);
     * divided by 2^32 *
 } */
 
 /* generates a rand num on (0,1)-real-interval */
 /* static double genrand_real3(lk_rand_t *self) {
-    return (((double)genrand_int32(self)) + 0.5)*(1.0/4294967296.0); 
+    return (((double)genrand_int32(self)) + 0.5)*(1.0/4294967296.0);
     * divided by 2^32 *
 } */
 
 /* generates a rand num on [0,1) with 53-bit resolution*/
-/* static double genrand_res53(lk_rand_t *self) { 
-    unsigned long a=genrand_int32(self)>>5, b=genrand_int32(self)>>6; 
-    return(a*67108864.0+b)*(1.0/9007199254740992.0); 
+/* static double genrand_res53(lk_rand_t *self) {
+    unsigned long a=genrand_int32(self)>>5, b=genrand_int32(self)>>6;
+    return(a*67108864.0+b)*(1.0/9007199254740992.0);
 }  */

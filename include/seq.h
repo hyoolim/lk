@@ -5,7 +5,7 @@
 /* type */
 struct lk_seq {
     struct lk_common o;
-    darray_t        data;
+    darray_t data;
 };
 
 /* ext map */

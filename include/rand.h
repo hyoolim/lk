@@ -4,10 +4,10 @@
 
 /* type */
 struct lk_rand {
-    struct lk_common  o;
-    lk_num_t      *seed;
-    int               mti;
-    unsigned long     mt[LK_RANDOM_N];
+    struct lk_common o;
+    lk_num_t *seed;
+    int mti;
+    unsigned long mt[LK_RANDOM_N];
 };
 
 /* ext map */

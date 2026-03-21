@@ -6,7 +6,8 @@ static LK_OBJ_DEFMARKFUNC(mark_instr) {
     mark(LK_OBJ(LK_INSTR(self)->next));
     mark(LK_OBJ(LK_INSTR(self)->rsrc));
     mark(LK_INSTR(self)->v);
-    if(LK_INSTR(self)->comment != NULL) mark(LK_OBJ(LK_INSTR(self)->comment));
+    if (LK_INSTR(self)->comment != NULL)
+        mark(LK_OBJ(LK_INSTR(self)->comment));
 }
 void lk_instr_typeinit(lk_vm_t *vm) {
     vm->t_instr = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_instr_t));
@@ -23,13 +24,15 @@ lk_num_t *lk_instr_line(lk_obj_t *self) {
 lk_str_t *lk_instr_message(lk_obj_t *self) {
     lk_instr_t *instr = LK_INSTR(self);
     do {
-        switch(instr->type) {
-            case LK_INSTRTYPE_APPLYMSG:
-            case LK_INSTRTYPE_SCOPEMSG:
-            case LK_INSTRTYPE_SELFMSG: return LK_STRING(instr->v);
-            default: instr = instr->prev;
+        switch (instr->type) {
+        case LK_INSTRTYPE_APPLYMSG:
+        case LK_INSTRTYPE_SCOPEMSG:
+        case LK_INSTRTYPE_SELFMSG:
+            return LK_STRING(instr->v);
+        default:
+            instr = instr->prev;
         }
-    } while(instr != NULL);
+    } while (instr != NULL);
     return LK_STRING(NIL);
 }
 lk_str_t *lk_instr_resource(lk_obj_t *self) {
@@ -103,7 +106,7 @@ lk_instr_t *lk_instr_newmessage(lk_parser_t *parser, lk_str_t *name) {
     {
         darray_t *cs = parser->comments;
         lk_str_t *c = darray_ptr_remove(cs, 0);
-        while(cs->size > 0) {
+        while (cs->size > 0) {
             darray_concat(DARRAY(c), DARRAY(darray_ptr_remove(cs, 0)));
         }
         new->comment = c;
@@ -118,8 +121,9 @@ lk_instr_t *lk_instr_newscopemessage(lk_parser_t *parser, lk_str_t *name) {
 
 /* info */
 void lk_instr_print(lk_instr_t *self) {
-    if(self == NULL) return;
-    switch(self->type) {
+    if (self == NULL)
+        return;
+    switch (self->type) {
     case LK_INSTRTYPE_FUNC:
         printf("{");
         lk_instr_print(LK_LFUNC(self->v)->first);
@@ -149,16 +153,19 @@ void lk_instr_print(lk_instr_t *self) {
     case LK_INSTRTYPE_APPLYMSG:
         printf(".");
         darray_print_tostream(DARRAY(self->v), stdout);
-        if(!(self->opts & LK_INSTROHASMSGARGS)) printf("[]");
+        if (!(self->opts & LK_INSTROHASMSGARGS))
+            printf("[]");
         break;
     case LK_INSTRTYPE_SCOPEMSG:
         darray_print_tostream(DARRAY(self->v), stdout);
-        if(!(self->opts & LK_INSTROHASMSGARGS)) printf("[]");
+        if (!(self->opts & LK_INSTROHASMSGARGS))
+            printf("[]");
         break;
     case LK_INSTRTYPE_SELFMSG:
         printf(".");
         darray_print_tostream(DARRAY(self->v), stdout);
-        if(!(self->opts & LK_INSTROHASMSGARGS)) printf("[]");
+        if (!(self->opts & LK_INSTROHASMSGARGS))
+            printf("[]");
         break;
     case LK_INSTRTYPE_MORE:
         break;
@@ -166,7 +173,7 @@ void lk_instr_print(lk_instr_t *self) {
         printf("?%i", (int)self->type);
         break;
     }
-    if(self->comment != NULL) {
+    if (self->comment != NULL) {
         printf(" #*");
         darray_print_tostream(DARRAY(self->comment), stdout);
         printf(" *#");

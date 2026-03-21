@@ -5,7 +5,7 @@
 /* type */
 struct lk_char {
     struct lk_common o;
-    uint32_t         data;
+    uint32_t data;
 };
 
 /* init */

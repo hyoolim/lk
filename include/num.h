@@ -5,7 +5,7 @@
 /* type */
 struct lk_num {
     struct lk_common o;
-    double           data;
+    double data;
 };
 
 /* ext map */

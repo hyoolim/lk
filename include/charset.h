@@ -5,7 +5,7 @@
 /* type */
 struct lk_charset {
     struct lk_common o;
-    charset_t        data;
+    charset_t data;
 };
 
 /* init */

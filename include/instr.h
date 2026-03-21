@@ -17,15 +17,15 @@ struct lk_instr {
         LK_INSTRTYPE_SCOPEMSG,
         LK_INSTRTYPE_SELFMSG,
         LK_INSTRTYPE_MORE
-    }                 type;
-    lk_instr_t       *prev;
-    lk_instr_t       *next;
-    lk_str_t      *rsrc;
-    int               line;
-    int               column;
-    lk_obj_t      *v;
-    lk_str_t      *comment;
-    uint8_t           opts;
+    } type;
+    lk_instr_t *prev;
+    lk_instr_t *next;
+    lk_str_t *rsrc;
+    int line;
+    int column;
+    lk_obj_t *v;
+    lk_str_t *comment;
+    uint8_t opts;
 };
 
 /* ext map */

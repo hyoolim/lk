@@ -6,28 +6,24 @@
 struct lk_parser {
     struct lk_common o;
     const lk_str_t *text;
-    const char        *err;
-    qphash_t          *binaryops;
-    qphash_t          *precs;
-    darray_t         *tokentypes;
-    darray_t         *tokenvalues;
-    darray_t         *words;
-    darray_t         *ops;
-    darray_t         *comments;
-    int                textpos;
-    int                line;
-    int                column;
-    int                opsize;
-    int                isterminated;
+    const char *err;
+    qphash_t *binaryops;
+    qphash_t *precs;
+    darray_t *tokentypes;
+    darray_t *tokenvalues;
+    darray_t *words;
+    darray_t *ops;
+    darray_t *comments;
+    int textpos;
+    int line;
+    int column;
+    int opsize;
+    int isterminated;
 };
 struct lk_prec {
     struct lk_common o;
-    int              level;
-    enum lk_precassoc_t {
-        LK_PREC_ASSOC_LEFT = 1,
-        LK_PREC_ASSOC_RIGHT,
-        LK_PREC_ASSOC_NON
-    }                assoc;
+    int level;
+    enum lk_precassoc_t { LK_PREC_ASSOC_LEFT = 1, LK_PREC_ASSOC_RIGHT, LK_PREC_ASSOC_NON } assoc;
 };
 
 /* ext map */

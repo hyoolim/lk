@@ -3,7 +3,7 @@
 
 /* type */
 static void free_dl(lk_obj_t *self) {
-    if(LK_DL(self)->dl != NULL) {
+    if (LK_DL(self)->dl != NULL) {
         dlclose(LK_DL(self)->dl);
         LK_DL(self)->dl = NULL;
     }
@@ -16,11 +16,14 @@ void lk_dl_typeinit(lk_vm_t *vm) {
 /* new */
 void lk_dl_init_withpath_andfunc(lk_dl_t *self, lk_str_t *path, lk_str_t *funcname) {
     void *dl = dlopen(darray_str_tocstr(DARRAY(path)), RTLD_NOW);
-    if(dl != NULL) {
-        union { void *p; void (*f)(lk_vm_t *vm); } func;
+    if (dl != NULL) {
+        union {
+            void *p;
+            void (*f)(lk_vm_t *vm);
+        } func;
         self->dl = dl;
         func.p = dlsym(dl, darray_str_tocstr(DARRAY(funcname)));
-        if(func.f != NULL) {
+        if (func.f != NULL) {
             func.f(VM);
         } else {
             printf("dlsym: %s\n", dlerror());
@@ -51,12 +54,10 @@ void lk_object_set(lk_obj_t *parent, const char *k, lk_obj_t *v) {
 void lk_global_set(const char *k, lk_obj_t *v) {
     lk_object_set(LK_OBJ(LK_VM(v)->global), k, v);
 }
-void lk_obj_set_cfield(lk_obj_t *self, const char *k, lk_obj_t *t,
-                   size_t offset) {
+void lk_obj_set_cfield(lk_obj_t *self, const char *k, lk_obj_t *t, size_t offset) {
     lk_vm_t *vm = LK_VM(self);
     lk_str_t *k_kc = lk_str_new_fromcstr(vm, k);
-    struct lk_slot *slot = lk_obj_setslot(
-    LK_OBJ(self), LK_OBJ(k_kc), t, vm->t_nil);
+    struct lk_slot *slot = lk_obj_setslot(LK_OBJ(self), LK_OBJ(k_kc), t, vm->t_nil);
     assert(offset >= sizeof(struct lk_common));
     LK_SLOT_SETTYPE(slot, LK_SLOTTYPE_CFIELDLKOBJ);
     slot->value.coffset = offset;

@@ -27,60 +27,59 @@ lk_file_t *lk_file_new_withpath(lk_vm_t *vm, lk_str_t *path) {
 }
 void lk_file_init_str(lk_file_t *self, lk_str_t *path) {
     int at = 0, nextat;
-    if(darray_str_get(DARRAY(path), 0) == '/') {
+    if (darray_str_get(DARRAY(path), 0) == '/') {
         self->path = path;
     } else {
         char buf[1000];
-        if(getcwd(buf, 1000) != NULL) {
+        if (getcwd(buf, 1000) != NULL) {
             lk_str_t *abs = lk_str_new_fromcstr(VM, buf);
             darray_concat(DARRAY(abs), DARRAY(VM->str_filesep));
             darray_concat(DARRAY(abs), DARRAY(path));
             self->path = abs;
         }
     }
-    while((nextat = darray_str_find(DARRAY(self->path), '/', at)) > -1) {
+    while ((nextat = darray_str_find(DARRAY(self->path), '/', at)) > -1) {
         at = nextat + 1;
     }
     self->name = lk_str_new_fromdarray(VM, DARRAY(self->path));
     darray_offset(DARRAY(self->name), at);
-
 }
 
 /* update */
 void lk_file_close(lk_file_t *self) {
-    if(self->fd != NULL) {
-        if(fclose(self->fd) != 0) {
+    if (self->fd != NULL) {
+        if (fclose(self->fd) != 0) {
             lk_vm_raiseerrno(VM);
         }
         self->fd = NULL;
     }
 }
 void lk_file_delete(lk_file_t *self) {
-    if(remove(CSTRING(self->path)) != 0) {
+    if (remove(CSTRING(self->path)) != 0) {
         lk_vm_raiseerrno(VM);
     }
 }
 void lk_file_flush(lk_file_t *self) {
-    if(self->fd != NULL && fflush(self->fd) != 0) {
+    if (self->fd != NULL && fflush(self->fd) != 0) {
         lk_vm_raiseerrno(VM);
     }
 }
 void lk_file_move_str(lk_file_t *self, lk_str_t *dest) {
-    if(rename(CSTRING(self->path), CSTRING(dest)) != 0) {
+    if (rename(CSTRING(self->path), CSTRING(dest)) != 0) {
         lk_vm_raiseerrno(VM);
     }
 }
 void lk_file_open(lk_file_t *self, lk_str_t *mode) {
-    if(self->fd != NULL) {
+    if (self->fd != NULL) {
         BUG("ReadableFile->st.file should be NULL");
     }
     self->fd = fopen(CSTRING(self->path), CSTRING(mode));
-    if(self->fd == NULL) {
+    if (self->fd == NULL) {
         lk_vm_raiseerrno(VM);
     }
 }
 void lk_file_write_str(lk_file_t *self, lk_str_t *text) {
-    if(self->fd == NULL) {
+    if (self->fd == NULL) {
         BUG("WritableFile->st.file should NEVER be NULL");
     }
     darray_print_tostream(DARRAY(text), self->fd);
@@ -98,7 +97,7 @@ lk_bool_t *lk_file_isexists(lk_file_t *self) {
     return access(CSTRING(self->path), F_OK) == 0 ? TRUE : FALSE;
 }
 lk_str_t *lk_file_read_num(lk_file_t *self, lk_num_t *length) {
-    if(self->fd == NULL) {
+    if (self->fd == NULL) {
         BUG("ReadableFile->st.file should NEVER be NULL");
     } else {
         darray_t *c = darray_str_alloc_fromfile_withsize(self->fd, CNUMBER(length));
@@ -106,7 +105,7 @@ lk_str_t *lk_file_read_num(lk_file_t *self, lk_num_t *length) {
     }
 }
 lk_str_t *lk_file_readall(lk_file_t *self) {
-    if(self->fd == NULL) {
+    if (self->fd == NULL) {
         BUG("ReadableFile->st.file should NEVER be NULL");
     } else {
         darray_t *c = darray_str_alloc_fromfile(self->fd);
@@ -114,7 +113,7 @@ lk_str_t *lk_file_readall(lk_file_t *self) {
     }
 }
 lk_str_t *lk_file_readuntil_char(lk_file_t *self, lk_char_t *until) {
-    if(self->fd == NULL) {
+    if (self->fd == NULL) {
         BUG("ReadableFile->st.file should NEVER be NULL");
     } else {
         darray_t *c = darray_str_alloc_fromfile_untilchar(self->fd, CHAR(until));
@@ -122,7 +121,7 @@ lk_str_t *lk_file_readuntil_char(lk_file_t *self, lk_char_t *until) {
     }
 }
 lk_str_t *lk_file_readuntil_charset(lk_file_t *self, lk_charset_t *until) {
-    if(self->fd == NULL) {
+    if (self->fd == NULL) {
         BUG("ReadableFile->st.file should NEVER be NULL");
     } else {
         darray_t *c = darray_str_alloc_fromfile_untilcharset(self->fd, CHARSET(until));
@@ -134,7 +133,7 @@ lk_bool_t *lk_file_isreadable(lk_file_t *self) {
 }
 lk_num_t *lk_file_size(lk_file_t *self) {
     struct stat info;
-    if(stat(CSTRING(self->path), &info) != 0) {
+    if (stat(CSTRING(self->path), &info) != 0) {
         lk_vm_raiseerrno(VM);
     }
     return lk_num_new(VM, info.st_size);

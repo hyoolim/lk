@@ -4,9 +4,9 @@
 
 /* type */
 struct lk_err {
-    struct lk_common  o;
-    lk_instr_t       *instr;
-    lk_str_t      *message;
+    struct lk_common o;
+    lk_instr_t *instr;
+    lk_str_t *message;
 };
 
 /* init */

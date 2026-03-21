@@ -4,18 +4,18 @@
 
 /* type - contains actual list data */
 struct listdata {
-    int  cap;
-    int  used;
-    int  ilen; /* length of item in data in bytes */
-    int  refc; /* how many ref this buf? */
+    int cap;
+    int used;
+    int ilen;  /* length of item in data in bytes */
+    int refc;  /* how many ref this buf? */
     char item; /* placeholder - first item */
 };
 
 /* type */
 typedef struct list {
     struct listdata *data;
-    char               *first;
-    int                 size;
+    char *first;
+    int size;
 } darray_t;
 
 /* new */
@@ -45,21 +45,20 @@ void darray_slice(darray_t *self, int offset, int limit);
 #define DARRAY_ATPTR(self, i) (*(void **)DARRAY_AT(self, (i)))
 int darray_cmp(const darray_t *self, const darray_t *other);
 #define DARRAY_COUNT(self) ((self)->size)
-#define DARRAY_EACH(self, i, v, block) do { \
-    darray_t *_l = (self); \
-    int i, _c = DARRAY_COUNT(_l); \
-    void *v; \
-    for(i = 0; i < _c; i ++) { \
-        v = DARRAY_AT(_l, i); \
-        { block; } \
-    } \
-} while(0)
-#define DARRAY_EACHPTR(self, i, v, block) \
-    DARRAY_EACH(self, i, v, v = *(void **)v; block);
-#define DARRAY_EQ(self, other) ( \
-    DARRAY_COUNT(self) != DARRAY_COUNT(other) \
-    ? 0 : darray_cmp((self), (other)) == 0 \
-)
+#define DARRAY_EACH(self, i, v, block) \
+    do { \
+        darray_t *_l = (self); \
+        int i, _c = DARRAY_COUNT(_l); \
+        void *v; \
+        for (i = 0; i < _c; i++) { \
+            v = DARRAY_AT(_l, i); \
+            { \
+                block; \
+            } \
+        } \
+    } while (0)
+#define DARRAY_EACHPTR(self, i, v, block) DARRAY_EACH(self, i, v, v = *(void **)v; block);
+#define DARRAY_EQ(self, other) (DARRAY_COUNT(self) != DARRAY_COUNT(other) ? 0 : darray_cmp((self), (other)) == 0)
 int darray_find_darray(const darray_t *self, const darray_t *pat, int o);
 void *darray_get(const darray_t *self, int i);
 int darray_hc(const darray_t *self);

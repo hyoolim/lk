@@ -4,10 +4,10 @@
 
 /* type */
 struct lk_file {
-    struct lk_common  o;
-    lk_str_t         *path;
-    lk_str_t         *name;
-    FILE             *fd;
+    struct lk_common o;
+    lk_str_t *path;
+    lk_str_t *name;
+    FILE *fd;
 };
 
 /* init */

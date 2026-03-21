@@ -4,9 +4,9 @@
 
 /* type */
 struct lk_pipe {
-    struct lk_common  o;
-    lk_str_t         *cmd;
-    FILE             *fd;
+    struct lk_common o;
+    lk_str_t *cmd;
+    FILE *fd;
 };
 
 /* init */

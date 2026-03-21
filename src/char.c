@@ -18,7 +18,7 @@ lk_char_t *lk_char_new(lk_vm_t *vm, uint32_t data) {
 
 /* update */
 void lk_char_add_num(lk_obj_t *self, lk_num_t *other) {
-    if(CNUMBER(other) > UINT32_MAX - CHAR(self)) {
+    if (CNUMBER(other) > UINT32_MAX - CHAR(self)) {
         lk_vm_raisecstr(VM, "Will overflow");
     }
     CHAR(self) += CNUMBER(other);
@@ -27,7 +27,7 @@ void lk_char_subtract_char(lk_obj_t *self, lk_char_t *other) {
     CHAR(self) -= CHAR(other);
 }
 void lk_char_subtract_num(lk_obj_t *self, lk_num_t *other) {
-    if(CNUMBER(other) > CHAR(self)) {
+    if (CNUMBER(other) > CHAR(self)) {
         lk_vm_raisecstr(VM, "Will underflow");
     }
     CHAR(self) -= CNUMBER(other);

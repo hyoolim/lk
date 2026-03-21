@@ -4,18 +4,14 @@
 #include "darray.h"
 
 /* type. */
-typedef enum numtype {
-    NUMBERTYPE_INT = 1,
-    NUMBERTYPE_FLOAT,
-    NUMBERTYPE_NUMBER
-} numtype_t;
+typedef enum numtype { NUMBERTYPE_INT = 1, NUMBERTYPE_FLOAT, NUMBERTYPE_NUMBER } numtype_t;
 typedef struct num {
-    uint8_t  *buf;
-    int  len;
+    uint8_t *buf;
+    int len;
 } num_t;
 typedef union numifn {
-    int          i;
-    double       f;
+    int i;
+    double f;
     num_t *n;
 } numifn_t;
 

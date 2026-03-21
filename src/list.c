@@ -23,7 +23,7 @@ lk_list_t *lk_list_new_fromdarray(lk_vm_t *vm, darray_t *from) {
 lk_list_t *lk_list_newfromargv(lk_vm_t *vm, int argc, const char **argv) {
     lk_list_t *self = lk_list_new(vm);
     int i = 0;
-    for(; i < argc; i ++) {
+    for (; i < argc; i++) {
         darray_ptr_push(DARRAY(self), lk_str_new_fromcstr(vm, argv[i]));
     }
     return self;
@@ -50,7 +50,8 @@ lk_obj_t *lk_list_at_num(lk_list_t *self, lk_num_t *index) {
 }
 void lk_list_flatten(lk_obj_t *self, lk_scope_t *local) {
     lk_scope_t *caller = local->caller;
-    if(!DARRAY_ISINIT(&caller->stack)) darray_ptr_init(&caller->stack);
+    if (!DARRAY_ISINIT(&caller->stack))
+        darray_ptr_init(&caller->stack);
     darray_concat(&caller->stack, DARRAY(self));
 }
 

@@ -4,9 +4,9 @@
 
 /* type */
 struct lk_dir {
-    struct lk_common  o;
-    lk_str_t         *path;
-    lk_str_t         *name;
+    struct lk_common o;
+    lk_str_t *path;
+    lk_str_t *name;
 };
 
 /* init */

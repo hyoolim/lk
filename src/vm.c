@@ -2,31 +2,31 @@
 #include "bool.h"
 #include "char.h"
 #include "charset.h"
+#include "dir.h"
 #include "env.h"
 #include "err.h"
-#include "lib.h"
 #include "file.h"
-#include "vec.h"
-#include "num.h"
-#include "dir.h"
-#include "scope.h"
 #include "func.h"
 #include "gc.h"
-#include "seq.h"
 #include "instr.h"
+#include "lib.h"
 #include "list.h"
 #include "map.h"
+#include "num.h"
 #include "obj.h"
 #include "parser.h"
 #include "rand.h"
+#include "scope.h"
+#include "seq.h"
 #include "socket.h"
 #include "str.h"
+#include "vec.h"
 #include <errno.h>
 #include <stdarg.h>
 #include <sys/time.h>
-#include <time.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <time.h>
 #include <unistd.h>
 
 /* ext map - types */
@@ -41,13 +41,16 @@ static void exit_vm(lk_obj_t *self, lk_scope_t *local) {
 }
 static void fork_vm(lk_obj_t *self, lk_scope_t *local) {
     pid_t child = fork();
-    if(child == -1) lk_vm_raiseerrno(VM);
+    if (child == -1)
+        lk_vm_raiseerrno(VM);
     RETURN(lk_num_new(VM, (int)child));
 }
 static void fork_vm_f(lk_obj_t *self, lk_scope_t *local) {
     pid_t child = fork();
-    if(child == -1) lk_vm_raiseerrno(VM);
-    if(child > 0) RETURN(lk_num_new(VM, (int)child));
+    if (child == -1)
+        lk_vm_raiseerrno(VM);
+    if (child > 0)
+        RETURN(lk_num_new(VM, (int)child));
     else {
         lk_lfunc_t *lf = LK_LFUNC(ARG(0));
         lk_scope_t *fr = lk_scope_new(VM);
@@ -80,22 +83,23 @@ static void seconds_west_of_utc_vm(lk_obj_t *self, lk_scope_t *local) {
     offset = l.tm_sec - gm.tm_sec;
     offset += (l.tm_min - gm.tm_min) * 60;
     offset += (l.tm_hour - gm.tm_hour) * 3600;
-    if(l.tm_year < gm.tm_year || l.tm_mon < gm.tm_mon || l.tm_mday < gm.tm_mday) {
+    if (l.tm_year < gm.tm_year || l.tm_mon < gm.tm_mon || l.tm_mday < gm.tm_mday) {
         offset -= 86400;
     }
     RETURN(lk_num_new(VM, offset));
 }
 static void system_vm(lk_obj_t *self, lk_scope_t *local) {
     pid_t child = fork();
-    if(child == -1) lk_vm_raiseerrno(VM);
-    if(child > 0) {
+    if (child == -1)
+        lk_vm_raiseerrno(VM);
+    if (child > 0) {
         int status;
         waitpid(child, &status, 0);
         RETURN(lk_num_new(VM, WEXITSTATUS(status)));
     } else {
         int i, c = local->argc;
         char **args = mem_alloc(sizeof(char *) * (c + 1));
-        for(i = 0; i < c; i ++) {
+        for (i = 0; i < c; i++) {
             args[i] = (char *)darray_str_tocstr(DARRAY(ARG(i)));
         }
         execvp(args[0], args);
@@ -104,10 +108,11 @@ static void system_vm(lk_obj_t *self, lk_scope_t *local) {
 }
 static void system2_vm_str(lk_obj_t *self, lk_scope_t *local) {
     FILE *out = popen(darray_str_tocstr(DARRAY(ARG(0))), "r");
-    if(out != NULL) {
+    if (out != NULL) {
         char ret[4096];
         char *line = fgets(ret, 4096, out);
-        if(line != NULL) RETURN(lk_str_new_fromcstr(VM, line));
+        if (line != NULL)
+            RETURN(lk_str_new_fromcstr(VM, line));
     }
     RETURN(NIL);
 }
@@ -228,16 +233,16 @@ static lk_scope_t *eval(lk_vm_t *self, lk_str_t *code) {
 }
 lk_scope_t *lk_vm_evalfile(lk_vm_t *self, const char *file, const char *base) {
     lk_str_t *filename = lk_str_new_fromcstr(self, file);
-    if(base != NULL && file[0] != '/') {
+    if (base != NULL && file[0] != '/') {
         lk_str_t *root = lk_str_new_fromcstr(self, base);
         int pos, i, pslen = DARRAY_COUNT(DARRAY(self->str_filesep));
         pos = darray_find_darray(DARRAY(root), DARRAY(self->str_filesep), 0);
-        if(pos > 0) {
+        if (pos > 0) {
             lk_str_t *orig = filename;
             root = lk_str_new_fromdarray(self, DARRAY(root));
             pos += pslen;
-            while((i = darray_find_darray(
-            DARRAY(root), DARRAY(self->str_filesep), pos)) > 0) pos = i + pslen;
+            while ((i = darray_find_darray(DARRAY(root), DARRAY(self->str_filesep), pos)) > 0)
+                pos = i + pslen;
             darray_slice(DARRAY(root), 0, pos);
             darray_resizeitem(DARRAY(root), DARRAY(orig));
             darray_concat(DARRAY(root), DARRAY(orig));
@@ -254,23 +259,21 @@ lk_scope_t *lk_vm_evalfile(lk_vm_t *self, const char *file, const char *base) {
         rsrc.prev = self->rsrc;
         self->rsrc = &rsrc;
         stream = fopen(cfilename, "r");
-        if(stream != NULL) {
+        if (stream != NULL) {
             darray_t *src = darray_str_alloc_fromfile(stream);
             fclose(stream);
-            if(src != NULL) {
+            if (src != NULL) {
                 fr = eval(self, lk_str_new_fromdarray(self, src));
                 darray_free(src);
                 self->rsrc = self->rsrc->prev;
                 return fr;
             } else {
                 self->rsrc = self->rsrc->prev;
-                lk_vm_raisecstr(self,
-                "Cannot read from file named %s", filename);
+                lk_vm_raisecstr(self, "Cannot read from file named %s", filename);
             }
         } else {
             self->rsrc = self->rsrc->prev;
-            lk_vm_raisecstr(self,
-            "Cannot open file named %s", filename);
+            lk_vm_raisecstr(self, "Cannot open file named %s", filename);
         }
     }
 }
@@ -287,32 +290,57 @@ lk_scope_t *lk_vm_evalstr(lk_vm_t *self, const char *code) {
 }
 /* dispatch a C function call with up to 5 arguments.
    argc must be set on args before calling. */
-static void call_cfunc(lk_vm_t *vm, lk_scope_t *self,
-                       lk_cfunc_t *cf, lk_scope_t *args) {
+static void call_cfunc(lk_vm_t *vm, lk_scope_t *self, lk_cfunc_t *cf, lk_scope_t *args) {
     lk_obj_t *recv = args->receiver;
     int argc = args->argc;
 #define A(i) LK_OBJ(DARRAY_ATPTR(&args->stack, (i)))
-    if(cf->cc == LK_CFUNC_CC_CVOID) {
-        switch(argc) {
-        case 0: cf->cfunc.v0(recv); break;
-        case 1: cf->cfunc.v1(recv, A(0)); break;
-        case 2: cf->cfunc.v2(recv, A(0), A(1)); break;
-        case 3: cf->cfunc.v3(recv, A(0), A(1), A(2)); break;
-        case 4: cf->cfunc.v4(recv, A(0), A(1), A(2), A(3)); break;
-        case 5: cf->cfunc.v5(recv, A(0), A(1), A(2), A(3), A(4)); break;
-        default: BUG("cc void not supported");
+    if (cf->cc == LK_CFUNC_CC_CVOID) {
+        switch (argc) {
+        case 0:
+            cf->cfunc.v0(recv);
+            break;
+        case 1:
+            cf->cfunc.v1(recv, A(0));
+            break;
+        case 2:
+            cf->cfunc.v2(recv, A(0), A(1));
+            break;
+        case 3:
+            cf->cfunc.v3(recv, A(0), A(1), A(2));
+            break;
+        case 4:
+            cf->cfunc.v4(recv, A(0), A(1), A(2), A(3));
+            break;
+        case 5:
+            cf->cfunc.v5(recv, A(0), A(1), A(2), A(3), A(4));
+            break;
+        default:
+            BUG("cc void not supported");
         }
         lk_scope_stackpush(args->returnto, recv);
-    } else if(cf->cc == LK_CFUNC_CC_CRETURN) {
+    } else if (cf->cc == LK_CFUNC_CC_CRETURN) {
         lk_obj_t *result;
-        switch(argc) {
-        case 0: result = cf->cfunc.r0(recv); break;
-        case 1: result = cf->cfunc.r1(recv, A(0)); break;
-        case 2: result = cf->cfunc.r2(recv, A(0), A(1)); break;
-        case 3: result = cf->cfunc.r3(recv, A(0), A(1), A(2)); break;
-        case 4: result = cf->cfunc.r4(recv, A(0), A(1), A(2), A(3)); break;
-        case 5: result = cf->cfunc.r5(recv, A(0), A(1), A(2), A(3), A(4)); break;
-        default: BUG("cc return not supported");
+        switch (argc) {
+        case 0:
+            result = cf->cfunc.r0(recv);
+            break;
+        case 1:
+            result = cf->cfunc.r1(recv, A(0));
+            break;
+        case 2:
+            result = cf->cfunc.r2(recv, A(0), A(1));
+            break;
+        case 3:
+            result = cf->cfunc.r3(recv, A(0), A(1), A(2));
+            break;
+        case 4:
+            result = cf->cfunc.r4(recv, A(0), A(1), A(2), A(3));
+            break;
+        case 5:
+            result = cf->cfunc.r5(recv, A(0), A(1), A(2), A(3), A(4));
+            break;
+        default:
+            BUG("cc return not supported");
         }
         lk_scope_stackpush(args->returnto, result);
     } else {
@@ -323,20 +351,19 @@ static void call_cfunc(lk_vm_t *vm, lk_scope_t *self,
 }
 /* CALLFUNC must stay a macro: the kfunc branch mutates `self` (a local in the
    eval loop) and both branches end with goto nextinstr. */
-#define CALLFUNC(self, func, args) do { \
-    (args)->argc = DARRAY_ISINIT(&(args)->stack) \
-        ? DARRAY_COUNT(&(args)->stack) : 0; \
-    if(LK_OBJ_ISCFUNC(LK_OBJ(func))) { \
-        call_cfunc(vm, self, LK_CFUNC(func), args); \
-    } else { \
-        (args)->o.parent = LK_OBJ(LK_LFUNC(func)->scope); \
-        (args)->self = LK_OBJ_ISSCOPE((args)->receiver) \
-            ? LK_LFUNC(func)->scope->self : (args)->receiver; \
-        (args)->first = (args)->next = LK_LFUNC(func)->first; \
-        (self) = (args); \
-    } \
-    goto nextinstr; \
-} while(0)
+#define CALLFUNC(self, func, args) \
+    do { \
+        (args)->argc = DARRAY_ISINIT(&(args)->stack) ? DARRAY_COUNT(&(args)->stack) : 0; \
+        if (LK_OBJ_ISCFUNC(LK_OBJ(func))) { \
+            call_cfunc(vm, self, LK_CFUNC(func), args); \
+        } else { \
+            (args)->o.parent = LK_OBJ(LK_LFUNC(func)->scope); \
+            (args)->self = LK_OBJ_ISSCOPE((args)->receiver) ? LK_LFUNC(func)->scope->self : (args)->receiver; \
+            (args)->first = (args)->next = LK_LFUNC(func)->first; \
+            (self) = (args); \
+        } \
+        goto nextinstr; \
+    } while (0)
 void lk_vm_doevalfunc(lk_vm_t *vm) {
     lk_scope_t *self = vm->currscope;
     lk_gc_t *gc = vm->gc;
@@ -359,19 +386,22 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
     rescue.prev = vm->rescue;
     rescue.rsrc = vm->rsrc;
     vm->rescue = &rescue;
-    if(setjmp(rescue.buf)) {
+    if (setjmp(rescue.buf)) {
         recv = vm->currscope != NULL ? LK_OBJ(vm->currscope) : LK_OBJ(self->scope);
         args = lk_scope_new(vm);
         lk_scope_stackpush(args, LK_OBJ(vm->lasterr));
-        for(; recv != NULL; recv = LK_OBJ(LK_SCOPE(recv)->returnto)) {
-            if((slots = recv->o.slots) == NULL) continue;
-            if((si = qphash_get(slots, vm->str_rescue)) == NULL) continue;
+        for (; recv != NULL; recv = LK_OBJ(LK_SCOPE(recv)->returnto)) {
+            if ((slots = recv->o.slots) == NULL)
+                continue;
+            if ((si = qphash_get(slots, vm->str_rescue)) == NULL)
+                continue;
             slot = LK_SLOT(SETITEM_VALUEPTR(si));
             slotv = lk_obj_getvaluefromslot(recv, slot);
-            if(!LK_OBJ_ISFUNC(slot->check)
-            || LK_OBJ_ISA(slotv, t_func) < 3) continue;
+            if (!LK_OBJ_ISFUNC(slot->check) || LK_OBJ_ISA(slotv, t_func) < 3)
+                continue;
             func = lk_func_match(LK_FUNC(slotv), args, args->self);
-            if(func == NULL) continue;
+            if (func == NULL)
+                continue;
             args->receiver = recv;
             args->returnto = LK_SCOPE(recv)->returnto;
             args->func = slotv; /* LK_OBJ(func); */
@@ -381,18 +411,19 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         vm->rsrc = vm->rescue != NULL ? vm->rescue->rsrc : NULL;
         lk_vm_raiseerr(vm, vm->lasterr);
     }
-    nextinstr:
+nextinstr:
     /* gc mem? sweep triggered by mark if necessary */
-    if(gc->newvalues > 5000) {
+    if (gc->newvalues > 5000) {
         lk_gc_mark(gc);
         gc->newvalues = 0;
     }
     /* like how cpu execs instrs by following a program sizeer */
-    if((instr = self->next) == NULL) goto prevscope;
-    vm->stat.totalinstrs ++;
+    if ((instr = self->next) == NULL)
+        goto prevscope;
+    vm->stat.totalinstrs++;
     vm->currinstr = self->current = instr;
     self->next = instr->next;
-    switch(instr->type) {
+    switch (instr->type) {
     /* skip comments */
     /* msg represents a possiblity, a function to be exec'd */
     case LK_INSTRTYPE_SELFMSG:
@@ -402,25 +433,25 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         lk_scope_stackpush(self, LK_OBJ(self->scope));
         goto sendmsg;
     case LK_INSTRTYPE_APPLYMSG:
-        sendmsg:
+    sendmsg:
         lk_scope_stackpush(self, LK_OBJ(instr));
-        if(instr->opts & LK_INSTROHASMSGARGS) goto nextinstr;
+        if (instr->opts & LK_INSTROHASMSGARGS)
+            goto nextinstr;
         args = NULL;
         goto apply;
     case LK_INSTRTYPE_APPLY:
     case LK_INSTRTYPE_LIST:
         args = lk_scope_new(vm);
         args->first = args->next = LK_INSTR(instr->v);
-        args->type = instr->type == LK_INSTRTYPE_APPLY
-        ? LK_SCOPETYPE_APPLY : LK_SCOPETYPE_LIST;
+        args->type = instr->type == LK_INSTRTYPE_APPLY ? LK_SCOPETYPE_APPLY : LK_SCOPETYPE_LIST;
         args->scope = self->scope;
         args->receiver = self->receiver;
         self = args;
         goto nextinstr;
     /* "literals" are actually generators */
     case LK_INSTRTYPE_NUMBER:
-    case LK_INSTRTYPE_STRING: 
-    case LK_INSTRTYPE_CHAR: 
+    case LK_INSTRTYPE_STRING:
+    case LK_INSTRTYPE_CHAR:
         lk_scope_stackpush(self, lk_obj_clone(instr->v));
         goto nextinstr;
     /* funcs also need ref to env for closures to work */
@@ -431,24 +462,26 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         clone->scope = self->scope;
         lk_obj_addref(LK_OBJ(clone), LK_OBJ(self->receiver));
         lk_scope_stackpush(self, LK_OBJ(clone));
-        goto nextinstr; }
+        goto nextinstr;
+    }
     /* read more instr from the parser */
     case LK_INSTRTYPE_MORE:
         self->next = lk_parser_getmore(LK_PARSER(instr->v));
         goto nextinstr;
     /* should never happen */
-    default: BUG("Invalid instruction type");
+    default:
+        BUG("Invalid instruction type");
     }
-    /* return from func */
-    prevscope:
+/* return from func */
+prevscope:
     args = self;
     self = self->returnto;
-    if(self == NULL) {
+    if (self == NULL) {
         vm->rescue = vm->rescue->prev;
         vm->currscope = vm->currscope->caller;
         return;
     }
-    switch(args->type) {
+    switch (args->type) {
     /* take the scope and return last val */
     case LK_SCOPETYPE_RETURN:
         lk_scope_stackpush(self, lk_scope_stackpeek(args));
@@ -461,14 +494,14 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         goto nextinstr;
     /* take the scope and use as args for msg */
     case LK_SCOPETYPE_APPLY:
-        apply:
+    apply:
         /*
         msg = LK_INSTR(lk_scope_stackpop(self));
         msgn = LK_STRING(msg->v);
         recv = r = lk_scope_stackpop(self);
         */
         recv = r = lk_scope_stackpop(self);
-        if(LK_OBJ_ISINSTR(recv)) {
+        if (LK_OBJ_ISINSTR(recv)) {
             msg = LK_INSTR(recv);
             msgn = LK_STRING(msg->v);
             recv = r = lk_scope_stackpop(self);
@@ -477,23 +510,24 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
             msgn = vm->str_at;
         }
         ancs = NULL;
-        findslot:
-        if((slots = r->o.slots) == NULL) goto parent;
-        if((si = qphash_get(slots, msgn)) == NULL) goto parent;
-        found:
+    findslot:
+        if ((slots = r->o.slots) == NULL)
+            goto parent;
+        if ((si = qphash_get(slots, msgn)) == NULL)
+            goto parent;
+    found:
         slot = LK_SLOT(SETITEM_VALUEPTR(si));
         slotv = lk_obj_getvaluefromslot(recv, slot);
         /* slot contains func obj - call? */
-        if(LK_OBJ_ISA(slotv, t_func) > 2
-        && LK_SLOT_CHECKOPTION(slot, LK_SLOTOPTION_AUTOSEND)
-        && (instr == NULL
-        || instr->next == NULL
-        || instr->next->type != LK_INSTRTYPE_APPLYMSG
-        || darray_str_cmp_cstr(DARRAY(instr->next->v), "+=") != 0)) {
-            callfunc:
-            if(args == NULL) args = lk_scope_new(vm);
+        if (LK_OBJ_ISA(slotv, t_func) > 2 && LK_SLOT_CHECKOPTION(slot, LK_SLOTOPTION_AUTOSEND) &&
+            (instr == NULL || instr->next == NULL || instr->next->type != LK_INSTRTYPE_APPLYMSG ||
+             darray_str_cmp_cstr(DARRAY(instr->next->v), "+=") != 0)) {
+        callfunc:
+            if (args == NULL)
+                args = lk_scope_new(vm);
             func = lk_func_match(LK_FUNC(slotv), args, recv);
-            if(func == NULL) goto parent;
+            if (func == NULL)
+                goto parent;
             args->type = LK_SCOPETYPE_RETURN;
             args->scope = args;
             args->receiver = recv;
@@ -501,13 +535,12 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
             CALLFUNC(self, func, args);
         } else {
             /* called like a func? */
-            if(args != NULL) {
+            if (args != NULL) {
                 /* slot contains func */
-                if(LK_OBJ_ISA(slotv, t_func) > 2) {
+                if (LK_OBJ_ISA(slotv, t_func) > 2) {
                     goto callfunc;
-                /* call at/apply if there are args */
-                } else if(DARRAY_ISINIT(&args->stack)
-                       && DARRAY_COUNT(&args->stack) > 0) {
+                    /* call at/apply if there are args */
+                } else if (DARRAY_ISINIT(&args->stack) && DARRAY_COUNT(&args->stack) > 0) {
                     msgn = vm->str_at;
                     recv = r = slotv;
                     ancs = NULL;
@@ -518,13 +551,15 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
             lk_scope_stackpush(self, slotv);
             goto nextinstr;
         }
-        parent:
-        if((ancs = r->o.ancestors) != NULL) {
+    parent:
+        if ((ancs = r->o.ancestors) != NULL) {
             ancc = DARRAY_COUNT(ancs);
-            for(anci = 1; anci < ancc; anci ++) {
+            for (anci = 1; anci < ancc; anci++) {
                 r = DARRAY_ATPTR(ancs, anci);
-                if((slots = r->o.slots) == NULL) continue;
-                if((si = qphash_get(slots, msg->v)) == NULL) continue;
+                if ((slots = r->o.slots) == NULL)
+                    continue;
+                if ((si = qphash_get(slots, msg->v)) == NULL)
+                    continue;
                 goto found;
             }
         } else {
@@ -532,7 +567,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
             goto findslot;
         }
         /* forward: */
-        if(DARRAY_EQ(DARRAY(msgn), DARRAY(vm->str_forward))) {
+        if (DARRAY_EQ(DARRAY(msgn), DARRAY(vm->str_forward))) {
             lk_vm_raisecstr(vm, "Cannot find slot named %s", msg->v);
         } else {
             msgn = vm->str_forward;
@@ -541,7 +576,8 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
             goto findslot;
         }
     /* should never happen */
-    default: BUG("Invalid scope type");
+    default:
+        BUG("Invalid scope type");
     }
 }
 void lk_vm_raisecstr(lk_vm_t *self, const char *message, ...) {
@@ -550,10 +586,10 @@ void lk_vm_raisecstr(lk_vm_t *self, const char *message, ...) {
     err->instr = self->currinstr;
     err->message = LK_STRING(lk_obj_alloc(self->t_str));
     va_start(ap, message);
-    for(; *message != '\0'; message ++) {
-        if(*message == '%') {
-            message ++;
-            switch(*message) {
+    for (; *message != '\0'; message++) {
+        if (*message == '%') {
+            message++;
+            switch (*message) {
             case 's':
                 darray_concat(DARRAY(err->message), DARRAY(va_arg(ap, lk_str_t *)));
                 break;
@@ -571,7 +607,8 @@ void lk_vm_raiseerrno(lk_vm_t *self) {
     lk_vm_raiseerr(self, err);
 }
 void lk_vm_raiseerr(lk_vm_t *self, lk_err_t *err) {
-    if(self->rescue == NULL) lk_vm_abort(self, err);
+    if (self->rescue == NULL)
+        lk_vm_abort(self, err);
     else {
         self->lasterr = err;
         longjmp(self->rescue->buf, 1);
@@ -582,28 +619,31 @@ void lk_vm_exit(lk_vm_t *self) {
     exit(EXIT_SUCCESS);
 }
 void lk_vm_abort(lk_vm_t *self, lk_err_t *err) {
-    if(err != NULL) {
-        struct lk_slot *slot = lk_obj_getslotfromany(
-        LK_OBJ(err), LK_OBJ(self->str_type));
+    if (err != NULL) {
+        struct lk_slot *slot = lk_obj_getslotfromany(LK_OBJ(err), LK_OBJ(self->str_type));
         lk_str_t *type = LK_STRING(lk_obj_getvaluefromslot(LK_OBJ(err), slot));
         lk_instr_t *expr = err->instr;
         int i = 0;
         darray_print_tostream(DARRAY(type), stdout);
-        if(expr == NULL) {
+        if (expr == NULL) {
             fprintf(stdout, "\n* rsrc: (no instr)");
         } else {
             fprintf(stdout, "\n* rsrc: ");
-            if(expr->rsrc != NULL)
+            if (expr->rsrc != NULL)
                 darray_print_tostream(DARRAY(expr->rsrc), stdout);
             else
                 fprintf(stdout, "(null)");
             fprintf(stdout, "\n* line: %i", expr->line);
-            while(expr->prev != NULL) { expr = expr->prev; i++; }
+            while (expr->prev != NULL) {
+                expr = expr->prev;
+                i++;
+            }
             fprintf(stdout, "\n* instruction(%i): ", i);
             lk_instr_print(expr);
         }
         fprintf(stdout, "\n* text: ");
-        if(err->message != NULL) darray_print_tostream(DARRAY(err->message), stdout);
+        if (err->message != NULL)
+            darray_print_tostream(DARRAY(err->message), stdout);
         printf("\n");
     } else {
         printf("Unknown err!\n");

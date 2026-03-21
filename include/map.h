@@ -5,7 +5,7 @@
 /* type */
 struct lk_map {
     struct lk_common o;
-    qphash_t         data;
+    qphash_t data;
 };
 
 /* ext map */

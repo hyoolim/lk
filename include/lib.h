@@ -1,34 +1,34 @@
 #ifndef LK_LIB_H
 #define LK_LIB_H
-#include "types.h"
 #include "bool.h"
+#include "char.h"
 #include "charset.h"
+#include "dir.h"
 #include "dl.h"
+#include "env.h"
 #include "err.h"
 #include "file.h"
 #include "func.h"
-#include "instr.h"
-#include "map.h"
-#include "obj.h"
-#include "rand.h"
-#include "seq.h"
-#include "str.h"
-#include "vec.h"
-#include "char.h"
-#include "env.h"
-#include "lib.h"
-#include "dir.h"
 #include "gc.h"
+#include "instr.h"
+#include "lib.h"
 #include "list.h"
+#include "map.h"
 #include "num.h"
+#include "obj.h"
 #include "parser.h"
 #include "pipe.h"
+#include "rand.h"
 #include "scope.h"
+#include "seq.h"
 #include "socket.h"
+#include "str.h"
+#include "types.h"
+#include "vec.h"
 #include "vm.h"
 
 /* ext shortcuts */
-#define ARG(i) (assert(local != NULL && 0 <= (i) && (i) < local->argc),  LK_OBJ(DARRAY_ATPTR(&local->stack, (i))))
+#define ARG(i) (assert(local != NULL && 0 <= (i) && (i) < local->argc), LK_OBJ(DARRAY_ATPTR(&local->stack, (i))))
 #define DONE return
 #define RETURN(v) \
     do { \
@@ -36,7 +36,7 @@
         assert(_r != NULL); \
         lk_scope_stackpush(local->caller, _r); \
         DONE; \
-    } while(0)
+    } while (0)
 #define GOTO(name) (name(self, local))
 
 #define CHAR(v) (LK_CHAR(v)->data)

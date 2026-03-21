@@ -43,13 +43,21 @@ void lk_str_unescape(lk_str_t *self) {
     darray_t *data = DARRAY(self);
     int i;
     uint32_t c;
-    for(i = 0; (i = darray_str_find(data, '\\', i)) >= 0; i ++) {
+    for (i = 0; (i = darray_str_find(data, '\\', i)) >= 0; i++) {
         darray_str_remove(data, i);
-        switch(c = darray_str_get(data, i)) {
-            case 'n': darray_str_set(data, i, '\012'); break;
-            case 'r': darray_str_set(data, i, '\015'); break;
-            case 't': darray_str_set(data, i, '\t'  ); break;
-            default : darray_str_set(data, i, c     ); break;
+        switch (c = darray_str_get(data, i)) {
+        case 'n':
+            darray_str_set(data, i, '\012');
+            break;
+        case 'r':
+            darray_str_set(data, i, '\015');
+            break;
+        case 't':
+            darray_str_set(data, i, '\t');
+            break;
+        default:
+            darray_str_set(data, i, c);
+            break;
         }
     }
 }
@@ -77,10 +85,13 @@ lk_charset_t *lk_str_tocharset(lk_str_t *self) {
 }
 lk_num_t *lk_str_tonum(lk_str_t *self) {
     numifn_t num;
-    switch(num_new(0, DARRAY(self), &num)) {
-        case NUMBERTYPE_INT: return lk_num_new(VM, num.i);
-        case NUMBERTYPE_FLOAT: return lk_num_new(VM, num.f);
-        default: BUG("Invalid num type while trying to parse code.\n");
+    switch (num_new(0, DARRAY(self), &num)) {
+    case NUMBERTYPE_INT:
+        return lk_num_new(VM, num.i);
+    case NUMBERTYPE_FLOAT:
+        return lk_num_new(VM, num.f);
+    default:
+        BUG("Invalid num type while trying to parse code.\n");
     }
 }
 

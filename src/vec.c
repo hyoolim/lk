@@ -15,19 +15,23 @@ static void at_vec_num(lk_obj_t *self, lk_scope_t *local) {
     RETURN(v != NULL ? LK_OBJ(lk_num_new(VM, *v)) : NIL);
 }
 #define AT(i) (*(int *)DARRAY_AT(values, *(int *)DARRAY_AT(indexes, (i))))
-#define SWAP(x, y) do { \
-    t = *(int *)DARRAY_AT(indexes, (x)); \
-    *(int *)DARRAY_AT(indexes, (x)) = *(int *)DARRAY_AT(indexes, (y)); \
-    *(int *)DARRAY_AT(indexes, (y)) = t; \
-} while(0)
+#define SWAP(x, y) \
+    do { \
+        t = *(int *)DARRAY_AT(indexes, (x)); \
+        *(int *)DARRAY_AT(indexes, (x)) = *(int *)DARRAY_AT(indexes, (y)); \
+        *(int *)DARRAY_AT(indexes, (y)) = t; \
+    } while (0)
 static void quicksort_hoare(darray_t *values, darray_t *indexes, int low, int hi) {
-    if(low < hi) {
+    if (low < hi) {
         int l = low, h = hi, p = AT(hi), t;
         do {
-            while(l < h && AT(l) <= p) l ++;
-            while(h > l && AT(h) >= p) h --;
-            if(l < h) SWAP(l, h);
-        } while(l < h);
+            while (l < h && AT(l) <= p)
+                l++;
+            while (h > l && AT(h) >= p)
+                h--;
+            if (l < h)
+                SWAP(l, h);
+        } while (l < h);
         SWAP(l, hi);
         quicksort_hoare(values, indexes, low, l - 1);
         quicksort_hoare(values, indexes, l + 1, hi);

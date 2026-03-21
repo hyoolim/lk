@@ -5,10 +5,7 @@ static void alloc_map(lk_obj_t *self, lk_obj_t *parent) {
     qphash_copy(QPHASH(self), QPHASH(parent));
 }
 static LK_OBJ_DEFMARKFUNC(mark_map) {
-    SET_EACH(QPHASH(self), i,
-        mark(LK_OBJ(i->key));
-        mark(SETITEM_VALUE(lk_obj_t *, i));
-    );
+    SET_EACH(QPHASH(self), i, mark(LK_OBJ(i->key)); mark(SETITEM_VALUE(lk_obj_t *, i)););
 }
 static void free_map(lk_obj_t *self) {
     qphash_fin(QPHASH(self));
@@ -36,11 +33,11 @@ void lk_map_clear(lk_map_t *self) {
     qphash_clear(QPHASH(self));
 }
 void lk_map_set(lk_map_t *self, lk_obj_t *k, lk_obj_t *v) {
-    *(lk_obj_t **)qphash_set(QPHASH(self),
-    lk_obj_addref(LK_OBJ(self), k)) = lk_obj_addref(LK_OBJ(self), v);
+    *(lk_obj_t **)qphash_set(QPHASH(self), lk_obj_addref(LK_OBJ(self), k)) = lk_obj_addref(LK_OBJ(self), v);
 }
 void lk_map_set_str_obj(lk_map_t *self, lk_str_t *key, lk_obj_t *value) {
-    *(lk_obj_t **)qphash_set(QPHASH(self), lk_obj_addref(LK_OBJ(self), LK_OBJ(key))) = lk_obj_addref(LK_OBJ(self), value);
+    *(lk_obj_t **)qphash_set(QPHASH(self), lk_obj_addref(LK_OBJ(self), LK_OBJ(key))) =
+        lk_obj_addref(LK_OBJ(self), value);
 }
 void lk_map_setWithCStringKey(lk_map_t *self, const char *k, lk_obj_t *v) {
     lk_map_set(self, LK_OBJ(lk_str_new_fromcstr(LK_VM(self), k)), v);

@@ -9,7 +9,11 @@
 #include <stdlib.h>
 
 /* common fatal errs */
-#define ERR(message) do { fprintf(stderr, (message)); abort(); } while(0)
+#define ERR(message) \
+    do { \
+        fprintf(stderr, (message)); \
+        abort(); \
+    } while (0)
 #define NYI(message) ERR("NYI: " message)
 #define BUG(message) ERR("BUG: " message)
 

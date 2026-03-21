@@ -6,23 +6,19 @@
 struct lk_func {
     struct lk_common o;
     struct lk_commonfunc {
-        lk_instr_t  *sigdef;
-        int          minargc;
-        int          maxargc;
-        darray_t   *sigs;
-        lk_sig_t    *rest;
+        lk_instr_t *sigdef;
+        int minargc;
+        int maxargc;
+        darray_t *sigs;
+        lk_sig_t *rest;
         lk_str_t *doc;
-        uint8_t      opts;
-    }                cf;
+        uint8_t opts;
+    } cf;
 };
 struct lk_cfunc {
     struct lk_common o;
     struct lk_commonfunc cf;
-    enum {
-        LK_CFUNC_CC_LK,
-        LK_CFUNC_CC_CRETURN,
-        LK_CFUNC_CC_CVOID
-    } cc;
+    enum { LK_CFUNC_CC_LK, LK_CFUNC_CC_CRETURN, LK_CFUNC_CC_CVOID } cc;
     union {
         lk_cfunc_lk_t *lk;
         lk_cfunc_r0_t *r0;
@@ -41,20 +37,20 @@ struct lk_cfunc {
 };
 struct lk_gfunc {
     struct lk_common o;
-    struct lk_commonfunc  cf;
-    darray_t            *funcs;
+    struct lk_commonfunc cf;
+    darray_t *funcs;
 };
 struct lk_lfunc {
     struct lk_common o;
-    struct lk_commonfunc  cf;
-    lk_scope_t           *scope;
-    lk_instr_t           *first;
+    struct lk_commonfunc cf;
+    lk_scope_t *scope;
+    lk_instr_t *first;
 };
 struct lk_sig {
     struct lk_common o;
-    lk_str_t      *name;
-    lk_obj_t      *check;
-    uint8_t           isself;
+    lk_str_t *name;
+    lk_obj_t *check;
+    uint8_t isself;
 };
 
 /* ext map */
@@ -62,7 +58,7 @@ void lk_func_typeinit(lk_vm_t *vm);
 void lk_func_libinit(lk_vm_t *vm);
 
 /* new */
-lk_cfunc_t *lk_cfunc_new(lk_vm_t * vm, lk_cfuncfunc_t *func, int minargc, int maxargc);
+lk_cfunc_t *lk_cfunc_new(lk_vm_t *vm, lk_cfuncfunc_t *func, int minargc, int maxargc);
 lk_lfunc_t *lk_lfunc_new(lk_vm_t *vm, lk_scope_t *scope, lk_instr_t *first);
 lk_gfunc_t *lk_gfunc_new(lk_vm_t *vm);
 lk_sig_t *lk_sig_new(lk_vm_t *vm, lk_str_t *name, lk_obj_t *type);

@@ -21,31 +21,46 @@ static void at_gl_vec(lk_obj_t *self, lk_scope_t *local) {
     lk_list_t *ret = LK_DARRAY(lk_obj_clone(self));
     darray_t *sl = DARRAY(self), *rl = DARRAY(ret), *indexes = DARRAY(ARG(0));
     darray_limit(rl, DARRAY_COUNT(indexes));
-    DARRAY_EACH(indexes, i, v,
-        darray_set(rl, i, darray_get(sl, *(int *)v));
-    );
+    DARRAY_EACH(indexes, i, v, darray_set(rl, i, darray_get(sl, *(int *)v)););
     RETURN(ret);
 }
 static void clearB_gl(lk_obj_t *self, lk_scope_t *local) {
-    darray_clear(DARRAY(self)); RETURN(self); }
+    darray_clear(DARRAY(self));
+    RETURN(self);
+}
 static void cmp_gl_gl(lk_obj_t *self, lk_scope_t *local) {
-    RETURN(lk_num_new(VM, darray_cmp(DARRAY(self), DARRAY(ARG(0))))); }
+    RETURN(lk_num_new(VM, darray_cmp(DARRAY(self), DARRAY(ARG(0)))));
+}
 static void concatB_gl_gl(lk_obj_t *self, lk_scope_t *local) {
-    darray_concat(DARRAY(self), DARRAY(ARG(0))); RETURN(self); }
+    darray_concat(DARRAY(self), DARRAY(ARG(0)));
+    RETURN(self);
+}
 static void size_gl(lk_obj_t *self, lk_scope_t *local) {
-    RETURN(lk_num_new(VM, DARRAY_COUNT(DARRAY(self)))); }
+    RETURN(lk_num_new(VM, DARRAY_COUNT(DARRAY(self))));
+}
 static void eq_gl_gl(lk_obj_t *self, lk_scope_t *local) {
-    RETURN(DARRAY_EQ(DARRAY(self), DARRAY(ARG(0))) ? TRUE : FALSE); }
+    RETURN(DARRAY_EQ(DARRAY(self), DARRAY(ARG(0))) ? TRUE : FALSE);
+}
 static void limitB_gl_num(lk_obj_t *self, lk_scope_t *local) {
-    darray_limit(DARRAY(self), CSIZE(ARG(0))); RETURN(self); }
+    darray_limit(DARRAY(self), CSIZE(ARG(0)));
+    RETURN(self);
+}
 static void offsetB_gl_num(lk_obj_t *self, lk_scope_t *local) {
-    darray_offset(DARRAY(self), CSIZE(ARG(0))); RETURN(self); }
+    darray_offset(DARRAY(self), CSIZE(ARG(0)));
+    RETURN(self);
+}
 static void restB_gl(lk_obj_t *self, lk_scope_t *local) {
-    darray_offset(DARRAY(self), 1); RETURN(self); }
+    darray_offset(DARRAY(self), 1);
+    RETURN(self);
+}
 static void reverseB_gl(lk_obj_t *self, lk_scope_t *local) {
-    darray_reverse(DARRAY(self)); RETURN(self); }
+    darray_reverse(DARRAY(self));
+    RETURN(self);
+}
 static void sliceB_gl_num_num(lk_obj_t *self, lk_scope_t *local) {
-    darray_slice(DARRAY(self), CSIZE(ARG(0)), CSIZE(ARG(1))); RETURN(self); }
+    darray_slice(DARRAY(self), CSIZE(ARG(0)), CSIZE(ARG(1)));
+    RETURN(self);
+}
 static void swapB_gl_num_num(lk_obj_t *self, lk_scope_t *local) {
     int s = DARRAY(self)->data->ilen;
     void *x = darray_get(DARRAY(self), CSIZE(ARG(0)));

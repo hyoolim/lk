@@ -25,6 +25,7 @@ void lk_err_libinit(lk_vm_t *vm) {
 lk_err_t *lk_err_new(lk_vm_t *vm, lk_obj_t *parent, const char *message) {
     lk_err_t *self = LK_ERROR(lk_obj_alloc(parent));
     self->instr = vm->currinstr;
-    if(message != NULL) self->message = lk_str_new_fromcstr(vm, message);
+    if (message != NULL)
+        self->message = lk_str_new_fromcstr(vm, message);
     return self;
 }

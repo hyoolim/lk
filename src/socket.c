@@ -1,7 +1,7 @@
 #include "socket.h"
 #include "lib.h"
-#include "num.h"
 #include "list.h"
+#include "num.h"
 #define IPADDR (LK_IPADDR(self))
 #define SOCKET (LK_SOCKET(self))
 
@@ -24,15 +24,16 @@ static void alloc_sock(lk_obj_t *self, lk_obj_t *parent) {
     SOCKET->fd = socket(AF_INET, SOCK_STREAM, 0);
     SOCKET->in = fdopen(SOCKET->fd, "r");
     SOCKET->out = fdopen(SOCKET->fd, "w");
-    if(setsockopt(SOCKET->fd,
-    SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
+    if (setsockopt(SOCKET->fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
         perror("setsockopt");
         exit(1);
     }
 }
 static void free_sock(lk_obj_t *self) {
-    if(LK_SOCKET(self)->in != NULL) fclose(LK_SOCKET(self)->in);
-    if(LK_SOCKET(self)->out != NULL) fclose(LK_SOCKET(self)->out);
+    if (LK_SOCKET(self)->in != NULL)
+        fclose(LK_SOCKET(self)->in);
+    if (LK_SOCKET(self)->out != NULL)
+        fclose(LK_SOCKET(self)->out);
 }
 static void acce_sock(lk_obj_t *self, lk_scope_t *local) {
     struct sockaddr remote;
@@ -49,8 +50,7 @@ static void bind_sock_ip_num(lk_obj_t *self, lk_scope_t *local) {
     my.sin_port = htons((uint16_t)CNUMBER(ARG(1)));
     my.sin_addr = LK_IPADDR(ARG(0))->addr;
     memset(&(my.sin_zero), 0x0, 8);
-    if(bind(SOCKET->fd,
-    (struct sockaddr *)&my, sizeof(struct sockaddr)) == -1) {
+    if (bind(SOCKET->fd, (struct sockaddr *)&my, sizeof(struct sockaddr)) == -1) {
         lk_vm_raisecstr(VM, "Cannot bind");
     }
     RETURN(self);
@@ -61,14 +61,13 @@ static void connect_sock_ip_num(lk_obj_t *self, lk_scope_t *local) {
     remote.sin_port = htons((uint16_t)CNUMBER(ARG(1)));
     remote.sin_addr = LK_IPADDR(ARG(0))->addr;
     memset(&(remote.sin_zero), 0x0, 8);
-    if(connect(SOCKET->fd,
-    (struct sockaddr *)&remote, sizeof(struct sockaddr)) == -1) {
+    if (connect(SOCKET->fd, (struct sockaddr *)&remote, sizeof(struct sockaddr)) == -1) {
         lk_vm_raisecstr(VM, "Cannot connect");
     }
     RETURN(self);
 }
 static void listen_sock(lk_obj_t *self, lk_scope_t *local) {
-    if(listen(SOCKET->fd, 10) == -1) {
+    if (listen(SOCKET->fd, 10) == -1) {
         lk_vm_raisecstr(VM, "Cannot listen");
     }
     RETURN(self);

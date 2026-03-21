@@ -8,6 +8,7 @@
 static LK_OBJ_DEFMARKFUNC(mark_dir) {
     mark(LK_OBJ(LK_DIR(self)->path));
 }
+
 void lk_dir_typeinit(lk_vm_t *vm) {
     vm->t_dir = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_dir_t));
     lk_obj_setmarkfunc(vm->t_dir, mark_dir);
@@ -19,11 +20,16 @@ lk_dir_t *lk_dir_new_withpath(lk_vm_t *vm, lk_str_t *path) {
     lk_dir_init(self, path);
     return self;
 }
+
 void lk_dir_init(lk_dir_t *self, lk_str_t *path) {
+    int at = 0, nextat;
+
     if (darray_str_get(DARRAY(path), 0) == '/') {
         self->path = path;
+
     } else {
         char buf[1000];
+
         if (getcwd(buf, 1000) != NULL) {
             lk_str_t *abs = lk_str_new_fromcstr(VM, buf);
             darray_concat(DARRAY(abs), DARRAY(VM->str_filesep));
@@ -31,7 +37,7 @@ void lk_dir_init(lk_dir_t *self, lk_str_t *path) {
             self->path = abs;
         }
     }
-    int at = 0, nextat;
+
     while ((nextat = darray_str_find(DARRAY(self->path), '/', at)) > -1) {
         at = nextat + 1;
     }
@@ -43,6 +49,7 @@ void lk_dir_init(lk_dir_t *self, lk_str_t *path) {
 void lk_dir_create(lk_dir_t *self) {
     mkdir(CSTRING(self->path), S_IRWXU | S_IRWXG | S_IRWXO);
 }
+
 void lk_dir_work(lk_dir_t *self) {
     if (chdir(CSTRING(self->path)) != 0) {
         lk_vm_raiseerrno(VM);
@@ -55,19 +62,24 @@ lk_list_t *lk_dir_items(lk_dir_t *self) {
     DIR *dd = opendir(CSTRING(self->path));
     struct dirent *entry;
     struct stat info;
+
     while (dd != NULL) {
         errno = 0;
+
         if ((entry = readdir(dd)) == NULL) {
             if (errno != 0) {
                 lk_vm_raiseerrno(VM);
             }
             break;
+
         } else if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
             lk_str_t *path = lk_str_new_fromcstr(VM, entry->d_name);
             darray_setrange(DARRAY(path), 0, 0, DARRAY(VM->str_filesep));
             darray_setrange(DARRAY(path), 0, 0, DARRAY(self->path));
+
             if (stat(CSTRING(path), &info) == 0 && S_ISDIR(info.st_mode)) {
                 darray_ptr_push(DARRAY(items), lk_dir_new_withpath(VM, path));
+
             } else {
                 darray_ptr_push(DARRAY(items), lk_file_new_withpath(VM, path));
             }

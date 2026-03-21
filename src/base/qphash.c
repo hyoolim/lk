@@ -10,6 +10,7 @@ static unsigned long primes[] = {11,        19,        37,        67,         13
 static struct setdata *setdata_alloc(int ivlen, int ci, sethashfunc_t *hashfunc, setkeycmpfunc_t *cmpfunc) {
     struct setdata *self;
     int c = primes[ci];
+
     self = mem_alloc(sizeof(struct setdata) - sizeof(setitem_t) + (sizeof(setitem_t) + ivlen) * c);
     self->ci = ci;
     self->cap = c;
@@ -36,6 +37,7 @@ static void qphash_resize(qphash_t *self, int ci) {
     setkeycmpfunc_t *cmpfunc = olddata->cmpfunc;
     int delta, newcap;
     setitem_t *newitem, *newlast;
+
     newdata = setdata_alloc(olddata->ivlen, ci, hashfunc, cmpfunc);
     newlast = SETITEM_AT(newdata, newdata->cap - 1);
     newcap = newdata->cap;
@@ -59,21 +61,26 @@ qphash_t *qphash_alloc(int ivlen, sethashfunc_t *hashfunc, setkeycmpfunc_t *cmpf
     qphash_init(self, ivlen, hashfunc, cmpfunc);
     return self;
 }
+
 qphash_t *qphash_clone(qphash_t *self) {
     qphash_t *clone = mem_alloc(sizeof(qphash_t));
     qphash_copy(clone, self);
     return clone;
 }
+
 void qphash_copy(qphash_t *self, qphash_t *src) {
     (self->data = src->data)->refc++;
 }
+
 void qphash_fin(qphash_t *self) {
     setdata_free(self->data);
 }
+
 void qphash_free(qphash_t *self) {
     qphash_fin(self);
     mem_free(self);
 }
+
 void qphash_init(qphash_t *self, int ivlen, sethashfunc_t *hashfunc, setkeycmpfunc_t *cmpfunc) {
     self->data = setdata_alloc(ivlen, 0, hashfunc, cmpfunc);
 }
@@ -81,40 +88,49 @@ void qphash_init(qphash_t *self, int ivlen, sethashfunc_t *hashfunc, setkeycmpfu
 // set manipulation
 void qphash_clear(qphash_t *self) {
     struct setdata *data = self->data;
+
     data->size = 0;
     memset(&data->items, 0x0, SETITEM_SIZE(data) * data->cap);
 }
+
 int qphash_size(qphash_t *self) {
     return self->data->size;
 }
+
 setitem_t *qphash_get(const qphash_t *self, const void *key) {
     struct setdata *data = self->data;
     int delta = 1, cap = data->cap;
     setitem_t *item = SETITEM_AT(data, data->hashfunc(key, cap));
     setitem_t *last = SETITEM_AT(data, cap - 1);
+
     while (item->key != NULL) {
         if (item->key != SETITEM_SKIPKEY && data->cmpfunc(item->key, key) == 0) {
             return item;
         }
         item = SETITEM_ADD(data, item, delta);
+
         while (item > last)
             item = SETITEM_ADD(data, item, -cap);
         delta += 2;
     }
     return NULL;
 }
+
 void *qphash_set(qphash_t *self, const void *key) {
     struct setdata *data = self->data;
     int delta = 1, cap;
     setitem_t *item, *last;
+
     if (data->size >= data->cap / 2)
         qphash_resize(self, data->ci + 1);
     data = self->data;
     cap = data->cap;
     item = SETITEM_AT(data, data->hashfunc(key, cap));
     last = SETITEM_AT(data, cap - 1);
+
     while (item->key != NULL && (item->key == SETITEM_SKIPKEY || data->cmpfunc(item->key, key) != 0)) {
         item = SETITEM_ADD(data, item, delta);
+
         while (item > last)
             item = SETITEM_ADD(data, item, -cap);
         delta += 2;
@@ -124,8 +140,10 @@ void *qphash_set(qphash_t *self, const void *key) {
     item->key = key;
     return SETITEM_VALUEPTR(item);
 }
+
 void qphash_unset(qphash_t *self, const void *key) {
     setitem_t *item = qphash_get(self, key);
+
     if (item != NULL) {
         item->key = SETITEM_SKIPKEY;
         self->data->size--;
@@ -136,6 +154,7 @@ void qphash_unset(qphash_t *self, const void *key) {
 int qphash_hash(const void *key, int cap) {
     return (ptrdiff_t)key % cap;
 }
+
 int qphash_keycmp(const void *self, const void *other) {
     return (ptrdiff_t)self - (ptrdiff_t)other;
 }

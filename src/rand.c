@@ -6,6 +6,7 @@
 // private func - see below for real impl
 static void init_genrand(lk_rand_t *self, unsigned long s);
 static unsigned long genrand_int32(lk_rand_t *self);
+
 // static long genrand_int31(lk_rand_t *self);
 static double genrand_real1(lk_rand_t *self);
 /* static double genrand_real2(lk_rand_t *self);
@@ -17,24 +18,30 @@ static void alloc_rand(lk_obj_t *self, lk_obj_t *parent) {
     static int n = 0;
     struct timeval tv;
     int seed;
+
     gettimeofday(&tv, 0);
     seed = tv.tv_sec ^ tv.tv_usec ^ n++;
     LK_RANDOM(self)->seed = lk_num_new(LK_VM(self), seed);
     init_genrand(LK_RANDOM(self), seed);
 }
+
 static void init_rand_num(lk_obj_t *self, lk_scope_t *local) {
     init_genrand(LK_RANDOM(self), CNUMBER(LK_RANDOM(self)->seed = LK_NUMBER(ARG(0))));
     RETURN(self);
 }
+
 static void nextFloat_rand(lk_obj_t *self, lk_scope_t *local) {
     RETURN(lk_num_new(VM, genrand_real1(LK_RANDOM(self))));
 }
+
 static void nextInteger_rand(lk_obj_t *self, lk_scope_t *local) {
     RETURN(lk_num_new(VM, (int)genrand_int32(LK_RANDOM(self))));
 }
+
 void lk_rand_extinit(lk_vm_t *vm) {
     lk_obj_t *num = vm->t_num;
     lk_obj_t *rand = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_rand_t));
+
     lk_obj_setallocfunc(rand, alloc_rand);
     alloc_rand(rand, NULL);
     lk_global_set("RandomNumberGenerator", rand);
@@ -94,20 +101,23 @@ void lk_rand_extinit(lk_vm_t *vm) {
 #define UPPER_MASK 0x80000000UL // most significant w-r bits
 #define LOWER_MASK 0x7fffffffUL // least significant r bits
 
-// 
+//
 #define mt self->mt
 #define mti self->mti
 
 // initializes mt[N] with a seed
 static void init_genrand(lk_rand_t *self, unsigned long s) {
     mt[0] = s & 0xffffffffUL;
+
     for (mti = 1; mti < N; mti++) {
         mt[mti] = (1812433253UL * (mt[mti - 1] ^ (mt[mti - 1] >> 30)) + mti);
+
         // See Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier.
         // In the previous versions, MSBs of the seed affect
         // only MSBs of the array mt[].
         // 2002/01/09 modified by Makoto Matsumoto
         mt[mti] &= 0xffffffffUL;
+
         // for >32 bit machines
     }
 }
@@ -116,6 +126,7 @@ static void init_genrand(lk_rand_t *self, unsigned long s) {
 static unsigned long genrand_int32(lk_rand_t *self) {
     unsigned long y;
     static unsigned long mag01[2] = {0x0UL, MATRIX_A};
+
     // mag01[x] = x * MATRIX_A  for x=0,1
 
     if (mti >= N) { // generate N words at one time
@@ -128,10 +139,12 @@ static unsigned long genrand_int32(lk_rand_t *self) {
             y = (mt[kk] & UPPER_MASK) | (mt[kk + 1] & LOWER_MASK);
             mt[kk] = mt[kk + M] ^ (y >> 1) ^ mag01[y & 0x1UL];
         }
+
         for (; kk < N - 1; kk++) {
             y = (mt[kk] & UPPER_MASK) | (mt[kk + 1] & LOWER_MASK);
             mt[kk] = mt[kk + (M - N)] ^ (y >> 1) ^ mag01[y & 0x1UL];
         }
+
         y = (mt[N - 1] & UPPER_MASK) | (mt[0] & LOWER_MASK);
         mt[N - 1] = mt[M - 1] ^ (y >> 1) ^ mag01[y & 0x1UL];
 
@@ -157,6 +170,7 @@ static unsigned long genrand_int32(lk_rand_t *self) {
 // generates a rand num on [0,1]-real-interval
 static double genrand_real1(lk_rand_t *self) {
     return genrand_int32(self) * (1.0 / 4294967295.0);
+
     // divided by 2^32-1
 }
 

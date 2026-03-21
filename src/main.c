@@ -1,4 +1,5 @@
 #include "lib.h"
+
 int main(int argc, const char **argv) {
     int i = 1;
     lk_vm_t *vm = lk_vm_new();
@@ -10,14 +11,17 @@ int main(int argc, const char **argv) {
     // options for vm
     lk_object_set(LK_OBJ(vm->t_dl), "paths", LK_OBJ(libpaths));
     darray_ptr_insert(DARRAY(libpaths), 0, lk_str_new_fromcstr(vm, LK_INSTALL_PATH "/lib/lk"));
+
     for (; i < argc; i++) {
         if (argv[i][0] != '-') {
             break;
+
         } else {
             switch (argv[i][1]) {
             case 'l':
                 if (++i < argc) {
                     darray_ptr_insert(DARRAY(libpaths), 0, lk_str_new_fromcstr(vm, argv[i]));
+
                 } else {
                     fprintf(stderr, "%s: -l requires an argument\n", argv[0]);
                     lk_vm_free(vm);
@@ -48,6 +52,7 @@ int main(int argc, const char **argv) {
     // pass rest of the arguments to lk program
     lk_global_set("arguments", LK_OBJ(args));
     lk_global_set("args", LK_OBJ(args));
+
     for (; i < argc; i++) {
         darray_ptr_push(DARRAY(args), lk_str_new_fromcstr(vm, argv[i]));
     }

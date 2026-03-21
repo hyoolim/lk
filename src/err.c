@@ -6,6 +6,7 @@ static LK_OBJ_DEFMARKFUNC(err_mark) {
     mark(LK_OBJ(LK_ERROR(self)->instr));
     mark(LK_OBJ(LK_ERROR(self)->message));
 }
+
 void lk_err_typeinit(lk_vm_t *vm) {
     vm->t_err = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_err_t));
     lk_obj_setmarkfunc(vm->t_err, err_mark);

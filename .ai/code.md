@@ -9,6 +9,13 @@ C11. Style choices worth noting:
 ## Formatting
 `.clang-format` is present — run `clang-format -i <file>` to format.
 
+## Blank line rules
+- One blank line between functions
+- One blank line between a block of variable declarations and the first non-declaration statement
+- One blank line before and after multiline statements (if/for/while/switch) — except no preceding blank line if it's the first thing in a block, and no trailing blank line if it's the last
+- One blank line before `else`, regardless of whether braces are involved (`} else {`, `} else`, `else {`, bare `else`)
+- One blank line before a comment, except when it's the first thing in a block
+
 ## Conventions
 - All lk object structs begin with `struct lk_common o` as their first member
 - Boolean fields use `bool`, not `int` or `uint8_t`

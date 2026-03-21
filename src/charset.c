@@ -4,9 +4,11 @@
 static void alloc_charset(lk_obj_t *self, lk_obj_t *parent) {
     charset_copy(CHARSET(self), CHARSET(parent));
 }
+
 static void free_charset(lk_obj_t *self) {
     charset_fin(CHARSET(self));
 }
+
 void lk_charset_typeinit(lk_vm_t *vm) {
     vm->t_charset = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_charset_t));
     charset_init(CHARSET(vm->t_charset));
@@ -18,6 +20,7 @@ void lk_charset_typeinit(lk_vm_t *vm) {
 lk_charset_t *lk_charset_new(lk_vm_t *vm) {
     return LK_CHARSET(lk_obj_alloc(vm->t_charset));
 }
+
 void lk_charset_init_str(lk_obj_t *self, lk_str_t *str) {
     charset_add_darray(CHARSET(self), DARRAY(str));
 }
@@ -26,15 +29,19 @@ void lk_charset_init_str(lk_obj_t *self, lk_str_t *str) {
 void lk_charset_add_charset(lk_obj_t *self, lk_charset_t *other) {
     charset_add_charset(CHARSET(self), CHARSET(other));
 }
+
 void lk_charset_add_str(lk_obj_t *self, lk_str_t *str) {
     charset_add_darray(CHARSET(self), DARRAY(str));
 }
+
 void lk_charset_negate(lk_obj_t *self) {
     charset_invert(CHARSET(self));
 }
+
 void lk_charset_subtract_charset(lk_obj_t *self, lk_charset_t *other) {
     charset_subtract_charset(CHARSET(self), CHARSET(other));
 }
+
 void lk_charset_subtract_str(lk_obj_t *self, lk_str_t *other) {
     charset_subtract_darray(CHARSET(self), DARRAY(other));
 }
@@ -43,6 +50,7 @@ void lk_charset_subtract_str(lk_obj_t *self, lk_str_t *other) {
 lk_bool_t *lk_charset_has_char(lk_obj_t *self, lk_char_t *achar) {
     return charset_has(CHARSET(self), CHAR(achar)) ? TRUE : FALSE;
 }
+
 lk_bool_t *lk_charset_has_str(lk_obj_t *self, lk_str_t *str) {
     darray_t *darray = DARRAY(str);
     DARRAY_EACH(darray, i, v, {
@@ -51,6 +59,7 @@ lk_bool_t *lk_charset_has_str(lk_obj_t *self, lk_str_t *str) {
     });
     return TRUE;
 }
+
 lk_str_t *lk_charset_tostr(lk_obj_t *self) {
     darray_t *base = charset_tostr(CHARSET(self));
     lk_str_t *lk = lk_str_new_fromdarray(LK_VM(self), base);

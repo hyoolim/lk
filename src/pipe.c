@@ -6,9 +6,11 @@
 static LK_OBJ_DEFMARKFUNC(mark_pipe) {
     mark(LK_OBJ(LK_PIPE(self)->cmd));
 }
+
 static void free_pipe(lk_obj_t *self) {
     lk_pipe_close(LK_PIPE(self));
 }
+
 void lk_pipe_typeinit(lk_vm_t *vm) {
     vm->t_pipe = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_pipe_t));
     lk_obj_setmarkfunc(vm->t_pipe, mark_pipe);
@@ -21,30 +23,38 @@ void lk_pipe_close(lk_pipe_t *self) {
         if (pclose(self->fd) != 0) {
             lk_vm_raiseerrno(VM);
         }
+
         self->fd = NULL;
     }
 }
+
 void lk_pipe_flush(lk_pipe_t *self) {
     if (self->fd != NULL && fflush(self->fd) != 0) {
         lk_vm_raiseerrno(VM);
     }
 }
+
 void lk_pipe_init_str(lk_pipe_t *self, lk_str_t *path) {
     self->cmd = path;
 }
+
 void lk_pipe_open(lk_pipe_t *self, lk_str_t *mode) {
     if (self->fd != NULL) {
         BUG("ReadableFile->st.pipe should be NULL");
     }
+
     self->fd = popen(CSTRING(self->cmd), CSTRING(mode));
+
     if (self->fd == NULL) {
         lk_vm_raiseerrno(VM);
     }
 }
+
 void lk_pipe_write_str(lk_pipe_t *self, lk_str_t *text) {
     if (self->fd == NULL) {
         BUG("WritableFile->st.pipe should NEVER be NULL");
     }
+
     darray_print_tostream(DARRAY(text), self->fd);
 }
 
@@ -57,6 +67,7 @@ lk_str_t *lk_pipe_read_num(lk_pipe_t *self, lk_num_t *length) {
         return c != NULL ? lk_str_new_fromdarray(VM, c) : LK_STRING(NIL);
     }
 }
+
 lk_str_t *lk_pipe_readall(lk_pipe_t *self) {
     if (self->fd == NULL) {
         BUG("ReadableFile->st.pipe should NEVER be NULL");
@@ -65,6 +76,7 @@ lk_str_t *lk_pipe_readall(lk_pipe_t *self) {
         return c != NULL ? lk_str_new_fromdarray(VM, c) : LK_STRING(NIL);
     }
 }
+
 lk_str_t *lk_pipe_readuntil_char(lk_pipe_t *self, lk_char_t *until) {
     if (self->fd == NULL) {
         BUG("ReadableFile->st.pipe should NEVER be NULL");
@@ -73,6 +85,7 @@ lk_str_t *lk_pipe_readuntil_char(lk_pipe_t *self, lk_char_t *until) {
         return c != NULL ? lk_str_new_fromdarray(VM, c) : LK_STRING(NIL);
     }
 }
+
 lk_str_t *lk_pipe_readuntil_charset(lk_pipe_t *self, lk_charset_t *until) {
     if (self->fd == NULL) {
         BUG("ReadableFile->st.pipe should NEVER be NULL");

@@ -5,26 +5,26 @@
 // ext map - types
 void lk_vec_type_init(lk_vm_t *vm) {
     vm->t_vec = lk_obj_alloc(vm->t_seq);
-    darray_fin(DARRAY(vm->t_vec));
-    darray_init(DARRAY(vm->t_vec), sizeof(int), 16);
+    vec_fin(VEC(vm->t_vec));
+    vec_init(VEC(vm->t_vec), sizeof(int), 16);
 }
 
 // ext map - funcs
 static void at_vec_num(lk_obj_t *self, lk_scope_t *local) {
-    int *v = darray_get(DARRAY(self), CSIZE(ARG(0)));
+    int *v = vec_get(VEC(self), CSIZE(ARG(0)));
 
     RETURN(v != NULL ? LK_OBJ(lk_num_new(VM, *v)) : NIL);
 }
 
-#define AT(i) (*(int *)DARRAY_AT(values, *(int *)DARRAY_AT(indexes, (i))))
+#define AT(i) (*(int *)VEC_AT(values, *(int *)VEC_AT(indexes, (i))))
 #define SWAP(x, y) \
     do { \
-        t = *(int *)DARRAY_AT(indexes, (x)); \
-        *(int *)DARRAY_AT(indexes, (x)) = *(int *)DARRAY_AT(indexes, (y)); \
-        *(int *)DARRAY_AT(indexes, (y)) = t; \
+        t = *(int *)VEC_AT(indexes, (x)); \
+        *(int *)VEC_AT(indexes, (x)) = *(int *)VEC_AT(indexes, (y)); \
+        *(int *)VEC_AT(indexes, (y)) = t; \
     } while (0)
 
-static void quicksort_hoare(darray_t *values, darray_t *indexes, int low, int hi) {
+static void quicksort_hoare(vec_t *values, vec_t *indexes, int low, int hi) {
     if (low < hi) {
         int l = low, h = hi, p = AT(hi), t;
 
@@ -45,32 +45,32 @@ static void quicksort_hoare(darray_t *values, darray_t *indexes, int low, int hi
 
 static void grade_vec(lk_obj_t *self, lk_scope_t *local) {
     lk_vec_t *indexes = LK_VECTOR(lk_obj_alloc(VM->t_vec));
-    darray_t *sl = DARRAY(self), *il = DARRAY(indexes);
+    vec_t *sl = VEC(self), *il = VEC(indexes);
 
-    darray_resize(il, DARRAY_COUNT(sl));
-    DARRAY_EACH(il, i, v, *(int *)v = i);
-    quicksort_hoare(sl, il, 0, DARRAY_COUNT(il) - 1);
+    vec_resize(il, VEC_COUNT(sl));
+    VEC_EACH(il, i, v, *(int *)v = i);
+    quicksort_hoare(sl, il, 0, VEC_COUNT(il) - 1);
     RETURN(indexes);
 }
 
 static void insertB_vec_num_num(lk_obj_t *self, lk_scope_t *local) {
     /*
-    darray_insert(DARRAY(self), CSIZE(ARG(0)), &CSIZE(ARG(1)));
+    vec_insert(VEC(self), CSIZE(ARG(0)), &CSIZE(ARG(1)));
     */
     RETURN(self);
 }
 
 static void removeB_vec_num(lk_obj_t *self, lk_scope_t *local) {
     int i = CSIZE(ARG(0));
-    int *v = darray_get(DARRAY(self), i);
+    int *v = vec_get(VEC(self), i);
 
-    darray_remove(DARRAY(self), i);
+    vec_remove(VEC(self), i);
     RETURN(v != NULL ? LK_OBJ(lk_num_new(VM, *v)) : NIL);
 }
 
 static void setB_vec_num_num(lk_obj_t *self, lk_scope_t *local) {
     /*
-    darray_set(DARRAY(self), CSIZE(ARG(0)), &CSIZE(ARG(1)));
+    vec_set(VEC(self), CSIZE(ARG(0)), &CSIZE(ARG(1)));
     */
     RETURN(self);
 }

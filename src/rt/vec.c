@@ -1,76 +1,74 @@
-#include "darray.h"
+#include "vec.h"
 
 // new
-static struct listdata *listdata_alloc(int ilen, int cap) {
-    struct listdata *self;
+static struct vec_buf *vec_buf_alloc(int ilen, int cap) {
+    struct vec_buf *self;
     int c = 8;
 
     while (cap > c)
         c *= 2;
-    self = mem_alloc(sizeof(struct listdata) - sizeof(char) + ilen * c);
-    self->cap = c;
+    self = mem_alloc(sizeof(struct vec_buf) - sizeof(char) + ilen * c);
+    self->capacity = c;
     self->used = 0;
-    self->ilen = ilen;
-    self->refc = 1;
+    self->item_size = ilen;
+    self->ref_count = 1;
     return self;
 }
 
-static void listdata_free(struct listdata *self) {
-    if (self->refc > 0)
-        self->refc--;
-    if (self->refc < 1)
+static void vec_buf_free(struct vec_buf *self) {
+    if (--self->ref_count == 0)
         mem_free(self);
 }
 
-darray_t *darray_alloc(int ilen, int cap) {
-    darray_t *self = mem_alloc(sizeof(darray_t));
-    darray_init(self, ilen, cap);
+vec_t *vec_alloc(int ilen, int cap) {
+    vec_t *self = mem_alloc(sizeof(vec_t));
+    vec_init(self, ilen, cap);
     return self;
 }
 
-darray_t *darray_ptr_alloc(void) {
-    return darray_ptr_alloc_withcap(10);
+vec_t *vec_ptr_alloc(void) {
+    return vec_ptr_alloc_withcap(10);
 }
 
-darray_t *darray_ptr_alloc_withcap(int cap) {
-    return darray_alloc(sizeof(void *), cap);
+vec_t *vec_ptr_alloc_withcap(int cap) {
+    return vec_alloc(sizeof(void *), cap);
 }
 
-darray_t *darray_str_alloc_fromfile_withsize(FILE *stream, size_t rs) {
-    darray_t *self = darray_alloc(1, rs);
-    self->size = self->data->used = fread(self->first, 1, rs, stream);
+vec_t *vec_str_alloc_fromfile_withsize(FILE *stream, size_t rs) {
+    vec_t *self = vec_alloc(1, rs);
+    self->size = self->buf->used = fread(self->first, 1, rs, stream);
     return self;
 }
 
-darray_t *darray_str_alloc(void) {
-    return darray_alloc(sizeof(uint8_t), 10);
+vec_t *vec_str_alloc(void) {
+    return vec_alloc(sizeof(uint8_t), 10);
 }
 
-darray_t *darray_clone(darray_t *self) {
-    darray_t *clone = mem_alloc(sizeof(darray_t));
-    darray_copy(clone, self);
+vec_t *vec_clone(vec_t *self) {
+    vec_t *clone = mem_alloc(sizeof(vec_t));
+    vec_copy(clone, self);
     return clone;
 }
 
-darray_t *darray_str_alloc_fromdata(const void *data, int len) {
-    darray_t *self = darray_alloc(sizeof(uint8_t), len);
+vec_t *vec_str_alloc_fromdata(const void *data, int len) {
+    vec_t *self = vec_alloc(sizeof(uint8_t), len);
     memcpy(self->first, data, len);
-    self->data->used = self->size = len;
+    self->buf->used = self->size = len;
     return self;
 }
 
-darray_t *darray_str_alloc_fromcstr(const char *cstr) {
-    return darray_str_alloc_fromdata(cstr, strlen(cstr));
+vec_t *vec_str_alloc_fromcstr(const char *cstr) {
+    return vec_str_alloc_fromdata(cstr, strlen(cstr));
 }
 
-darray_t *darray_str_alloc_fromfile(FILE *stream) {
+vec_t *vec_str_alloc_fromfile(FILE *stream) {
     if (fseek(stream, 0, SEEK_END) == 0) {
         long size;
 
         if ((size = ftell(stream)) >= 0 && fseek(stream, 0, SEEK_SET) == 0) {
-            darray_t *self = darray_alloc(sizeof(uint8_t), size);
+            vec_t *self = vec_alloc(sizeof(uint8_t), size);
             fread(self->first, 1, size, stream);
-            self->size = self->data->used = size;
+            self->size = self->buf->used = size;
             return self;
         }
     }
@@ -80,70 +78,71 @@ darray_t *darray_str_alloc_fromfile(FILE *stream) {
 #define UNTIL(check) \
     do { \
         int i, c = 64; \
-        darray_t *self = darray_alloc(sizeof(uint8_t), c); \
+        vec_t *self = vec_alloc(sizeof(uint8_t), c); \
         int ch; \
         for (i = 0; (ch = fgetc(stream)) != EOF; i++) { \
             if (i >= c) { \
                 do { \
                     c *= 2; \
                 } while (i >= c); \
-                self->data = mem_resize(self->data, sizeof(struct listdata) - sizeof(char) + self->data->ilen * c); \
-                self->data->cap = (c); \
-                self->first = &(self)->data->item; \
+                self->buf = \
+                    mem_resize(self->buf, sizeof(struct vec_buf) - sizeof(char) + self->buf->item_size * c); \
+                self->buf->capacity = (c); \
+                self->first = &(self)->buf->item; \
             } \
             ((char *)self->first)[i] = ch; \
             if ((check)) \
                 break; \
         } \
-        self->size = self->data->used = i + 1; \
+        self->size = self->buf->used = ch == EOF ? i : i + 1; \
         return self; \
     } while (0)
 
-darray_t *darray_str_alloc_fromfile_untilchar(FILE *stream, uint32_t pat) {
+vec_t *vec_str_alloc_fromfile_untilchar(FILE *stream, uint32_t pat) {
     if (feof(stream))
         return NULL;
     UNTIL((uint32_t)ch == pat);
 }
 
-darray_t *darray_str_alloc_fromfile_untilcharset(FILE *stream, const charset_t *pat) {
+vec_t *vec_str_alloc_fromfile_untilcharset(FILE *stream, const charset_t *pat) {
     if (feof(stream))
         return NULL;
     UNTIL(charset_has(pat, ch));
 }
 
-void darray_init(darray_t *self, int ilen, int cap) {
-    self->data = listdata_alloc(ilen, cap);
-    self->first = &self->data->item;
+void vec_init(vec_t *self, int ilen, int cap) {
+    self->buf = vec_buf_alloc(ilen, cap);
+    self->first = &self->buf->item;
     self->size = 0;
 }
 
-void darray_ptr_init(darray_t *self) {
-    darray_init(self, sizeof(void *), 10);
+void vec_ptr_init(vec_t *self) {
+    vec_init(self, sizeof(void *), 10);
 }
 
-void darray_copy(darray_t *self, darray_t *src) {
-    (self->data = src->data)->refc++;
+void vec_copy(vec_t *self, vec_t *src) {
+    (self->buf = src->buf)->ref_count++;
     self->first = src->first;
     self->size = src->size;
 }
 
-void darray_fin(darray_t *self) {
-    listdata_free(self->data);
+void vec_fin(vec_t *self) {
+    vec_buf_free(self->buf);
 }
 
-void darray_free(darray_t *self) {
-    listdata_free(self->data);
+void vec_free(vec_t *self) {
+    vec_buf_free(self->buf);
     mem_free(self);
 }
 
 // update
 #define SETITEM(self, t, i, v) \
     do { \
-        *(t *)DARRAY_AT(self, i) = *(t *)v; \
+        *(t *)VEC_AT(self, i) = *(t *)v; \
     } while (0)
 #define SETANYITEM(self, i, v) \
     do { \
-        switch ((self)->data->ilen) { \
+        switch ((self)->buf->item_size) { \
         case sizeof(char): \
             SETITEM((self), char, (i), (v)); \
             break; \
@@ -154,55 +153,53 @@ void darray_free(darray_t *self) {
             SETITEM((self), long, (i), (v)); \
             break; \
         default: \
-            memmove(DARRAY_AT(self, i), (v), (self)->data->ilen); \
+            memmove(VEC_AT(self, i), (v), (self)->buf->item_size); \
             break; \
         } \
     } while (0)
 
-static void darray_prepupdate(darray_t *self, int i, int newsize) {
-    struct listdata *bd = self->data;
-    int newcap = bd->cap, ilen = bd->ilen;
+static void vec_prepupdate(vec_t *self, int i, int newsize) {
+    struct vec_buf *bd = self->buf;
+    int newcap = bd->capacity, ilen = bd->item_size;
 
     if (newsize > newcap) {
         do {
             newcap *= 2;
         } while (newsize > newcap);
 
-        // buf shared? alloc new
-        if (bd->refc > 1) {
-        newlistdata:
-            bd->refc--;
-            bd = self->data = listdata_alloc(ilen, newcap);
+        if (bd->ref_count > 1) {
+            bd->ref_count--;
+            bd = self->buf = vec_buf_alloc(ilen, newcap);
             memcpy(&bd->item, self->first, ilen * self->size);
             self->first = &bd->item;
 
-            // resize existing buf
-
         } else {
             ptrdiff_t d = self->first - &bd->item;
-            bd = self->data = mem_resize(bd, sizeof(struct listdata) - sizeof(char) + ilen * newcap);
-            bd->cap = newcap;
+            bd = self->buf = mem_resize(bd, sizeof(struct vec_buf) - sizeof(char) + ilen * newcap);
+            bd->capacity = newcap;
             self->first = &bd->item + d;
         }
 
         // new buf if replacing existing item in shared buf
-
-    } else if (bd->refc > 1 && i < bd->used) {
-        goto newlistdata;
+    } else if (bd->ref_count > 1 && i < bd->used) {
+        bd->ref_count--;
+        bd = self->buf = vec_buf_alloc(ilen, newcap);
+        memcpy(&bd->item, self->first, ilen * self->size);
+        self->first = &bd->item;
     }
     bd->used = newsize + (self->first - &bd->item);
     self->size = newsize;
 }
 
-void darray_clear(darray_t *self) {
-    darray_limit(self, 0);
+void vec_clear(vec_t *self) {
+    vec_limit(self, 0);
 }
 
-void darray_concat(darray_t *self, darray_t *v) {
+void vec_concat(vec_t *self, vec_t *v) {
     int sc = self->size, vc = v->size;
-    int sl = self->data->ilen, vl = self->data->ilen;
+    int sl = self->buf->item_size, vl = v->buf->item_size;
 
-    darray_prepupdate(self, sc, sc + vc);
+    vec_prepupdate(self, sc, sc + vc);
 
     if (sl == vl)
         memcpy(self->first + sl * sc, v->first, vl * vc);
@@ -210,36 +207,36 @@ void darray_concat(darray_t *self, darray_t *v) {
         NYI("Cannot concat differently sized buffers");
 }
 
-void darray_insert(darray_t *self, int i, void *v) {
+void vec_insert(vec_t *self, int i, void *v) {
     int size = self->size;
 
     if (i < 0)
         i += size;
 
     if (i < 0)
-        darray_set(self, i - size - 1, v);
+        vec_set(self, i - size - 1, v);
     else if (i > size)
-        darray_set(self, i, v);
+        vec_set(self, i, v);
     else {
-        int ilen = self->data->ilen;
-        darray_prepupdate(self, i, size + 1);
+        int ilen = self->buf->item_size;
+        vec_prepupdate(self, i, size + 1);
         memmove(self->first + ilen * (i + 1), self->first + ilen * i, ilen * (size - i));
     }
     SETANYITEM(self, i, v);
 }
 
-void darray_ptr_insert(darray_t *self, int i, void *v) {
-    darray_insert(self, i, (void *)&v);
+void vec_ptr_insert(vec_t *self, int i, void *v) {
+    vec_insert(self, i, (void *)&v);
 }
 
 #define INSERTUINT(self, t, i, v) \
     do { \
         t nv = (v); \
-        darray_insert(self, (i), (void *)&nv); \
+        vec_insert(self, (i), (void *)&nv); \
     } while (0);
 
-void darray_str_insert(darray_t *self, int i, uint32_t v) {
-    switch (self->data->ilen) {
+void vec_str_insert(vec_t *self, int i, uint32_t v) {
+    switch (self->buf->item_size) {
     case sizeof(uint8_t):
         INSERTUINT(self, uint8_t, i, v);
         break;
@@ -250,18 +247,18 @@ void darray_str_insert(darray_t *self, int i, uint32_t v) {
         INSERTUINT(self, uint32_t, i, v);
         break;
     default:
-        BUG("Invalid ilen in darray_str_insert\n");
+        BUG("Invalid ilen in vec_str_insert\n");
     }
 }
 
-void darray_limit(darray_t *self, int n) {
+void vec_limit(vec_t *self, int n) {
     if (n < 0)
         n += self->size;
     if (n >= 0 && n < self->size)
         self->size = n;
 }
 
-void darray_offset(darray_t *self, int n) {
+void vec_offset(vec_t *self, int n) {
     if (n < 0)
         n += self->size;
     if (n == 0)
@@ -270,36 +267,36 @@ void darray_offset(darray_t *self, int n) {
     if (n < 0 || n >= self->size)
         self->size = 0;
     else {
-        self->first += n * self->data->ilen;
+        self->first += n * self->buf->item_size;
         self->size -= n;
     }
 }
 
-void *darray_ptr_peek(darray_t *self) {
-    return darray_ptr_get((self), (self)->size - 1);
+void *vec_ptr_peek(vec_t *self) {
+    return vec_ptr_get((self), (self)->size - 1);
 }
 
-uint32_t darray_str_peek(darray_t *self) {
-    return darray_str_get((self), (self)->size - 1);
+uint32_t vec_str_peek(vec_t *self) {
+    return vec_str_get((self), (self)->size - 1);
 }
 
-void *darray_ptr_pop(darray_t *self) {
-    return darray_ptr_remove(self, self->size - 1);
+void *vec_ptr_pop(vec_t *self) {
+    return vec_ptr_remove(self, self->size - 1);
 }
 
-uint32_t darray_str_pop(darray_t *self) {
-    return darray_str_remove(self, self->size - 1);
+uint32_t vec_str_pop(vec_t *self) {
+    return vec_str_remove(self, self->size - 1);
 }
 
-void darray_ptr_push(darray_t *self, void *v) {
-    darray_ptr_set(self, self->size, v);
+void vec_ptr_push(vec_t *self, void *v) {
+    vec_ptr_set(self, self->size, v);
 }
 
-void darray_str_push(darray_t *self, uint32_t v) {
-    darray_str_set(self, self->size, v);
+void vec_str_push(vec_t *self, uint32_t v) {
+    vec_str_set(self, self->size, v);
 }
 
-void darray_remove(darray_t *self, int i) {
+void vec_remove(vec_t *self, int i) {
     int size = self->size;
 
     if (i < 0)
@@ -308,34 +305,34 @@ void darray_remove(darray_t *self, int i) {
     if (i < 0 || i >= size)
         return;
     else {
-        int ilen = self->data->ilen, newsize = size - 1;
-        darray_prepupdate(self, i, newsize);
+        int ilen = self->buf->item_size, newsize = size - 1;
+        vec_prepupdate(self, i, newsize);
 
         if (i < newsize)
-            memmove(self->first + ilen * i, self->first + ilen * (i + 1), ilen * (size - i));
+            memmove(self->first + ilen * i, self->first + ilen * (i + 1), ilen * (newsize - i));
     }
 }
 
-void *darray_ptr_remove(darray_t *self, int i) {
-    void *item = darray_ptr_get(self, i);
-    darray_remove(self, i);
+void *vec_ptr_remove(vec_t *self, int i) {
+    void *item = vec_ptr_get(self, i);
+    vec_remove(self, i);
     return item;
 }
 
-uint32_t darray_str_remove(darray_t *self, int i) {
-    uint32_t v = darray_str_get(self, i);
-    darray_remove(self, i);
+uint32_t vec_str_remove(vec_t *self, int i) {
+    uint32_t v = vec_str_get(self, i);
+    vec_remove(self, i);
     return v;
 }
 
-void darray_resize(darray_t *self, int s) {
+void vec_resize(vec_t *self, int s) {
     if (s <= self->size)
         return;
-    darray_prepupdate(self, s - 1, s);
+    vec_prepupdate(self, s - 1, s);
 }
 
-void darray_resizeitem(darray_t *self, darray_t *other) {
-    if (self->data->ilen != other->data->ilen) {
+void vec_resizeitem(vec_t *self, vec_t *other) {
+    if (self->buf->item_size != other->buf->item_size) {
         NYI("Cannot resize item");
     }
 }
@@ -352,14 +349,14 @@ void darray_resizeitem(darray_t *self, darray_t *other) {
         } \
     } while (0)
 
-void darray_reverse(darray_t *self) {
-    struct listdata *bd = self->data;
-    int ilen = bd->ilen, i = 0, c = self->size, c2 = (c + 1) / 2;
+void vec_reverse(vec_t *self) {
+    struct vec_buf *bd = self->buf;
+    int ilen = bd->item_size, i = 0, c = self->size, c2 = (c + 1) / 2;
     char *from = self->first, *to;
 
-    if (bd->refc > 1) {
-        listdata_free(bd);
-        bd = self->data = listdata_alloc(ilen, c);
+    if (bd->ref_count > 1) {
+        vec_buf_free(bd);
+        bd = self->buf = vec_buf_alloc(ilen, c);
         bd->used = c;
         to = self->first = &bd->item;
 
@@ -367,7 +364,7 @@ void darray_reverse(darray_t *self) {
         to = from;
     }
 
-    switch (self->data->ilen) {
+    switch (self->buf->item_size) {
     case sizeof(char):
         SWAPITEMS(char);
         break;
@@ -393,7 +390,7 @@ void darray_reverse(darray_t *self) {
     }
 }
 
-void darray_set(darray_t *self, int i, void *v) {
+void vec_set(vec_t *self, int i, void *v) {
     int size = self->size;
 
     if (i < 0)
@@ -401,46 +398,46 @@ void darray_set(darray_t *self, int i, void *v) {
 
     if (i < 0) {
     } else {
-        darray_prepupdate(self, i, i >= size ? i + 1 : size);
+        vec_prepupdate(self, i, i >= size ? i + 1 : size);
     }
     SETANYITEM(self, i, v);
 }
 
-void darray_ptr_set(darray_t *self, int i, void *v) {
-    darray_set(self, i, (void *)&v);
+void vec_ptr_set(vec_t *self, int i, void *v) {
+    vec_set(self, i, (void *)&v);
 }
 
-void darray_setrange(darray_t *self, int b, int e, darray_t *v) {
+void vec_setrange(vec_t *self, int b, int e, vec_t *v) {
     int i, d, sc = self->size, vc = v->size;
 
     if (b < 0)
         b += sc;
     if (e < 0)
-        e += vc;
+        e += sc;
     d = e - b - vc;
 
     if (d > 0)
         for (; d > 0; d--)
-            darray_remove(self, b);
+            vec_remove(self, b);
     else if (d < 0) {
         void *t = NULL;
 
         for (; d < 0; d++)
-            darray_insert(self, b, (void *)&t);
+            vec_insert(self, b, (void *)&t);
     }
 
     for (i = 0; i < vc; i++)
-        darray_set(self, b++, darray_get(v, i));
+        vec_set(self, b++, vec_get(v, i));
 }
 
 #define SETUINT(self, t, i, v) \
     do { \
         t nv = (v); \
-        darray_set(self, (i), (void *)&nv); \
+        vec_set(self, (i), (void *)&nv); \
     } while (0);
 
-void darray_str_set(darray_t *self, int i, uint32_t v) {
-    switch (self->data->ilen) {
+void vec_str_set(vec_t *self, int i, uint32_t v) {
+    switch (self->buf->item_size) {
     case sizeof(uint8_t):
         SETUINT(self, uint8_t, i, v);
         break;
@@ -451,31 +448,31 @@ void darray_str_set(darray_t *self, int i, uint32_t v) {
         SETUINT(self, uint32_t, i, v);
         break;
     default:
-        BUG("Invalid ilen in darray_str_set\n");
+        BUG("Invalid ilen in vec_str_set\n");
     }
 }
 
-void *darray_ptr_shift(darray_t *self) {
-    return darray_ptr_remove(self, 0);
+void *vec_ptr_shift(vec_t *self) {
+    return vec_ptr_remove(self, 0);
 }
 
-void darray_slice(darray_t *self, int offset, int limit) {
-    darray_offset(self, offset);
-    darray_limit(self, limit);
+void vec_slice(vec_t *self, int offset, int limit) {
+    vec_offset(self, offset);
+    vec_limit(self, limit);
 }
 
-const char *darray_str_tocstr(darray_t *self) {
-    darray_str_set(self, self->size, '\0');
+const char *vec_str_tocstr(vec_t *self) {
+    vec_str_set(self, self->size, '\0');
     self->size--;
     return self->first;
 }
 
-void darray_ptr_unshift(darray_t *self, void *v) {
-    darray_ptr_insert(self, 0, v);
+void vec_ptr_unshift(vec_t *self, void *v) {
+    vec_ptr_insert(self, 0, v);
 }
 
 // info
-int darray_cmp(const darray_t *self, const darray_t *other) {
+int vec_cmp(const vec_t *self, const vec_t *other) {
     if (self == other)
         return 0;
     else {
@@ -486,7 +483,7 @@ int darray_cmp(const darray_t *self, const darray_t *other) {
         else {
             int m = d > 0 ? oc : sc;
 
-            if (self->data->ilen == other->data->ilen) {
+            if (self->buf->item_size == other->buf->item_size) {
                 int rd = memcmp(self->first, other->first, m);
                 return rd == 0 ? d : rd;
 
@@ -494,10 +491,10 @@ int darray_cmp(const darray_t *self, const darray_t *other) {
                 /*
                 printf("Trying to compare strs"
                 " with different item length\n");
-                printf("self=%p(%i) '", (void *)self, self->data->ilen);
-                darray_print_tostream(self, stdout); printf("'\n");
-                printf("other=%p(%i) '", (void *)other, other->data->ilen);
-                darray_print_tostream(other, stdout); printf("'\n");
+                printf("self=%p(%i) '", (void *)self, self->buf->item_size);
+                vec_print_tostream(self, stdout); printf("'\n");
+                printf("other=%p(%i) '", (void *)other, other->buf->item_size);
+                vec_print_tostream(other, stdout); printf("'\n");
                  */
                 abort();
             }
@@ -514,10 +511,10 @@ int darray_cmp(const darray_t *self, const darray_t *other) {
         } \
     } while (0)
 
-int darray_str_cmp_cstr(const darray_t *self, const char *other) {
+int vec_str_cmp_cstr(const vec_t *self, const char *other) {
     int sc = self->size, oc = strlen(other), d = sc - oc;
     int len = d > 0 ? oc : sc;
-    uint8_t ilen = self->data->ilen;
+    uint8_t ilen = self->buf->item_size;
     uint8_t *sb = (uint8_t *)self->first, *sbend = sb + len * ilen;
     int cd;
 
@@ -526,9 +523,9 @@ int darray_str_cmp_cstr(const darray_t *self, const char *other) {
     else if (ilen == sizeof(uint16_t))
         COMPARECSTRING(uint16_t);
     else if (ilen == sizeof(uint32_t))
-        COMPARECSTRING(uint16_t);
+        COMPARECSTRING(uint32_t);
     else
-        BUG("Invalid ilen in darray_str_cmp_cstr\n");
+        BUG("Invalid ilen in vec_str_cmp_cstr\n");
     return d;
 }
 
@@ -539,11 +536,11 @@ int darray_str_cmp_cstr(const darray_t *self, const char *other) {
                 return o; \
     } while (0)
 
-int darray_str_find(const darray_t *self, uint32_t pat, int o) {
+int vec_str_find(const vec_t *self, uint32_t pat, int o) {
     void *buf = self->first;
     int c = self->size;
 
-    switch (self->data->ilen) {
+    switch (self->buf->item_size) {
     case sizeof(uint8_t):
         MATCHCHAR(uint8_t);
         break;
@@ -554,7 +551,7 @@ int darray_str_find(const darray_t *self, uint32_t pat, int o) {
         MATCHCHAR(uint32_t);
         break;
     default:
-        BUG("Invalid ilen in darray_str_find\n");
+        BUG("Invalid ilen in vec_str_find\n");
     }
     return -1;
 }
@@ -566,11 +563,11 @@ int darray_str_find(const darray_t *self, uint32_t pat, int o) {
                 return o; \
     } while (0)
 
-int darray_str_findset(const darray_t *self, const charset_t *pat, int o) {
+int vec_str_findset(const vec_t *self, const charset_t *pat, int o) {
     void *buf = self->first;
     int c = self->size;
 
-    switch (self->data->ilen) {
+    switch (self->buf->item_size) {
     case sizeof(uint8_t):
         MATCHCHARSET(uint8_t);
         break;
@@ -586,7 +583,7 @@ int darray_str_findset(const darray_t *self, const charset_t *pat, int o) {
     return -1;
 }
 
-int darray_find_darray(const darray_t *self, const darray_t *pat, int o) {
+int vec_find_darray(const vec_t *self, const vec_t *pat, int o) {
     int self_c = self->size, pat_c = pat->size;
 
     if (pat_c == 0)
@@ -594,9 +591,9 @@ int darray_find_darray(const darray_t *self, const darray_t *pat, int o) {
     if (pat_c > self_c)
         return -1;
     if (pat_c == 1)
-        return darray_str_find(self, darray_str_get(pat, 0), o);
+        return vec_str_find(self, vec_str_get(pat, 0), o);
     else {
-        switch (self->data->ilen) {
+        switch (self->buf->item_size) {
         case sizeof(uint8_t): {
             /* Boyer-Moore-Horspool
              * see: http://www.dcc.uchile.cl/~rbaeza/handbook
@@ -624,31 +621,31 @@ int darray_find_darray(const darray_t *self, const darray_t *pat, int o) {
             break;
         }
         default:
-            BUG("Invalid ilen in darray_find_darray\n");
+            BUG("Invalid ilen in vec_find_darray\n");
         }
         return -1;
     }
 }
 
-void *darray_get(const darray_t *self, int i) {
+void *vec_get(const vec_t *self, int i) {
     int size = self->size;
 
     if (i < 0)
         i += size;
-    return i < 0 || i >= size ? NULL : DARRAY_AT(self, i);
+    return i < 0 || i >= size ? NULL : VEC_AT(self, i);
 }
 
-void *darray_ptr_get(const darray_t *self, int i) {
-    void **vptr = (void **)darray_get(self, i);
+void *vec_ptr_get(const vec_t *self, int i) {
+    void **vptr = (void **)vec_get(self, i);
     return vptr != NULL ? *vptr : NULL;
 }
 
-uint32_t darray_str_get(const darray_t *self, int i) {
-    void *vptr = darray_get(self, i);
+uint32_t vec_str_get(const vec_t *self, int i) {
+    void *vptr = vec_get(self, i);
 
     if (vptr == NULL)
         return 0;
-    switch (self->data->ilen) {
+    switch (self->buf->item_size) {
     case sizeof(uint8_t):
         return *(uint8_t *)vptr;
     case sizeof(uint16_t):
@@ -656,13 +653,13 @@ uint32_t darray_str_get(const darray_t *self, int i) {
     case sizeof(uint32_t):
         return *(uint32_t *)vptr;
     default:
-        BUG("Invalid ilen in darray_str_get\n");
+        BUG("Invalid ilen in vec_str_get\n");
     }
 }
 
-int darray_hc(const darray_t *self) {
+int vec_hc(const vec_t *self) {
     register const uint8_t *beg = (uint8_t *)self->first;
-    register const uint8_t *end = beg + self->data->ilen * self->size;
+    register const uint8_t *end = beg + self->buf->item_size * self->size;
     int hc = 5381;
 
     for (; beg < end; beg++) {
@@ -680,20 +677,20 @@ int darray_hc(const darray_t *self) {
         fprintf((stream), "\n"); \
     } while (0)
 
-void darray_write(const darray_t *self, FILE *stream) {
-    struct listdata *bd = self->data;
-    int ilen = bd->ilen;
+void vec_write(const vec_t *self, FILE *stream) {
+    struct vec_buf *bd = self->buf;
+    int ilen = bd->item_size;
     char *first = self->first;
 
-    fprintf(stream, "darray_t(%p", (void *)self);
+    fprintf(stream, "vec_t(%p", (void *)self);
     fprintf(stream, ", first=%p", (void *)first);
     fprintf(stream, "(%i)", (int)((first - &bd->item) / ilen));
     fprintf(stream, ", size=%i", self->size);
     fprintf(stream, ")\n-> data(%p", (void *)bd);
-    fprintf(stream, ", cap=%i", bd->cap);
+    fprintf(stream, ", cap=%i", bd->capacity);
     fprintf(stream, ", used=%i", bd->used);
     fprintf(stream, ", ilen=%i", ilen);
-    fprintf(stream, ", refc=%i", bd->refc);
+    fprintf(stream, ", refc=%i", bd->ref_count);
     fprintf(stream, ")\n->");
 
     switch (ilen) {
@@ -712,6 +709,6 @@ void darray_write(const darray_t *self, FILE *stream) {
     }
 }
 
-void darray_print_tostream(const darray_t *self, FILE *stream) {
-    fwrite(self->first, self->data->ilen, self->size, stream);
+void vec_print_tostream(const vec_t *self, FILE *stream) {
+    fwrite(self->first, self->buf->item_size, self->size, stream);
 }

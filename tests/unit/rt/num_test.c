@@ -1,13 +1,13 @@
-#include "../../../src/rt/darray.h"
+#include "../../../src/rt/vec.h"
 #include "../../../src/rt/num.h"
 #include "greatest.h"
 #include <limits.h>
 #include <math.h>
 
 static num_type_t parse(const char *s, num_t *res) {
-    darray_t *str = darray_str_alloc_fromcstr(s);
+    vec_t *str = vec_str_alloc_fromcstr(s);
     num_type_t type = num_new(str, res);
-    darray_free(str);
+    vec_free(str);
     return type;
 }
 

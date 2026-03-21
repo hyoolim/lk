@@ -36,8 +36,8 @@ void charset_inspect(const charset_t *self, FILE *output);
 int charset_size(const charset_t *self);
 
 // delayed due to cross-dependency
-#include "darray.h"
-void charset_add_darray(charset_t *self, darray_t *str);
-void charset_subtract_darray(charset_t *self, darray_t *str);
-darray_t *charset_tostr(const charset_t *self);
+#include "vec.h"
+void charset_add_darray(charset_t *self, vec_t *str);
+void charset_subtract_darray(charset_t *self, vec_t *str);
+vec_t *charset_tostr(const charset_t *self);
 #endif

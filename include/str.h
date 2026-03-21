@@ -8,7 +8,7 @@ void lk_str_lib_init(lk_vm_t *vm);
 
 // new
 lk_str_t *lk_str_new(lk_vm_t *vm);
-lk_str_t *lk_str_new_from_darray(lk_vm_t *vm, darray_t *list);
+lk_str_t *lk_str_new_from_darray(lk_vm_t *vm, vec_t *list);
 lk_str_t *lk_str_new_from_data(lk_vm_t *vm, const void *data, int len);
 lk_str_t *lk_str_new_from_cstr(lk_vm_t *vm, const char *cstr);
 

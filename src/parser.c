@@ -22,11 +22,11 @@ static void alloc_parser(lk_obj_t *self, lk_obj_t *parent) {
     (void)parent;
     PARSER->binaryops = qphash_alloc(sizeof(lk_prec_t *), lk_obj_hash_code, lk_obj_key_cmp);
     PARSER->precs = qphash_alloc(sizeof(lk_prec_t *), lk_obj_hash_code, lk_obj_key_cmp);
-    PARSER->tokentypes = darray_ptr_alloc();
-    PARSER->tokenvalues = darray_ptr_alloc();
-    PARSER->words = darray_ptr_alloc();
-    PARSER->ops = darray_ptr_alloc();
-    PARSER->comments = darray_ptr_alloc();
+    PARSER->tokentypes = vec_ptr_alloc();
+    PARSER->tokenvalues = vec_ptr_alloc();
+    PARSER->words = vec_ptr_alloc();
+    PARSER->ops = vec_ptr_alloc();
+    PARSER->comments = vec_ptr_alloc();
 
     // binary op names
     setbinaryop(PARSER, "->", "send");
@@ -69,16 +69,16 @@ static LK_OBJ_DEFMARKFUNC(mark_parser) {
         SET_EACH(PARSER->precs, item, mark(LK_OBJ(item->key)); mark(SETITEM_VALUE(lk_obj_t *, item)););
     }
     if (PARSER->tokenvalues != NULL) {
-        DARRAY_EACH_PTR(PARSER->tokenvalues, i, v, mark(v));
+        VEC_EACH_PTR(PARSER->tokenvalues, i, v, mark(v));
     }
     if (PARSER->words != NULL) {
-        DARRAY_EACH_PTR(PARSER->words, i, v, mark(v));
+        VEC_EACH_PTR(PARSER->words, i, v, mark(v));
     }
     if (PARSER->ops != NULL) {
-        DARRAY_EACH_PTR(PARSER->ops, i, v, mark(v));
+        VEC_EACH_PTR(PARSER->ops, i, v, mark(v));
     }
     if (PARSER->comments != NULL) {
-        DARRAY_EACH_PTR(PARSER->comments, i, v, mark(v));
+        VEC_EACH_PTR(PARSER->comments, i, v, mark(v));
     }
 }
 
@@ -88,15 +88,15 @@ static void free_parser(lk_obj_t *self) {
     if (PARSER->precs != NULL)
         qphash_free(PARSER->precs);
     if (PARSER->tokentypes != NULL)
-        darray_free(PARSER->tokentypes);
+        vec_free(PARSER->tokentypes);
     if (PARSER->tokenvalues != NULL)
-        darray_free(PARSER->tokenvalues);
+        vec_free(PARSER->tokenvalues);
     if (PARSER->words != NULL)
-        darray_free(PARSER->words);
+        vec_free(PARSER->words);
     if (PARSER->ops != NULL)
-        darray_free(PARSER->ops);
+        vec_free(PARSER->ops);
     if (PARSER->comments != NULL)
-        darray_free(PARSER->comments);
+        vec_free(PARSER->comments);
 }
 
 void lk_parser_type_init(lk_vm_t *vm) {
@@ -134,8 +134,8 @@ typedef enum tokentype_t {
     FUNC_BEGIN,
     FUNC_SEP,
     FUNC_END,
-    DARRAY_BEGIN,
-    DARRAY_END,
+    VEC_BEGIN,
+    VEC_END,
     GROUP_BEGIN,
     GROUP_END
 } tokentype_t;
@@ -147,12 +147,12 @@ typedef enum tokentype_t {
 typedef READFUNC(readfunc_t);
 
 // common calc on text
-#define CHARAT(self, at) (darray_str_get(DARRAY((self)->text), (at)))
+#define CHARAT(self, at) (vec_str_get(VEC((self)->text), (at)))
 #define CHARCURR(self) (CHARAT((self), (self)->textpos))
 #define CHARNEXT(self) (CHARAT((self), ++(self)->textpos))
 #define CHARPREV(self) (CHARAT((self), --(self)->textpos))
 #define CHARIN(c, s) (strchr((s), (c)))
-#define ISINSIDE(self) (0 <= (self)->textpos && (self)->textpos < DARRAY_COUNT(DARRAY((self)->text)))
+#define ISINSIDE(self) (0 <= (self)->textpos && (self)->textpos < VEC_COUNT(VEC((self)->text)))
 #define CHARCURRIN(self, s) (CHARIN(CHARCURR(self), (s)))
 #define ISCURR(self, s) (ISINSIDE(self) && CHARCURRIN((self), (s)))
 #define ISNOTCURR(self, s) (ISINSIDE(self) && !CHARCURRIN((self), (s)))
@@ -194,10 +194,10 @@ static lk_prec_t *shiftreduce(lk_parser_t *self, lk_instr_t *op) {
     lk_prec_t *curr = op != NULL ? getprec(self, op) : NULL;
 
     // reduce - NULL reduces everything
-    while (DARRAY_COUNT(self->ops) > self->opsize) {
+    while (VEC_COUNT(self->ops) > self->opsize) {
         int is_break = 1;
-        lk_instr_t *top = darray_ptr_peek(self->ops);
-        darray_t *topstr = DARRAY(top->v);
+        lk_instr_t *top = vec_ptr_peek(self->ops);
+        vec_t *topstr = VEC(top->v);
         lk_prec_t *prev = getprec(self, top);
 
         if (op == NULL)
@@ -209,7 +209,7 @@ static lk_prec_t *shiftreduce(lk_parser_t *self, lk_instr_t *op) {
             if (curr != NULL)
                 curr_level = curr->level;
             else {
-                if (darray_str_get(topstr, -1) == '=')
+                if (vec_str_get(topstr, -1) == '=')
                     curr_level = 10000;
                 else
                     curr_level = 30000;
@@ -220,7 +220,7 @@ static lk_prec_t *shiftreduce(lk_parser_t *self, lk_instr_t *op) {
                 assoc = prev->assoc;
 
             } else {
-                if (darray_str_get(topstr, -1) == '=') {
+                if (vec_str_get(topstr, -1) == '=') {
                     prev_level = 10000;
                     assoc = LK_PREC_ASSOC_RIGHT;
 
@@ -242,22 +242,22 @@ static lk_prec_t *shiftreduce(lk_parser_t *self, lk_instr_t *op) {
         if (is_break)
             break;
         else {
-            lk_instr_t *arg = darray_ptr_pop(self->words);
-            lk_instr_t *last = darray_ptr_peek(self->words);
+            lk_instr_t *arg = vec_ptr_pop(self->words);
+            lk_instr_t *last = vec_ptr_peek(self->words);
 
-            darray_ptr_pop(self->ops);
+            vec_ptr_pop(self->ops);
             top->v = LK_OBJ(getbinaryop(self, LK_STRING(top->v)));
-            topstr = DARRAY(top->v);
+            topstr = VEC(top->v);
 
             // rec / arg -> rec /arg
             if ((arg->type == LK_INSTRTYPE_SCOPEMSG || arg->type == LK_INSTRTYPE_STRING) &&
-                darray_str_cmp_cstr(topstr, "send") == 0) {
+                vec_str_cmp_cstr(topstr, "send") == 0) {
                 top = arg;
                 top->type = LK_INSTRTYPE_APPLYMSG;
                 goto gotarg;
 
                 // rec ? arg -> rec ? { arg }
-            } else if (arg->type != LK_INSTRTYPE_FUNC && darray_str_cmp_cstr(topstr, "?") == 0) {
+            } else if (arg->type != LK_INSTRTYPE_FUNC && vec_str_cmp_cstr(topstr, "?") == 0) {
                 arg = lk_instr_new_func(self, arg);
             }
             arg = lk_instr_new_arglist(self, arg);
@@ -271,7 +271,7 @@ static lk_prec_t *shiftreduce(lk_parser_t *self, lk_instr_t *op) {
 
     // shift
     if (op != NULL)
-        darray_ptr_push(self->ops, op);
+        vec_ptr_push(self->ops, op);
     return curr;
 }
 
@@ -287,7 +287,7 @@ static const tokentype_t miscmap[] = {
     /*  64 */ NONE,        NONE,      NONE, NONE,         NONE,       NONE,       NONE, NONE,
     /*  72 */ NONE,        NONE,      NONE, NONE,         NONE,       NONE,       NONE, NONE,
     /*  80 */ NONE,        NONE,      NONE, NONE,         NONE,       NONE,       NONE, NONE,
-    /*  88 */ NONE,        NONE,      NONE, DARRAY_BEGIN, NONE,       DARRAY_END, NONE, NONE,
+    /*  88 */ NONE,        NONE,      NONE, VEC_BEGIN, NONE,       VEC_END, NONE, NONE,
     /*  96 */ NONE,        NONE,      NONE, NONE,         NONE,       NONE,       NONE, NONE,
     /* 104 */ NONE,        NONE,      NONE, NONE,         NONE,       NONE,       NONE, NONE,
     /* 112 */ NONE,        NONE,      NONE, NONE,         NONE,       NONE,       NONE, NONE,
@@ -542,25 +542,25 @@ static void readtoken(lk_parser_t *self) {
         (type = readtoken_num(self)) != NONE) {
         lk_str_t *tok = LK_STRING(lk_obj_clone(LK_OBJ(self->text)));
 
-        darray_slice(DARRAY(tok), lastpos, self->textpos - lastpos);
+        vec_slice(VEC(tok), lastpos, self->textpos - lastpos);
 
-        if (type == OP && (darray_str_cmp_cstr(DARRAY(tok), "---") == 0 || darray_str_cmp_cstr(DARRAY(tok), "|") == 0))
+        if (type == OP && (vec_str_cmp_cstr(VEC(tok), "---") == 0 || vec_str_cmp_cstr(VEC(tok), "|") == 0))
             type = FUNC_SEP;
-        darray_ptr_push(self->tokentypes, (void *)type);
-        darray_ptr_push(self->tokenvalues, tok);
+        vec_ptr_push(self->tokentypes, (void *)type);
+        vec_ptr_push(self->tokenvalues, tok);
         lk_obj_add_ref(LK_OBJ(self), LK_OBJ(tok));
     }
 }
 
 static lk_str_t *getnexttoken(lk_parser_t *self, tokentype_t type) {
-    darray_t *tt = self->tokentypes;
+    vec_t *tt = self->tokentypes;
 
-    if (DARRAY_COUNT(tt) < 1)
+    if (VEC_COUNT(tt) < 1)
         readtoken(self);
 
-    if ((tokentype_t)(intptr_t)darray_ptr_get(tt, 0) == type) {
-        darray_ptr_shift(tt);
-        return darray_ptr_shift(self->tokenvalues);
+    if ((tokentype_t)(intptr_t)vec_ptr_get(tt, 0) == type) {
+        vec_ptr_shift(tt);
+        return vec_ptr_shift(self->tokenvalues);
     }
     return NULL;
 }
@@ -572,8 +572,8 @@ static READFUNC(readpad) {
     if ((tok = getnexttoken(self, WS2)) != NULL)
         return 1;
     else if ((tok = getnexttoken(self, COMMENT)) != NULL) {
-        darray_remove(DARRAY(tok), 0);
-        darray_ptr_push(self->comments, tok);
+        vec_remove(VEC(tok), 0);
+        vec_ptr_push(self->comments, tok);
         return 1;
     }
     return 0;
@@ -585,7 +585,7 @@ static READFUNC(readmessage);
 static READFUNC(readexpr) {
     int old_opsize = self->opsize;
 
-    self->opsize = DARRAY_COUNT(self->ops);
+    self->opsize = VEC_COUNT(self->ops);
 
     if (readobj(self)) {
         lk_instr_t *last;
@@ -594,7 +594,7 @@ static READFUNC(readexpr) {
             if (!readmessage(self))
                 break;
         shiftreduce(self, NULL);
-        last = darray_ptr_peek(self->words);
+        last = vec_ptr_peek(self->words);
 
         while (last->next != NULL)
             last = last->next;
@@ -617,7 +617,7 @@ static lk_instr_t *getexprs(lk_parser_t *self, tokentype_t separator) {
     while (readexpr(self)) {
         while (last->next != NULL)
             last = last->next;
-        expr = darray_ptr_pop(self->words);
+        expr = vec_ptr_pop(self->words);
         (last->next = expr)->prev = last;
         last = expr;
 
@@ -638,7 +638,7 @@ static READFUNC(readgroup) {
 
         list->type = LK_INSTRTYPE_GROUP;
         list->v = LK_OBJ(getexprs(self, TERMINATOR));
-        darray_ptr_push(self->words, list);
+        vec_ptr_push(self->words, list);
 
         if (getnexttoken(self, GROUP_END) != NULL)
             return 1;
@@ -649,16 +649,16 @@ static READFUNC(readgroup) {
 
 // [ expr1; expr2; expr3; ... ]
 static READFUNC(readlist) {
-    if (getnexttoken(self, DARRAY_BEGIN) == NULL)
+    if (getnexttoken(self, VEC_BEGIN) == NULL)
         return 0;
     else {
         lk_instr_t *list = lk_instr_new(self);
 
         list->type = LK_INSTRTYPE_LIST;
         list->v = LK_OBJ(getexprs(self, TERMINATOR));
-        darray_ptr_push(self->words, list);
+        vec_ptr_push(self->words, list);
 
-        if (getnexttoken(self, DARRAY_END) != NULL)
+        if (getnexttoken(self, VEC_END) != NULL)
             return 1;
         else
             lk_vm_raise_cstr(VM, "Cannot find ] to close list");
@@ -691,7 +691,7 @@ static READFUNC(readfunc) {
             } else if (readexpr(self)) {
                 while (last->next != NULL)
                     last = last->next;
-                expr = darray_ptr_pop(self->words);
+                expr = vec_ptr_pop(self->words);
                 (last->next = expr)->prev = last;
                 last = expr;
                 isbreak = !(self->isterminated || getnexttoken(self, TERMINATOR)) != NONE;
@@ -708,7 +708,7 @@ static READFUNC(readfunc) {
             first->next->prev = NULL;
         first = lk_instr_new_func(self, first->next);
         LK_LFUNC(first->v)->cf.sigdef = sigdef;
-        darray_ptr_push(self->words, first);
+        vec_ptr_push(self->words, first);
 
         if (getnexttoken(self, FUNC_END) != NULL)
             return 1;
@@ -754,7 +754,7 @@ static READFUNC(readmsg) {
 
     if (tok == NULL)
         return 0;
-    darray_ptr_push(self->words, lk_instr_new_scope_message(self, tok));
+    vec_ptr_push(self->words, lk_instr_new_scope_message(self, tok));
     return 1;
 }
 
@@ -769,10 +769,10 @@ static READFUNC(readunaryop) {
         lk_vm_raise_cstr(VM, "Cannot find expression after unary operator");
 
     } else {
-        lk_instr_t *arg = darray_ptr_peek(self->words);
+        lk_instr_t *arg = vec_ptr_peek(self->words);
 
         // /arg[] -> /arg[]
-        if (darray_str_cmp_cstr(DARRAY(tok), ".") == 0) {
+        if (vec_str_cmp_cstr(VEC(tok), ".") == 0) {
             arg->type = LK_INSTRTYPE_SELFMSG;
 
             // +arg[] -> arg[] /+[]
@@ -795,7 +795,7 @@ static READFUNC(readchar) {
         return 0;
     else {
         lk_str_unescape(tok);
-        darray_ptr_push(self->words, lk_instr_new_char(self, darray_str_get(DARRAY(tok), 2)));
+        vec_ptr_push(self->words, lk_instr_new_char(self, vec_str_get(VEC(tok), 2)));
         return 1;
     }
 }
@@ -808,12 +808,12 @@ static READFUNC(readnum) {
     else {
         num_t num;
 
-        switch (num_new(DARRAY(tok), &num)) {
+        switch (num_new(VEC(tok), &num)) {
         case NUM_TYPE_INT:
-            darray_ptr_push(self->words, lk_instr_new_number(self, num.i));
+            vec_ptr_push(self->words, lk_instr_new_number(self, num.i));
             break;
         case NUM_TYPE_DOUBLE:
-            darray_ptr_push(self->words, lk_instr_new_number(self, num.d));
+            vec_ptr_push(self->words, lk_instr_new_number(self, num.d));
             break;
         default:
             BUG("Invalid num type while trying to parse code.\n");
@@ -828,9 +828,9 @@ static READFUNC(readstr) {
     if (tok == NULL)
         return 0;
     else {
-        darray_slice(DARRAY(tok), 1, -1);
+        vec_slice(VEC(tok), 1, -1);
         lk_str_unescape(tok);
-        darray_ptr_push(self->words, lk_instr_new_str(self, tok));
+        vec_ptr_push(self->words, lk_instr_new_str(self, tok));
         return 1;
     }
 }
@@ -843,11 +843,11 @@ static READFUNC(readobj) {
 
     if (readchar(self) || readnum(self) || readstr(self) || readgroup(self) || readlist(self) || readfunc(self) ||
         readmsg(self) || readunaryop(self)) {
-        if (DARRAY_COUNT(self->words) > 0) {
-            lk_instr_t *o = LK_INSTR(darray_ptr_peek(self->words));
+        if (VEC_COUNT(self->words) > 0) {
+            lk_instr_t *o = LK_INSTR(vec_ptr_peek(self->words));
 
             if (o->type == LK_INSTRTYPE_GROUP) {
-                o = LK_INSTR(LK_INSTR(darray_ptr_pop(self->words))->v);
+                o = LK_INSTR(LK_INSTR(vec_ptr_pop(self->words))->v);
 
                 if (o == NULL) {
                     lk_vm_raise_cstr(VM, "Group must contain at least one expression");
@@ -864,7 +864,7 @@ static READFUNC(readobj) {
                         lk_vm_raise_cstr(VM, "Group cannot contain more than one expression");
 
                     } else {
-                        darray_ptr_push(self->words, o);
+                        vec_ptr_push(self->words, o);
                     }
                 }
             }
@@ -880,13 +880,13 @@ static READFUNC(readobj) {
                 if (!readgroup(self))
                     args = NULL;
                 else
-                    args = darray_ptr_pop(self->words);
+                    args = vec_ptr_pop(self->words);
 
                 while (readpad(self)) {
                 }
 
                 if (!self->isterminated && readfunc(self)) {
-                    lk_instr_t *f = darray_ptr_pop(self->words);
+                    lk_instr_t *f = vec_ptr_pop(self->words);
 
                     if (args == NULL)
                         args = lk_instr_new_arglist(self, f);
@@ -900,7 +900,7 @@ static READFUNC(readobj) {
                 }
 
                 if (args != NULL) {
-                    lk_instr_t *obj = darray_ptr_peek(self->words);
+                    lk_instr_t *obj = vec_ptr_peek(self->words);
 
                     args->type = LK_INSTRTYPE_APPLY;
 
@@ -931,11 +931,11 @@ lk_instr_t *lk_parser_parse(lk_parser_t *self, const lk_str_t *text) {
     self->textpos = 0;
     self->line = 1;
     self->column = 1;
-    darray_clear(self->tokentypes);
-    darray_clear(self->tokenvalues);
-    darray_clear(self->words);
-    darray_clear(self->ops);
-    darray_clear(self->comments);
+    vec_clear(self->tokentypes);
+    vec_clear(self->tokenvalues);
+    vec_clear(self->words);
+    vec_clear(self->ops);
+    vec_clear(self->comments);
     self->opsize = 0;
     self->isterminated = 0;
 
@@ -950,7 +950,7 @@ lk_instr_t *lk_parser_getmore(lk_parser_t *self) {
     lk_instr_t *first = NULL;
 
     if (readexpr(self)) {
-        lk_instr_t *instr = first = darray_ptr_pop(self->words);
+        lk_instr_t *instr = first = vec_ptr_pop(self->words);
         lk_str_t *tok;
 
         while (instr->next != NULL)
@@ -968,8 +968,8 @@ lk_instr_t *lk_parser_getmore(lk_parser_t *self) {
         lk_vm_raise_cstr(VM, "Cannot find terminator after expression");
     }
 done:
-    assert(DARRAY_COUNT(self->words) == 0);
-    assert(DARRAY_COUNT(self->ops) == 0);
+    assert(VEC_COUNT(self->words) == 0);
+    assert(VEC_COUNT(self->ops) == 0);
     return first;
 }
 
@@ -985,7 +985,7 @@ static lk_instr_t *applymacros(lk_parser_t *self, lk_instr_t *it) {
             it->v = LK_OBJ(applymacros(self, LK_INSTR(it->v)));
             /*
         } else if(it->type == LK_INSTRTYPE_SCOPEMSG
-               && darray_str_cmp_cstr(DARRAY(it->v), ".") == 0) {
+               && vec_str_cmp_cstr(VEC(it->v), ".") == 0) {
             lk_instr_t *msg = it->next;
             if(msg != NULL && msg->type == LK_INSTRTYPE_APPLYMSG) {
                 msg->type = LK_INSTRTYPE_SELFMSG;
@@ -995,8 +995,8 @@ static lk_instr_t *applymacros(lk_parser_t *self, lk_instr_t *it) {
             */
 
         } else if (it->type == LK_INSTRTYPE_APPLYMSG &&
-                   (darray_str_cmp_cstr(DARRAY(it->v), ":") == 0 || darray_str_cmp_cstr(DARRAY(it->v), "=") == 0 ||
-                    darray_str_cmp_cstr(DARRAY(it->v), ":=") == 0)) {
+                   (vec_str_cmp_cstr(VEC(it->v), ":") == 0 || vec_str_cmp_cstr(VEC(it->v), "=") == 0 ||
+                    vec_str_cmp_cstr(VEC(it->v), ":=") == 0)) {
             lk_instr_t *name = it->prev, *args = it->next;
 
             if (name->type == LK_INSTRTYPE_SELFMSG || name->type == LK_INSTRTYPE_SCOPEMSG ||
@@ -1016,7 +1016,7 @@ static lk_instr_t *applymacros(lk_parser_t *self, lk_instr_t *it) {
 
                 // var[] /: @[Object ] /= @[1 ] -> := @['var' Object 1 ]
                 if (nextop != NULL && nextop->type == LK_INSTRTYPE_APPLYMSG &&
-                    darray_str_cmp_cstr(DARRAY(nextop->v), "=") == 0) {
+                    vec_str_cmp_cstr(VEC(nextop->v), "=") == 0) {
                     lk_instr_t *a, *nextargs = nextop->next;
 
                     it->v = LK_OBJ(lk_str_new_from_cstr(LK_VM(it), ":="));
@@ -1045,7 +1045,7 @@ static lk_instr_t *applymacros(lk_parser_t *self, lk_instr_t *it) {
                 args->v = atargs->v;
             }
 
-        } else if (it->type == LK_INSTRTYPE_APPLYMSG && darray_str_cmp_cstr(DARRAY(it->v), "!") == 0) {
+        } else if (it->type == LK_INSTRTYPE_APPLYMSG && vec_str_cmp_cstr(VEC(it->v), "!") == 0) {
             // 1 /? @[2 ]  /! @[3 ]   -> 1 /? @[2 3 ]
             // op  add(a) it  args(b) ->   op  args
             lk_instr_t *args = it->next;
@@ -1063,7 +1063,7 @@ static lk_instr_t *applymacros(lk_parser_t *self, lk_instr_t *it) {
                         a = a->next;
 
                     // convert b to func if op is ? for short-circuiting
-                    if (b->type != LK_INSTRTYPE_FUNC && darray_str_cmp_cstr(DARRAY(op->v), "?") == 0) {
+                    if (b->type != LK_INSTRTYPE_FUNC && vec_str_cmp_cstr(VEC(op->v), "?") == 0) {
                         b = lk_instr_new_func(self, b);
                     }
                     (a->next = b)->prev = a;

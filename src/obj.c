@@ -12,7 +12,7 @@ void lk_obj_type_init(lk_vm_t *vm) {
     o->o.tag->vm = vm;
     o->o.tag->size = sizeof(lk_obj_t);
     o->o.parent = NULL;
-    darray_ptr_push(o->o.ancestors = darray_ptr_alloc(), o);
+    vec_ptr_push(o->o.ancestors = vec_ptr_alloc(), o);
 }
 
 // ext map - funcs
@@ -20,13 +20,13 @@ static void Ddefine_and_assignB_obj_str_obj_obj(lk_obj_t *self, lk_scope_t *loca
 
 static void Ddefine_obj_str_obj(lk_obj_t *self, lk_scope_t *local) {
     local->argc++;
-    darray_ptr_push(&local->stack, NIL);
+    vec_ptr_push(&local->stack, NIL);
     GOTO(Ddefine_and_assignB_obj_str_obj_obj);
 }
 
 static void Ddefine_and_assignB_obj_str_obj(lk_obj_t *self, lk_scope_t *local) {
     local->argc++;
-    darray_ptr_insert(&local->stack, 1, VM->t_obj);
+    vec_ptr_insert(&local->stack, 1, VM->t_obj);
     GOTO(Ddefine_and_assignB_obj_str_obj_obj);
 }
 
@@ -70,7 +70,7 @@ static void Dslots_obj(lk_obj_t *self, lk_scope_t *local) {
     lk_list_t *slots = lk_list_new(VM);
 
     if (self->o.slots != NULL) {
-        SET_EACH(self->o.slots, i, darray_ptr_push(DARRAY(slots), (void *)i->key););
+        SET_EACH(self->o.slots, i, vec_ptr_push(VEC(slots), (void *)i->key););
     }
     RETURN(slots);
 }
@@ -133,15 +133,15 @@ static void parents_obj(lk_obj_t *self, lk_scope_t *local) {
 
     } else {
         lk_list_t *ret = lk_list_new(VM);
-        darray_ptr_push(DARRAY(ret), self->o.parent);
+        vec_ptr_push(VEC(ret), self->o.parent);
         RETURN(ret);
     }
 }
 
 static void parent_obj(lk_obj_t *self, lk_scope_t *local) {
     if (LK_OBJ_HASPARENTS(self)) {
-        darray_t *pars = LK_OBJ_PARENTS(self);
-        RETURN(DARRAY_COUNT(pars) > 0 ? darray_ptr_get(pars, -1) : NIL);
+        vec_t *pars = LK_OBJ_PARENTS(self);
+        RETURN(VEC_COUNT(pars) > 0 ? vec_ptr_get(pars, -1) : NIL);
     }
     RETURN(self->o.parent);
 }
@@ -223,9 +223,9 @@ void lk_obj_just_free(lk_obj_t *self) {
     if (tag->free_func != NULL)
         tag->free_func(self);
     if (LK_OBJ_HASPARENTS(self))
-        darray_free(LK_OBJ_PARENTS(self));
+        vec_free(LK_OBJ_PARENTS(self));
     if (self->o.ancestors != NULL)
-        darray_free(self->o.ancestors);
+        vec_free(self->o.ancestors);
     if (self->o.slots != NULL)
         qphash_free(self->o.slots);
     if (--tag->refc < 1)
@@ -258,17 +258,17 @@ LK_OBJ_IMPLTAGSETTER(lk_tagfreefunc_t *, free_func);
 
 // update
 void lk_obj_extend(lk_obj_t *self, lk_obj_t *parent) {
-    darray_t *parents;
+    vec_t *parents;
 
     if (LK_OBJ_HASPARENTS(self)) {
         parents = LK_OBJ_PARENTS(self);
 
     } else {
-        parents = darray_ptr_alloc();
-        darray_ptr_push(parents, self->o.parent);
+        parents = vec_ptr_alloc();
+        vec_ptr_push(parents, self->o.parent);
         self->o.parent = LK_OBJ((ptrdiff_t)parents | 1); // lowest bit = multi-parent flag; requires 2-byte alignment
     }
-    darray_ptr_unshift(parents, parent);
+    vec_ptr_unshift(parents, parent);
 
     if (!lk_obj_calc_ancestors(self)) {
         printf("BUG: Throw proper ancestor err here\n");
@@ -280,7 +280,7 @@ struct lk_slot *lk_obj_setslot(lk_obj_t *self, lk_obj_t *k, lk_obj_t *check, lk_
     struct lk_slot *slot = lk_obj_getslot(self, k);
 
     if (slot == NULL) {
-        uint32_t first = darray_str_get(DARRAY(k), 0);
+        uint32_t first = vec_str_get(VEC(k), 0);
 
         if (self->o.slots == NULL) {
             self->o.slots = qphash_alloc(sizeof(struct lk_slot), lk_obj_hash_code, lk_obj_key_cmp);
@@ -327,101 +327,101 @@ void lk_obj_set_value_on_slot(lk_obj_t *self, struct lk_slot *slot, lk_obj_t *v)
 
 int lk_obj_calc_ancestors(lk_obj_t *self) {
     lk_obj_t *cand = NULL;
-    darray_t *pars;
-    darray_t *il, *newancs = darray_ptr_alloc(), *ol = darray_ptr_alloc();
+    vec_t *pars;
+    vec_t *il, *newancs = vec_ptr_alloc(), *ol = vec_ptr_alloc();
     int candi, j, k, olc, ilc;
 
-    il = darray_ptr_alloc();
-    darray_ptr_push(il, self);
-    darray_ptr_push(ol, il);
+    il = vec_ptr_alloc();
+    vec_ptr_push(il, self);
+    vec_ptr_push(ol, il);
 
     if (LK_OBJ_HASPARENTS(self)) {
         pars = LK_OBJ_PARENTS(self);
 
-        for (candi = 0; candi < DARRAY_COUNT(pars); candi++) {
-            cand = DARRAY_ATPTR(pars, candi);
-            il = darray_ptr_alloc();
+        for (candi = 0; candi < VEC_COUNT(pars); candi++) {
+            cand = VEC_ATPTR(pars, candi);
+            il = vec_ptr_alloc();
 
             if (cand->o.ancestors == NULL)
                 lk_obj_calc_ancestors(cand);
             if (cand->o.ancestors == NULL)
                 return 0;
-            darray_concat(il, cand->o.ancestors);
-            darray_ptr_push(ol, il);
+            vec_concat(il, cand->o.ancestors);
+            vec_ptr_push(ol, il);
         }
 
     } else {
         cand = self->o.parent;
 
         if (cand != NULL) {
-            il = darray_ptr_alloc();
+            il = vec_ptr_alloc();
 
             if (cand->o.ancestors == NULL)
                 lk_obj_calc_ancestors(cand);
             if (cand->o.ancestors == NULL)
                 return 0;
-            darray_concat(il, cand->o.ancestors);
-            darray_ptr_push(ol, il);
+            vec_concat(il, cand->o.ancestors);
+            vec_ptr_push(ol, il);
         }
     }
 
     if (LK_OBJ_HASPARENTS(self)) {
-        il = darray_ptr_alloc();
-        darray_concat(il, LK_OBJ_PARENTS(self));
-        darray_ptr_push(ol, il);
+        il = vec_ptr_alloc();
+        vec_concat(il, LK_OBJ_PARENTS(self));
+        vec_ptr_push(ol, il);
 
     } else {
         if (self->o.parent != NULL) {
-            il = darray_ptr_alloc();
-            darray_ptr_push(il, self->o.parent);
-            darray_ptr_push(ol, il);
+            il = vec_ptr_alloc();
+            vec_ptr_push(il, self->o.parent);
+            vec_ptr_push(ol, il);
         }
     }
 
 startover:
-    for (candi = 0, olc = DARRAY_COUNT(ol); candi < olc; candi++) {
-        il = DARRAY_ATPTR(ol, candi);
+    for (candi = 0, olc = VEC_COUNT(ol); candi < olc; candi++) {
+        il = VEC_ATPTR(ol, candi);
 
-        if (DARRAY_COUNT(il) < 1)
+        if (VEC_COUNT(il) < 1)
             continue;
-        cand = DARRAY_ATPTR(il, 0);
+        cand = VEC_ATPTR(il, 0);
 
         for (j = 0; j < olc; j++) {
-            il = DARRAY_ATPTR(ol, j);
+            il = VEC_ATPTR(ol, j);
 
-            for (k = 1, ilc = DARRAY_COUNT(il); k < ilc; k++) {
-                if (cand == DARRAY_ATPTR(il, k)) {
+            for (k = 1, ilc = VEC_COUNT(il); k < ilc; k++) {
+                if (cand == VEC_ATPTR(il, k)) {
                     cand = NULL;
                     goto nextcandidate;
                 }
             }
         }
 
-        darray_ptr_push(newancs, cand);
+        vec_ptr_push(newancs, cand);
 
         for (j = 0; j < olc; j++) {
-            il = DARRAY_ATPTR(ol, j);
+            il = VEC_ATPTR(ol, j);
 
-            for (k = 0, ilc = DARRAY_COUNT(il); k < ilc; k++) {
-                if (cand == darray_ptr_get(il, k))
-                    darray_ptr_remove(il, k--);
+            for (k = 0, ilc = VEC_COUNT(il); k < ilc; k++) {
+                if (cand == vec_ptr_get(il, k))
+                    vec_ptr_remove(il, k--);
             }
         }
 
         goto startover;
     nextcandidate:;
     }
-    for (j = 0; j < DARRAY_COUNT(ol); j++)
-        darray_free(DARRAY_ATPTR(ol, j));
-    darray_free(ol);
+    for (j = 0; j < VEC_COUNT(ol); j++)
+        vec_free(VEC_ATPTR(ol, j));
+    vec_free(ol);
 
     if (cand == NULL)
         return 0;
     else {
-        darray_t *oldancs = self->o.ancestors;
+        vec_t *oldancs = self->o.ancestors;
 
         if (oldancs != NULL)
-            darray_free(oldancs);
+            vec_free(oldancs);
         self->o.ancestors = newancs;
         return 1;
     }
@@ -457,7 +457,7 @@ static lk_cfunc_t *lk_obj_setcfunc(lk_obj_t *self, const char *name, lk_cfunc_lk
             cfuncobj->cf.maxargc = INT_MAX;
             break;
         }
-        darray_ptr_set(cfuncobj->cf.sigs, i, lk_sig_new(vm, NULL, arg));
+        vec_ptr_set(cfuncobj->cf.sigs, i, lk_sig_new(vm, NULL, arg));
     }
     return cfuncobj;
 }
@@ -491,10 +491,10 @@ void lk_obj_set_cfunc_cvoid(lk_obj_t *self, const char *name, ...) {
             self = self->o.parent; \
         } \
     checkancestors: { \
-        darray_t *ancs = self->o.ancestors; \
-        int i, c = DARRAY_COUNT(ancs); \
+        vec_t *ancs = self->o.ancestors; \
+        int i, c = VEC_COUNT(ancs); \
         for (i = 1; i < c; i++) { \
-            self = DARRAY_ATPTR(ancs, i); \
+            self = VEC_ATPTR(ancs, i); \
             check \
         } \
         return (nil); \
@@ -534,11 +534,11 @@ lk_obj_t *lk_obj_get_value_from_slot(lk_obj_t *self, struct lk_slot *slot) {
 }
 
 int lk_obj_hash_code(const void *k, int cap) {
-    return darray_hc(DARRAY(k)) % cap;
+    return vec_hc(VEC(k)) % cap;
 }
 
 int lk_obj_key_cmp(const void *self, const void *other) {
     if (self == other)
         return 0;
-    return !DARRAY_EQ(DARRAY(self), DARRAY(other));
+    return !VEC_EQ(VEC(self), VEC(other));
 }

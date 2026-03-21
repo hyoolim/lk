@@ -72,11 +72,11 @@ lk_obj_isa((self), (t)))
 #define LK_OBJ_HASONEPARENT(pars) ((ptrdiff_t)(pars) & 1)
 #define LK_OBJ_ONEPARENT(pars) LK_OBJ((ptrdiff_t)(pars) & ~1)
 #define LK_OBJ_PROTO(self) LK_OBJ_HASONEPARENT((self)->o.parents) \
-? LK_OBJ_ONEPARENT((self)->o.parents) : DARRAY_ATPTR((self)->o.parents, 0)
+? LK_OBJ_ONEPARENT((self)->o.parents) : VEC_ATPTR((self)->o.parents, 0)
  */
 #define LK_OBJ_HASPARENTS(self) ((ptrdiff_t)((self)->o.parent) & 1)
-#define LK_OBJ_PARENTS(self) ((darray_t *)((ptrdiff_t)((self)->o.parent) & ~1))
-#define LK_OBJ_PROTO(self) (LK_OBJ_HASPARENTS(self) ? darray_ptr_get(LK_OBJ_PARENTS(self), -1) : (self)->o.parent)
+#define LK_OBJ_PARENTS(self) ((vec_t *)((ptrdiff_t)((self)->o.parent) & ~1))
+#define LK_OBJ_PROTO(self) (LK_OBJ_HASPARENTS(self) ? vec_ptr_get(LK_OBJ_PARENTS(self), -1) : (self)->o.parent)
 #define LK_OBJ_ISA(self, t) \
     ((self) == (t) ? 1 : !LK_OBJ_HASPARENTS(self) && (self)->o.parent == (t) ? 2 : lk_obj_isa((self), (t)))
 #define LK_OBJ_ISCFUNC(self) ((self)->o.tag->alloc_func == LK_VM(self)->t_cfunc->o.tag->alloc_func)

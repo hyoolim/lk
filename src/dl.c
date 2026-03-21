@@ -19,7 +19,7 @@ void lk_dl_type_init(lk_vm_t *vm) {
 
 // new
 void lk_dl_init_with_path_and_func(lk_dl_t *self, lk_str_t *path, lk_str_t *funcname) {
-    void *dl = dlopen(darray_str_tocstr(DARRAY(path)), RTLD_NOW);
+    void *dl = dlopen(vec_str_tocstr(VEC(path)), RTLD_NOW);
 
     if (dl != NULL) {
         union {
@@ -28,7 +28,7 @@ void lk_dl_init_with_path_and_func(lk_dl_t *self, lk_str_t *path, lk_str_t *func
         } func;
 
         self->dl = dl;
-        func.p = dlsym(dl, darray_str_tocstr(DARRAY(funcname)));
+        func.p = dlsym(dl, vec_str_tocstr(VEC(funcname)));
 
         if (func.f != NULL) {
             func.f(VM);

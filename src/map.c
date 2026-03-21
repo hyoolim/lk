@@ -67,7 +67,7 @@ lk_obj_t *lk_map_getByCStringKey(lk_map_t *self, const char *k) {
 
 lk_list_t *lk_map_keys(lk_map_t *self) {
     lk_list_t *keys = lk_list_new(VM);
-    SET_EACH(QPHASH(self), i, darray_ptr_push(DARRAY(keys), (void *)i->key));
+    SET_EACH(QPHASH(self), i, vec_ptr_push(VEC(keys), (void *)i->key));
     return keys;
 }
 
@@ -77,7 +77,7 @@ lk_num_t *lk_map_size(lk_map_t *self) {
 
 lk_list_t *lk_map_values(lk_map_t *self) {
     lk_list_t *values = lk_list_new(VM);
-    SET_EACH(QPHASH(self), i, darray_ptr_push(DARRAY(values), SETITEM_VALUE(lk_obj_t *, i)));
+    SET_EACH(QPHASH(self), i, vec_ptr_push(VEC(values), SETITEM_VALUE(lk_obj_t *, i)));
     return values;
 }
 

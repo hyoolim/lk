@@ -1,5 +1,5 @@
-#ifndef LK_DARRAY_H
-#define LK_DARRAY_H
+#ifndef LK_VEC_H
+#define LK_VEC_H
 #include "types.h"
 
 // type
@@ -8,7 +8,7 @@ void lk_list_lib_init(lk_vm_t *vm);
 
 // new
 lk_list_t *lk_list_new(lk_vm_t *vm);
-lk_list_t *lk_list_new_from_darray(lk_vm_t *vm, darray_t *from);
+lk_list_t *lk_list_new_from_darray(lk_vm_t *vm, vec_t *from);
 lk_list_t *lk_list_new_from_argv(lk_vm_t *vm, int argc, const char **argv);
 
 // update

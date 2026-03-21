@@ -24,7 +24,7 @@ lk_dir_t *lk_dir_new_with_path(lk_vm_t *vm, lk_str_t *path) {
 void lk_dir_init(lk_dir_t *self, lk_str_t *path) {
     int at = 0, nextat;
 
-    if (darray_str_get(DARRAY(path), 0) == '/') {
+    if (vec_str_get(VEC(path), 0) == '/') {
         self->path = path;
 
     } else {
@@ -32,17 +32,17 @@ void lk_dir_init(lk_dir_t *self, lk_str_t *path) {
 
         if (getcwd(buf, 1000) != NULL) {
             lk_str_t *abs = lk_str_new_from_cstr(VM, buf);
-            darray_concat(DARRAY(abs), DARRAY(VM->str_filesep));
-            darray_concat(DARRAY(abs), DARRAY(path));
+            vec_concat(VEC(abs), VEC(VM->str_filesep));
+            vec_concat(VEC(abs), VEC(path));
             self->path = abs;
         }
     }
 
-    while ((nextat = darray_str_find(DARRAY(self->path), '/', at)) > -1) {
+    while ((nextat = vec_str_find(VEC(self->path), '/', at)) > -1) {
         at = nextat + 1;
     }
-    self->name = lk_str_new_from_darray(VM, DARRAY(self->path));
-    darray_offset(DARRAY(self->name), at);
+    self->name = lk_str_new_from_darray(VM, VEC(self->path));
+    vec_offset(VEC(self->name), at);
 }
 
 // update
@@ -74,14 +74,14 @@ lk_list_t *lk_dir_items(lk_dir_t *self) {
 
         } else if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
             lk_str_t *path = lk_str_new_from_cstr(VM, entry->d_name);
-            darray_setrange(DARRAY(path), 0, 0, DARRAY(VM->str_filesep));
-            darray_setrange(DARRAY(path), 0, 0, DARRAY(self->path));
+            vec_setrange(VEC(path), 0, 0, VEC(VM->str_filesep));
+            vec_setrange(VEC(path), 0, 0, VEC(self->path));
 
             if (stat(CSTRING(path), &info) == 0 && S_ISDIR(info.st_mode)) {
-                darray_ptr_push(DARRAY(items), lk_dir_new_with_path(VM, path));
+                vec_ptr_push(VEC(items), lk_dir_new_with_path(VM, path));
 
             } else {
-                darray_ptr_push(DARRAY(items), lk_file_new_with_path(VM, path));
+                vec_ptr_push(VEC(items), lk_file_new_with_path(VM, path));
             }
         }
     }

@@ -22,7 +22,7 @@ lk_charset_t *lk_charset_new(lk_vm_t *vm) {
 }
 
 void lk_charset_init_str(lk_obj_t *self, lk_str_t *str) {
-    charset_add_darray(CHARSET(self), DARRAY(str));
+    charset_add_darray(CHARSET(self), VEC(str));
 }
 
 // update
@@ -31,7 +31,7 @@ void lk_charset_add_charset(lk_obj_t *self, lk_charset_t *other) {
 }
 
 void lk_charset_add_str(lk_obj_t *self, lk_str_t *str) {
-    charset_add_darray(CHARSET(self), DARRAY(str));
+    charset_add_darray(CHARSET(self), VEC(str));
 }
 
 void lk_charset_negate(lk_obj_t *self) {
@@ -43,7 +43,7 @@ void lk_charset_subtract_charset(lk_obj_t *self, lk_charset_t *other) {
 }
 
 void lk_charset_subtract_str(lk_obj_t *self, lk_str_t *other) {
-    charset_subtract_darray(CHARSET(self), DARRAY(other));
+    charset_subtract_darray(CHARSET(self), VEC(other));
 }
 
 // info
@@ -52,19 +52,19 @@ lk_bool_t *lk_charset_has_char(lk_obj_t *self, lk_char_t *achar) {
 }
 
 lk_bool_t *lk_charset_has_str(lk_obj_t *self, lk_str_t *str) {
-    darray_t *darray = DARRAY(str);
-    DARRAY_EACH(darray, i, v, {
+    vec_t *darray = VEC(str);
+    VEC_EACH(darray, i, v, {
         (void)v;
-        if (!charset_has(CHARSET(self), darray_str_get(darray, i)))
+        if (!charset_has(CHARSET(self), vec_str_get(darray, i)))
             return FALSE;
     });
     return TRUE;
 }
 
 lk_str_t *lk_charset_to_str(lk_obj_t *self) {
-    darray_t *base = charset_tostr(CHARSET(self));
+    vec_t *base = charset_tostr(CHARSET(self));
     lk_str_t *lk = lk_str_new_from_darray(LK_VM(self), base);
-    darray_free(base);
+    vec_free(base);
     return lk;
 }
 

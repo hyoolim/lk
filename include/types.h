@@ -1,7 +1,7 @@
 #ifndef LK_TYPES_H
 #define LK_TYPES_H
 #include "rt/common.h"
-#include "rt/darray.h"
+#include "rt/vec.h"
 #include "rt/num.h"
 #include "rt/qphash.h"
 
@@ -56,7 +56,7 @@ struct lk_objgroup {
 };
 struct lk_common {
     lk_obj_t *parent;
-    darray_t *ancestors;
+    vec_t *ancestors;
     qphash_t *slots;
     struct lk_tag *tag;
     struct {
@@ -105,7 +105,7 @@ typedef void lk_cfuncfunc_t(lk_obj_t *self, lk_scope_t *local);
 #define LK_INSTROEND (1 << 1)
 #define LK_DL(obj) ((lk_dl_t *)(obj))
 #define LK_LIST(obj) ((lk_list_t *)(obj))
-#define LK_DARRAY(obj) ((lk_list_t *)(obj))
+#define LK_VEC(obj) ((lk_list_t *)(obj))
 #define LK_MAP(obj) ((lk_map_t *)(obj))
 #define LK_NUMBER(obj) ((lk_num_t *)(obj))
 #define LK_OBJ(obj) ((lk_obj_t *)(obj))

@@ -9,11 +9,11 @@ struct lk_parser {
     const char *err;
     qphash_t *binaryops;
     qphash_t *precs;
-    darray_t *tokentypes;
-    darray_t *tokenvalues;
-    darray_t *words;
-    darray_t *ops;
-    darray_t *comments;
+    vec_t *tokentypes;
+    vec_t *tokenvalues;
+    vec_t *words;
+    vec_t *ops;
+    vec_t *comments;
     int textpos;
     int line;
     int column;

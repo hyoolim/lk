@@ -223,17 +223,17 @@ void charset_add_charset(charset_t *self, charset_t *other) {
 }
 
 // add all the chars in the specified str to this charset
-void charset_add_darray(charset_t *self, darray_t *str) {
+void charset_add_darray(charset_t *self, vec_t *str) {
     int c = str->size;
 
     if (c > 0) {
         int i = 0;
-        uint32_t v = darray_str_get(str, i);
+        uint32_t v = vec_str_get(str, i);
 
         while (i < c) {
-            v = darray_str_get(str, i++);
+            v = vec_str_get(str, i++);
             (CHARSET_IS_INVERTED(self) ? charset_remove : charset_insert)(
-                self, v, i < c && darray_str_get(str, i) == '-' ? darray_str_get(str, (i += 2) - 1) : v);
+                self, v, i < c && vec_str_get(str, i) == '-' ? vec_str_get(str, (i += 2) - 1) : v);
         }
     }
 }
@@ -268,17 +268,17 @@ void charset_subtract_charset(charset_t *self, charset_t *other) {
 }
 
 // charset_remove all the chars in the specified str from this charset
-void charset_subtract_darray(charset_t *self, darray_t *str) {
+void charset_subtract_darray(charset_t *self, vec_t *str) {
     int c = str->size;
 
     if (c > 0) {
         int i = 0;
-        uint32_t v = darray_str_get(str, i);
+        uint32_t v = vec_str_get(str, i);
 
         while (i < c) {
-            v = darray_str_get(str, i++);
+            v = vec_str_get(str, i++);
             (CHARSET_IS_INVERTED(self) ? charset_insert : charset_remove)(
-                self, v, i < c && darray_str_get(str, i) == '-' ? darray_str_get(str, (i += 2) - 1) : v);
+                self, v, i < c && vec_str_get(str, i) == '-' ? vec_str_get(str, (i += 2) - 1) : v);
         }
     }
 }
@@ -343,24 +343,24 @@ int charset_size(const charset_t *self) {
 }
 
 // str representation of the str
-darray_t *charset_tostr(const charset_t *self) {
-    darray_t *str = darray_str_alloc();
+vec_t *charset_tostr(const charset_t *self) {
+    vec_t *str = vec_str_alloc();
     uint32_t from, to;
     uint32_t *curr = CHARSET_DATA(self), *last = curr + self->size;
 
     if (CHARSET_IS_INVERTED(self))
-        darray_str_set(str, str->size, '^');
+        vec_str_set(str, str->size, '^');
 
     for (; curr < last;) {
         from = *curr++;
         to = *curr++;
 
         if (from == to)
-            darray_str_set(str, str->size, from);
+            vec_str_set(str, str->size, from);
         else {
-            darray_str_set(str, str->size, from);
-            darray_str_set(str, str->size, '-');
-            darray_str_set(str, str->size, to);
+            vec_str_set(str, str->size, from);
+            vec_str_set(str, str->size, '-');
+            vec_str_set(str, str->size, to);
         }
     }
     return str;

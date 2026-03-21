@@ -11,8 +11,8 @@
 
 // ext map - types
 static LK_OBJ_DEFMARKFUNC(mark_scope) {
-    if (DARRAY_ISINIT(SCOPESTACK))
-        DARRAY_EACH_PTR(SCOPESTACK, i, v, mark(v));
+    if (VEC_ISINIT(SCOPESTACK))
+        VEC_EACH_PTR(SCOPESTACK, i, v, mark(v));
     mark(LK_OBJ(SCOPE->scope));
     mark(LK_OBJ(SCOPE->receiver));
     mark(LK_OBJ(SCOPE->self));
@@ -26,8 +26,8 @@ static LK_OBJ_DEFMARKFUNC(mark_scope) {
 }
 
 static void free_scope(lk_obj_t *self) {
-    if (DARRAY_ISINIT(SCOPESTACK))
-        darray_fin(SCOPESTACK);
+    if (VEC_ISINIT(SCOPESTACK))
+        vec_fin(SCOPESTACK);
 }
 
 void lk_scope_type_init(lk_vm_t *vm) {
@@ -38,12 +38,12 @@ void lk_scope_type_init(lk_vm_t *vm) {
 
 // ext map - funcs
 static void Dargs_scope(lk_obj_t *self, lk_scope_t *local) {
-    if (!DARRAY_ISINIT(SCOPESTACK))
+    if (!VEC_ISINIT(SCOPESTACK))
         RETURN(lk_list_new(VM));
     else {
         lk_list_t *args = lk_list_new_from_darray(VM, SCOPESTACK);
 
-        darray_limit(DARRAY(args), SCOPE->argc);
+        vec_limit(VEC(args), SCOPE->argc);
         RETURN(args);
     }
 }
@@ -75,7 +75,7 @@ static void DassignB_scope_str_obj(lk_obj_t *self, lk_scope_t *local) {
 }
 
 static void include_scope_str_str(lk_obj_t *self, lk_scope_t *local) {
-    lk_scope_t *fr = lk_vm_eval_file(VM, darray_str_tocstr(DARRAY(ARG(0))), darray_str_tocstr(DARRAY(ARG(1))));
+    lk_scope_t *fr = lk_vm_eval_file(VM, vec_str_tocstr(VEC(ARG(0))), vec_str_tocstr(VEC(ARG(1))));
 
     if (fr != NULL) {
         qphash_t *from = fr->o.slots;
@@ -105,14 +105,14 @@ static void raise_scope_str(lk_obj_t *self, lk_scope_t *local) {
 
 static void redo_scope(lk_obj_t *self, lk_scope_t *local) {
     (void)local;
-    if (DARRAY_ISINIT(SCOPESTACK))
-        darray_clear(SCOPESTACK);
+    if (VEC_ISINIT(SCOPESTACK))
+        vec_clear(SCOPESTACK);
     SCOPE->next = SCOPE->first;
     DONE;
 }
 
 static void require_scope_str_str(lk_obj_t *self, lk_scope_t *local) {
-    RETURN(lk_vm_eval_file(VM, darray_str_tocstr(DARRAY(ARG(0))), darray_str_tocstr(DARRAY(ARG(1)))));
+    RETURN(lk_vm_eval_file(VM, vec_str_tocstr(VEC(ARG(0))), vec_str_tocstr(VEC(ARG(1)))));
 }
 
 static void rescue_scope_f(lk_obj_t *self, lk_scope_t *local) {
@@ -150,10 +150,10 @@ static void return_scope(lk_obj_t *self, lk_scope_t *local) {
     SCOPE->next = NULL;
     SCOPE->returnto = f;
 
-    if (DARRAY_ISINIT(&local->stack)) {
-        if (!DARRAY_ISINIT(SCOPESTACK))
-            darray_ptr_init(SCOPESTACK);
-        darray_concat(SCOPESTACK, &local->stack);
+    if (VEC_ISINIT(&local->stack)) {
+        if (!VEC_ISINIT(SCOPESTACK))
+            vec_ptr_init(SCOPESTACK);
+        vec_concat(SCOPESTACK, &local->stack);
     }
 
     DONE;
@@ -196,7 +196,7 @@ lk_scope_t *lk_scope_new(lk_vm_t *vm) {
         vm->stat.recycledscopes++;
         self = parent->child;
         self->o.parent = LK_OBJ(parent);
-        darray_clear(&self->stack);
+        vec_clear(&self->stack);
 
         if (self->o.slots != NULL) {
             qphash_clear(self->o.slots);
@@ -219,32 +219,32 @@ lk_scope_t *lk_scope_new(lk_vm_t *vm) {
 
 void lk_scope_stack_push(lk_scope_t *self, lk_obj_t *v) {
     assert(v != NULL);
-    if (!DARRAY_ISINIT(&self->stack))
-        darray_ptr_init(&self->stack);
-    darray_ptr_push(&self->stack, lk_obj_add_ref(LK_OBJ(self), v));
+    if (!VEC_ISINIT(&self->stack))
+        vec_ptr_init(&self->stack);
+    vec_ptr_push(&self->stack, lk_obj_add_ref(LK_OBJ(self), v));
 }
 
 // update
 lk_obj_t *lk_scope_stack_pop(lk_scope_t *self) {
-    assert(DARRAY_ISINIT(&self->stack));
-    assert(DARRAY_COUNT(&self->stack) > 0);
-    return darray_ptr_pop(&self->stack);
+    assert(VEC_ISINIT(&self->stack));
+    assert(VEC_COUNT(&self->stack) > 0);
+    return vec_ptr_pop(&self->stack);
 }
 
 lk_obj_t *lk_scope_stack_peek(lk_scope_t *self) {
     lk_vm_t *vm = LK_VM(self);
 
-    if (!DARRAY_ISINIT(&self->stack))
+    if (!VEC_ISINIT(&self->stack))
         return vm->t_nil;
-    if (DARRAY_COUNT(&self->stack) < 1)
+    if (VEC_COUNT(&self->stack) < 1)
         return vm->t_nil;
-    return darray_ptr_peek(&self->stack);
+    return vec_ptr_peek(&self->stack);
 }
 
 lk_list_t *lk_scope_stack_to_list(lk_scope_t *self) {
     lk_list_t *stack = lk_list_new(LK_VM(self));
 
-    if (DARRAY_ISINIT(&self->stack))
-        darray_copy(DARRAY(stack), &self->stack);
+    if (VEC_ISINIT(&self->stack))
+        vec_copy(VEC(stack), &self->stack);
     return stack;
 }

@@ -122,7 +122,7 @@ static void system_vm(lk_obj_t *self, lk_scope_t *local) {
         char **args = mem_alloc(sizeof(char *) * (c + 1));
 
         for (int i = 0; i < c; i++) {
-            args[i] = (char *)darray_str_tocstr(DARRAY(ARG(i)));
+            args[i] = (char *)vec_str_tocstr(VEC(ARG(i)));
         }
 
         execvp(args[0], args);
@@ -131,7 +131,7 @@ static void system_vm(lk_obj_t *self, lk_scope_t *local) {
 }
 
 static void system2_vm_str(lk_obj_t *self, lk_scope_t *local) {
-    FILE *out = popen(darray_str_tocstr(DARRAY(ARG(0))), "r");
+    FILE *out = popen(vec_str_tocstr(VEC(ARG(0))), "r");
 
     if (out != NULL) {
         char ret[4096];
@@ -271,21 +271,21 @@ lk_scope_t *lk_vm_eval_file(lk_vm_t *self, const char *file, const char *base) {
 
     if (base != NULL && file[0] != '/') {
         lk_str_t *root = lk_str_new_from_cstr(self, base);
-        int pslen = DARRAY_COUNT(DARRAY(self->str_filesep));
-        int pos = darray_find_darray(DARRAY(root), DARRAY(self->str_filesep), 0);
+        int pslen = VEC_COUNT(VEC(self->str_filesep));
+        int pos = vec_find_darray(VEC(root), VEC(self->str_filesep), 0);
 
         if (pos > 0) {
             lk_str_t *orig = filename;
 
-            root = lk_str_new_from_darray(self, DARRAY(root));
+            root = lk_str_new_from_darray(self, VEC(root));
             pos += pslen;
 
-            for (int i; (i = darray_find_darray(DARRAY(root), DARRAY(self->str_filesep), pos)) > 0;)
+            for (int i; (i = vec_find_darray(VEC(root), VEC(self->str_filesep), pos)) > 0;)
                 pos = i + pslen;
 
-            darray_slice(DARRAY(root), 0, pos);
-            darray_resizeitem(DARRAY(root), DARRAY(orig));
-            darray_concat(DARRAY(root), DARRAY(orig));
+            vec_slice(VEC(root), 0, pos);
+            vec_resizeitem(VEC(root), VEC(orig));
+            vec_concat(VEC(root), VEC(orig));
             filename = root;
         }
     }
@@ -294,7 +294,7 @@ lk_scope_t *lk_vm_eval_file(lk_vm_t *self, const char *file, const char *base) {
         lk_scope_t *fr;
         struct lk_rsrcchain rsrc;
         FILE *stream;
-        const char *cfilename = darray_str_tocstr(DARRAY(filename));
+        const char *cfilename = vec_str_tocstr(VEC(filename));
 
         rsrc.isstr = 0;
         rsrc.rsrc = filename;
@@ -303,13 +303,13 @@ lk_scope_t *lk_vm_eval_file(lk_vm_t *self, const char *file, const char *base) {
         stream = fopen(cfilename, "r");
 
         if (stream != NULL) {
-            darray_t *src = darray_str_alloc_fromfile(stream);
+            vec_t *src = vec_str_alloc_fromfile(stream);
 
             fclose(stream);
 
             if (src != NULL) {
                 fr = eval(self, lk_str_new_from_darray(self, src));
-                darray_free(src);
+                vec_free(src);
                 self->rsrc = self->rsrc->prev;
                 return fr;
 
@@ -343,7 +343,7 @@ lk_scope_t *lk_vm_eval_str(lk_vm_t *self, const char *code) {
 static void call_cfunc(lk_vm_t *vm, lk_scope_t *self, lk_cfunc_t *cf, lk_scope_t *args) {
     lk_obj_t *recv = args->receiver;
     int argc = args->argc;
-#define A(i) LK_OBJ(DARRAY_ATPTR(&args->stack, (i)))
+#define A(i) LK_OBJ(VEC_ATPTR(&args->stack, (i)))
 
     if (cf->cc == LK_CFUNC_CC_CVOID) {
         switch (argc) {
@@ -411,7 +411,7 @@ static void call_cfunc(lk_vm_t *vm, lk_scope_t *self, lk_cfunc_t *cf, lk_scope_t
    eval loop) and both branches end with goto nextinstr. */
 #define CALLFUNC(self, func, args) \
     do { \
-        (args)->argc = DARRAY_ISINIT(&(args)->stack) ? DARRAY_COUNT(&(args)->stack) : 0; \
+        (args)->argc = VEC_ISINIT(&(args)->stack) ? VEC_COUNT(&(args)->stack) : 0; \
         if (LK_OBJ_ISCFUNC(LK_OBJ(func))) { \
             call_cfunc(vm, self, LK_CFUNC(func), args); \
         } else { \
@@ -438,7 +438,7 @@ void lk_vm_do_eval_func(lk_vm_t *vm) {
     qphash_t *slots;
     setitem_t *si;
     struct lk_slot *slot;
-    darray_t *ancs;
+    vec_t *ancs;
     lk_obj_t *recv, *r, *slotv;
     lk_func_t *func;
 
@@ -604,7 +604,7 @@ prevscope:
         // slot contains func obj - call?
         if (LK_OBJ_ISA(slotv, t_func) > 2 && LK_SLOT_CHECKOPTION(slot, LK_SLOTOPTION_AUTOSEND) &&
             (instr == NULL || instr->next == NULL || instr->next->type != LK_INSTRTYPE_APPLYMSG ||
-             darray_str_cmp_cstr(DARRAY(instr->next->v), "+=") != 0)) {
+             vec_str_cmp_cstr(VEC(instr->next->v), "+=") != 0)) {
         callfunc:
             if (args == NULL)
                 args = lk_scope_new(vm);
@@ -625,7 +625,7 @@ prevscope:
                     goto callfunc;
 
                     // call at/apply if there are args
-                } else if (DARRAY_ISINIT(&args->stack) && DARRAY_COUNT(&args->stack) > 0) {
+                } else if (VEC_ISINIT(&args->stack) && VEC_COUNT(&args->stack) > 0) {
                     msgn = vm->str_at;
                     recv = r = slotv;
                     ancs = NULL;
@@ -639,10 +639,10 @@ prevscope:
         }
     parent:
         if ((ancs = r->o.ancestors) != NULL) {
-            int ancc = DARRAY_COUNT(ancs);
+            int ancc = VEC_COUNT(ancs);
 
             for (int anci = 1; anci < ancc; anci++) {
-                r = DARRAY_ATPTR(ancs, anci);
+                r = VEC_ATPTR(ancs, anci);
                 if ((slots = r->o.slots) == NULL)
                     continue;
                 if ((si = qphash_get(slots, msg->v)) == NULL)
@@ -656,7 +656,7 @@ prevscope:
         }
 
         // forward:
-        if (DARRAY_EQ(DARRAY(msgn), DARRAY(vm->str_forward))) {
+        if (VEC_EQ(VEC(msgn), VEC(vm->str_forward))) {
             lk_vm_raise_cstr(vm, "Cannot find slot named %s", msg->v);
 
         } else {
@@ -685,11 +685,11 @@ void lk_vm_raise_cstr(lk_vm_t *self, const char *message, ...) {
             message++;
             switch (*message) {
             case 's':
-                darray_concat(DARRAY(err->message), DARRAY(va_arg(ap, lk_str_t *)));
+                vec_concat(VEC(err->message), VEC(va_arg(ap, lk_str_t *)));
                 break;
             }
         } else {
-            darray_str_push(DARRAY(err->message), *message);
+            vec_str_push(VEC(err->message), *message);
         }
     }
 
@@ -725,7 +725,7 @@ void lk_vm_abort(lk_vm_t *self, lk_err_t *err) {
         lk_instr_t *expr = err->instr;
         int i = 0;
 
-        darray_print_tostream(DARRAY(type), stdout);
+        vec_print_tostream(VEC(type), stdout);
 
         if (expr == NULL) {
             fprintf(stdout, "\n* rsrc: (no instr)");
@@ -733,7 +733,7 @@ void lk_vm_abort(lk_vm_t *self, lk_err_t *err) {
         } else {
             fprintf(stdout, "\n* rsrc: ");
             if (expr->rsrc != NULL)
-                darray_print_tostream(DARRAY(expr->rsrc), stdout);
+                vec_print_tostream(VEC(expr->rsrc), stdout);
             else
                 fprintf(stdout, "(null)");
             fprintf(stdout, "\n* line: %i", expr->line);
@@ -749,7 +749,7 @@ void lk_vm_abort(lk_vm_t *self, lk_err_t *err) {
 
         fprintf(stdout, "\n* text: ");
         if (err->message != NULL)
-            darray_print_tostream(DARRAY(err->message), stdout);
+            vec_print_tostream(VEC(err->message), stdout);
         printf("\n");
 
     } else {

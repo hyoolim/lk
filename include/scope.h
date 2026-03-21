@@ -6,7 +6,7 @@
 struct lk_scope {
     struct lk_common o;
     enum lk_scopetype_t { LK_SCOPETYPE_APPLY = 1, LK_SCOPETYPE_LIST, LK_SCOPETYPE_RETURN } type;
-    darray_t stack;
+    vec_t stack;
     lk_scope_t *scope;
     lk_obj_t *receiver;
     lk_obj_t *self;

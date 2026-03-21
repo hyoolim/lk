@@ -4,81 +4,81 @@
 
 // ext map - types
 static void alloc_seq(lk_obj_t *self, lk_obj_t *parent) {
-    darray_copy(DARRAY(self), DARRAY(parent));
+    vec_copy(VEC(self), VEC(parent));
 }
 
 static void free_seq(lk_obj_t *self) {
-    darray_fin(DARRAY(self));
+    vec_fin(VEC(self));
 }
 
 void lk_seq_type_init(lk_vm_t *vm) {
     vm->t_seq = lk_obj_alloc_with_size(vm->t_obj, sizeof(lk_seq_t));
-    darray_init(DARRAY(vm->t_seq), 1, 16);
+    vec_init(VEC(vm->t_seq), 1, 16);
     lk_obj_set_alloc_func(vm->t_seq, alloc_seq);
     lk_obj_set_free_func(vm->t_seq, free_seq);
 }
 
 // ext map - funcs
 static void at_gl_vec(lk_obj_t *self, lk_scope_t *local) {
-    lk_list_t *ret = LK_DARRAY(lk_obj_clone(self));
-    darray_t *sl = DARRAY(self), *rl = DARRAY(ret), *indexes = DARRAY(ARG(0));
+    lk_list_t *ret = LK_VEC(lk_obj_clone(self));
+    vec_t *sl = VEC(self), *rl = VEC(ret), *indexes = VEC(ARG(0));
 
-    darray_limit(rl, DARRAY_COUNT(indexes));
-    DARRAY_EACH(indexes, i, v, darray_set(rl, i, darray_get(sl, *(int *)v)););
+    vec_limit(rl, VEC_COUNT(indexes));
+    VEC_EACH(indexes, i, v, vec_set(rl, i, vec_get(sl, *(int *)v)););
     RETURN(ret);
 }
 
 static void clearB_gl(lk_obj_t *self, lk_scope_t *local) {
-    darray_clear(DARRAY(self));
+    vec_clear(VEC(self));
     RETURN(self);
 }
 
 static void cmp_gl_gl(lk_obj_t *self, lk_scope_t *local) {
-    RETURN(lk_num_new(VM, darray_cmp(DARRAY(self), DARRAY(ARG(0)))));
+    RETURN(lk_num_new(VM, vec_cmp(VEC(self), VEC(ARG(0)))));
 }
 
 static void concatB_gl_gl(lk_obj_t *self, lk_scope_t *local) {
-    darray_concat(DARRAY(self), DARRAY(ARG(0)));
+    vec_concat(VEC(self), VEC(ARG(0)));
     RETURN(self);
 }
 
 static void size_gl(lk_obj_t *self, lk_scope_t *local) {
-    RETURN(lk_num_new(VM, DARRAY_COUNT(DARRAY(self))));
+    RETURN(lk_num_new(VM, VEC_COUNT(VEC(self))));
 }
 
 static void eq_gl_gl(lk_obj_t *self, lk_scope_t *local) {
-    RETURN(DARRAY_EQ(DARRAY(self), DARRAY(ARG(0))) ? TRUE : FALSE);
+    RETURN(VEC_EQ(VEC(self), VEC(ARG(0))) ? TRUE : FALSE);
 }
 
 static void limitB_gl_num(lk_obj_t *self, lk_scope_t *local) {
-    darray_limit(DARRAY(self), CSIZE(ARG(0)));
+    vec_limit(VEC(self), CSIZE(ARG(0)));
     RETURN(self);
 }
 
 static void offsetB_gl_num(lk_obj_t *self, lk_scope_t *local) {
-    darray_offset(DARRAY(self), CSIZE(ARG(0)));
+    vec_offset(VEC(self), CSIZE(ARG(0)));
     RETURN(self);
 }
 
 static void restB_gl(lk_obj_t *self, lk_scope_t *local) {
-    darray_offset(DARRAY(self), 1);
+    vec_offset(VEC(self), 1);
     RETURN(self);
 }
 
 static void reverseB_gl(lk_obj_t *self, lk_scope_t *local) {
-    darray_reverse(DARRAY(self));
+    vec_reverse(VEC(self));
     RETURN(self);
 }
 
 static void sliceB_gl_num_num(lk_obj_t *self, lk_scope_t *local) {
-    darray_slice(DARRAY(self), CSIZE(ARG(0)), CSIZE(ARG(1)));
+    vec_slice(VEC(self), CSIZE(ARG(0)), CSIZE(ARG(1)));
     RETURN(self);
 }
 
 static void swapB_gl_num_num(lk_obj_t *self, lk_scope_t *local) {
-    int s = DARRAY(self)->data->ilen;
-    void *x = darray_get(DARRAY(self), CSIZE(ARG(0)));
-    void *y = darray_get(DARRAY(self), CSIZE(ARG(1)));
+    int s = VEC(self)->buf->item_size;
+    void *x = vec_get(VEC(self), CSIZE(ARG(0)));
+    void *y = vec_get(VEC(self), CSIZE(ARG(1)));
     void *t = mem_alloc(s);
 
     memcpy(t, x, s);

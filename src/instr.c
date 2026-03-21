@@ -119,11 +119,11 @@ lk_instr_t *lk_instr_new_message(lk_parser_t *parser, lk_str_t *name) {
     lk_instr_t *new = instr_new(parser, LK_INSTRTYPE_APPLYMSG);
     new->v = LK_OBJ(name);
     {
-        darray_t *cs = parser->comments;
-        lk_str_t *c = darray_ptr_remove(cs, 0);
+        vec_t *cs = parser->comments;
+        lk_str_t *c = vec_ptr_remove(cs, 0);
 
         while (cs->size > 0) {
-            darray_concat(DARRAY(c), DARRAY(darray_ptr_remove(cs, 0)));
+            vec_concat(VEC(c), VEC(vec_ptr_remove(cs, 0)));
         }
         new->comment = c;
     }
@@ -159,7 +159,7 @@ void lk_instr_print(lk_instr_t *self) {
         break;
     case LK_INSTRTYPE_STRING:
         printf("'");
-        darray_print_tostream(DARRAY(self->v), stdout);
+        vec_print_tostream(VEC(self->v), stdout);
         printf("'");
         break;
     case LK_INSTRTYPE_NUMBER:
@@ -170,20 +170,20 @@ void lk_instr_print(lk_instr_t *self) {
         break;
     case LK_INSTRTYPE_APPLYMSG:
         printf(".");
-        darray_print_tostream(DARRAY(self->v), stdout);
+        vec_print_tostream(VEC(self->v), stdout);
 
         if (!(self->opts & LK_INSTROHASMSGARGS))
             printf("[]");
         break;
     case LK_INSTRTYPE_SCOPEMSG:
-        darray_print_tostream(DARRAY(self->v), stdout);
+        vec_print_tostream(VEC(self->v), stdout);
 
         if (!(self->opts & LK_INSTROHASMSGARGS))
             printf("[]");
         break;
     case LK_INSTRTYPE_SELFMSG:
         printf(".");
-        darray_print_tostream(DARRAY(self->v), stdout);
+        vec_print_tostream(VEC(self->v), stdout);
 
         if (!(self->opts & LK_INSTROHASMSGARGS))
             printf("[]");
@@ -197,7 +197,7 @@ void lk_instr_print(lk_instr_t *self) {
 
     if (self->comment != NULL) {
         printf(" #*");
-        darray_print_tostream(DARRAY(self->comment), stdout);
+        vec_print_tostream(VEC(self->comment), stdout);
         printf(" *#");
     }
     printf(self->opts & LK_INSTROEND ? "; " : " ");

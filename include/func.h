@@ -9,7 +9,7 @@ struct lk_func {
         lk_instr_t *sigdef;
         int minargc;
         int maxargc;
-        darray_t *sigs;
+        vec_t *sigs;
         lk_sig_t *rest;
         lk_str_t *doc;
         uint8_t opts;
@@ -38,7 +38,7 @@ struct lk_cfunc {
 struct lk_gfunc {
     struct lk_common o;
     struct lk_commonfunc cf;
-    darray_t *funcs;
+    vec_t *funcs;
 };
 struct lk_lfunc {
     struct lk_common o;

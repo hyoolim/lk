@@ -78,7 +78,7 @@ void lk_gc_mark_obj_used(lk_obj_t *self) {
         lk_objgroup_insert(gc->used, self);
 
         if (LK_OBJ_HASPARENTS(self)) {
-            DARRAY_EACH_PTR(LK_OBJ_PARENTS(self), i, v, lk_gc_mark_obj_pending(LK_OBJ(v)););
+            VEC_EACH_PTR(LK_OBJ_PARENTS(self), i, v, lk_gc_mark_obj_pending(LK_OBJ(v)););
 
         } else {
             if (self->o.parent != NULL)

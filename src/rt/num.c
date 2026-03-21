@@ -1,14 +1,14 @@
 #include "num.h"
 
-num_type_t num_new(darray_t *str, num_t *res) {
-    int len = DARRAY_COUNT(str);
+num_type_t num_new(vec_t *str, num_t *res) {
+    int len = VEC_COUNT(str);
     int idx = 0;
     int i = 0;
     int digit = 0;
 
     // Try as native int
     for (; idx < len; idx++) {
-        digit = (int)darray_str_get(str, idx) - '0';
+        digit = (int)vec_str_get(str, idx) - '0';
 
         if (digit == '_' - '0')
             continue;
@@ -33,7 +33,7 @@ num_type_t num_new(darray_t *str, num_t *res) {
 
     if (digit != '.' - '0') {
         for (; idx < len; idx++) {
-            digit = (int)darray_str_get(str, idx) - '0';
+            digit = (int)vec_str_get(str, idx) - '0';
 
             if (digit == '_' - '0')
                 continue;
@@ -59,7 +59,7 @@ num_type_t num_new(darray_t *str, num_t *res) {
 
     if (digit == '.' - '0') {
         for (idx++; idx < len; idx++) {
-            digit = (int)darray_str_get(str, idx) - '0';
+            digit = (int)vec_str_get(str, idx) - '0';
 
             if (digit == '_' - '0')
                 continue;

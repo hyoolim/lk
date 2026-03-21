@@ -3,7 +3,7 @@
 
 // ext map - funcs
 static void at_env_str(lk_obj_t *self, lk_scope_t *local) {
-    const char *k = darray_str_tocstr(DARRAY(ARG(0)));
+    const char *k = vec_str_tocstr(VEC(ARG(0)));
     const char *v = getenv(k);
     RETURN(v != NULL ? LK_OBJ(lk_str_new_from_cstr(VM, v)) : NIL);
 }
@@ -27,7 +27,7 @@ static void keys_env(lk_obj_t *self, lk_scope_t *local) {
 
         for (j = 0; v[j] != '\0' && v[j] != '='; j++) {
         }
-        darray_ptr_push(DARRAY(keys), lk_str_new_from_data(VM, v, j));
+        vec_ptr_push(VEC(keys), lk_str_new_from_data(VM, v, j));
     }
     RETURN(keys);
 }

@@ -31,7 +31,7 @@ lk_file_t *lk_file_new_with_path(lk_vm_t *vm, lk_str_t *path) {
 void lk_file_init_str(lk_file_t *self, lk_str_t *path) {
     int at = 0, nextat;
 
-    if (darray_str_get(DARRAY(path), 0) == '/') {
+    if (vec_str_get(VEC(path), 0) == '/') {
         self->path = path;
 
     } else {
@@ -39,17 +39,17 @@ void lk_file_init_str(lk_file_t *self, lk_str_t *path) {
 
         if (getcwd(buf, 1000) != NULL) {
             lk_str_t *abs = lk_str_new_from_cstr(VM, buf);
-            darray_concat(DARRAY(abs), DARRAY(VM->str_filesep));
-            darray_concat(DARRAY(abs), DARRAY(path));
+            vec_concat(VEC(abs), VEC(VM->str_filesep));
+            vec_concat(VEC(abs), VEC(path));
             self->path = abs;
         }
     }
 
-    while ((nextat = darray_str_find(DARRAY(self->path), '/', at)) > -1) {
+    while ((nextat = vec_str_find(VEC(self->path), '/', at)) > -1) {
         at = nextat + 1;
     }
-    self->name = lk_str_new_from_darray(VM, DARRAY(self->path));
-    darray_offset(DARRAY(self->name), at);
+    self->name = lk_str_new_from_darray(VM, VEC(self->path));
+    vec_offset(VEC(self->name), at);
 }
 
 // update
@@ -97,7 +97,7 @@ void lk_file_write_str(lk_file_t *self, lk_str_t *text) {
     if (self->fd == NULL) {
         BUG("WritableFile->st.file should NEVER be NULL");
     }
-    darray_print_tostream(DARRAY(text), self->fd);
+    vec_print_tostream(VEC(text), self->fd);
 }
 
 // info
@@ -119,7 +119,7 @@ lk_str_t *lk_file_read_num(lk_file_t *self, lk_num_t *length) {
         BUG("ReadableFile->st.file should NEVER be NULL");
 
     } else {
-        darray_t *c = darray_str_alloc_fromfile_withsize(self->fd, CNUMBER(length));
+        vec_t *c = vec_str_alloc_fromfile_withsize(self->fd, CNUMBER(length));
         return c != NULL ? lk_str_new_from_darray(VM, c) : LK_STRING(NIL);
     }
 }
@@ -129,7 +129,7 @@ lk_str_t *lk_file_read_all(lk_file_t *self) {
         BUG("ReadableFile->st.file should NEVER be NULL");
 
     } else {
-        darray_t *c = darray_str_alloc_fromfile(self->fd);
+        vec_t *c = vec_str_alloc_fromfile(self->fd);
         return c != NULL ? lk_str_new_from_darray(VM, c) : LK_STRING(NIL);
     }
 }
@@ -139,7 +139,7 @@ lk_str_t *lk_file_read_until_char(lk_file_t *self, lk_char_t *until) {
         BUG("ReadableFile->st.file should NEVER be NULL");
 
     } else {
-        darray_t *c = darray_str_alloc_fromfile_untilchar(self->fd, CHAR(until));
+        vec_t *c = vec_str_alloc_fromfile_untilchar(self->fd, CHAR(until));
         return c != NULL ? lk_str_new_from_darray(VM, c) : LK_STRING(NIL);
     }
 }
@@ -149,7 +149,7 @@ lk_str_t *lk_file_read_until_charset(lk_file_t *self, lk_charset_t *until) {
         BUG("ReadableFile->st.file should NEVER be NULL");
 
     } else {
-        darray_t *c = darray_str_alloc_fromfile_untilcharset(self->fd, CHARSET(until));
+        vec_t *c = vec_str_alloc_fromfile_untilcharset(self->fd, CHARSET(until));
         return c != NULL ? lk_str_new_from_darray(VM, c) : LK_STRING(NIL);
     }
 }

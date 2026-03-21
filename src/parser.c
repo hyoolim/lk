@@ -19,6 +19,7 @@ static void setprec(lk_parser_t *self, const char *op, int level, enum lk_precas
 }
 
 static void alloc_parser(lk_obj_t *self, lk_obj_t *parent) {
+    (void)parent;
     PARSER->binaryops = qphash_alloc(sizeof(lk_prec_t *), lk_obj_hashcode, lk_obj_keycmp);
     PARSER->precs = qphash_alloc(sizeof(lk_prec_t *), lk_obj_hashcode, lk_obj_keycmp);
     PARSER->tokentypes = darray_ptr_alloc();

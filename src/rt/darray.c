@@ -102,7 +102,7 @@ darray_t *darray_str_alloc_fromfile(FILE *stream) {
 darray_t *darray_str_alloc_fromfile_untilchar(FILE *stream, uint32_t pat) {
     if (feof(stream))
         return NULL;
-    UNTIL(ch == pat);
+    UNTIL((uint32_t)ch == pat);
 }
 
 darray_t *darray_str_alloc_fromfile_untilcharset(FILE *stream, const charset_t *pat) {

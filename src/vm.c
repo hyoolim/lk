@@ -36,6 +36,7 @@ void lk_vm_typeinit(lk_vm_t *vm) {
 
 // ext map - funcs
 static void exit_vm(lk_obj_t *self, lk_scope_t *local) {
+    (void)local;
     lk_vm_exit(VM);
     DONE;
 }

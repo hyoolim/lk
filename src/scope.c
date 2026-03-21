@@ -104,6 +104,7 @@ static void raise_scope_str(lk_obj_t *self, lk_scope_t *local) {
 }
 
 static void redo_scope(lk_obj_t *self, lk_scope_t *local) {
+    (void)local;
     if (DARRAY_ISINIT(SCOPESTACK))
         darray_clear(SCOPESTACK);
     SCOPE->next = SCOPE->first;
@@ -123,6 +124,7 @@ static void RESOURCE_scope(lk_obj_t *self, lk_scope_t *local) {
 }
 
 static void retry_scope(lk_obj_t *self, lk_scope_t *local) {
+    (void)local;
     lk_scope_t *caller = SCOPE->caller;
     lk_instr_t *i = caller->current->prev;
 

@@ -6,12 +6,22 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
 set(LK_INSTALL_PATH "/usr/local" CACHE PATH "Install prefix for lk")
+option(LK_ASAN "Enable AddressSanitizer" OFF)
 
-add_compile_options(-O2 -g -Wall -pedantic)
+add_compile_options(
+    -Wall -Wextra -pedantic
+    "$<$<CONFIG:Debug>:-O0;-g>"
+    "$<$<CONFIG:Release>:-O2>"
+)
+
+if(LK_ASAN)
+    add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+    add_link_options(-fsanitize=address)
+endif()
 
 # Core library (object library avoids double-compiling for future shared lib use)
-file(GLOB RT_SOURCES "src/rt/*.c")
-file(GLOB CORE_SOURCES "src/*.c")
+file(GLOB RT_SOURCES CONFIGURE_DEPENDS "src/rt/*.c")
+file(GLOB CORE_SOURCES CONFIGURE_DEPENDS "src/*.c")
 list(REMOVE_ITEM CORE_SOURCES "${CMAKE_SOURCE_DIR}/src/main.c")
 
 add_library(lkcore OBJECT ${CORE_SOURCES} ${RT_SOURCES})

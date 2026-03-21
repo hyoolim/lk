@@ -17,6 +17,16 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
+    },
+    {
+      "name": "asan",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/asan",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "LK_ASAN": "ON"
+      }
     }
   ],
   "buildPresets": [
@@ -27,6 +37,10 @@
     {
       "name": "release",
       "configurePreset": "release"
+    },
+    {
+      "name": "asan",
+      "configurePreset": "asan"
     }
   ],
   "testPresets": [

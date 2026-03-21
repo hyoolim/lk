@@ -21,6 +21,7 @@ static void to_str_ip(lk_obj_t *self, lk_scope_t *local) {
 
 // ext map - socket
 static void alloc_sock(lk_obj_t *self, lk_obj_t *parent) {
+    (void)parent;
     int yes = 1;
 
     SOCKET->fd = socket(AF_INET, SOCK_STREAM, 0);

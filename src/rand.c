@@ -15,6 +15,7 @@ static double genrand_res53(lk_rand_t *self); */
 
 // ext map
 static void alloc_rand(lk_obj_t *self, lk_obj_t *parent) {
+    (void)parent;
     static int n = 0;
     struct timeval tv;
     int seed;

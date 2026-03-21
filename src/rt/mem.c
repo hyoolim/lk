@@ -5,6 +5,7 @@ static int allocsize = 0;
 static size_t alloctotal = 0;
 static size_t allocused = 0;
 static size_t allocpeak = 0;
+static size_t allocrecycled = 0;
 static void *recycled[MEMORY_MAXRECYCLED];
 
 void *mem_alloc(size_t size) {
@@ -15,6 +16,11 @@ void *mem_alloc(size_t size) {
         void *new = recycled[size];
         recycled[size] = next;
         memset(new, 0x0, size);
+        allocused += size;
+        allocrecycled -= size;
+
+        if (allocused > allocpeak)
+            allocpeak = allocused;
         return new;
 
     } else {
@@ -40,6 +46,8 @@ void mem_free(void *ptr) {
         if (size < MEMORY_MAXRECYCLED) {
             *(void **)ptr = recycled[size];
             recycled[size] = ptr;
+            allocused -= size;
+            allocrecycled += size;
 
         } else {
             size_t size2 = *(size_t *)(ptr = (size_t *)ptr - 1);
@@ -60,7 +68,7 @@ void mem_freerecycled(void) {
             while (curr != NULL) {
                 recycled[i] = *(void **)curr;
                 free((size_t *)curr - 1);
-                allocused -= i;
+                allocrecycled -= i;
                 curr = recycled[i];
             }
         }
@@ -102,4 +110,8 @@ size_t mem_allocused(void) {
 
 size_t mem_allocpeak(void) {
     return allocpeak;
+}
+
+size_t mem_allocrecycled(void) {
+    return allocrecycled;
 }

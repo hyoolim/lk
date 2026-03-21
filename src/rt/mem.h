@@ -15,4 +15,5 @@ int mem_allocsize(void);
 size_t mem_alloctotal(void);
 size_t mem_allocused(void);
 size_t mem_allocpeak(void);
+size_t mem_allocrecycled(void);
 #endif

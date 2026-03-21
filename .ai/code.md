@@ -16,6 +16,10 @@ C11. Style choices worth noting:
 - One blank line before `else`, regardless of whether braces are involved (`} else {`, `} else`, `else {`, bare `else`)
 - One blank line before a comment, except when it's the first thing in a block
 
+## Comments
+- Only where the logic isn't self-evident
+- Capitalize the first word; no trailing period unless separating multiple sentences within the same comment
+
 ## Conventions
 - All lk object structs begin with `struct lk_common o` as their first member
 - Boolean fields use `bool`, not `int` or `uint8_t`

@@ -34,7 +34,7 @@ void *mem_alloc(size_t size) {
 
 void mem_free(void *ptr) {
     if (ptr != NULL) {
-        int size = *((size_t *)ptr - 1);
+        size_t size = *((size_t *)ptr - 1);
         allocsize--;
 
         if (size < MEMORY_MAXRECYCLED) {
@@ -42,7 +42,7 @@ void mem_free(void *ptr) {
             recycled[size] = ptr;
 
         } else {
-            int size2 = *(size_t *)(ptr = (size_t *)ptr - 1);
+            size_t size2 = *(size_t *)(ptr = (size_t *)ptr - 1);
             free(ptr);
             allocused -= size2;
         }

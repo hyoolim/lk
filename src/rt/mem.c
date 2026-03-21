@@ -38,18 +38,17 @@ void *mem_alloc(size_t size) {
         atomic_fetch_sub_explicit(&alloc_recycled, size, memory_order_relaxed);
         update_peak();
         return new;
-
-    } else {
-        size_t *new = calloc(1, size + sizeof(size_t));
-
-        if (new == NULL)
-            ERR("Unable to allocate mem!");
-        *new = size; // Size header
-        atomic_fetch_add_explicit(&alloc_total, size, memory_order_relaxed);
-        atomic_fetch_add_explicit(&alloc_used, size, memory_order_relaxed);
-        update_peak();
-        return new + 1;
     }
+
+    size_t *new = calloc(1, size + sizeof(size_t));
+
+    if (new == NULL)
+        ERR("Unable to allocate mem!");
+    *new = size; // Size header
+    atomic_fetch_add_explicit(&alloc_total, size, memory_order_relaxed);
+    atomic_fetch_add_explicit(&alloc_used, size, memory_order_relaxed);
+    update_peak();
+    return new + 1;
 }
 
 void mem_free(void *ptr) {

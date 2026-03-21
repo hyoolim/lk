@@ -246,10 +246,10 @@ void lk_vm_free(lk_vm_t *self) {
     mem_free(self);
 
     /*
-    fprintf(stderr, "allocsize: %i\n", mem_allocsize());
-    fprintf(stderr, "alloctotal: %i\n", mem_alloctotal());
-    fprintf(stderr, "allocpeak: %i\n", mem_allocpeak());
-    fprintf(stderr, "allocused: %i\n", mem_allocused());
+    fprintf(stderr, "allocsize: %i\n", mem_alloc_count());
+    fprintf(stderr, "alloctotal: %i\n", mem_alloc_total());
+    fprintf(stderr, "allocpeak: %i\n", mem_alloc_peak());
+    fprintf(stderr, "allocused: %i\n", mem_alloc_used());
     */
 }
 

@@ -25,7 +25,7 @@ int main(int argc, const char **argv) {
                 } else {
                     fprintf(stderr, "%s: -l requires an argument\n", argv[0]);
                     lk_vm_free(vm);
-                    mem_freerecycled();
+                    mem_free_recycled();
                     return EXIT_FAILURE;
                 }
                 break;
@@ -34,7 +34,7 @@ int main(int argc, const char **argv) {
             default:
                 fprintf(stderr, "%s: -%c is not a valid option\n", argv[0], argv[i][1]);
                 lk_vm_free(vm);
-                mem_freerecycled();
+                mem_free_recycled();
                 return EXIT_FAILURE;
             }
         }
@@ -44,7 +44,7 @@ int main(int argc, const char **argv) {
     if (i >= argc) {
         fprintf(stderr, "%s: script file is required\n", argv[0]);
         lk_vm_free(vm);
-        mem_freerecycled();
+        mem_free_recycled();
         return EXIT_FAILURE;
     }
     script = lk_str_new_fromcstr(vm, argv[i++]);
@@ -71,6 +71,6 @@ int main(int argc, const char **argv) {
     lk_gc_resume(vm->gc);
     lk_vm_evalfile(vm, darray_str_tocstr(DARRAY(script)), "");
     lk_vm_free(vm);
-    mem_freerecycled();
+    mem_free_recycled();
     return EXIT_SUCCESS;
 }

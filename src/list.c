@@ -48,7 +48,7 @@ void lk_list_set_num_obj(lk_list_t *self, lk_num_t *index, lk_obj_t *value) {
 }
 
 void lk_list_set_num_num_list(lk_list_t *self, lk_num_t *from, lk_num_t *to, lk_list_t *list) {
-    vec_setrange(VEC(self), CSIZE(from), CSIZE(to), VEC(list));
+    vec_set_range(VEC(self), CSIZE(from), CSIZE(to), VEC(list));
 }
 
 // info

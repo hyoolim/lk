@@ -188,7 +188,7 @@ lk_cfunc_t *lk_cfunc_new(lk_vm_t *vm, lk_cfunc_lk_t *cfunc, int minargc, int max
     self->cf.maxargc = maxargc;
 
     // if(minargc > 0) self->cf.sigs = vec_ptr_alloc_withcap(minargc);
-    self->cf.sigs = vec_ptr_alloc_withcap(minargc);
+    self->cf.sigs = vec_ptr_alloc_with_capacity(minargc);
     return self;
 }
 

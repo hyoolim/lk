@@ -5,7 +5,7 @@
 #include <math.h>
 
 static num_type_t parse(const char *s, num_t *res) {
-    vec_t *str = vec_str_alloc_fromcstr(s);
+    vec_t *str = vec_str_alloc_from_cstr(s);
     num_type_t type = num_new(str, res);
     vec_free(str);
     return type;

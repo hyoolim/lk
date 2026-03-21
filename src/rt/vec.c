@@ -2,16 +2,16 @@
 
 #pragma region vec
 
-static struct vec_buf *vec_buf_alloc(int ilen, int cap) {
+static struct vec_buf *vec_buf_alloc(int item_size, int capacity) {
     struct vec_buf *self;
     int c = 8;
 
-    while (cap > c)
+    while (capacity > c)
         c *= 2;
-    self = mem_alloc(sizeof(struct vec_buf) + ilen * c);
+    self = mem_alloc(sizeof(struct vec_buf) + item_size * c);
     self->capacity = c;
     self->used = 0;
-    self->item_size = ilen;
+    self->item_size = item_size;
     self->ref_count = 1;
     return self;
 }
@@ -21,9 +21,9 @@ static void vec_buf_free(struct vec_buf *self) {
         mem_free(self);
 }
 
-vec_t *vec_alloc(int ilen, int cap) {
+vec_t *vec_alloc(int item_size, int capacity) {
     vec_t *self = mem_alloc(sizeof(vec_t));
-    vec_init(self, ilen, cap);
+    vec_init(self, item_size, capacity);
     return self;
 }
 
@@ -40,8 +40,8 @@ void vec_copy(vec_t *self, vec_t *src) {
     self->size = src->size;
 }
 
-void vec_init(vec_t *self, int ilen, int cap) {
-    self->buf = vec_buf_alloc(ilen, cap);
+void vec_init(vec_t *self, int item_size, int capacity) {
+    self->buf = vec_buf_alloc(item_size, capacity);
     self->first = self->buf->items;
     self->size = 0;
 }
@@ -92,14 +92,14 @@ void vec_clear(vec_t *self) {
     vec_limit(self, 0);
 }
 
-void vec_concat(vec_t *self, vec_t *v) {
-    int sc = self->size, vc = v->size;
-    int sl = self->buf->item_size, vl = v->buf->item_size;
+void vec_concat(vec_t *self, vec_t *other) {
+    int sc = self->size, vc = other->size;
+    int sl = self->buf->item_size, vl = other->buf->item_size;
 
     vec_prepupdate(self, sc, sc + vc);
 
     if (sl == vl)
-        memcpy(self->first + sl * sc, v->first, vl * vc);
+        memcpy(self->first + sl * sc, other->first, vl * vc);
     else
         NYI("Cannot concat differently sized buffers");
 }
@@ -126,69 +126,69 @@ void vec_concat(vec_t *self, vec_t *v) {
         } \
     } while (0)
 
-void vec_insert(vec_t *self, int i, void *v) {
+void vec_insert(vec_t *self, int at, void *value) {
     int size = self->size;
 
-    if (i < 0)
-        i += size;
+    if (at < 0)
+        at += size;
 
-    if (i < 0)
-        vec_set(self, i - size - 1, v);
-    else if (i > size)
-        vec_set(self, i, v);
+    if (at < 0)
+        vec_set(self, at - size - 1, value);
+    else if (at > size)
+        vec_set(self, at, value);
     else {
         int ilen = self->buf->item_size;
-        vec_prepupdate(self, i, size + 1);
-        memmove(self->first + ilen * (i + 1), self->first + ilen * i, ilen * (size - i));
+        vec_prepupdate(self, at, size + 1);
+        memmove(self->first + ilen * (at + 1), self->first + ilen * at, ilen * (size - at));
     }
-    SETANYITEM(self, i, v);
+    SETANYITEM(self, at, value);
 }
 
-void vec_limit(vec_t *self, int n) {
-    if (n < 0)
-        n += self->size;
-    if (n >= 0 && n < self->size)
-        self->size = n;
+void vec_limit(vec_t *self, int limit) {
+    if (limit < 0)
+        limit += self->size;
+    if (limit >= 0 && limit < self->size)
+        self->size = limit;
 }
 
-void vec_offset(vec_t *self, int n) {
-    if (n < 0)
-        n += self->size;
-    if (n == 0)
+void vec_offset(vec_t *self, int offset) {
+    if (offset < 0)
+        offset += self->size;
+    if (offset == 0)
         return;
 
-    if (n < 0 || n >= self->size)
+    if (offset < 0 || offset >= self->size)
         self->size = 0;
     else {
-        self->first += n * self->buf->item_size;
-        self->size -= n;
+        self->first += offset * self->buf->item_size;
+        self->size -= offset;
     }
 }
 
-void vec_remove(vec_t *self, int i) {
+void vec_remove(vec_t *self, int at) {
     int size = self->size;
 
-    if (i < 0)
-        i += size;
+    if (at < 0)
+        at += size;
 
-    if (i < 0 || i >= size)
+    if (at < 0 || at >= size)
         return;
     else {
         int ilen = self->buf->item_size, newsize = size - 1;
-        vec_prepupdate(self, i, newsize);
+        vec_prepupdate(self, at, newsize);
 
-        if (i < newsize)
-            memmove(self->first + ilen * i, self->first + ilen * (i + 1), ilen * (newsize - i));
+        if (at < newsize)
+            memmove(self->first + ilen * at, self->first + ilen * (at + 1), ilen * (newsize - at));
     }
 }
 
-void vec_resize(vec_t *self, int s) {
-    if (s <= self->size)
+void vec_resize(vec_t *self, int length) {
+    if (length <= self->size)
         return;
-    vec_prepupdate(self, s - 1, s);
+    vec_prepupdate(self, length - 1, length);
 }
 
-void vec_resizeitem(vec_t *self, vec_t *other) {
+void vec_resize_item(vec_t *self, vec_t *other) {
     if (self->buf->item_size != other->buf->item_size) {
         NYI("Cannot resize item");
     }
@@ -247,40 +247,40 @@ void vec_reverse(vec_t *self) {
     }
 }
 
-void vec_set(vec_t *self, int i, void *v) {
+void vec_set(vec_t *self, int at, void *value) {
     int size = self->size;
 
-    if (i < 0)
-        i += size;
+    if (at < 0)
+        at += size;
 
-    if (i < 0) {
+    if (at < 0) {
     } else {
-        vec_prepupdate(self, i, i >= size ? i + 1 : size);
+        vec_prepupdate(self, at, at >= size ? at + 1 : size);
     }
-    SETANYITEM(self, i, v);
+    SETANYITEM(self, at, value);
 }
 
-void vec_setrange(vec_t *self, int b, int e, vec_t *v) {
-    int i, d, sc = self->size, vc = v->size;
+void vec_set_range(vec_t *self, int start, int end, vec_t *other) {
+    int i, d, sc = self->size, vc = other->size;
 
-    if (b < 0)
-        b += sc;
-    if (e < 0)
-        e += sc;
-    d = e - b - vc;
+    if (start < 0)
+        start += sc;
+    if (end < 0)
+        end += sc;
+    d = end - start - vc;
 
     if (d > 0)
         for (; d > 0; d--)
-            vec_remove(self, b);
+            vec_remove(self, start);
     else if (d < 0) {
         void *t = NULL;
 
         for (; d < 0; d++)
-            vec_insert(self, b, (void *)&t);
+            vec_insert(self, start, (void *)&t);
     }
 
     for (i = 0; i < vc; i++)
-        vec_set(self, b++, vec_get(v, i));
+        vec_set(self, start++, vec_get(other, i));
 }
 
 void vec_slice(vec_t *self, int offset, int limit) {
@@ -310,21 +310,21 @@ int vec_cmp(const vec_t *self, const vec_t *other) {
     }
 }
 
-int vec_find_vec(const vec_t *self, const vec_t *pat, int o) {
-    int self_c = self->size, pat_c = pat->size;
+int vec_find_vec(const vec_t *self, const vec_t *pattern, int offset) {
+    int self_c = self->size, pat_c = pattern->size;
 
     if (pat_c == 0)
-        return o < self_c ? o : -1;
+        return offset < self_c ? offset : -1;
     if (pat_c > self_c)
         return -1;
     if (pat_c == 1)
-        return vec_str_find(self, vec_str_get(pat, 0), o);
+        return vec_str_find(self, vec_str_get(pattern, 0), offset);
     else {
         switch (self->buf->item_size) {
         case sizeof(uint8_t): {
             // Boyer-Moore-Horspool
             uint8_t *s = (uint8_t *)self->first;
-            uint8_t *p = (uint8_t *)pat->first;
+            uint8_t *p = (uint8_t *)pattern->first;
             int i, j, k, skip[256];
 
             for (k = 0; k < 256; k++)
@@ -333,7 +333,7 @@ int vec_find_vec(const vec_t *self, const vec_t *pat, int o) {
             for (k = 0; k < pat_c - 1; k++)
                 skip[p[k]] = pat_c - k - 1;
 
-            for (k = o + pat_c - 1; k < self_c; k += skip[s[k] & 255]) {
+            for (k = offset + pat_c - 1; k < self_c; k += skip[s[k] & 255]) {
                 for (j = pat_c - 1, i = k; j >= 0 && s[i] == p[j]; j--)
                     i--;
 
@@ -349,12 +349,12 @@ int vec_find_vec(const vec_t *self, const vec_t *pat, int o) {
     }
 }
 
-void *vec_get(const vec_t *self, int i) {
+void *vec_get(const vec_t *self, int at) {
     int size = self->size;
 
-    if (i < 0)
-        i += size;
-    return i < 0 || i >= size ? NULL : VEC_AT(self, i);
+    if (at < 0)
+        at += size;
+    return at < 0 || at >= size ? NULL : VEC_AT(self, at);
 }
 
 int vec_hc(const vec_t *self) {
@@ -442,18 +442,18 @@ vec_t *vec_str_alloc(void) {
     return vec_alloc(sizeof(uint8_t), 10);
 }
 
-vec_t *vec_str_alloc_fromcstr(const char *cstr) {
-    return vec_str_alloc_fromdata(cstr, strlen(cstr));
+vec_t *vec_str_alloc_from_cstr(const char *cstr) {
+    return vec_str_alloc_from_data(cstr, strlen(cstr));
 }
 
-vec_t *vec_str_alloc_fromdata(const void *data, int len) {
-    vec_t *self = vec_alloc(sizeof(uint8_t), len);
-    memcpy(self->first, data, len);
-    self->buf->used = self->size = len;
+vec_t *vec_str_alloc_from_data(const void *data, int length) {
+    vec_t *self = vec_alloc(sizeof(uint8_t), length);
+    memcpy(self->first, data, length);
+    self->buf->used = self->size = length;
     return self;
 }
 
-vec_t *vec_str_alloc_fromfile(FILE *stream) {
+vec_t *vec_str_alloc_from_file(FILE *stream) {
     if (fseek(stream, 0, SEEK_END) == 0) {
         long size;
 
@@ -467,22 +467,22 @@ vec_t *vec_str_alloc_fromfile(FILE *stream) {
     return NULL;
 }
 
-vec_t *vec_str_alloc_fromfile_untilchar(FILE *stream, uint32_t pat) {
+vec_t *vec_str_alloc_from_file_until_char(FILE *stream, uint32_t pattern) {
     if (feof(stream))
         return NULL;
-    UNTIL((uint32_t)ch == pat);
+    UNTIL((uint32_t)ch == pattern);
 }
 
-vec_t *vec_str_alloc_fromfile_withsize(FILE *stream, size_t rs) {
-    vec_t *self = vec_alloc(1, rs);
-    self->size = self->buf->used = fread(self->first, 1, rs, stream);
+vec_t *vec_str_alloc_from_file_with_length(FILE *stream, size_t length) {
+    vec_t *self = vec_alloc(1, length);
+    self->size = self->buf->used = fread(self->first, 1, length, stream);
     return self;
 }
 
-vec_t *vec_str_alloc_fromfile_untilcharset(FILE *stream, const charset_t *pat) {
+vec_t *vec_str_alloc_from_file_until_charset(FILE *stream, const charset_t *pattern) {
     if (feof(stream))
         return NULL;
-    UNTIL(charset_has(pat, ch));
+    UNTIL(charset_has(pattern, ch));
 }
 
 #define INSERTUINT(self, t, i, v) \
@@ -491,16 +491,16 @@ vec_t *vec_str_alloc_fromfile_untilcharset(FILE *stream, const charset_t *pat) {
         vec_insert(self, (i), (void *)&nv); \
     } while (0);
 
-void vec_str_insert(vec_t *self, int i, uint32_t v) {
+void vec_str_insert(vec_t *self, int at, uint32_t value) {
     switch (self->buf->item_size) {
     case sizeof(uint8_t):
-        INSERTUINT(self, uint8_t, i, v);
+        INSERTUINT(self, uint8_t, at, value);
         break;
     case sizeof(uint16_t):
-        INSERTUINT(self, uint16_t, i, v);
+        INSERTUINT(self, uint16_t, at, value);
         break;
     case sizeof(uint32_t):
-        INSERTUINT(self, uint32_t, i, v);
+        INSERTUINT(self, uint32_t, at, value);
         break;
     default:
         BUG("Invalid ilen in vec_str_insert\n");
@@ -511,13 +511,13 @@ uint32_t vec_str_pop(vec_t *self) {
     return vec_str_remove(self, self->size - 1);
 }
 
-void vec_str_push(vec_t *self, uint32_t v) {
-    vec_str_set(self, self->size, v);
+void vec_str_push(vec_t *self, uint32_t value) {
+    vec_str_set(self, self->size, value);
 }
 
-uint32_t vec_str_remove(vec_t *self, int i) {
-    uint32_t v = vec_str_get(self, i);
-    vec_remove(self, i);
+uint32_t vec_str_remove(vec_t *self, int at) {
+    uint32_t v = vec_str_get(self, at);
+    vec_remove(self, at);
     return v;
 }
 
@@ -527,16 +527,16 @@ uint32_t vec_str_remove(vec_t *self, int i) {
         vec_set(self, (i), (void *)&nv); \
     } while (0);
 
-void vec_str_set(vec_t *self, int i, uint32_t v) {
+void vec_str_set(vec_t *self, int at, uint32_t value) {
     switch (self->buf->item_size) {
     case sizeof(uint8_t):
-        SETUINT(self, uint8_t, i, v);
+        SETUINT(self, uint8_t, at, value);
         break;
     case sizeof(uint16_t):
-        SETUINT(self, uint16_t, i, v);
+        SETUINT(self, uint16_t, at, value);
         break;
     case sizeof(uint32_t):
-        SETUINT(self, uint32_t, i, v);
+        SETUINT(self, uint32_t, at, value);
         break;
     default:
         BUG("Invalid ilen in vec_str_set\n");
@@ -582,12 +582,12 @@ int vec_str_cmp_cstr(const vec_t *self, const char *other) {
 
 #define MATCHCHAR(type) \
     do { \
-        for (; o < c; o++) \
-            if (((type *)buf)[o] == pat) \
-                return o; \
+        for (; offset < c; offset++) \
+            if (((type *)buf)[offset] == pattern) \
+                return offset; \
     } while (0)
 
-int vec_str_find(const vec_t *self, uint32_t pat, int o) {
+int vec_str_find(const vec_t *self, uint32_t pattern, int offset) {
     void *buf = self->first;
     int c = self->size;
 
@@ -607,8 +607,8 @@ int vec_str_find(const vec_t *self, uint32_t pat, int o) {
     return -1;
 }
 
-uint32_t vec_str_get(const vec_t *self, int i) {
-    void *vptr = vec_get(self, i);
+uint32_t vec_str_get(const vec_t *self, int at) {
+    void *vptr = vec_get(self, at);
 
     if (vptr == NULL)
         return 0;
@@ -626,12 +626,12 @@ uint32_t vec_str_get(const vec_t *self, int i) {
 
 #define MATCHCHARSET(type) \
     do { \
-        for (; o < c; o++) \
-            if (charset_has(pat, ((type *)buf)[o])) \
-                return o; \
+        for (; offset < c; offset++) \
+            if (charset_has(pattern, ((type *)buf)[offset])) \
+                return offset; \
     } while (0)
 
-int vec_str_findset(const vec_t *self, const charset_t *pat, int o) {
+int vec_str_find_charset(const vec_t *self, const charset_t *pattern, int offset) {
     void *buf = self->first;
     int c = self->size;
 
@@ -659,49 +659,49 @@ void vec_ptr_init(vec_t *self) {
 }
 
 vec_t *vec_ptr_alloc(void) {
-    return vec_ptr_alloc_withcap(10);
+    return vec_ptr_alloc_with_capacity(10);
 }
 
-vec_t *vec_ptr_alloc_withcap(int cap) {
-    return vec_alloc(sizeof(void *), cap);
+vec_t *vec_ptr_alloc_with_capacity(int capacity) {
+    return vec_alloc(sizeof(void *), capacity);
 }
 
-void vec_ptr_insert(vec_t *self, int i, void *v) {
-    vec_insert(self, i, (void *)&v);
+void vec_ptr_insert(vec_t *self, int at, void *value) {
+    vec_insert(self, at, (void *)&value);
 }
 
 void *vec_ptr_pop(vec_t *self) {
     return vec_ptr_remove(self, self->size - 1);
 }
 
-void vec_ptr_push(vec_t *self, void *v) {
-    vec_ptr_set(self, self->size, v);
+void vec_ptr_push(vec_t *self, void *value) {
+    vec_ptr_set(self, self->size, value);
 }
 
-void *vec_ptr_remove(vec_t *self, int i) {
-    void *item = vec_ptr_get(self, i);
-    vec_remove(self, i);
+void *vec_ptr_remove(vec_t *self, int at) {
+    void *item = vec_ptr_get(self, at);
+    vec_remove(self, at);
     return item;
 }
 
-void vec_ptr_set(vec_t *self, int i, void *v) {
-    vec_set(self, i, (void *)&v);
+void vec_ptr_set(vec_t *self, int at, void *value) {
+    vec_set(self, at, (void *)&value);
 }
 
 void *vec_ptr_shift(vec_t *self) {
     return vec_ptr_remove(self, 0);
 }
 
-void vec_ptr_unshift(vec_t *self, void *v) {
-    vec_ptr_insert(self, 0, v);
+void vec_ptr_unshift(vec_t *self, void *value) {
+    vec_ptr_insert(self, 0, value);
 }
 
 void *vec_ptr_peek(vec_t *self) {
     return vec_ptr_get((self), (self)->size - 1);
 }
 
-void *vec_ptr_get(const vec_t *self, int i) {
-    void **vptr = (void **)vec_get(self, i);
+void *vec_ptr_get(const vec_t *self, int at) {
+    void **vptr = (void **)vec_get(self, at);
     return vptr != NULL ? *vptr : NULL;
 }
 

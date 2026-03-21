@@ -284,7 +284,7 @@ lk_scope_t *lk_vm_eval_file(lk_vm_t *self, const char *file, const char *base) {
                 pos = i + pslen;
 
             vec_slice(VEC(root), 0, pos);
-            vec_resizeitem(VEC(root), VEC(orig));
+            vec_resize_item(VEC(root), VEC(orig));
             vec_concat(VEC(root), VEC(orig));
             filename = root;
         }
@@ -303,7 +303,7 @@ lk_scope_t *lk_vm_eval_file(lk_vm_t *self, const char *file, const char *base) {
         stream = fopen(cfilename, "r");
 
         if (stream != NULL) {
-            vec_t *src = vec_str_alloc_fromfile(stream);
+            vec_t *src = vec_str_alloc_from_file(stream);
 
             fclose(stream);
 

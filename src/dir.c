@@ -74,8 +74,8 @@ lk_list_t *lk_dir_items(lk_dir_t *self) {
 
         } else if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
             lk_str_t *path = lk_str_new_from_cstr(VM, entry->d_name);
-            vec_setrange(VEC(path), 0, 0, VEC(VM->str_filesep));
-            vec_setrange(VEC(path), 0, 0, VEC(self->path));
+            vec_set_range(VEC(path), 0, 0, VEC(VM->str_filesep));
+            vec_set_range(VEC(path), 0, 0, VEC(self->path));
 
             if (stat(CSTRING(path), &info) == 0 && S_ISDIR(info.st_mode)) {
                 vec_ptr_push(VEC(items), lk_dir_new_with_path(VM, path));

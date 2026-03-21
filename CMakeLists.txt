@@ -34,7 +34,7 @@ endif()
 
 # Build .lk stdlib libraries (equivalent to `make lib`)
 add_custom_target(stdlib
-    COMMAND lk -l ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/buildlibs.lk
+    COMMAND lk -l ${CMAKE_SOURCE_DIR}/stdlib ${CMAKE_SOURCE_DIR}/buildlibs.lk
     DEPENDS lk
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Building lk stdlib libraries"
@@ -42,7 +42,7 @@ add_custom_target(stdlib
 
 # Install
 install(TARGETS lk DESTINATION bin)
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/lib/ DESTINATION lib/lk)
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/stdlib/ DESTINATION lib/lk)
 install(FILES ${CMAKE_SOURCE_DIR}/include/*.h DESTINATION include/lk)
 install(FILES ${CMAKE_SOURCE_DIR}/include/base/*.h DESTINATION include/lk/base)
 
@@ -54,7 +54,7 @@ foreach(test_file ${LK_TESTS})
     get_filename_component(test_dir ${test_file} DIRECTORY)
     add_test(
         NAME ${test_name}
-        COMMAND lk -l ${CMAKE_SOURCE_DIR}/lib ${test_file}
+        COMMAND lk -l ${CMAKE_SOURCE_DIR}/stdlib ${test_file}
         WORKING_DIRECTORY ${test_dir}
     )
 endforeach()

@@ -19,4 +19,4 @@ install:
 
 clean:
 	rm -rf build build-release
-	rm -rf lib/*/*.dll lib/*/*.dylib lib/*/*.so lib/*/*.o
+	rm -rf stdlib/*/*.dll stdlib/*/*.dylib stdlib/*/*.so stdlib/*/*.o

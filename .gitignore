@@ -1,7 +1,7 @@
 build
 build-release
-lib/*/*.dll
-lib/*/*.dylib
-lib/*/*.so
-lib/*/*.o
+stdlib/*/*.dll
+stdlib/*/*.dylib
+stdlib/*/*.so
+stdlib/*/*.o
 tmp

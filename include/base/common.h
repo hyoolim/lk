@@ -4,6 +4,7 @@
 #include <float.h>
 #include <limits.h>
 #include <stdbool.h>
+#include <stdnoreturn.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>

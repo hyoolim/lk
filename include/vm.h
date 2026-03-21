@@ -73,9 +73,9 @@ void lk_vm_free(lk_vm_t *self);
 lk_scope_t *lk_vm_evalfile(lk_vm_t *self, const char *file, const char *base);
 lk_scope_t *lk_vm_evalstr(lk_vm_t *self, const char *code);
 void lk_vm_doevalfunc(lk_vm_t *vm);
-void lk_vm_raisecstr(lk_vm_t *self, const char *message, ...) __attribute__((noreturn));
-void lk_vm_raiseerrno(lk_vm_t *self) __attribute__((noreturn));
-void lk_vm_raiseerr(lk_vm_t *self, lk_err_t *err) __attribute__((noreturn));
-void lk_vm_exit(lk_vm_t *self) __attribute__((noreturn));
-void lk_vm_abort(lk_vm_t *self, lk_err_t *err) __attribute__((noreturn));
+noreturn void lk_vm_raisecstr(lk_vm_t *self, const char *message, ...);
+noreturn void lk_vm_raiseerrno(lk_vm_t *self);
+noreturn void lk_vm_raiseerr(lk_vm_t *self, lk_err_t *err);
+noreturn void lk_vm_exit(lk_vm_t *self);
+noreturn void lk_vm_abort(lk_vm_t *self, lk_err_t *err);
 #endif

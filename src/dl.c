@@ -1,6 +1,9 @@
 #include "lib.h"
 #include <dlfcn.h>
 
+// cfield offsets are relative to lk_obj_t*, so lk_common must be at offset 0
+_Static_assert(offsetof(lk_obj_t, o) == 0, "lk_common must be first member of lk_obj_t for cfield offsets");
+
 // type
 static void free_dl(lk_obj_t *self) {
     if (LK_DL(self)->dl != NULL) {

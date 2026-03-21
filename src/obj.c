@@ -1,6 +1,9 @@
 #include "lib.h"
 #include <stdarg.h>
 
+// pointer tagging: lowest bit of parent ptr used as multi-parent flag
+_Static_assert(_Alignof(lk_obj_t) >= 2, "lk_obj_t must be at least 2-byte aligned for pointer tagging");
+
 // ext map - types
 void lk_obj_typeinit(lk_vm_t *vm) {
     lk_obj_t *o = vm->t_obj = mem_alloc(sizeof(lk_obj_t));

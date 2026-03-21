@@ -1,6 +1,9 @@
 #include "charset.h"
 #define CHARSET_DEFAULTCAP 8
 
+// pointer tagging: lowest bit of data ptr used as invert flag
+_Static_assert(_Alignof(uint32_t) >= 2, "uint32_t must be at least 2-byte aligned for pointer tagging");
+
 // new
 charset_t *charset_alloc(void) {
     return mem_alloc(sizeof(charset_t));

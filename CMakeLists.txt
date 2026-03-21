@@ -76,6 +76,9 @@ foreach(test_src ${UNIT_TESTS})
         ${CMAKE_SOURCE_DIR}/src
         ${CMAKE_SOURCE_DIR}/src/rt
     )
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        target_link_libraries(${test_name} m)
+    endif()
     add_test(NAME unit/${test_id} COMMAND ${test_name})
 endforeach()
 

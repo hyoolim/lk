@@ -16,15 +16,10 @@ num_type_t num_new(darray_t *str, num_t *res) {
         if (digit < 0 || digit > 9)
             break;
 
-        if (i > INT_MAX / 10)
+        if (i > INT_MAX / 10 || (i == INT_MAX / 10 && digit > INT_MAX % 10))
             break;
 
-        i *= 10;
-
-        if (i > INT_MAX - digit)
-            break;
-
-        i += digit;
+        i = i * 10 + digit;
     }
 
     if (idx >= len) {

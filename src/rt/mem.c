@@ -30,9 +30,8 @@ void *mem_alloc(size_t size) {
 
     if (size < MEM_MAX_RECYCLED && recycled[size] != NULL) {
         // Pop from free list — first word of each recycled block stores the next pointer
-        void *next = *(void **)recycled[size];
         void *block = recycled[size];
-        recycled[size] = next;
+        recycled[size] = *(void **)block;
         memset(block, 0x0, size); // Re-zero to match calloc semantics
         atomic_fetch_add_explicit(&alloc_used, size, memory_order_relaxed);
         atomic_fetch_sub_explicit(&alloc_recycled, size, memory_order_relaxed);
@@ -99,9 +98,8 @@ void *mem_resize(void *old, size_t size) {
 
     if (size < MEM_MAX_RECYCLED && recycled[size] != NULL) {
         // Serve new size from recycler, copy data, then recycle or free old
-        void *next = *(void **)recycled[size];
         void *block = recycled[size];
-        recycled[size] = next;
+        recycled[size] = *(void **)block;
         size_t copy_size = old_size < size ? old_size : size;
         memcpy(block, old, copy_size);
 

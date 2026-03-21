@@ -15,9 +15,9 @@ void mem_free_recycled(void); // Release the calling thread's recycler to the OS
 void *mem_resize(void *old, size_t size);
 
 // Diagnostic stats (relaxed atomics — approximate under concurrency)
-int mem_alloc_count(void);    // Live allocation count
-size_t mem_alloc_total(void); // Cumulative bytes ever allocated (grows only)
-size_t mem_alloc_used(void);  // Bytes in live allocations
-size_t mem_alloc_peak(void);  // Peak value of alloc_used
+int mem_alloc_count(void);       // Live allocation count
+size_t mem_alloc_total(void);    // Cumulative bytes ever allocated (grows only)
+size_t mem_alloc_used(void);     // Bytes in live allocations
+size_t mem_alloc_peak(void);     // Peak value of alloc_used
 size_t mem_alloc_recycled(void); // Bytes held in recycler (not live)
 #endif

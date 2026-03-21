@@ -24,26 +24,26 @@ struct lk_vm {
     lk_scope_t *global;
 
     // freq used primitive types
-    lk_obj_t *t_nil, *t_bool, *t_true, *t_false; // bool
-    lk_obj_t *t_char;                              // char
-    lk_obj_t *t_charset;                           // charset
-    lk_obj_t *t_dl;                                // dl
-    lk_obj_t *t_err;                               // err
+    lk_obj_t *t_nil, *t_bool, *t_true, *t_false;              // bool
+    lk_obj_t *t_char;                                         // char
+    lk_obj_t *t_charset;                                      // charset
+    lk_obj_t *t_dl;                                           // dl
+    lk_obj_t *t_err;                                          // err
     lk_obj_t *t_file, *t_dir, *t_stdin, *t_stdout, *t_stderr; // file
-    lk_obj_t *t_vec;                               // vec
-    lk_obj_t *t_num;                               // fixnum
-    lk_obj_t *t_scope;                             // scope
+    lk_obj_t *t_vec;                                          // vec
+    lk_obj_t *t_num;                                          // fixnum
+    lk_obj_t *t_scope;                                        // scope
     lk_obj_t *t_func, *t_sig, *t_lfunc, *t_cfunc, *t_gfunc;   // func
-    lk_obj_t *t_seq;                               // seq
-    lk_obj_t *t_instr;                             // instr
-    lk_obj_t *t_list;                              // list
-    lk_obj_t *t_map;                               // map
-    lk_obj_t *t_obj;                               // obj
-    lk_obj_t *t_parser, *t_prec;                   // parser
-    lk_obj_t *t_pipe;                              // pipe
-    lk_obj_t *t_socket;                            // socket
-    lk_obj_t *t_str;                               // str
-    lk_obj_t *t_vm;                                // vm
+    lk_obj_t *t_seq;                                          // seq
+    lk_obj_t *t_instr;                                        // instr
+    lk_obj_t *t_list;                                         // list
+    lk_obj_t *t_map;                                          // map
+    lk_obj_t *t_obj;                                          // obj
+    lk_obj_t *t_parser, *t_prec;                              // parser
+    lk_obj_t *t_pipe;                                         // pipe
+    lk_obj_t *t_socket;                                       // socket
+    lk_obj_t *t_str;                                          // str
+    lk_obj_t *t_vm;                                           // vm
 
     // freq used strs
     lk_str_t *str_type;

@@ -49,13 +49,13 @@ static void fork_vm_f(lk_obj_t *self, lk_scope_t *local) {
     if(child == -1) lk_vm_raiseerrno(VM);
     if(child > 0) RETURN(lk_num_new(VM, (int)child));
     else {
-        lk_kfunc_t *kf = LK_KFUNC(ARG(0));
+        lk_lfunc_t *lf = LK_LFUNC(ARG(0));
         lk_scope_t *fr = lk_scope_new(VM);
-        fr->first = fr->next = kf->first;
+        fr->first = fr->next = lf->first;
         fr->receiver = fr->self = self;
-        fr->func = LK_OBJ(kf);
+        fr->func = LK_OBJ(lf);
         fr->returnto = NULL;
-        fr->o.parent = LK_OBJ(kf->scope);
+        fr->o.parent = LK_OBJ(lf->scope);
         lk_vm_doevalfunc(VM);
         lk_vm_exit(VM);
         DONE;
@@ -329,10 +329,10 @@ static void call_cfunc(lk_vm_t *vm, lk_scope_t *self,
     if(LK_OBJ_ISCFUNC(LK_OBJ(func))) { \
         call_cfunc(vm, self, LK_CFUNC(func), args); \
     } else { \
-        (args)->o.parent = LK_OBJ(LK_KFUNC(func)->scope); \
+        (args)->o.parent = LK_OBJ(LK_LFUNC(func)->scope); \
         (args)->self = LK_OBJ_ISSCOPE((args)->receiver) \
-            ? LK_KFUNC(func)->scope->self : (args)->receiver; \
-        (args)->first = (args)->next = LK_KFUNC(func)->first; \
+            ? LK_LFUNC(func)->scope->self : (args)->receiver; \
+        (args)->first = (args)->next = LK_LFUNC(func)->first; \
         (self) = (args); \
     } \
     goto nextinstr; \
@@ -425,8 +425,8 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
         goto nextinstr;
     /* funcs also need ref to env for closures to work */
     case LK_INSTRTYPE_FUNC: {
-        lk_kfunc_t *clone = LK_KFUNC(lk_obj_clone(instr->v));
-        lk_kfunc_updatesig(clone);
+        lk_lfunc_t *clone = LK_LFUNC(lk_obj_clone(instr->v));
+        lk_lfunc_updatesig(clone);
         lk_obj_addref(LK_OBJ(clone), LK_OBJ(self->scope));
         clone->scope = self->scope;
         lk_obj_addref(LK_OBJ(clone), LK_OBJ(self->receiver));

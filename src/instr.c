@@ -71,7 +71,7 @@ lk_instr_t *lk_instr_newmore(lk_parser_t *parser) {
 }
 lk_instr_t *lk_instr_newfunc(lk_parser_t *parser, lk_instr_t *first) {
     lk_instr_t *new = instr_new(parser, LK_INSTRTYPE_FUNC);
-    new->v = LK_OBJ(lk_kfunc_new(LK_VM(parser), NULL, first));
+    new->v = LK_OBJ(lk_lfunc_new(LK_VM(parser), NULL, first));
     return new;
 }
 lk_instr_t *lk_instr_newarglist(lk_parser_t *parser, lk_instr_t *func) {
@@ -122,7 +122,7 @@ void lk_instr_print(lk_instr_t *self) {
     switch(self->type) {
     case LK_INSTRTYPE_FUNC:
         printf("{");
-        lk_instr_print(LK_KFUNC(self->v)->first);
+        lk_instr_print(LK_LFUNC(self->v)->first);
         printf("}");
         break;
     case LK_INSTRTYPE_APPLY:

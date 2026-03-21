@@ -316,7 +316,7 @@ Sequence/extend {
 
 # IpAddress
 
-# KineticFunction < Function
+# LinkFunction < Function
 
 # List < Sequence
 List/extend {

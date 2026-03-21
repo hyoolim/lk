@@ -3,7 +3,7 @@ DocumentGeneratorFile := File/with {
         /write[
         '<html>'
         '<head>'
-            '<title>Kinetic Class and Library Reference: '; title; '</title>'
+            '<title>Link Class and Library Reference: '; title; '</title>'
             '<link type="text/css" rel="stylesheet" href="./default.css" />'
             '<script type="text/javascript" src="./default.js"></script>'
         '</head>'

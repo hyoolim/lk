@@ -78,13 +78,13 @@ static void ancestors_obj(lk_obj_t *self, lk_scope_t *local) {
 static void clone_obj(lk_obj_t *self, lk_scope_t *local) {
     RETURN(lk_obj_clone(self)); }
 static void do_obj_f(lk_obj_t *self, lk_scope_t *local) {
-    lk_kfunc_t *kf = LK_KFUNC(ARG(0));
+    lk_lfunc_t *lf = LK_LFUNC(ARG(0));
     lk_scope_t *fr = lk_scope_new(VM);
-    fr->first = fr->next = kf->first;
+    fr->first = fr->next = lf->first;
     fr->receiver = fr->self = self;
-    fr->func = LK_OBJ(kf);
+    fr->func = LK_OBJ(lf);
     fr->returnto = NULL;
-    fr->o.parent = LK_OBJ(kf->scope);
+    fr->o.parent = LK_OBJ(lf->scope);
     lk_vm_doevalfunc(VM);
     RETURN(self);
 }

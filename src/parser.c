@@ -552,7 +552,7 @@ static READFUNC(readfunc) {
         } while(1);
         if(first->next != NULL) first->next->prev = NULL;
         first = lk_instr_newfunc(self, first->next);
-        LK_KFUNC(first->v)->cf.sigdef = sigdef;
+        LK_LFUNC(first->v)->cf.sigdef = sigdef;
         darray_ptr_push(self->words, first);
         if(getnexttoken(self, FUNC_END) != NULL) return 1;
         else lk_vm_raisecstr(VM, "Cannot find } to close function");
@@ -758,9 +758,9 @@ static lk_instr_t *applymacros(lk_parser_t *self, lk_instr_t *it) {
     lk_instr_t *first = it;
     for(; it != NULL; it = it->next) {
         if(it->type == LK_INSTRTYPE_FUNC) {
-            LK_KFUNC(it->v)->cf.sigdef= applymacros(
-            self, LK_KFUNC(it->v)->cf.sigdef);
-            LK_KFUNC(it->v)->first = applymacros(self, LK_KFUNC(it->v)->first);
+            LK_LFUNC(it->v)->cf.sigdef= applymacros(
+            self, LK_LFUNC(it->v)->cf.sigdef);
+            LK_LFUNC(it->v)->first = applymacros(self, LK_LFUNC(it->v)->first);
         } else if(it->type == LK_INSTRTYPE_APPLY
                || it->type == LK_INSTRTYPE_LIST) {
             it->v = LK_OBJ(applymacros(self, LK_INSTR(it->v)));

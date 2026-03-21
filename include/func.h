@@ -44,7 +44,7 @@ struct lk_gfunc {
     struct lk_commonfunc  cf;
     darray_t            *funcs;
 };
-struct lk_kfunc {
+struct lk_lfunc {
     struct lk_common o;
     struct lk_commonfunc  cf;
     lk_scope_t           *scope;
@@ -63,12 +63,12 @@ void lk_func_libinit(lk_vm_t *vm);
 
 /* new */
 lk_cfunc_t *lk_cfunc_new(lk_vm_t * vm, lk_cfuncfunc_t *func, int minargc, int maxargc);
-lk_kfunc_t *lk_kfunc_new(lk_vm_t *vm, lk_scope_t *scope, lk_instr_t *first);
+lk_lfunc_t *lk_lfunc_new(lk_vm_t *vm, lk_scope_t *scope, lk_instr_t *first);
 lk_gfunc_t *lk_gfunc_new(lk_vm_t *vm);
 lk_sig_t *lk_sig_new(lk_vm_t *vm, lk_str_t *name, lk_obj_t *type);
 
 /* update */
 lk_gfunc_t *lk_func_combine(lk_func_t *self, lk_func_t *other);
 lk_func_t *lk_func_match(lk_func_t *self, lk_scope_t *args, lk_obj_t *recv);
-void lk_kfunc_updatesig(lk_kfunc_t *self);
+void lk_lfunc_updatesig(lk_lfunc_t *self);
 #endif

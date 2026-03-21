@@ -16,7 +16,7 @@ typedef struct lk_dir lk_dir_t;
 typedef struct lk_func lk_func_t;
 typedef struct lk_cfunc lk_cfunc_t;
 typedef struct lk_gfunc lk_gfunc_t;
-typedef struct lk_kfunc lk_kfunc_t;
+typedef struct lk_lfunc lk_lfunc_t;
 typedef struct lk_sig lk_sig_t;
 typedef struct lk_gc lk_gc_t;
 typedef struct lk_instr lk_instr_t;
@@ -95,7 +95,7 @@ typedef void lk_cfuncfunc_t(lk_obj_t *self, lk_scope_t *local);
 #define LK_FUNCOASSIGNED (1 << 1)
 #define LK_CFUNC(obj) ((lk_cfunc_t *)(obj))
 #define LK_GFUNC(obj) ((lk_gfunc_t *)(obj))
-#define LK_KFUNC(obj) ((lk_kfunc_t *)(obj))
+#define LK_LFUNC(obj) ((lk_lfunc_t *)(obj))
 #define LK_SIG(obj) ((lk_sig_t *)(obj))
 #define LK_GC(obj) ((lk_gc_t *)(obj))
 #define LK_INSTR(obj) ((lk_instr_t *)(obj))

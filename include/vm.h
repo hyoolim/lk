@@ -33,7 +33,7 @@ struct lk_vm {
     /* vec   */ lk_obj_t *t_vec;
     /* fixnum   */ lk_obj_t *t_num;
     /* scope    */ lk_obj_t *t_scope;
-    /* func     */ lk_obj_t *t_func, *t_sig, *t_kfunc, *t_cfunc, *t_gfunc;
+    /* func     */ lk_obj_t *t_func, *t_sig, *t_lfunc, *t_cfunc, *t_gfunc;
     /* seq      */ lk_obj_t *t_seq;
     /* instr    */ lk_obj_t *t_instr;
     /* list     */ lk_obj_t *t_list;

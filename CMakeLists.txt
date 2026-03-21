@@ -63,10 +63,12 @@ install(FILES ${CMAKE_SOURCE_DIR}/include/*.h DESTINATION include/lk)
 # Tests
 enable_testing()
 
-# C unit tests (tests/unit/*.c) — one executable per file, linked against lkcore
-file(GLOB UNIT_TESTS CONFIGURE_DEPENDS "tests/unit/*.c")
+# C unit tests (tests/unit/**/*.c) — one executable per file, linked against lkcore
+file(GLOB_RECURSE UNIT_TESTS CONFIGURE_DEPENDS "tests/unit/*.c")
 foreach(test_src ${UNIT_TESTS})
     get_filename_component(test_name ${test_src} NAME_WE)
+    file(RELATIVE_PATH test_rel ${CMAKE_SOURCE_DIR}/tests/unit ${test_src})
+    string(REGEX REPLACE "\\.c$" "" test_id ${test_rel})
     add_executable(${test_name} ${test_src} $<TARGET_OBJECTS:lkcore>)
     target_include_directories(${test_name} PRIVATE
         ${CMAKE_SOURCE_DIR}/tests/unit
@@ -74,7 +76,7 @@ foreach(test_src ${UNIT_TESTS})
         ${CMAKE_SOURCE_DIR}/src
         ${CMAKE_SOURCE_DIR}/src/rt
     )
-    add_test(NAME unit/${test_name} COMMAND ${test_name})
+    add_test(NAME unit/${test_id} COMMAND ${test_name})
 endforeach()
 
 # Language tests (tests/lang/*.lk) — run via the interpreter

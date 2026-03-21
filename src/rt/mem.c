@@ -31,43 +31,42 @@ void *mem_alloc(size_t size) {
     if (size < MEM_MAX_RECYCLED && recycled[size] != NULL) {
         // Pop from free list — first word of each recycled block stores the next pointer
         void *next = *(void **)recycled[size];
-        void *new = recycled[size];
+        void *block = recycled[size];
         recycled[size] = next;
-        memset(new, 0x0, size); // Re-zero to match calloc semantics
+        memset(block, 0x0, size); // Re-zero to match calloc semantics
         atomic_fetch_add_explicit(&alloc_used, size, memory_order_relaxed);
         atomic_fetch_sub_explicit(&alloc_recycled, size, memory_order_relaxed);
         update_peak();
-        return new;
+        return block;
     }
 
-    size_t *new = calloc(1, size + sizeof(size_t));
+    size_t *header = calloc(1, size + sizeof(size_t));
 
-    if (new == NULL)
+    if (header == NULL)
         ERR("Unable to allocate mem!");
-    *new = size; // Size header
+
+    *header = size; // Size header
     atomic_fetch_add_explicit(&alloc_total, size, memory_order_relaxed);
     atomic_fetch_add_explicit(&alloc_used, size, memory_order_relaxed);
     update_peak();
-    return new + 1;
+    return header + 1;
 }
 
-void mem_free(void *ptr) {
-    if (ptr != NULL) {
-        size_t size = *((size_t *)ptr - 1);
+void mem_free(void *block) {
+    if (block != NULL) {
+        size_t size = *((size_t *)block - 1);
         atomic_fetch_sub_explicit(&alloc_count, 1, memory_order_relaxed);
 
         if (size < MEM_MAX_RECYCLED) {
             // Push onto free list — threads the next pointer through the block
-            *(void **)ptr = recycled[size];
-            recycled[size] = ptr;
+            *(void **)block = recycled[size];
+            recycled[size] = block;
             atomic_fetch_sub_explicit(&alloc_used, size, memory_order_relaxed);
             atomic_fetch_add_explicit(&alloc_recycled, size, memory_order_relaxed);
 
         } else {
-            // Step back to the header before calling free
-            size_t size2 = *(size_t *)(ptr = (size_t *)ptr - 1);
-            free(ptr);
-            atomic_fetch_sub_explicit(&alloc_used, size2, memory_order_relaxed);
+            free((size_t *)block - 1);
+            atomic_fetch_sub_explicit(&alloc_used, size, memory_order_relaxed);
         }
     }
 }
@@ -76,15 +75,13 @@ void mem_free(void *ptr) {
 // so callers on different threads free independent sets of blocks
 void mem_free_recycled(void) {
     for (int i = 0; i < MEM_MAX_RECYCLED; i++) {
-        void *curr = recycled[i];
+        void *current = recycled[i];
 
-        if (curr != NULL) {
-            while (curr != NULL) {
-                recycled[i] = *(void **)curr;
-                free((size_t *)curr - 1);
-                atomic_fetch_sub_explicit(&alloc_recycled, i, memory_order_relaxed);
-                curr = recycled[i];
-            }
+        while (current != NULL) {
+            recycled[i] = *(void **)current;
+            free((size_t *)current - 1);
+            atomic_fetch_sub_explicit(&alloc_recycled, i, memory_order_relaxed);
+            current = recycled[i];
         }
     }
 }
@@ -94,26 +91,30 @@ void *mem_resize(void *old, size_t size) {
         return mem_alloc(size);
 
     assert(size > 0);
-
     size_t *old_header = (size_t *)old - 1;
     size_t old_size = *old_header;
+
+    if (size == old_size)
+        return old;
 
     if (size < MEM_MAX_RECYCLED && recycled[size] != NULL) {
         // Serve new size from recycler, copy data, then recycle or free old
         void *next = *(void **)recycled[size];
-        void *new = recycled[size];
+        void *block = recycled[size];
         recycled[size] = next;
         size_t copy_size = old_size < size ? old_size : size;
-        memcpy(new, old, copy_size);
+        memcpy(block, old, copy_size);
 
         if (size > old_size)
-            memset((char *)new + old_size, 0, size - old_size); // Zero-init growth
+            memset((char *)block + old_size, 0, size - old_size); // Zero-init growth
+
         atomic_fetch_sub_explicit(&alloc_recycled, size, memory_order_relaxed);
 
         if (old_size < MEM_MAX_RECYCLED) {
             *(void **)old = recycled[old_size];
             recycled[old_size] = old;
             atomic_fetch_add_explicit(&alloc_recycled, old_size, memory_order_relaxed);
+
         } else {
             free(old_header);
         }
@@ -121,29 +122,32 @@ void *mem_resize(void *old, size_t size) {
         if (size > old_size) {
             atomic_fetch_add_explicit(&alloc_total, size - old_size, memory_order_relaxed);
             atomic_fetch_add_explicit(&alloc_used, size - old_size, memory_order_relaxed);
+
         } else {
             atomic_fetch_sub_explicit(&alloc_used, old_size - size, memory_order_relaxed);
         }
 
         update_peak();
-        return new;
+        return block;
     }
 
-    size_t *new = realloc(old_header, size + sizeof(size_t));
+    size_t *header = realloc(old_header, size + sizeof(size_t));
 
-    if (new == NULL)
+    if (header == NULL)
         ERR("Unable to resize mem!");
-    *new = size;
+
+    *header = size;
 
     if (size > old_size) {
         atomic_fetch_add_explicit(&alloc_total, size - old_size, memory_order_relaxed);
         atomic_fetch_add_explicit(&alloc_used, size - old_size, memory_order_relaxed);
+
     } else {
         atomic_fetch_sub_explicit(&alloc_used, old_size - size, memory_order_relaxed);
     }
 
     update_peak();
-    return new + 1;
+    return header + 1;
 }
 
 // info

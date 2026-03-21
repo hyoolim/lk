@@ -10,7 +10,7 @@
 // free list indexed by size, avoiding OS calls on reuse
 #define MEM_MAX_RECYCLED 1000
 void *mem_alloc(size_t size);
-void mem_free(void *ptr);
+void mem_free(void *block);
 void mem_free_recycled(void); // Release the calling thread's recycler to the OS
 void *mem_resize(void *old, size_t size);
 

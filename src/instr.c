@@ -122,7 +122,7 @@ lk_instr_t *lk_instr_new_message(lk_parser_t *parser, lk_str_t *name) {
         vec_t *cs = parser->comments;
         lk_str_t *c = vec_ptr_remove(cs, 0);
 
-        while (cs->size > 0) {
+        while (cs->length > 0) {
             vec_concat(VEC(c), VEC(vec_ptr_remove(cs, 0)));
         }
         new->comment = c;

@@ -37,13 +37,13 @@ vec_t *vec_clone(vec_t *self) {
 void vec_copy(vec_t *self, vec_t *src) {
     (self->buf = src->buf)->ref_count++;
     self->first = src->first;
-    self->size = src->size;
+    self->length = src->length;
 }
 
 void vec_init(vec_t *self, int item_size, int capacity) {
     self->buf = vec_buf_alloc(item_size, capacity);
     self->first = self->buf->items;
-    self->size = 0;
+    self->length = 0;
 }
 
 void vec_fin(vec_t *self) {
@@ -67,7 +67,7 @@ static void vec_prepupdate(vec_t *self, int i, int newsize) {
         if (bd->ref_count > 1) {
             bd->ref_count--;
             bd = self->buf = vec_buf_alloc(ilen, newcap);
-            memcpy(bd->items, self->first, ilen * self->size);
+            memcpy(bd->items, self->first, ilen * self->length);
             self->first = bd->items;
 
         } else {
@@ -81,11 +81,11 @@ static void vec_prepupdate(vec_t *self, int i, int newsize) {
     } else if (bd->ref_count > 1 && i < bd->used) {
         bd->ref_count--;
         bd = self->buf = vec_buf_alloc(ilen, newcap);
-        memcpy(bd->items, self->first, ilen * self->size);
+        memcpy(bd->items, self->first, ilen * self->length);
         self->first = bd->items;
     }
     bd->used = newsize + (self->first - bd->items);
-    self->size = newsize;
+    self->length = newsize;
 }
 
 void vec_clear(vec_t *self) {
@@ -93,7 +93,7 @@ void vec_clear(vec_t *self) {
 }
 
 void vec_concat(vec_t *self, vec_t *other) {
-    int sc = self->size, vc = other->size;
+    int sc = self->length, vc = other->length;
     int sl = self->buf->item_size, vl = other->buf->item_size;
 
     vec_prepupdate(self, sc, sc + vc);
@@ -127,7 +127,7 @@ void vec_concat(vec_t *self, vec_t *other) {
     } while (0)
 
 void vec_insert(vec_t *self, int at, void *value) {
-    int size = self->size;
+    int size = self->length;
 
     if (at < 0)
         at += size;
@@ -146,27 +146,27 @@ void vec_insert(vec_t *self, int at, void *value) {
 
 void vec_limit(vec_t *self, int limit) {
     if (limit < 0)
-        limit += self->size;
-    if (limit >= 0 && limit < self->size)
-        self->size = limit;
+        limit += self->length;
+    if (limit >= 0 && limit < self->length)
+        self->length = limit;
 }
 
 void vec_offset(vec_t *self, int offset) {
     if (offset < 0)
-        offset += self->size;
+        offset += self->length;
     if (offset == 0)
         return;
 
-    if (offset < 0 || offset >= self->size)
-        self->size = 0;
+    if (offset < 0 || offset >= self->length)
+        self->length = 0;
     else {
         self->first += offset * self->buf->item_size;
-        self->size -= offset;
+        self->length -= offset;
     }
 }
 
 void vec_remove(vec_t *self, int at) {
-    int size = self->size;
+    int size = self->length;
 
     if (at < 0)
         at += size;
@@ -183,7 +183,7 @@ void vec_remove(vec_t *self, int at) {
 }
 
 void vec_resize(vec_t *self, int length) {
-    if (length <= self->size)
+    if (length <= self->length)
         return;
     vec_prepupdate(self, length - 1, length);
 }
@@ -208,7 +208,7 @@ void vec_resize_item(vec_t *self, vec_t *other) {
 
 void vec_reverse(vec_t *self) {
     struct vec_buf *bd = self->buf;
-    int ilen = bd->item_size, i = 0, c = self->size, c2 = (c + 1) / 2;
+    int ilen = bd->item_size, i = 0, c = self->length, c2 = (c + 1) / 2;
     char *from = self->first, *to;
 
     if (bd->ref_count > 1) {
@@ -248,7 +248,7 @@ void vec_reverse(vec_t *self) {
 }
 
 void vec_set(vec_t *self, int at, void *value) {
-    int size = self->size;
+    int size = self->length;
 
     if (at < 0)
         at += size;
@@ -261,7 +261,7 @@ void vec_set(vec_t *self, int at, void *value) {
 }
 
 void vec_set_range(vec_t *self, int start, int end, vec_t *other) {
-    int i, d, sc = self->size, vc = other->size;
+    int i, d, sc = self->length, vc = other->length;
 
     if (start < 0)
         start += sc;
@@ -292,7 +292,7 @@ int vec_cmp(const vec_t *self, const vec_t *other) {
     if (self == other)
         return 0;
     else {
-        int sc = self->size, oc = other->size, d = sc - oc;
+        int sc = self->length, oc = other->length, d = sc - oc;
 
         if (self->first == other->first)
             return d;
@@ -311,7 +311,7 @@ int vec_cmp(const vec_t *self, const vec_t *other) {
 }
 
 int vec_find_vec(const vec_t *self, const vec_t *pattern, int offset) {
-    int self_c = self->size, pat_c = pattern->size;
+    int self_c = self->length, pat_c = pattern->length;
 
     if (pat_c == 0)
         return offset < self_c ? offset : -1;
@@ -350,7 +350,7 @@ int vec_find_vec(const vec_t *self, const vec_t *pattern, int offset) {
 }
 
 void *vec_get(const vec_t *self, int at) {
-    int size = self->size;
+    int size = self->length;
 
     if (at < 0)
         at += size;
@@ -359,7 +359,7 @@ void *vec_get(const vec_t *self, int at) {
 
 int vec_hc(const vec_t *self) {
     register const uint8_t *beg = (uint8_t *)self->first;
-    register const uint8_t *end = beg + self->buf->item_size * self->size;
+    register const uint8_t *end = beg + self->buf->item_size * self->length;
     int hc = 5381;
 
     for (; beg < end; beg++) {
@@ -371,7 +371,7 @@ int vec_hc(const vec_t *self) {
 
 #define WRITEITEM(self, stream, t, f) \
     do { \
-        t *i = (t *)(self)->first, *end = i + (self)->size; \
+        t *i = (t *)(self)->first, *end = i + (self)->length; \
         for (; i < end; i++) \
             fprintf((stream), " " f, (t) * i); \
         fprintf((stream), "\n"); \
@@ -385,7 +385,7 @@ void vec_write(const vec_t *self, FILE *stream) {
     fprintf(stream, "vec_t(%p", (void *)self);
     fprintf(stream, ", first=%p", (void *)first);
     fprintf(stream, "(%i)", (int)((first - bd->items) / ilen));
-    fprintf(stream, ", size=%i", self->size);
+    fprintf(stream, ", size=%i", self->length);
     fprintf(stream, ")\n-> buf(%p", (void *)bd);
     fprintf(stream, ", capacity=%i", bd->capacity);
     fprintf(stream, ", used=%i", bd->used);
@@ -410,7 +410,7 @@ void vec_write(const vec_t *self, FILE *stream) {
 }
 
 void vec_print_tostream(const vec_t *self, FILE *stream) {
-    fwrite(self->first, self->buf->item_size, self->size, stream);
+    fwrite(self->first, self->buf->item_size, self->length, stream);
 }
 
 #pragma endregion
@@ -434,7 +434,7 @@ void vec_print_tostream(const vec_t *self, FILE *stream) {
             if ((check)) \
                 break; \
         } \
-        self->size = self->buf->used = ch == EOF ? i : i + 1; \
+        self->length = self->buf->used = ch == EOF ? i : i + 1; \
         return self; \
     } while (0)
 
@@ -449,7 +449,7 @@ vec_t *vec_str_alloc_from_cstr(const char *cstr) {
 vec_t *vec_str_alloc_from_data(const void *data, int length) {
     vec_t *self = vec_alloc(sizeof(uint8_t), length);
     memcpy(self->first, data, length);
-    self->buf->used = self->size = length;
+    self->buf->used = self->length = length;
     return self;
 }
 
@@ -460,7 +460,7 @@ vec_t *vec_str_alloc_from_file(FILE *stream) {
         if ((size = ftell(stream)) >= 0 && fseek(stream, 0, SEEK_SET) == 0) {
             vec_t *self = vec_alloc(sizeof(uint8_t), size);
             fread(self->first, 1, size, stream);
-            self->size = self->buf->used = size;
+            self->length = self->buf->used = size;
             return self;
         }
     }
@@ -475,7 +475,7 @@ vec_t *vec_str_alloc_from_file_until_char(FILE *stream, uint32_t pattern) {
 
 vec_t *vec_str_alloc_from_file_with_length(FILE *stream, size_t length) {
     vec_t *self = vec_alloc(1, length);
-    self->size = self->buf->used = fread(self->first, 1, length, stream);
+    self->length = self->buf->used = fread(self->first, 1, length, stream);
     return self;
 }
 
@@ -508,11 +508,11 @@ void vec_str_insert(vec_t *self, int at, uint32_t value) {
 }
 
 uint32_t vec_str_pop(vec_t *self) {
-    return vec_str_remove(self, self->size - 1);
+    return vec_str_remove(self, self->length - 1);
 }
 
 void vec_str_push(vec_t *self, uint32_t value) {
-    vec_str_set(self, self->size, value);
+    vec_str_set(self, self->length, value);
 }
 
 uint32_t vec_str_remove(vec_t *self, int at) {
@@ -544,12 +544,12 @@ void vec_str_set(vec_t *self, int at, uint32_t value) {
 }
 
 uint32_t vec_str_peek(vec_t *self) {
-    return vec_str_get((self), (self)->size - 1);
+    return vec_str_get((self), (self)->length - 1);
 }
 
 const char *vec_str_tocstr(vec_t *self) {
-    vec_str_set(self, self->size, '\0');
-    self->size--;
+    vec_str_set(self, self->length, '\0');
+    self->length--;
     return self->first;
 }
 
@@ -563,7 +563,7 @@ const char *vec_str_tocstr(vec_t *self) {
     } while (0)
 
 int vec_str_cmp_cstr(const vec_t *self, const char *other) {
-    int sc = self->size, oc = strlen(other), d = sc - oc;
+    int sc = self->length, oc = strlen(other), d = sc - oc;
     int len = d > 0 ? oc : sc;
     uint8_t ilen = self->buf->item_size;
     uint8_t *sb = (uint8_t *)self->first, *sbend = sb + len * ilen;
@@ -589,7 +589,7 @@ int vec_str_cmp_cstr(const vec_t *self, const char *other) {
 
 int vec_str_find(const vec_t *self, uint32_t pattern, int offset) {
     void *buf = self->first;
-    int c = self->size;
+    int c = self->length;
 
     switch (self->buf->item_size) {
     case sizeof(uint8_t):
@@ -633,7 +633,7 @@ uint32_t vec_str_get(const vec_t *self, int at) {
 
 int vec_str_find_charset(const vec_t *self, const charset_t *pattern, int offset) {
     void *buf = self->first;
-    int c = self->size;
+    int c = self->length;
 
     switch (self->buf->item_size) {
     case sizeof(uint8_t):
@@ -671,11 +671,11 @@ void vec_ptr_insert(vec_t *self, int at, void *value) {
 }
 
 void *vec_ptr_pop(vec_t *self) {
-    return vec_ptr_remove(self, self->size - 1);
+    return vec_ptr_remove(self, self->length - 1);
 }
 
 void vec_ptr_push(vec_t *self, void *value) {
-    vec_ptr_set(self, self->size, value);
+    vec_ptr_set(self, self->length, value);
 }
 
 void *vec_ptr_remove(vec_t *self, int at) {
@@ -697,7 +697,7 @@ void vec_ptr_unshift(vec_t *self, void *value) {
 }
 
 void *vec_ptr_peek(vec_t *self) {
-    return vec_ptr_get((self), (self)->size - 1);
+    return vec_ptr_get((self), (self)->length - 1);
 }
 
 void *vec_ptr_get(const vec_t *self, int at) {

@@ -224,7 +224,7 @@ void charset_add_charset(charset_t *self, charset_t *other) {
 
 // add all the chars in the specified str to this charset
 void charset_add_darray(charset_t *self, vec_t *str) {
-    int c = str->size;
+    int c = str->length;
 
     if (c > 0) {
         int i = 0;
@@ -269,7 +269,7 @@ void charset_subtract_charset(charset_t *self, charset_t *other) {
 
 // charset_remove all the chars in the specified str from this charset
 void charset_subtract_darray(charset_t *self, vec_t *str) {
-    int c = str->size;
+    int c = str->length;
 
     if (c > 0) {
         int i = 0;
@@ -349,18 +349,18 @@ vec_t *charset_tostr(const charset_t *self) {
     uint32_t *curr = CHARSET_DATA(self), *last = curr + self->size;
 
     if (CHARSET_IS_INVERTED(self))
-        vec_str_set(str, str->size, '^');
+        vec_str_set(str, str->length, '^');
 
     for (; curr < last;) {
         from = *curr++;
         to = *curr++;
 
         if (from == to)
-            vec_str_set(str, str->size, from);
+            vec_str_set(str, str->length, from);
         else {
-            vec_str_set(str, str->size, from);
-            vec_str_set(str, str->size, '-');
-            vec_str_set(str, str->size, to);
+            vec_str_set(str, str->length, from);
+            vec_str_set(str, str->length, '-');
+            vec_str_set(str, str->length, to);
         }
     }
     return str;

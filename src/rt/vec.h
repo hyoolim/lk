@@ -16,7 +16,7 @@ struct vec_buf {
 typedef struct vec {
     struct vec_buf *buf;
     char *first;
-    int size;
+    int length;
 } vec_t;
 
 vec_t *vec_alloc(int item_size, int capacity);
@@ -41,7 +41,7 @@ void vec_slice(vec_t *self, int offset, int limit);
 
 #define VEC_AT(self, i) ((self)->first + (self)->buf->item_size * i)
 #define VEC_ATPTR(self, i) (*(void **)VEC_AT(self, (i)))
-#define VEC_COUNT(self) ((self)->size)
+#define VEC_COUNT(self) ((self)->length)
 #define VEC_EACH(self, i, v, block) \
     do { \
         vec_t *_l = (self); \

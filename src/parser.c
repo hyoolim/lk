@@ -806,14 +806,14 @@ static READFUNC(readnum) {
     if (tok == NULL)
         return 0;
     else {
-        numifn_t num;
+        num_t num;
 
         switch (num_new(0, DARRAY(tok), &num)) {
-        case NUMBERTYPE_INT:
+        case NUM_TYPE_INT:
             darray_ptr_push(self->words, lk_instr_new_number(self, num.i));
             break;
-        case NUMBERTYPE_FLOAT:
-            darray_ptr_push(self->words, lk_instr_new_number(self, num.f));
+        case NUM_TYPE_DOUBLE:
+            darray_ptr_push(self->words, lk_instr_new_number(self, num.d));
             break;
         default:
             BUG("Invalid num type while trying to parse code.\n");

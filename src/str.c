@@ -99,13 +99,13 @@ lk_charset_t *lk_str_to_charset(lk_str_t *self) {
 }
 
 lk_num_t *lk_str_to_num(lk_str_t *self) {
-    numifn_t num;
+    num_t num;
 
     switch (num_new(0, DARRAY(self), &num)) {
-    case NUMBERTYPE_INT:
+    case NUM_TYPE_INT:
         return lk_num_new(VM, num.i);
-    case NUMBERTYPE_FLOAT:
-        return lk_num_new(VM, num.f);
+    case NUM_TYPE_DOUBLE:
+        return lk_num_new(VM, num.d);
     default:
         BUG("Invalid num type while trying to parse code.\n");
     }

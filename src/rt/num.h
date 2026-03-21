@@ -1,21 +1,21 @@
-#ifndef NUMBER_H
-#define NUMBER_H
+#ifndef NUM_H
+#define NUM_H
 #include "common.h"
 #include "darray.h"
 
-// type.
-typedef enum numtype { NUMBERTYPE_INT = 1, NUMBERTYPE_FLOAT, NUMBERTYPE_NUMBER } numtype_t;
-typedef struct num {
-    uint8_t *buf;
-    int len;
-} num_t;
-typedef union numifn {
-    int i;
-    double f;
-    num_t *n;
-} numifn_t;
+typedef enum { NUM_TYPE_INT = 1, NUM_TYPE_DOUBLE, NUM_TYPE_BIG } num_type_t;
 
-// new.
-numtype_t num_new(int is_big, darray_t *str, numifn_t *res);
-void num_free(num_t *self);
+typedef struct {
+    uint8_t *buf;
+    size_t len;
+} num_big_t;
+
+typedef union {
+    int i;
+    double d;
+    num_big_t *b;
+} num_t;
+
+num_type_t num_new(bool big, darray_t *str, num_t *res);
+void num_free(num_big_t *self);
 #endif

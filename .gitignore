@@ -1,5 +1,5 @@
 build
-include
+build-release
 lib/*/*.dll
 lib/*/*.dylib
 lib/*/*.so

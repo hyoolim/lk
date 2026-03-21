@@ -77,7 +77,8 @@ void *mem_resize(void *old, size_t size) {
         if (new == NULL)
             ERR("Unable to resize mem!");
         *new = size;
-        alloctotal += size - old_size;
+        if (size > old_size)
+            alloctotal += size - old_size;
         allocused += size - old_size;
 
         if (allocused > allocpeak)

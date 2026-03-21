@@ -10,7 +10,7 @@ struct vec_buf {
     int used;      // high-water mark used for copy-on-write decisions
     int item_size; // size of each item in bytes
     int ref_count; // number of vecs sharing this buf
-    char item;     // first byte of inline data (pre-C99 flexible array member workaround)
+    char items[];  // inline data
 };
 
 typedef struct vec {

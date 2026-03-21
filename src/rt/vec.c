@@ -8,8 +8,7 @@ static struct vec_buf *vec_buf_alloc(int ilen, int cap) {
 
     while (cap > c)
         c *= 2;
-    // sizeof(struct vec_buf) - sizeof(char) accounts for the `item` placeholder already in the struct
-    self = mem_alloc(sizeof(struct vec_buf) - sizeof(char) + ilen * c);
+    self = mem_alloc(sizeof(struct vec_buf) + ilen * c);
     self->capacity = c;
     self->used = 0;
     self->item_size = ilen;
@@ -43,7 +42,7 @@ void vec_copy(vec_t *self, vec_t *src) {
 
 void vec_init(vec_t *self, int ilen, int cap) {
     self->buf = vec_buf_alloc(ilen, cap);
-    self->first = &self->buf->item;
+    self->first = self->buf->items;
     self->size = 0;
 }
 
@@ -68,24 +67,24 @@ static void vec_prepupdate(vec_t *self, int i, int newsize) {
         if (bd->ref_count > 1) {
             bd->ref_count--;
             bd = self->buf = vec_buf_alloc(ilen, newcap);
-            memcpy(&bd->item, self->first, ilen * self->size);
-            self->first = &bd->item;
+            memcpy(bd->items, self->first, ilen * self->size);
+            self->first = bd->items;
 
         } else {
-            ptrdiff_t d = self->first - &bd->item;
+            ptrdiff_t d = self->first - bd->items;
             bd = self->buf = mem_resize(bd, sizeof(struct vec_buf) - sizeof(char) + ilen * newcap);
             bd->capacity = newcap;
-            self->first = &bd->item + d;
+            self->first = bd->items + d;
         }
 
         // new buf if replacing existing item in shared buf
     } else if (bd->ref_count > 1 && i < bd->used) {
         bd->ref_count--;
         bd = self->buf = vec_buf_alloc(ilen, newcap);
-        memcpy(&bd->item, self->first, ilen * self->size);
-        self->first = &bd->item;
+        memcpy(bd->items, self->first, ilen * self->size);
+        self->first = bd->items;
     }
-    bd->used = newsize + (self->first - &bd->item);
+    bd->used = newsize + (self->first - bd->items);
     self->size = newsize;
 }
 
@@ -216,7 +215,7 @@ void vec_reverse(vec_t *self) {
         vec_buf_free(bd);
         bd = self->buf = vec_buf_alloc(ilen, c);
         bd->used = c;
-        to = self->first = &bd->item;
+        to = self->first = bd->items;
 
     } else {
         to = from;
@@ -385,7 +384,7 @@ void vec_write(const vec_t *self, FILE *stream) {
 
     fprintf(stream, "vec_t(%p", (void *)self);
     fprintf(stream, ", first=%p", (void *)first);
-    fprintf(stream, "(%i)", (int)((first - &bd->item) / ilen));
+    fprintf(stream, "(%i)", (int)((first - bd->items) / ilen));
     fprintf(stream, ", size=%i", self->size);
     fprintf(stream, ")\n-> buf(%p", (void *)bd);
     fprintf(stream, ", capacity=%i", bd->capacity);
@@ -427,9 +426,9 @@ void vec_print_tostream(const vec_t *self, FILE *stream) {
                 do { \
                     c *= 2; \
                 } while (i >= c); \
-                self->buf = mem_resize(self->buf, sizeof(struct vec_buf) - sizeof(char) + self->buf->item_size * c); \
+                self->buf = mem_resize(self->buf, sizeof(struct vec_buf) + self->buf->item_size * c); \
                 self->buf->capacity = (c); \
-                self->first = &(self)->buf->item; \
+                self->first = (self)->buf->items; \
             } \
             ((char *)self->first)[i] = ch; \
             if ((check)) \

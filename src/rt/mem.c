@@ -148,7 +148,6 @@ void *mem_resize(void *old, size_t size) {
     return header + 1;
 }
 
-// info
 int mem_alloc_count(void) {
     return atomic_load_explicit(&alloc_count, memory_order_relaxed);
 }

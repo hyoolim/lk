@@ -176,8 +176,6 @@ static lk_prec_t *getprec(lk_parser_t *self, lk_instr_t *op) {
 }
 static lk_prec_t *shiftreduce(lk_parser_t *self, lk_instr_t *op) {
     lk_prec_t *curr = op != NULL ? getprec(self, op) : NULL;
-    int curr_level, prev_level;
-    enum lk_precassoc_t assoc;
     // reduce - NULL reduces everything
     while (DARRAY_COUNT(self->ops) > self->opsize) {
         int is_break = 1;
@@ -187,6 +185,8 @@ static lk_prec_t *shiftreduce(lk_parser_t *self, lk_instr_t *op) {
         if (op == NULL)
             is_break = 0;
         else {
+            int curr_level, prev_level;
+            enum lk_precassoc_t assoc;
             if (curr != NULL)
                 curr_level = curr->level;
             else {

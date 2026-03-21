@@ -354,8 +354,6 @@ startover:
 }
 static lk_cfunc_t *lk_obj_setcfunc(lk_obj_t *self, const char *name, lk_cfunc_lk_t *cfunc, va_list *args) {
     lk_vm_t *vm = LK_VM(self);
-    int i;
-    lk_obj_t *arg;
     lk_str_t *nameobj = lk_str_new_fromcstr(vm, name);
     lk_cfunc_t *cfuncobj = lk_cfunc_new(vm, cfunc, 0, 0);
     struct lk_slot *slot = lk_obj_getslot(self, LK_OBJ(nameobj));
@@ -369,8 +367,8 @@ static lk_cfunc_t *lk_obj_setcfunc(lk_obj_t *self, const char *name, lk_cfunc_lk
         slot = lk_obj_setslot(self, LK_OBJ(nameobj), vm->t_func, LK_OBJ(cfuncobj));
     }
     LK_SLOT_SETOPTION(slot, LK_SLOTOPTION_AUTOSEND);
-    for (i = 0;; i++) {
-        arg = va_arg(*args, lk_obj_t *);
+    for (int i = 0;; i++) {
+        lk_obj_t *arg = va_arg(*args, lk_obj_t *);
         if (arg == NULL) {
             cfuncobj->cf.minargc = cfuncobj->cf.maxargc = i;
             break;

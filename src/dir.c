@@ -20,7 +20,6 @@ lk_dir_t *lk_dir_new_withpath(lk_vm_t *vm, lk_str_t *path) {
     return self;
 }
 void lk_dir_init(lk_dir_t *self, lk_str_t *path) {
-    int at = 0, nextat;
     if (darray_str_get(DARRAY(path), 0) == '/') {
         self->path = path;
     } else {
@@ -32,6 +31,7 @@ void lk_dir_init(lk_dir_t *self, lk_str_t *path) {
             self->path = abs;
         }
     }
+    int at = 0, nextat;
     while ((nextat = darray_str_find(DARRAY(self->path), '/', at)) > -1) {
         at = nextat + 1;
     }

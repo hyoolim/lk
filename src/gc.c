@@ -97,14 +97,13 @@ void lk_gc_resume(lk_gc_t *self) {
 }
 void lk_gc_mark(lk_gc_t *self) {
     if (self->isrunning) {
-        int i;
         /*
         printf("marking! - unused: %i, pending: %i, used: %i\n",
         lk_objgroup_size(self->unused),
         lk_objgroup_size(self->pending),
         lk_objgroup_size(self->used));
          */
-        for (i = 0; i < 30000; i++) {
+        for (int i = 0; i < 30000; i++) {
             if (self->pending->first == NULL) {
                 lk_gc_sweep(self);
                 break;
@@ -140,8 +139,7 @@ void lk_gc_sweep(lk_gc_t *self) {
 // info
 int lk_objgroup_size(struct lk_objgroup *self) {
     int c = 0;
-    lk_obj_t *i;
-    for (i = self->first; i != NULL; i = i->o.mark.next)
+    for (lk_obj_t *i = self->first; i != NULL; i = i->o.mark.next)
         c++;
     return c;
 }

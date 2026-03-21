@@ -97,9 +97,9 @@ static void system_vm(lk_obj_t *self, lk_scope_t *local) {
         waitpid(child, &status, 0);
         RETURN(lk_num_new(VM, WEXITSTATUS(status)));
     } else {
-        int i, c = local->argc;
+        int c = local->argc;
         char **args = mem_alloc(sizeof(char *) * (c + 1));
-        for (i = 0; i < c; i++) {
+        for (int i = 0; i < c; i++) {
             args[i] = (char *)darray_str_tocstr(DARRAY(ARG(i)));
         }
         execvp(args[0], args);
@@ -235,13 +235,13 @@ lk_scope_t *lk_vm_evalfile(lk_vm_t *self, const char *file, const char *base) {
     lk_str_t *filename = lk_str_new_fromcstr(self, file);
     if (base != NULL && file[0] != '/') {
         lk_str_t *root = lk_str_new_fromcstr(self, base);
-        int pos, i, pslen = DARRAY_COUNT(DARRAY(self->str_filesep));
-        pos = darray_find_darray(DARRAY(root), DARRAY(self->str_filesep), 0);
+        int pslen = DARRAY_COUNT(DARRAY(self->str_filesep));
+        int pos = darray_find_darray(DARRAY(root), DARRAY(self->str_filesep), 0);
         if (pos > 0) {
             lk_str_t *orig = filename;
             root = lk_str_new_fromdarray(self, DARRAY(root));
             pos += pslen;
-            while ((i = darray_find_darray(DARRAY(root), DARRAY(self->str_filesep), pos)) > 0)
+            for (int i; (i = darray_find_darray(DARRAY(root), DARRAY(self->str_filesep), pos)) > 0;)
                 pos = i + pslen;
             darray_slice(DARRAY(root), 0, pos);
             darray_resizeitem(DARRAY(root), DARRAY(orig));
@@ -378,7 +378,6 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
     setitem_t *si;
     struct lk_slot *slot;
     darray_t *ancs;
-    int anci, ancc;
     lk_obj_t *recv, *r, *slotv;
     lk_func_t *func;
     // rescue err and run approp func
@@ -553,8 +552,8 @@ prevscope:
         }
     parent:
         if ((ancs = r->o.ancestors) != NULL) {
-            ancc = DARRAY_COUNT(ancs);
-            for (anci = 1; anci < ancc; anci++) {
+            int ancc = DARRAY_COUNT(ancs);
+            for (int anci = 1; anci < ancc; anci++) {
                 r = DARRAY_ATPTR(ancs, anci);
                 if ((slots = r->o.slots) == NULL)
                     continue;

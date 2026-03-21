@@ -9,16 +9,16 @@ static void at_env_str(lk_obj_t *self, lk_scope_t *local) {
 }
 extern char **environ;
 static void size_env(lk_obj_t *self, lk_scope_t *local) {
-    int c;
-    for (c = 0; environ[c] != NULL; c++) {
+    int c = 0;
+    for (; environ[c] != NULL; c++) {
     }
     RETURN(lk_num_new(VM, c));
 }
 static void keys_env(lk_obj_t *self, lk_scope_t *local) {
     lk_list_t *keys = lk_list_new(VM);
-    int i, j;
-    const char *v;
-    for (i = 0; (v = environ[i]) != NULL; i++) {
+    for (int i = 0; environ[i] != NULL; i++) {
+        const char *v = environ[i];
+        int j;
         for (j = 0; v[j] != '\0' && v[j] != '='; j++) {
         }
         darray_ptr_push(DARRAY(keys), lk_str_new_fromdata(VM, v, j));

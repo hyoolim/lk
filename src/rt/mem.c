@@ -9,6 +9,7 @@ static size_t allocrecycled = 0;
 static void *recycled[MEMORY_MAXRECYCLED];
 
 void *mem_alloc(size_t size) {
+    assert(size > 0);
     allocsize++;
 
     if (size < MEMORY_MAXRECYCLED && recycled[size] != NULL) {

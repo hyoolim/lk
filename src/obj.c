@@ -227,7 +227,7 @@ void lk_obj_extend(lk_obj_t *self, lk_obj_t *parent) {
     } else {
         parents = darray_ptr_alloc();
         darray_ptr_push(parents, self->o.parent);
-        self->o.parent = LK_OBJ((ptrdiff_t)parents | 1);
+        self->o.parent = LK_OBJ((ptrdiff_t)parents | 1); // lowest bit = multi-parent flag; requires 2-byte alignment
     }
     darray_ptr_unshift(parents, parent);
     if (!lk_obj_calcancestors(self)) {

@@ -61,7 +61,7 @@ void lk_obj_set_cfield(lk_obj_t *self, const char *k, lk_obj_t *t, size_t offset
     lk_vm_t *vm = LK_VM(self);
     lk_str_t *k_kc = lk_str_new_fromcstr(vm, k);
     struct lk_slot *slot = lk_obj_setslot(LK_OBJ(self), LK_OBJ(k_kc), t, vm->t_nil);
-    assert(offset >= sizeof(struct lk_common));
+    assert(offset >= sizeof(struct lk_common)); // cfield offsets are relative to lk_obj_t*, so must clear lk_common
     LK_SLOT_SETTYPE(slot, LK_SLOTTYPE_CFIELDLKOBJ);
     slot->value.coffset = offset;
 }

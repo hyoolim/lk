@@ -1,6 +1,6 @@
-# Link
+# Link Programming Language
 
-Link (`.lk`) is a dynamically typed, prototype-based language. It is currently implemented as a tree-walking interpreter written in C, with a compiler as the next milestone.
+Link (`.lk`) is a systems language currently in early development. It is dynamically typed and prototype-based today, with class-based OOP and static typing planned. The current implementation is a tree-walking interpreter written in C, with a compiler as the next milestone.
 
 ## Building
 

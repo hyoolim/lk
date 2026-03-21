@@ -54,6 +54,7 @@ lk_bool_t *lk_charset_has_char(lk_obj_t *self, lk_char_t *achar) {
 lk_bool_t *lk_charset_has_str(lk_obj_t *self, lk_str_t *str) {
     darray_t *darray = DARRAY(str);
     DARRAY_EACH(darray, i, v, {
+        (void)v;
         if (!charset_has(CHARSET(self), darray_str_get(darray, i)))
             return FALSE;
     });

@@ -50,7 +50,7 @@ static void Ddefine_and_assignB_obj_str_obj_obj(lk_obj_t *self, lk_scope_t *loca
 }
 
 static void Did_obj(lk_obj_t *self, lk_scope_t *local) {
-    RETURN(lk_num_new(VM, (int)self));
+    RETURN(lk_num_new(VM, (double)(uintptr_t)self));
 }
 
 static void Dretrieve_obj_str(lk_obj_t *self, lk_scope_t *local) {

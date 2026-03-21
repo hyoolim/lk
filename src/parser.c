@@ -557,7 +557,7 @@ static lk_str_t *getnexttoken(lk_parser_t *self, tokentype_t type) {
     if (DARRAY_COUNT(tt) < 1)
         readtoken(self);
 
-    if ((tokentype_t)darray_ptr_get(tt, 0) == type) {
+    if ((tokentype_t)(intptr_t)darray_ptr_get(tt, 0) == type) {
         darray_ptr_shift(tt);
         return darray_ptr_shift(self->tokenvalues);
     }

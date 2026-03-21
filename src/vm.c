@@ -231,7 +231,7 @@ lk_vm_t *lk_vm_new(void) {
     lk_env_extinit(self);
     lk_rand_extinit(self);
     lk_socket_extinit(self);
-    lk_global_set("Global", self->global);
+    lk_global_set("Global", LK_OBJ(self->global));
     return self;
 }
 

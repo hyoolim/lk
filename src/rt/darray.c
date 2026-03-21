@@ -687,7 +687,7 @@ void darray_write(const darray_t *self, FILE *stream) {
 
     fprintf(stream, "darray_t(%p", (void *)self);
     fprintf(stream, ", first=%p", (void *)first);
-    fprintf(stream, "(%i)", (first - &bd->item) / ilen);
+    fprintf(stream, "(%i)", (int)((first - &bd->item) / ilen));
     fprintf(stream, ", size=%i", self->size);
     fprintf(stream, ")\n-> data(%p", (void *)bd);
     fprintf(stream, ", cap=%i", bd->cap);

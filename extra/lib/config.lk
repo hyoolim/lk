@@ -1,90 +1,90 @@
 #
-build := ARGUMENTS[0] ++ '/'
-objects := WritableFile/new[build ++ 'objects']
-libs := WritableFile/new[build ++ 'libs']
+build := ARGUMENTS[0] ++ '.'
+objects := WritableFile.new[build ++ 'objects']
+libs := WritableFile.new[build ++ 'libs']
 
 #
-ConfigOptional := Object/with {
-    /ALL := [ ]
-    /add_c_flags! := { str ---
-        /c_flags/concat![str % ' ' ->reject { v --- v[0] != 0c- }]
+ConfigOptional := Object.with {
+    .ALL := [ ]
+    .add_c_flags! := { str ---
+        .c_flags.concat![str % ' ' ->reject { v --- v[0] != 0c- }]
     }
-    /add_c_libs! := { str ---
-        /c_libs/concat![str % ' ' ->reject { v --- v[0] != 0c- }]
+    .add_c_libs! := { str ---
+        .c_libs.concat![str % ' ' ->reject { v --- v[0] != 0c- }]
     }
-    /c_preprocess? := { code ---
-        c_test := WritableFile/new[build ++ 'c_test.c']
-        c_test/write[code ++ '\n']
-        c_test/flush
-        VirtualMachine/system[
-            'cc'; '-E'; *(/c_flags)
+    .c_preprocess? := { code ---
+        c_test := WritableFile.new[build ++ 'c_test.c']
+        c_test.write[code ++ '\n']
+        c_test.flush
+        VirtualMachine.system[
+            'cc'; '-E'; *(.c_flags)
             '-o'; build ++ 'c_test.o';
             build ++ 'c_test.c'
         ] == 0
     }
-    /c_compile? := { code ---
-        c_test := WritableFile/new[build ++ 'c_test.c']
-        c_test/write[code]
-        c_test/flush
-        VirtualMachine/system[
-            'cc'; *(/c_flags)
+    .c_compile? := { code ---
+        c_test := WritableFile.new[build ++ 'c_test.c']
+        c_test.write[code]
+        c_test.flush
+        VirtualMachine.system[
+            'cc'; *(.c_flags)
             '-o'; build ++ 'c_test.o';
-            *(/c_libs/map { v --- '-l' ++ v })
+            *(.c_libs.map { v --- '-l' ++ v })
             build ++ 'c_test.c'
         ] == 0
     }
-    /c_header? := { name ---
-        /c_preprocess?['#include <' ++ name ++ '>']
+    .c_header? := { name ---
+        .c_preprocess?['#include <' ++ name ++ '>']
     }
-    /finish := { ---
-        /ALL/push![/.]
-        objects/writeLine[/name ++ '.o']
-        /c_libs/each { v --- libs/writeLine[v] }
-        WritableFile/new[build ++ /name ++ '.cf']/write[/c_flags/join[' ']]
+    .finish := { ---
+        .ALL.push![..]
+        objects.writeLine[.name ++ '.o']
+        .c_libs.each { v --- libs.writeLine[v] }
+        WritableFile.new[build ++ .name ++ '.cf'].write[.c_flags.join[' ']]
     }
-    /init! := { ---
-        /c_flags := [ ]
-        /c_libs := [ ]
+    .init! := { ---
+        .c_flags := [ ]
+        .c_libs := [ ]
     }
-    /init!  = { /name ---
-        /init!
+    .init!  = { .name ---
+        .init!
     }
 }
 
 #
-ConfigOptional/new['mysql']/do {
-    /add_c_flags![VirtualMachine/system2['mysql_config --cflags'] || '' ->trim]
-    /add_c_libs![VirtualMachine/system2['mysql_config --libs'] || '' ->trim]
-    /c_header?['mysql.h'] ? /finish
+ConfigOptional.new['mysql'].do {
+    .add_c_flags![VirtualMachine.system2['mysql_config --cflags'] || '' ->trim]
+    .add_c_libs![VirtualMachine.system2['mysql_config --libs'] || '' ->trim]
+    .c_header?['mysql.h'] ? .finish
 }
-ConfigOptional/new['regex']/do {
-    /c_header?['regex.h'] ? /finish
+ConfigOptional.new['regex'].do {
+    .c_header?['regex.h'] ? .finish
 }
 
-ConfigOptional/new['postgres']/do {
-    include_path := VirtualMachine/system2['pg_config --includedir']
+ConfigOptional.new['postgres'].do {
+    include_path := VirtualMachine.system2['pg_config --includedir']
     include_path = include_path ? '-I' ++ include_path ! ''
-    lib_path := VirtualMachine/system2['pg_config --libdir']
+    lib_path := VirtualMachine.system2['pg_config --libdir']
     lib_path = lib_path ? '-L' ++ lib_path ! ''
-    include_path/trim!/concat![' -pipe']
-    lib_path/trim!/concat![' -lpq']
-    /add_c_flags![include_path]
-    /add_c_libs![lib_path]
-    /c_header?['libpq-fe.h'] && /c_header?['libpq/libpq-fs.h'] ? /finish
+    include_path.trim!.concat![' -pipe']
+    lib_path.trim!.concat![' -lpq']
+    .add_c_flags![include_path]
+    .add_c_libs![lib_path]
+    .c_header?['libpq-fe.h'] && .c_header?['libpq.libpq-fs.h'] ? .finish
 }
 #
-objects/writeLine['optional.o']
-WritableFile/new[build ++ 'optional.c']/do {
-    /writeLine['#include "../../vm.h"']
-    /writeLine['#include "../../ext.h"']
-    /writeLine
-    /writeLine['/* */']
-    ConfigOptional/ALL/each { v ---
-        /writeLine['extern LK_EXT_DEFINIT(lk_' ++ v/name ++ ');']
+objects.writeLine['optional.o']
+WritableFile.new[build ++ 'optional.c'].do {
+    .writeLine['#include "......vm.h"']
+    .writeLine['#include "......ext.h"']
+    .writeLine
+    .writeLine['.* *.']
+    ConfigOptional.ALL.each { v ---
+        .writeLine['extern LK_EXT_DEFINIT(lk_' ++ v.name ++ ');']
     }
-    /writeLine['LK_EXT_DEFINIT(lk_optional_extinit) {']
-    ConfigOptional/ALL/each { v ---
-        /writeLine['lk_' ++ v/name ++ '_extinit(vm);']
+    .writeLine['LK_EXT_DEFINIT(lk_optional_extinit) {']
+    ConfigOptional.ALL.each { v ---
+        .writeLine['lk_' ++ v.name ++ '_extinit(vm);']
     }
-    /writeLine['}']
+    .writeLine['}']
 }

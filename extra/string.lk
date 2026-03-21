@@ -15,36 +15,36 @@ writeLine('abcdef' <=> 'abcdefg' ->toCode)
 writeLine('abcdef' <=> 'ABCDEF' ->toCode)
 #
 writeLine('--- each ---')
-'hello;world'/each(';') { v | writeLine('<', v, '>') }
+'hello;world'.each(';') { v | writeLine('<', v, '>') }
 #
 writeLine('--- index ---')
-writeLine('hello'/find('e') ->toCode)
-writeLine('hello'/find('lo') ->toCode)
-writeLine('hello'/find('a') ->toCode)
+writeLine('hello'.find('e') ->toCode)
+writeLine('hello'.find('lo') ->toCode)
+writeLine('hello'.find('a') ->toCode)
 #
 writeLine('--- justifyLeft ---')
-writeLine('hello'/justifyLeft(4) ->toCode)
-writeLine('hello'/justifyLeft(20) ->toCode)
+writeLine('hello'.justifyLeft(4) ->toCode)
+writeLine('hello'.justifyLeft(20) ->toCode)
 #
 writeLine('--- justifyCenter ---')
-writeLine('hello'/justifyCenter(4) ->toCode)
-writeLine('hello'/justifyCenter(20) ->toCode)
+writeLine('hello'.justifyCenter(4) ->toCode)
+writeLine('hello'.justifyCenter(20) ->toCode)
 #
 writeLine('--- justifyRight ---')
-writeLine('hello'/justifyRight(4) ->toCode)
-writeLine('hello'/justifyRight(20) ->toCode)
+writeLine('hello'.justifyRight(4) ->toCode)
+writeLine('hello'.justifyRight(20) ->toCode)
 #
 writeLine('--- set! ---')
-writeLine('hello'/set!(2, 4, 'xyz') ->toCode)
-writeLine('hello'/set!(-4, 2, 'xyz') ->toCode)
-writeLine('hello'/set!(2, 0, 'xyz') ->toCode)
-writeLine('hello'/set!(0, 0, 'xyz') ->toCode)
-writeLine('hello'/set!(0, 10, 'xyz') ->toCode)
+writeLine('hello'.set!(2, 4, 'xyz') ->toCode)
+writeLine('hello'.set!(-4, 2, 'xyz') ->toCode)
+writeLine('hello'.set!(2, 0, 'xyz') ->toCode)
+writeLine('hello'.set!(0, 0, 'xyz') ->toCode)
+writeLine('hello'.set!(0, 10, 'xyz') ->toCode)
 #
 writeLine('--- divide ---')
 writeLine('nows  the time' % ' ' ->toCode)
 writeLine('mellow yellow' % 'ello' ->toCode)
 #
-writeLine('--- char/toString --')
-char := Character/new() + 48
-writeLine(char/toString)
+writeLine('--- char.toString --')
+char := Character.new() + 48
+writeLine(char.toString)

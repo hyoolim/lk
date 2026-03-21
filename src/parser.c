@@ -25,10 +25,10 @@ static void alloc_parser(lk_obj_t *self, lk_obj_t *parent) {
     PARSER->comments = darray_ptr_alloc();
     /* binary op names */
     setbinaryop(PARSER, "->",  "send");
-    setbinaryop(PARSER, "/",   "send");
+    setbinaryop(PARSER, ".",   "send");
     /* prec map */
     setprec(PARSER, "@",   100000, LK_PREC_ASSOC_LEFT); /* misc */
-    setprec(PARSER, "/",    90000, LK_PREC_ASSOC_LEFT);
+    setprec(PARSER, ".",    90000, LK_PREC_ASSOC_LEFT);
     setprec(PARSER, ":",    80000, LK_PREC_ASSOC_LEFT);
     setprec(PARSER, "*",    70000, LK_PREC_ASSOC_LEFT); /* arith */
     setprec(PARSER, "**",   70000, LK_PREC_ASSOC_LEFT);
@@ -139,7 +139,7 @@ typedef READFUNC(readfunc_t);
 /* chars */
 #define UPPER "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #define LOWER "abcdefghijklmnopqrstuvwxyz"
-#define ALPHA "._" UPPER LOWER
+#define ALPHA "_" UPPER LOWER
 #define DIGIT "0123456789"
 #define ALNUM ALPHA DIGIT
 #define LETTER "_" ALNUM
@@ -334,6 +334,21 @@ static READTOKENFUNC(readtoken_word) {
         }
         */
         if(ISCURR(self, "=!?")) CHARNEXT(self);
+        /* varargs suffix: consume trailing ... as part of the word */
+        if(ISCURR(self, ".")) {
+            int dotpos = self->textpos;
+            CHARNEXT(self);
+            if(ISCURR(self, ".")) {
+                CHARNEXT(self);
+                if(ISCURR(self, ".")) {
+                    CHARNEXT(self);
+                } else {
+                    self->textpos = dotpos;
+                }
+            } else {
+                self->textpos = dotpos;
+            }
+        }
         return WORD;
     }
     self->textpos = lastpos;
@@ -342,7 +357,11 @@ static READTOKENFUNC(readtoken_word) {
 
 /* op - +, - */
 static READTOKENFUNC(readtoken_op) {
-    if(ISNOTCURR(self, WS ALNUM "{}[]();`'\".")) {
+    if(ISCURR(self, ".")) {
+        CHARNEXT(self);
+        return OP;
+    }
+    if(ISNOTCURR(self, WS ALNUM "{}[]();`'\"")) {
         CHARNEXT(self);
         CHARNEXTUNTIL(self, WS ALNUM "{}[]();`'\".");
         return OP;
@@ -598,7 +617,7 @@ static READFUNC(readunaryop) {
     } else {
         lk_instr_t *arg = darray_ptr_peek(self->words);
         /* /arg[] -> /arg[] */
-        if(darray_str_cmp_cstr(DARRAY(tok), "/") == 0) {
+        if(darray_str_cmp_cstr(DARRAY(tok), ".") == 0) {
             arg->type = LK_INSTRTYPE_SELFMSG;
         /* +arg[] -> arg[] /+[] */
         } else {

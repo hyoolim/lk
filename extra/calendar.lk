@@ -1,15 +1,15 @@
 include['datetime.lk']
-write['Year? ']; year := read[0c\n]/trim/toNumber
-write['Month? ']; month := read[0c\n]/trim/toNumber
-d := Date/new[year; month; 1; 0; 0; 0.0]
+write['Year? ']; year := read[0c\n].trim.toNumber
+write['Month? ']; month := read[0c\n].trim.toNumber
+d := Date.new[year; month; 1; 0; 0; 0.0]
 header := 'Sun Mon Tue Wed Thu Fri Sat'
-writeLine[d/month/toString ++ '/' ++ d/year/toString ->justifyRight[header/count]]
-writeLine['-' ** header/count]
+writeLine[d.month.toString ++ '/' ++ d.year.toString ->justifyRight[header.count]]
+writeLine['-' ** header.count]
 writeLine[header]
-dow := d/day of week
+dow := d.day of week
 write['    ' ** dow]
-d/to[d + Duration/new[0; 1; -1; 0; 0; 0]]/each { v ---
-    write[v/day $ '% 3d ']
-    (dow += 1)/mod[7] == 0 ? writeLine
+d.to[d + Duration.new[0; 1; -1; 0; 0; 0]].each { v ---
+    write[v.day $ '% 3d ']
+    (dow += 1).mod[7] == 0 ? writeLine
 }
 writeLine

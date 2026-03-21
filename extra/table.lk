@@ -1,25 +1,25 @@
-Row := List/with {
-    /'==' := { x --- /map { v --- v == x } }
-    /'>' := { x --- /map { v --- v > x } }
-    /'<' := { x --- /map { v --- v < x } }
+Row := List.with {
+    .'==' := { x --- .map { v --- v == x } }
+    .'>' := { x --- .map { v --- v > x } }
+    .'<' := { x --- .map { v --- v < x } }
 }
-Table := Object/with {
-    /init! := { /columns... ---
-        /data := Map/new
-        /columns/each { v; i ---
-            /data/set![v; r := Row/new]
-            /':='[v; r]
+Table := Object.with {
+    .init! := { .columns... ---
+        .data := Map.new
+        .columns.each { v; i ---
+            .data.set![v; r := Row.new]
+            .':='[v; r]
         }
     }
-    /insert := { params... ---
-        /columns/count != params/count ? { raise['wrong number of params'] }
-        /columns/each { v; i --- /data[v]/push![params[i]] }
+    .insert := { params... ---
+        .columns.count != params.count ? { raise['wrong number of params'] }
+        .columns.each { v; i --- .data[v].push![params[i]] }
     }
 }
 
-person := Table/new['name'; 'gender'; 'age']
-person/insert['hyoo'; 'm'; 25]
-person/insert['jason'; 'm'; 25]
-person/insert['hai'; 'm'; 20]
-person/insert['scott'; 'f'; 40]
-person/age < 30 ->println
+person := Table.new['name'; 'gender'; 'age']
+person.insert['hyoo'; 'm'; 25]
+person.insert['jason'; 'm'; 25]
+person.insert['hai'; 'm'; 20]
+person.insert['scott'; 'f'; 40]
+person.age < 30 ->println

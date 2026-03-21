@@ -1,71 +1,71 @@
-Duration := Object/with {
+Duration := Object.with {
     make mvar := { y; m --- (y * 12) + m }
-    make svar := { h; m; s --- (h * 3600)/toReal + (m * 60)/toReal + s }
+    make svar := { h; m; s --- (h * 3600).toReal + (m * 60).toReal + s }
 
     # internal storage
-    /m var := 0
-    /day := 0
-    /s var := 0.0
+    .m var := 0
+    .day := 0
+    .s var := 0.0
 
     # accessors
-    /year := 0
-    /month := 0
-    /hour := 0
-    /minute := 0
-    /second := 0.0
+    .year := 0
+    .month := 0
+    .hour := 0
+    .minute := 0
+    .second := 0.0
 
     # real triggers
-    /month.on assign := { m --- /m var = make mvar[/year; m]; m }
-    /year.on assign := { y --- /m var = make mvar[y; /month]; y }
-    /second.on assign := { s --- /s var = make svar[/hour; /minute; s]; s }
-    /minute.on assign := { m --- /s var = make svar[/hour; m; /second]; m }
-    /hour.on assign := { h --- /s var = make svar[h; /minute; /second]; h }
+    .month.on assign := { m --- .m var = make mvar[.year; m]; m }
+    .year.on assign := { y --- .m var = make mvar[y; .month]; y }
+    .second.on assign := { s --- .s var = make svar[.hour; .minute; s]; s }
+    .minute.on assign := { m --- .s var = make svar[.hour; m; .second]; m }
+    .hour.on assign := { h --- .s var = make svar[h; .minute; .second]; h }
 
     # init
-    /init! := { /year; /month; /day; /hour; /minute; /second ---
-    } + { /m var; /day; /s var --- /normalize
+    .init! := { .year; .month; .day; .hour; .minute; .second ---
+    } + { .m var; .day; .s var --- .normalize
     }
-    /normalize! := { ---
-        month number := /m var
-        second number := /s var
-        /year = month number % 12
-        /month = month number/mod[12]
+    .normalize! := { ---
+        month number := .m var
+        second number := .s var
+        .year = month number % 12
+        .month = month number.mod[12]
 
-        # time/date adjustment
-        new days := second number/toInteger % 86400
-        second number = second number - (new days * 86400)/toReal
-        /day = /day + new days
+        # time.date adjustment
+        new days := second number.toInteger % 86400
+        second number = second number - (new days * 86400).toReal
+        .day = .day + new days
         d adj := (second number < 0.0 ? -1 ! 1)
         second number < 0.0 || second number >= 86400.0 ? {
-            /day = /day + d adj
-            second number = second number - (86400 * d adj)/toReal
+            .day = .day + d adj
+            second number = second number - (86400 * d adj).toReal
         }
 
-        /hour = (second number % 3600.0)/toInteger
-        /minute = ((second number - (/hour/toReal * 3600.0)) % 60.0)/toInteger
-        /second = second number - (/hour/toReal * 3600.0) -
-                (/minute/toReal * 60.0)
-        /.
+        .hour = (second number % 3600.0).toInteger
+        .minute = ((second number - (.hour.toReal * 3600.0)) % 60.0).toInteger
+        .second = second number - (.hour.toReal * 3600.0) -
+                (.minute.toReal * 60.0)
+        ..
     }
-    /normalize := { --- /clone/normalize! }
-    /clone := { --- Duration/new[*(/toList)] }
+    .normalize := { --- .clone.normalize! }
+    .clone := { --- Duration.new[*(.toList)] }
 
     # toStringomething else
-    /toList := { --- [/year; /month; /day; /hour; /minute; /second] }
-    /serialize := { --- [/m var; /day; /s var] }
-    /toString := { ---
-        '[Duration: ' ++ /year/toString ++ 'y ' ++ /month/toString ++ 'mon ' ++
-                /day/toString ++ 'd ' ++ /hour/toString ++ 'h ' ++
-                /minute/toString ++ 'min ' ++ /second/toString ++ 's]'
+    .toList := { --- [.year; .month; .day; .hour; .minute; .second] }
+    .serialize := { --- [.m var; .day; .s var] }
+    .toString := { ---
+        '[Duration: ' ++ .year.toString ++ 'y ' ++ .month.toString ++ 'mon ' ++
+                .day.toString ++ 'd ' ++ .hour.toString ++ 'h ' ++
+                .minute.toString ++ 'min ' ++ .second.toString ++ 's]'
     }
 
     # comparable
-    /'<=>' := { other ---
-        d1 := /clone/normalize
-        d2 := other/clone/normalize
-        m cmp := d1/m var - d2/m var
-        d cmp := d1/day - d2/day
-        s cmp := d1/s var - d2/s var
+    .'<=>' := { other ---
+        d1 := .clone.normalize
+        d2 := other.clone.normalize
+        m cmp := d1.m var - d2.m var
+        d cmp := d1.day - d2.day
+        s cmp := d1.s var - d2.s var
         m cmp == 0 ? {
             d cmp == 0 ? {
                 s cmp > 0.0 ? 1 !
@@ -78,5 +78,5 @@ Duration := Object/with {
             m cmp
         }
     }
-    /also[Comparable]
+    .also[Comparable]
 }

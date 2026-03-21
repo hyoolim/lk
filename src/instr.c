@@ -147,7 +147,7 @@ void lk_instr_print(lk_instr_t *self) {
         printf("%c", CHAR(self->v));
         break;
     case LK_INSTRTYPE_APPLYMSG:
-        printf("/");
+        printf(".");
         darray_print_tostream(DARRAY(self->v), stdout);
         if(!(self->opts & LK_INSTROHASMSGARGS)) printf("[]");
         break;
@@ -156,7 +156,7 @@ void lk_instr_print(lk_instr_t *self) {
         if(!(self->opts & LK_INSTROHASMSGARGS)) printf("[]");
         break;
     case LK_INSTRTYPE_SELFMSG:
-        printf("./");
+        printf(".");
         darray_print_tostream(DARRAY(self->v), stdout);
         if(!(self->opts & LK_INSTROHASMSGARGS)) printf("[]");
         break;

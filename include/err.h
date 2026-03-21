@@ -10,8 +10,8 @@ struct lk_err {
 };
 
 // init
-void lk_err_typeinit(lk_vm_t *vm);
-void lk_err_libinit(lk_vm_t *vm);
+void lk_err_type_init(lk_vm_t *vm);
+void lk_err_lib_init(lk_vm_t *vm);
 
 // new
 lk_err_t *lk_err_new(lk_vm_t *vm, lk_obj_t *parent, const char *message);

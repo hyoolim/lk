@@ -16,7 +16,7 @@ static void alloc_ip_str(lk_obj_t *self, lk_scope_t *local) {
 }
 
 static void to_str_ip(lk_obj_t *self, lk_scope_t *local) {
-    RETURN(lk_str_new_fromcstr(VM, inet_ntoa(IPADDR->addr)));
+    RETURN(lk_str_new_from_cstr(VM, inet_ntoa(IPADDR->addr)));
 }
 
 // ext map - socket
@@ -61,7 +61,7 @@ static void bind_sock_ip_num(lk_obj_t *self, lk_scope_t *local) {
     memset(&(my.sin_zero), 0x0, 8);
 
     if (bind(SOCKET->fd, (struct sockaddr *)&my, sizeof(struct sockaddr)) == -1) {
-        lk_vm_raisecstr(VM, "Cannot bind");
+        lk_vm_raise_cstr(VM, "Cannot bind");
     }
 
     RETURN(self);
@@ -76,7 +76,7 @@ static void connect_sock_ip_num(lk_obj_t *self, lk_scope_t *local) {
     memset(&(remote.sin_zero), 0x0, 8);
 
     if (connect(SOCKET->fd, (struct sockaddr *)&remote, sizeof(struct sockaddr)) == -1) {
-        lk_vm_raisecstr(VM, "Cannot connect");
+        lk_vm_raise_cstr(VM, "Cannot connect");
     }
 
     RETURN(self);
@@ -84,18 +84,18 @@ static void connect_sock_ip_num(lk_obj_t *self, lk_scope_t *local) {
 
 static void listen_sock(lk_obj_t *self, lk_scope_t *local) {
     if (listen(SOCKET->fd, 10) == -1) {
-        lk_vm_raisecstr(VM, "Cannot listen");
+        lk_vm_raise_cstr(VM, "Cannot listen");
     }
     RETURN(self);
 }
 
-void lk_socket_extinit(lk_vm_t *vm) {
+void lk_socket_ext_init(lk_vm_t *vm) {
     lk_obj_t *obj = vm->t_obj, *str = vm->t_str, *num = vm->t_num;
-    lk_obj_t *ip = lk_obj_alloc_withsize(obj, sizeof(lk_ipaddr_t));
-    lk_obj_t *sock = lk_obj_alloc_withsize(obj, sizeof(lk_socket_t));
+    lk_obj_t *ip = lk_obj_alloc_with_size(obj, sizeof(lk_ipaddr_t));
+    lk_obj_t *sock = lk_obj_alloc_with_size(obj, sizeof(lk_socket_t));
 
-    lk_obj_setallocfunc(sock, alloc_sock);
-    lk_obj_setfreefunc(sock, free_sock);
+    lk_obj_set_alloc_func(sock, alloc_sock);
+    lk_obj_set_free_func(sock, free_sock);
 
     //
     lk_global_set("IpAddress", ip);

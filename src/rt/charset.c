@@ -1,5 +1,5 @@
 #include "charset.h"
-#define CHARSET_DEFAULTCAP 8
+#define CHARSET_DEFAULT_CAP 8
 
 // pointer tagging: lowest bit of data ptr used as invert flag
 _Static_assert(_Alignof(uint32_t) >= 2, "uint32_t must be at least 2-byte aligned for pointer tagging");
@@ -20,7 +20,7 @@ void charset_copy(charset_t *self, charset_t *from) {
     self->data = mem_alloc(sizeof(uint32_t) * self->cap);
     memcpy(CHARSET_DATA(self), CHARSET_DATA(from), sizeof(uint32_t) * self->cap);
 
-    if (CHARSET_ISINVERTED(from))
+    if (CHARSET_IS_INVERTED(from))
         charset_invert(self);
 }
 
@@ -36,7 +36,7 @@ void charset_free(charset_t *self) {
 void charset_init(charset_t *self) {
     self->min = UINT32_MAX;
     self->max = 0;
-    self->cap = CHARSET_DEFAULTCAP;
+    self->cap = CHARSET_DEFAULT_CAP;
     self->size = 0;
     self->data = mem_alloc(sizeof(uint32_t) * self->cap);
 }
@@ -50,7 +50,7 @@ charset_t *charset_new(void) {
 // update
 // double the internal storage space when we run out
 static void resize(charset_t *self) {
-    int isinverted = CHARSET_ISINVERTED(self), newcap = self->cap;
+    int isinverted = CHARSET_IS_INVERTED(self), newcap = self->cap;
 
     while (self->size >= newcap)
         newcap *= 2;
@@ -207,7 +207,7 @@ static void charset_remove(charset_t *self, uint32_t from, uint32_t to) {
 
 // add specified range of chars to the charset
 void charset_add_chars(charset_t *self, uint32_t from, uint32_t to) {
-    (CHARSET_ISINVERTED(self) ? charset_remove : charset_insert)(self, from, to);
+    (CHARSET_IS_INVERTED(self) ? charset_remove : charset_insert)(self, from, to);
 }
 
 // add another charset to this charset
@@ -218,7 +218,7 @@ void charset_add_charset(charset_t *self, charset_t *other) {
     for (; c < last;) {
         f = *c++;
         t = *c++;
-        (CHARSET_ISINVERTED(self) ? charset_remove : charset_insert)(self, f, t);
+        (CHARSET_IS_INVERTED(self) ? charset_remove : charset_insert)(self, f, t);
     }
 }
 
@@ -232,7 +232,7 @@ void charset_add_darray(charset_t *self, darray_t *str) {
 
         while (i < c) {
             v = darray_str_get(str, i++);
-            (CHARSET_ISINVERTED(self) ? charset_remove : charset_insert)(
+            (CHARSET_IS_INVERTED(self) ? charset_remove : charset_insert)(
                 self, v, i < c && darray_str_get(str, i) == '-' ? darray_str_get(str, (i += 2) - 1) : v);
         }
     }
@@ -247,12 +247,12 @@ void charset_clear(charset_t *self) {
 }
 
 void charset_invert(charset_t *self) {
-    self->data = CHARSET_ISINVERTED(self) ? CHARSET_DATA(self) : (uint32_t *)((ptrdiff_t)self->data | 1);
+    self->data = CHARSET_IS_INVERTED(self) ? CHARSET_DATA(self) : (uint32_t *)((ptrdiff_t)self->data | 1);
 }
 
 // charset_remove specified range of chars from the charset
 void charset_subtract_chars(charset_t *self, uint32_t from, uint32_t to) {
-    (CHARSET_ISINVERTED(self) ? charset_insert : charset_remove)(self, from, to);
+    (CHARSET_IS_INVERTED(self) ? charset_insert : charset_remove)(self, from, to);
 }
 
 // charset_remove another charset from this charset
@@ -263,7 +263,7 @@ void charset_subtract_charset(charset_t *self, charset_t *other) {
     for (; c < last;) {
         f = *c++;
         t = *c++;
-        (CHARSET_ISINVERTED(self) ? charset_insert : charset_remove)(self, f, t);
+        (CHARSET_IS_INVERTED(self) ? charset_insert : charset_remove)(self, f, t);
     }
 }
 
@@ -277,7 +277,7 @@ void charset_subtract_darray(charset_t *self, darray_t *str) {
 
         while (i < c) {
             v = darray_str_get(str, i++);
-            (CHARSET_ISINVERTED(self) ? charset_insert : charset_remove)(
+            (CHARSET_IS_INVERTED(self) ? charset_insert : charset_remove)(
                 self, v, i < c && darray_str_get(str, i) == '-' ? darray_str_get(str, (i += 2) - 1) : v);
         }
     }
@@ -295,11 +295,11 @@ int charset_has(const charset_t *self, uint32_t achar) {
             to = *curr++;
 
             if (from <= achar && achar <= to) {
-                return 1 ^ CHARSET_ISINVERTED(self);
+                return 1 ^ CHARSET_IS_INVERTED(self);
             }
         }
     }
-    return 0 ^ CHARSET_ISINVERTED(self);
+    return 0 ^ CHARSET_IS_INVERTED(self);
 }
 
 // print the contents of charset struct - useful for debugging
@@ -348,7 +348,7 @@ darray_t *charset_tostr(const charset_t *self) {
     uint32_t from, to;
     uint32_t *curr = CHARSET_DATA(self), *last = curr + self->size;
 
-    if (CHARSET_ISINVERTED(self))
+    if (CHARSET_IS_INVERTED(self))
         darray_str_set(str, str->size, '^');
 
     for (; curr < last;) {

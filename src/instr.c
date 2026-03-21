@@ -11,9 +11,9 @@ static LK_OBJ_DEFMARKFUNC(mark_instr) {
         mark(LK_OBJ(LK_INSTR(self)->comment));
 }
 
-void lk_instr_typeinit(lk_vm_t *vm) {
-    vm->t_instr = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_instr_t));
-    lk_obj_setmarkfunc(vm->t_instr, mark_instr);
+void lk_instr_type_init(lk_vm_t *vm) {
+    vm->t_instr = lk_obj_alloc_with_size(vm->t_obj, sizeof(lk_instr_t));
+    lk_obj_set_mark_func(vm->t_instr, mark_instr);
 }
 
 // info
@@ -46,7 +46,7 @@ lk_str_t *lk_instr_resource(lk_obj_t *self) {
 }
 
 // bind all c funcs to lk equiv
-void lk_instr_libinit(lk_vm_t *vm) {
+void lk_instr_lib_init(lk_vm_t *vm) {
     lk_obj_t *instr = vm->t_instr;
     lk_object_set(vm->t_vm, "Instruction", instr);
     lk_obj_set_cfield(instr, "_next", instr, offsetof(lk_instr_t, next));
@@ -75,27 +75,27 @@ lk_instr_t *lk_instr_new(lk_parser_t *parser) {
     return instr_new(parser, (enum lk_instrtype_t)0);
 }
 
-lk_instr_t *lk_instr_newmore(lk_parser_t *parser) {
+lk_instr_t *lk_instr_new_more(lk_parser_t *parser) {
     lk_instr_t *new = instr_new(parser, LK_INSTRTYPE_MORE);
     new->v = LK_OBJ(parser);
     return new;
 }
 
-lk_instr_t *lk_instr_newfunc(lk_parser_t *parser, lk_instr_t *first) {
+lk_instr_t *lk_instr_new_func(lk_parser_t *parser, lk_instr_t *first) {
     lk_instr_t *new = instr_new(parser, LK_INSTRTYPE_FUNC);
     new->v = LK_OBJ(lk_lfunc_new(LK_VM(parser), NULL, first));
     return new;
 }
 
-lk_instr_t *lk_instr_newarglist(lk_parser_t *parser, lk_instr_t *func) {
+lk_instr_t *lk_instr_new_arglist(lk_parser_t *parser, lk_instr_t *func) {
     lk_instr_t *new = instr_new(parser, LK_INSTRTYPE_APPLY);
     new->v = LK_OBJ(func);
     return new;
 }
 
-lk_instr_t *lk_instr_newstr(lk_parser_t *parser, lk_str_t *s) {
+lk_instr_t *lk_instr_new_str(lk_parser_t *parser, lk_str_t *s) {
     lk_instr_t *new = instr_new(parser, LK_INSTRTYPE_STRING);
-    new->v = LK_OBJ(s); // lk_str_new_fromdarray(LK_VM(parser), s));
+    new->v = LK_OBJ(s); // lk_str_new_from_darray(LK_VM(parser), s));
     return new;
 }
 
@@ -105,17 +105,17 @@ lk_instr_t *lk_instr_new_number(lk_parser_t *parser, double num) {
     return new;
 }
 
-lk_instr_t *lk_instr_newchar(lk_parser_t *parser, uint32_t c) {
+lk_instr_t *lk_instr_new_char(lk_parser_t *parser, uint32_t c) {
     lk_instr_t *new = instr_new(parser, LK_INSTRTYPE_CHAR);
     new->v = LK_OBJ(lk_char_new(LK_VM(parser), c));
     return new;
 }
 
-lk_instr_t *lk_instr_newempty(lk_parser_t *parser) {
+lk_instr_t *lk_instr_new_empty(lk_parser_t *parser) {
     return instr_new(parser, (enum lk_instrtype_t)0);
 }
 
-lk_instr_t *lk_instr_newmessage(lk_parser_t *parser, lk_str_t *name) {
+lk_instr_t *lk_instr_new_message(lk_parser_t *parser, lk_str_t *name) {
     lk_instr_t *new = instr_new(parser, LK_INSTRTYPE_APPLYMSG);
     new->v = LK_OBJ(name);
     {
@@ -130,7 +130,7 @@ lk_instr_t *lk_instr_newmessage(lk_parser_t *parser, lk_str_t *name) {
     return new;
 }
 
-lk_instr_t *lk_instr_newscopemessage(lk_parser_t *parser, lk_str_t *name) {
+lk_instr_t *lk_instr_new_scope_message(lk_parser_t *parser, lk_str_t *name) {
     lk_instr_t *new = instr_new(parser, LK_INSTRTYPE_SCOPEMSG);
     new->v = LK_OBJ(name);
     return new;

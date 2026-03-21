@@ -3,6 +3,6 @@
 #include "types.h"
 
 // ext map
-void lk_vec_typeinit(lk_vm_t *vm);
-void lk_vec_libinit(lk_vm_t *vm);
+void lk_vec_type_init(lk_vm_t *vm);
+void lk_vec_lib_init(lk_vm_t *vm);
 #endif

@@ -12,7 +12,7 @@
 // ext map - types
 static LK_OBJ_DEFMARKFUNC(mark_scope) {
     if (DARRAY_ISINIT(SCOPESTACK))
-        DARRAY_EACHPTR(SCOPESTACK, i, v, mark(v));
+        DARRAY_EACH_PTR(SCOPESTACK, i, v, mark(v));
     mark(LK_OBJ(SCOPE->scope));
     mark(LK_OBJ(SCOPE->receiver));
     mark(LK_OBJ(SCOPE->self));
@@ -30,10 +30,10 @@ static void free_scope(lk_obj_t *self) {
         darray_fin(SCOPESTACK);
 }
 
-void lk_scope_typeinit(lk_vm_t *vm) {
-    vm->t_scope = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_scope_t));
-    lk_obj_setmarkfunc(vm->t_scope, mark_scope);
-    lk_obj_setfreefunc(vm->t_scope, free_scope);
+void lk_scope_type_init(lk_vm_t *vm) {
+    vm->t_scope = lk_obj_alloc_with_size(vm->t_obj, sizeof(lk_scope_t));
+    lk_obj_set_mark_func(vm->t_scope, mark_scope);
+    lk_obj_set_free_func(vm->t_scope, free_scope);
 }
 
 // ext map - funcs
@@ -41,7 +41,7 @@ static void Dargs_scope(lk_obj_t *self, lk_scope_t *local) {
     if (!DARRAY_ISINIT(SCOPESTACK))
         RETURN(lk_list_new(VM));
     else {
-        lk_list_t *args = lk_list_new_fromdarray(VM, SCOPESTACK);
+        lk_list_t *args = lk_list_new_from_darray(VM, SCOPESTACK);
 
         darray_limit(DARRAY(args), SCOPE->argc);
         RETURN(args);
@@ -51,21 +51,21 @@ static void Dargs_scope(lk_obj_t *self, lk_scope_t *local) {
 static void DassignB_scope_str_obj(lk_obj_t *self, lk_scope_t *local) {
     lk_str_t *k = LK_STRING(ARG(0));
     lk_obj_t *v = ARG(1);
-    struct lk_slot *slot = lk_obj_getslotfromany(self, LK_OBJ(k));
+    struct lk_slot *slot = lk_obj_get_slot_from_any(self, LK_OBJ(k));
     lk_obj_t *oldval;
 
     if (slot == NULL) {
-        lk_vm_raisecstr(VM, "Cannot assign to undefined slot %s", k);
+        lk_vm_raise_cstr(VM, "Cannot assign to undefined slot %s", k);
 
     } else if (LK_SLOT_CHECKOPTION(slot, LK_SLOTOPTION_READONLY)) {
-        lk_vm_raisecstr(VM, "Cannot assign to readonly slot %s", k);
+        lk_vm_raise_cstr(VM, "Cannot assign to readonly slot %s", k);
 
     } else {
-        oldval = lk_obj_getvaluefromslot(self, slot);
+        oldval = lk_obj_get_value_from_slot(self, slot);
         if (LK_OBJ_ISFUNC(oldval))
             v = LK_OBJ(lk_func_combine(LK_FUNC(oldval), LK_FUNC(v)));
-        lk_obj_setvalueonslot(self, slot, v);
-        v = lk_obj_getvaluefromslot(self, slot);
+        lk_obj_set_value_on_slot(self, slot, v);
+        v = lk_obj_get_value_from_slot(self, slot);
         if (LK_OBJ_ISFUNC(v)) {
             LK_SLOT_SETOPTION(slot, LK_SLOTOPTION_AUTOSEND);
             SETOPT(LK_FUNC(v)->cf.opts, LK_FUNCOASSIGNED);
@@ -75,7 +75,7 @@ static void DassignB_scope_str_obj(lk_obj_t *self, lk_scope_t *local) {
 }
 
 static void include_scope_str_str(lk_obj_t *self, lk_scope_t *local) {
-    lk_scope_t *fr = lk_vm_evalfile(VM, darray_str_tocstr(DARRAY(ARG(0))), darray_str_tocstr(DARRAY(ARG(1))));
+    lk_scope_t *fr = lk_vm_eval_file(VM, darray_str_tocstr(DARRAY(ARG(0))), darray_str_tocstr(DARRAY(ARG(1))));
 
     if (fr != NULL) {
         qphash_t *from = fr->o.slots;
@@ -84,7 +84,7 @@ static void include_scope_str_str(lk_obj_t *self, lk_scope_t *local) {
             qphash_t *to = self->o.slots;
 
             if (to == NULL)
-                to = self->o.slots = qphash_alloc(sizeof(struct lk_slot), lk_obj_hashcode, lk_obj_keycmp);
+                to = self->o.slots = qphash_alloc(sizeof(struct lk_slot), lk_obj_hash_code, lk_obj_key_cmp);
             SET_EACH(from, i, *LK_SLOT(qphash_set(to, i->key)) = *LK_SLOT(SETITEM_VALUEPTR(i)););
         }
     }
@@ -93,14 +93,14 @@ static void include_scope_str_str(lk_obj_t *self, lk_scope_t *local) {
 }
 
 static void raise_scope_err(lk_obj_t *self, lk_scope_t *local) {
-    lk_vm_raiseerr(VM, LK_ERROR(ARG(0)));
+    lk_vm_raise_err(VM, LK_ERROR(ARG(0)));
 }
 
 static void raise_scope_str(lk_obj_t *self, lk_scope_t *local) {
     lk_err_t *err = lk_err_new(VM, VM->t_err, NULL);
 
     err->message = LK_STRING(ARG(0));
-    lk_vm_raiseerr(VM, err);
+    lk_vm_raise_err(VM, err);
 }
 
 static void redo_scope(lk_obj_t *self, lk_scope_t *local) {
@@ -112,11 +112,11 @@ static void redo_scope(lk_obj_t *self, lk_scope_t *local) {
 }
 
 static void require_scope_str_str(lk_obj_t *self, lk_scope_t *local) {
-    RETURN(lk_vm_evalfile(VM, darray_str_tocstr(DARRAY(ARG(0))), darray_str_tocstr(DARRAY(ARG(1)))));
+    RETURN(lk_vm_eval_file(VM, darray_str_tocstr(DARRAY(ARG(0))), darray_str_tocstr(DARRAY(ARG(1)))));
 }
 
 static void rescue_scope_f(lk_obj_t *self, lk_scope_t *local) {
-    RETURN(lk_obj_getvaluefromslot(self, lk_obj_setslot(self, LK_OBJ(VM->str_rescue), VM->t_func, ARG(0))));
+    RETURN(lk_obj_get_value_from_slot(self, lk_obj_setslot(self, LK_OBJ(VM->str_rescue), VM->t_func, ARG(0))));
 }
 
 static void RESOURCE_scope(lk_obj_t *self, lk_scope_t *local) {
@@ -159,7 +159,7 @@ static void return_scope(lk_obj_t *self, lk_scope_t *local) {
     DONE;
 }
 
-void lk_scope_libinit(lk_vm_t *vm) {
+void lk_scope_lib_init(lk_vm_t *vm) {
     lk_obj_t *scope = vm->t_scope, *obj = vm->t_obj, *instr = vm->t_instr, *str = vm->t_str, *err = vm->t_err,
              *f = vm->t_func;
 
@@ -217,21 +217,21 @@ lk_scope_t *lk_scope_new(lk_vm_t *vm) {
     return self;
 }
 
-void lk_scope_stackpush(lk_scope_t *self, lk_obj_t *v) {
+void lk_scope_stack_push(lk_scope_t *self, lk_obj_t *v) {
     assert(v != NULL);
     if (!DARRAY_ISINIT(&self->stack))
         darray_ptr_init(&self->stack);
-    darray_ptr_push(&self->stack, lk_obj_addref(LK_OBJ(self), v));
+    darray_ptr_push(&self->stack, lk_obj_add_ref(LK_OBJ(self), v));
 }
 
 // update
-lk_obj_t *lk_scope_stackpop(lk_scope_t *self) {
+lk_obj_t *lk_scope_stack_pop(lk_scope_t *self) {
     assert(DARRAY_ISINIT(&self->stack));
     assert(DARRAY_COUNT(&self->stack) > 0);
     return darray_ptr_pop(&self->stack);
 }
 
-lk_obj_t *lk_scope_stackpeek(lk_scope_t *self) {
+lk_obj_t *lk_scope_stack_peek(lk_scope_t *self) {
     lk_vm_t *vm = LK_VM(self);
 
     if (!DARRAY_ISINIT(&self->stack))
@@ -241,7 +241,7 @@ lk_obj_t *lk_scope_stackpeek(lk_scope_t *self) {
     return darray_ptr_peek(&self->stack);
 }
 
-lk_list_t *lk_scope_stacktolist(lk_scope_t *self) {
+lk_list_t *lk_scope_stack_to_list(lk_scope_t *self) {
     lk_list_t *stack = lk_list_new(LK_VM(self));
 
     if (DARRAY_ISINIT(&self->stack))

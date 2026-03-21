@@ -9,8 +9,8 @@ struct lk_charset {
 };
 
 // init
-void lk_charset_typeinit(lk_vm_t *vm);
-void lk_charset_libinit(lk_vm_t *vm);
+void lk_charset_type_init(lk_vm_t *vm);
+void lk_charset_lib_init(lk_vm_t *vm);
 
 // new
 lk_charset_t *lk_charset_new(lk_vm_t *vm);
@@ -26,5 +26,5 @@ void lk_charset_subtract_str(lk_obj_t *self, lk_str_t *other);
 // info
 lk_bool_t *lk_charset_has_char(lk_obj_t *self, lk_char_t *achar);
 lk_bool_t *lk_charset_has_str(lk_obj_t *self, lk_str_t *str);
-lk_str_t *lk_charset_tostr(lk_obj_t *self);
+lk_str_t *lk_charset_to_str(lk_obj_t *self);
 #endif

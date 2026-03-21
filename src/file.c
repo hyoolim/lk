@@ -12,17 +12,17 @@ static void free_file(lk_obj_t *self) {
     lk_file_close(LK_FILE(self));
 }
 
-void lk_file_typeinit(lk_vm_t *vm) {
-    vm->t_file = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_file_t));
-    lk_obj_setmarkfunc(vm->t_file, mark_file);
-    lk_obj_setfreefunc(vm->t_file, free_file);
+void lk_file_type_init(lk_vm_t *vm) {
+    vm->t_file = lk_obj_alloc_with_size(vm->t_obj, sizeof(lk_file_t));
+    lk_obj_set_mark_func(vm->t_file, mark_file);
+    lk_obj_set_free_func(vm->t_file, free_file);
     LK_FILE(vm->t_stdin = lk_obj_alloc(vm->t_file))->fd = stdin;
     LK_FILE(vm->t_stdout = lk_obj_alloc(vm->t_file))->fd = stdout;
     LK_FILE(vm->t_stderr = lk_obj_alloc(vm->t_file))->fd = stderr;
 }
 
 // new
-lk_file_t *lk_file_new_withpath(lk_vm_t *vm, lk_str_t *path) {
+lk_file_t *lk_file_new_with_path(lk_vm_t *vm, lk_str_t *path) {
     lk_file_t *self = LK_FILE(lk_obj_alloc(vm->t_file));
     lk_file_init_str(self, path);
     return self;
@@ -38,7 +38,7 @@ void lk_file_init_str(lk_file_t *self, lk_str_t *path) {
         char buf[1000];
 
         if (getcwd(buf, 1000) != NULL) {
-            lk_str_t *abs = lk_str_new_fromcstr(VM, buf);
+            lk_str_t *abs = lk_str_new_from_cstr(VM, buf);
             darray_concat(DARRAY(abs), DARRAY(VM->str_filesep));
             darray_concat(DARRAY(abs), DARRAY(path));
             self->path = abs;
@@ -48,7 +48,7 @@ void lk_file_init_str(lk_file_t *self, lk_str_t *path) {
     while ((nextat = darray_str_find(DARRAY(self->path), '/', at)) > -1) {
         at = nextat + 1;
     }
-    self->name = lk_str_new_fromdarray(VM, DARRAY(self->path));
+    self->name = lk_str_new_from_darray(VM, DARRAY(self->path));
     darray_offset(DARRAY(self->name), at);
 }
 
@@ -56,7 +56,7 @@ void lk_file_init_str(lk_file_t *self, lk_str_t *path) {
 void lk_file_close(lk_file_t *self) {
     if (self->fd != NULL) {
         if (fclose(self->fd) != 0) {
-            lk_vm_raiseerrno(VM);
+            lk_vm_raise_errno(VM);
         }
 
         self->fd = NULL;
@@ -65,19 +65,19 @@ void lk_file_close(lk_file_t *self) {
 
 void lk_file_delete(lk_file_t *self) {
     if (remove(CSTRING(self->path)) != 0) {
-        lk_vm_raiseerrno(VM);
+        lk_vm_raise_errno(VM);
     }
 }
 
 void lk_file_flush(lk_file_t *self) {
     if (self->fd != NULL && fflush(self->fd) != 0) {
-        lk_vm_raiseerrno(VM);
+        lk_vm_raise_errno(VM);
     }
 }
 
 void lk_file_move_str(lk_file_t *self, lk_str_t *dest) {
     if (rename(CSTRING(self->path), CSTRING(dest)) != 0) {
-        lk_vm_raiseerrno(VM);
+        lk_vm_raise_errno(VM);
     }
 }
 
@@ -89,7 +89,7 @@ void lk_file_open(lk_file_t *self, lk_str_t *mode) {
     self->fd = fopen(CSTRING(self->path), CSTRING(mode));
 
     if (self->fd == NULL) {
-        lk_vm_raiseerrno(VM);
+        lk_vm_raise_errno(VM);
     }
 }
 
@@ -101,16 +101,16 @@ void lk_file_write_str(lk_file_t *self, lk_str_t *text) {
 }
 
 // info
-lk_bool_t *lk_file_isdirectory(lk_file_t *self) {
+lk_bool_t *lk_file_is_directory(lk_file_t *self) {
     struct stat info;
     return stat(CSTRING(self->path), &info) == 0 && S_ISDIR(info.st_mode) ? TRUE : FALSE;
 }
 
-lk_bool_t *lk_file_isexecutable(lk_file_t *self) {
+lk_bool_t *lk_file_is_executable(lk_file_t *self) {
     return access(CSTRING(self->path), X_OK) == 0 ? TRUE : FALSE;
 }
 
-lk_bool_t *lk_file_isexists(lk_file_t *self) {
+lk_bool_t *lk_file_is_exists(lk_file_t *self) {
     return access(CSTRING(self->path), F_OK) == 0 ? TRUE : FALSE;
 }
 
@@ -120,41 +120,41 @@ lk_str_t *lk_file_read_num(lk_file_t *self, lk_num_t *length) {
 
     } else {
         darray_t *c = darray_str_alloc_fromfile_withsize(self->fd, CNUMBER(length));
-        return c != NULL ? lk_str_new_fromdarray(VM, c) : LK_STRING(NIL);
+        return c != NULL ? lk_str_new_from_darray(VM, c) : LK_STRING(NIL);
     }
 }
 
-lk_str_t *lk_file_readall(lk_file_t *self) {
+lk_str_t *lk_file_read_all(lk_file_t *self) {
     if (self->fd == NULL) {
         BUG("ReadableFile->st.file should NEVER be NULL");
 
     } else {
         darray_t *c = darray_str_alloc_fromfile(self->fd);
-        return c != NULL ? lk_str_new_fromdarray(VM, c) : LK_STRING(NIL);
+        return c != NULL ? lk_str_new_from_darray(VM, c) : LK_STRING(NIL);
     }
 }
 
-lk_str_t *lk_file_readuntil_char(lk_file_t *self, lk_char_t *until) {
+lk_str_t *lk_file_read_until_char(lk_file_t *self, lk_char_t *until) {
     if (self->fd == NULL) {
         BUG("ReadableFile->st.file should NEVER be NULL");
 
     } else {
         darray_t *c = darray_str_alloc_fromfile_untilchar(self->fd, CHAR(until));
-        return c != NULL ? lk_str_new_fromdarray(VM, c) : LK_STRING(NIL);
+        return c != NULL ? lk_str_new_from_darray(VM, c) : LK_STRING(NIL);
     }
 }
 
-lk_str_t *lk_file_readuntil_charset(lk_file_t *self, lk_charset_t *until) {
+lk_str_t *lk_file_read_until_charset(lk_file_t *self, lk_charset_t *until) {
     if (self->fd == NULL) {
         BUG("ReadableFile->st.file should NEVER be NULL");
 
     } else {
         darray_t *c = darray_str_alloc_fromfile_untilcharset(self->fd, CHARSET(until));
-        return c != NULL ? lk_str_new_fromdarray(VM, c) : LK_STRING(NIL);
+        return c != NULL ? lk_str_new_from_darray(VM, c) : LK_STRING(NIL);
     }
 }
 
-lk_bool_t *lk_file_isreadable(lk_file_t *self) {
+lk_bool_t *lk_file_is_readable(lk_file_t *self) {
     return access(CSTRING(self->path), R_OK) == 0 ? TRUE : FALSE;
 }
 
@@ -162,18 +162,18 @@ lk_num_t *lk_file_size(lk_file_t *self) {
     struct stat info;
 
     if (stat(CSTRING(self->path), &info) != 0) {
-        lk_vm_raiseerrno(VM);
+        lk_vm_raise_errno(VM);
     }
 
     return lk_num_new(VM, info.st_size);
 }
 
-lk_bool_t *lk_file_iswritable(lk_file_t *self) {
+lk_bool_t *lk_file_is_writable(lk_file_t *self) {
     return access(CSTRING(self->path), W_OK) == 0 ? TRUE : FALSE;
 }
 
 // bind all c funcs to lk equiv
-void lk_file_libinit(lk_vm_t *vm) {
+void lk_file_lib_init(lk_vm_t *vm) {
     lk_obj_t *file = vm->t_file, *str = vm->t_str, *num = vm->t_num, *ch = vm->t_char, *charset = vm->t_charset;
     lk_global_set("File", file);
 
@@ -193,16 +193,16 @@ void lk_file_libinit(lk_vm_t *vm) {
     lk_obj_set_cfunc_cvoid(file, "write", lk_file_write_str, str, NULL);
 
     // info
-    lk_obj_set_cfunc_creturn(file, "directory?", lk_file_isdirectory, NULL);
-    lk_obj_set_cfunc_creturn(file, "executable?", lk_file_isexecutable, NULL);
-    lk_obj_set_cfunc_creturn(file, "exists?", lk_file_isexists, NULL);
+    lk_obj_set_cfunc_creturn(file, "directory?", lk_file_is_directory, NULL);
+    lk_obj_set_cfunc_creturn(file, "executable?", lk_file_is_executable, NULL);
+    lk_obj_set_cfunc_creturn(file, "exists?", lk_file_is_exists, NULL);
     lk_obj_set_cfunc_creturn(file, "read", lk_file_read_num, num, NULL);
-    lk_obj_set_cfunc_creturn(file, "readAll", lk_file_readall, NULL);
-    lk_obj_set_cfunc_creturn(file, "readUntil", lk_file_readuntil_char, ch, NULL);
-    lk_obj_set_cfunc_creturn(file, "readUntil", lk_file_readuntil_charset, charset, NULL);
-    lk_obj_set_cfunc_creturn(file, "readable?", lk_file_isreadable, NULL);
+    lk_obj_set_cfunc_creturn(file, "readAll", lk_file_read_all, NULL);
+    lk_obj_set_cfunc_creturn(file, "readUntil", lk_file_read_until_char, ch, NULL);
+    lk_obj_set_cfunc_creturn(file, "readUntil", lk_file_read_until_charset, charset, NULL);
+    lk_obj_set_cfunc_creturn(file, "readable?", lk_file_is_readable, NULL);
     lk_obj_set_cfunc_creturn(file, "size", lk_file_size, NULL);
-    lk_obj_set_cfunc_creturn(file, "writable?", lk_file_iswritable, NULL);
+    lk_obj_set_cfunc_creturn(file, "writable?", lk_file_is_writable, NULL);
 
     // standard pipes
     lk_global_set("STDIN", vm->t_stdin);

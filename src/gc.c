@@ -8,13 +8,13 @@ static void free_gc(lk_obj_t *self) {
     mem_free(LK_GC(self)->permanent);
 }
 
-void lk_gc_typeinit(lk_vm_t *vm) {
-    vm->gc = LK_GC(lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_gc_t)));
+void lk_gc_type_init(lk_vm_t *vm) {
+    vm->gc = LK_GC(lk_obj_alloc_with_size(vm->t_obj, sizeof(lk_gc_t)));
     vm->gc->unused = mem_alloc(sizeof(struct lk_objgroup));
     vm->gc->pending = mem_alloc(sizeof(struct lk_objgroup));
     vm->gc->used = mem_alloc(sizeof(struct lk_objgroup));
     vm->gc->permanent = mem_alloc(sizeof(struct lk_objgroup));
-    lk_obj_setfreefunc(LK_OBJ(vm->gc), free_gc);
+    lk_obj_set_free_func(LK_OBJ(vm->gc), free_gc);
 }
 
 // update
@@ -23,7 +23,7 @@ void lk_gc_free_objgroup(struct lk_objgroup *self) {
 
     for (; c != NULL; c = n) {
         n = c->o.mark.next;
-        lk_obj_justfree(c);
+        lk_obj_just_free(c);
     }
 }
 
@@ -56,7 +56,7 @@ void lk_objgroup_insert(struct lk_objgroup *self, lk_obj_t *v) {
     self->last = v;
 }
 
-void lk_gc_mark_objpending(lk_obj_t *self) {
+void lk_gc_mark_obj_pending(lk_obj_t *self) {
     lk_gc_t *gc = LK_VM(self)->gc;
 
     if (LK_GC_ISMARKUNUSED(gc, self)) {
@@ -67,10 +67,10 @@ void lk_gc_mark_objpending(lk_obj_t *self) {
 
 static void gc_markpendingifunused(lk_obj_t *v) {
     if (v != NULL)
-        lk_gc_mark_objpending(v);
+        lk_gc_mark_obj_pending(v);
 }
 
-void lk_gc_mark_objused(lk_obj_t *self) {
+void lk_gc_mark_obj_used(lk_obj_t *self) {
     lk_gc_t *gc = LK_VM(self)->gc;
 
     if (LK_GC_ISMARKPENDING(gc, self)) {
@@ -78,32 +78,32 @@ void lk_gc_mark_objused(lk_obj_t *self) {
         lk_objgroup_insert(gc->used, self);
 
         if (LK_OBJ_HASPARENTS(self)) {
-            DARRAY_EACHPTR(LK_OBJ_PARENTS(self), i, v, lk_gc_mark_objpending(LK_OBJ(v)););
+            DARRAY_EACH_PTR(LK_OBJ_PARENTS(self), i, v, lk_gc_mark_obj_pending(LK_OBJ(v)););
 
         } else {
             if (self->o.parent != NULL)
-                lk_gc_mark_objpending(self->o.parent);
+                lk_gc_mark_obj_pending(self->o.parent);
         }
 
         if (self->o.slots != NULL) {
             struct lk_slot *slot;
-            SET_EACH(self->o.slots, item, lk_gc_mark_objpending(LK_OBJ(item->key));
+            SET_EACH(self->o.slots, item, lk_gc_mark_obj_pending(LK_OBJ(item->key));
                      slot = LK_SLOT(SETITEM_VALUEPTR(item));
-                     lk_gc_mark_objpending(slot->check);
-                     lk_gc_mark_objpending(lk_obj_getvaluefromslot(self, slot)););
+                     lk_gc_mark_obj_pending(slot->check);
+                     lk_gc_mark_obj_pending(lk_obj_get_value_from_slot(self, slot)););
         }
 
-        if (self->o.tag->markfunc != NULL) {
-            self->o.tag->markfunc(self, gc_markpendingifunused);
+        if (self->o.tag->mark_func != NULL) {
+            self->o.tag->mark_func(self, gc_markpendingifunused);
         }
     }
 }
 
-lk_obj_t *lk_obj_addref(lk_obj_t *self, lk_obj_t *v) {
+lk_obj_t *lk_obj_add_ref(lk_obj_t *self, lk_obj_t *v) {
     lk_gc_t *gc = LK_VM(self)->gc;
 
     if (LK_GC_ISMARKUSED(gc, self))
-        lk_gc_mark_objpending(v);
+        lk_gc_mark_obj_pending(v);
     v->o.mark.isref = 1;
     return v;
 }
@@ -129,7 +129,7 @@ void lk_gc_mark(lk_gc_t *self) {
                 lk_gc_sweep(self);
                 break;
             }
-            lk_gc_mark_objused(self->pending->first);
+            lk_gc_mark_obj_used(self->pending->first);
         }
     }
 }
@@ -144,14 +144,14 @@ void lk_gc_sweep(lk_gc_t *self) {
         lk_objgroup_size(self->unused),
         lk_objgroup_size(self->used));
          */
-        lk_gc_mark_objpending(LK_OBJ(vm->currscope));
+        lk_gc_mark_obj_pending(LK_OBJ(vm->currscope));
 
         for (; rsrc != NULL; rsrc = rsrc->prev) {
-            lk_gc_mark_objpending(LK_OBJ(rsrc->rsrc));
+            lk_gc_mark_obj_pending(LK_OBJ(rsrc->rsrc));
         }
 
         while (self->pending->first != NULL) {
-            lk_gc_mark_objused(self->pending->first);
+            lk_gc_mark_obj_used(self->pending->first);
         }
 
         lk_gc_free_objgroup(unused);
@@ -171,7 +171,7 @@ int lk_objgroup_size(struct lk_objgroup *self) {
 }
 
 // bind all c funcs to lk equiv
-void lk_gc_libinit(lk_vm_t *vm) {
+void lk_gc_lib_init(lk_vm_t *vm) {
     lk_obj_t *gc = LK_OBJ(vm->gc);
     lk_global_set("GarbageCollector", gc);
 

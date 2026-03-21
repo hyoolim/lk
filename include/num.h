@@ -9,8 +9,8 @@ struct lk_num {
 };
 
 // ext map
-void lk_num_typeinit(lk_vm_t *vm);
-void lk_num_libinit(lk_vm_t *vm);
+void lk_num_type_init(lk_vm_t *vm);
+void lk_num_lib_init(lk_vm_t *vm);
 
 // new
 lk_num_t *lk_num_new(lk_vm_t *vm, double num);

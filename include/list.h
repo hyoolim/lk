@@ -3,13 +3,13 @@
 #include "types.h"
 
 // type
-void lk_list_typeinit(lk_vm_t *vm);
-void lk_list_libinit(lk_vm_t *vm);
+void lk_list_type_init(lk_vm_t *vm);
+void lk_list_lib_init(lk_vm_t *vm);
 
 // new
 lk_list_t *lk_list_new(lk_vm_t *vm);
-lk_list_t *lk_list_new_fromdarray(lk_vm_t *vm, darray_t *from);
-lk_list_t *lk_list_newfromargv(lk_vm_t *vm, int argc, const char **argv);
+lk_list_t *lk_list_new_from_darray(lk_vm_t *vm, darray_t *from);
+lk_list_t *lk_list_new_from_argv(lk_vm_t *vm, int argc, const char **argv);
 
 // update
 void lk_list_insert_num_obj(lk_list_t *self, lk_num_t *index, lk_obj_t *value);

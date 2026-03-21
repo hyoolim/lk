@@ -5,9 +5,9 @@ static void alloc_ch(lk_obj_t *self, lk_obj_t *parent) {
     CHAR(self) = CHAR(parent);
 }
 
-void lk_char_typeinit(lk_vm_t *vm) {
-    vm->t_char = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_char_t));
-    lk_obj_setallocfunc(vm->t_char, alloc_ch);
+void lk_char_type_init(lk_vm_t *vm) {
+    vm->t_char = lk_obj_alloc_with_size(vm->t_obj, sizeof(lk_char_t));
+    lk_obj_set_alloc_func(vm->t_char, alloc_ch);
 }
 
 // new
@@ -20,7 +20,7 @@ lk_char_t *lk_char_new(lk_vm_t *vm, uint32_t data) {
 // update
 void lk_char_add_num(lk_obj_t *self, lk_num_t *other) {
     if (CNUMBER(other) > UINT32_MAX - CHAR(self)) {
-        lk_vm_raisecstr(VM, "Will overflow");
+        lk_vm_raise_cstr(VM, "Will overflow");
     }
 
     CHAR(self) += CNUMBER(other);
@@ -32,7 +32,7 @@ void lk_char_subtract_char(lk_obj_t *self, lk_char_t *other) {
 
 void lk_char_subtract_num(lk_obj_t *self, lk_num_t *other) {
     if (CNUMBER(other) > CHAR(self)) {
-        lk_vm_raisecstr(VM, "Will underflow");
+        lk_vm_raise_cstr(VM, "Will underflow");
     }
 
     CHAR(self) -= CNUMBER(other);
@@ -43,14 +43,14 @@ lk_num_t *lk_char_compare_char(lk_obj_t *self, lk_char_t *other) {
     return lk_num_new(VM, CHAR(self) - CHAR(other));
 }
 
-lk_str_t *lk_char_tostr(lk_obj_t *self) {
+lk_str_t *lk_char_to_str(lk_obj_t *self) {
     lk_str_t *str = lk_str_new(VM);
     darray_str_set(DARRAY(str), 0, CHAR(self));
     return str;
 }
 
 // bind all c funcs to lk equiv
-void lk_char_libinit(lk_vm_t *vm) {
+void lk_char_lib_init(lk_vm_t *vm) {
     lk_obj_t *ch = vm->t_char, *num = vm->t_num;
     lk_global_set("Character", ch);
 
@@ -61,5 +61,5 @@ void lk_char_libinit(lk_vm_t *vm) {
 
     // info
     lk_obj_set_cfunc_creturn(ch, "<=>", lk_char_compare_char, ch, NULL);
-    lk_obj_set_cfunc_creturn(ch, "toString", lk_char_tostr, NULL);
+    lk_obj_set_cfunc_creturn(ch, "toString", lk_char_to_str, NULL);
 }

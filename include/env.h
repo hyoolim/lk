@@ -8,5 +8,5 @@ struct lk_env {
 };
 
 // init
-void lk_env_extinit(lk_vm_t *vm);
+void lk_env_ext_init(lk_vm_t *vm);
 #endif

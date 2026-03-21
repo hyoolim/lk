@@ -39,11 +39,11 @@ static void nextInteger_rand(lk_obj_t *self, lk_scope_t *local) {
     RETURN(lk_num_new(VM, (int)genrand_int32(LK_RANDOM(self))));
 }
 
-void lk_rand_extinit(lk_vm_t *vm) {
+void lk_rand_ext_init(lk_vm_t *vm) {
     lk_obj_t *num = vm->t_num;
-    lk_obj_t *rand = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_rand_t));
+    lk_obj_t *rand = lk_obj_alloc_with_size(vm->t_obj, sizeof(lk_rand_t));
 
-    lk_obj_setallocfunc(rand, alloc_rand);
+    lk_obj_set_alloc_func(rand, alloc_rand);
     alloc_rand(rand, NULL);
     lk_global_set("RandomNumberGenerator", rand);
     lk_obj_set_cfunc_lk(rand, "init!", init_rand_num, num, NULL);

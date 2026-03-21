@@ -27,8 +27,8 @@ struct lk_prec {
 };
 
 // ext map
-void lk_parser_typeinit(lk_vm_t *vm);
-void lk_parser_libinit(lk_vm_t *vm);
+void lk_parser_type_init(lk_vm_t *vm);
+void lk_parser_lib_init(lk_vm_t *vm);
 
 // new
 lk_parser_t *lk_parser_new(lk_vm_t *vm);

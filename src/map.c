@@ -13,12 +13,12 @@ static void free_map(lk_obj_t *self) {
     qphash_fin(QPHASH(self));
 }
 
-void lk_map_typeinit(lk_vm_t *vm) {
-    vm->t_map = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_map_t));
-    qphash_init(QPHASH(vm->t_map), sizeof(lk_obj_t *), lk_obj_hashcode, lk_obj_keycmp);
-    lk_obj_setallocfunc(vm->t_map, alloc_map);
-    lk_obj_setmarkfunc(vm->t_map, mark_map);
-    lk_obj_setfreefunc(vm->t_map, free_map);
+void lk_map_type_init(lk_vm_t *vm) {
+    vm->t_map = lk_obj_alloc_with_size(vm->t_obj, sizeof(lk_map_t));
+    qphash_init(QPHASH(vm->t_map), sizeof(lk_obj_t *), lk_obj_hash_code, lk_obj_key_cmp);
+    lk_obj_set_alloc_func(vm->t_map, alloc_map);
+    lk_obj_set_mark_func(vm->t_map, mark_map);
+    lk_obj_set_free_func(vm->t_map, free_map);
 }
 
 // new
@@ -38,16 +38,16 @@ void lk_map_clear(lk_map_t *self) {
 }
 
 void lk_map_set(lk_map_t *self, lk_obj_t *k, lk_obj_t *v) {
-    *(lk_obj_t **)qphash_set(QPHASH(self), lk_obj_addref(LK_OBJ(self), k)) = lk_obj_addref(LK_OBJ(self), v);
+    *(lk_obj_t **)qphash_set(QPHASH(self), lk_obj_add_ref(LK_OBJ(self), k)) = lk_obj_add_ref(LK_OBJ(self), v);
 }
 
 void lk_map_set_str_obj(lk_map_t *self, lk_str_t *key, lk_obj_t *value) {
-    *(lk_obj_t **)qphash_set(QPHASH(self), lk_obj_addref(LK_OBJ(self), LK_OBJ(key))) =
-        lk_obj_addref(LK_OBJ(self), value);
+    *(lk_obj_t **)qphash_set(QPHASH(self), lk_obj_add_ref(LK_OBJ(self), LK_OBJ(key))) =
+        lk_obj_add_ref(LK_OBJ(self), value);
 }
 
 void lk_map_setWithCStringKey(lk_map_t *self, const char *k, lk_obj_t *v) {
-    lk_map_set(self, LK_OBJ(lk_str_new_fromcstr(LK_VM(self), k)), v);
+    lk_map_set(self, LK_OBJ(lk_str_new_from_cstr(LK_VM(self), k)), v);
 }
 
 // info
@@ -62,7 +62,7 @@ lk_obj_t *lk_map_get(lk_map_t *self, lk_obj_t *k) {
 }
 
 lk_obj_t *lk_map_getByCStringKey(lk_map_t *self, const char *k) {
-    return lk_map_get(self, LK_OBJ(lk_str_new_fromcstr(LK_VM(self), k)));
+    return lk_map_get(self, LK_OBJ(lk_str_new_from_cstr(LK_VM(self), k)));
 }
 
 lk_list_t *lk_map_keys(lk_map_t *self) {
@@ -82,7 +82,7 @@ lk_list_t *lk_map_values(lk_map_t *self) {
 }
 
 // bind all c funcs to lk equiv
-void lk_map_libinit(lk_vm_t *vm) {
+void lk_map_lib_init(lk_vm_t *vm) {
     lk_obj_t *map = vm->t_map, *obj = vm->t_obj, *str = vm->t_str;
     lk_global_set("Map", map);
 

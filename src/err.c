@@ -7,13 +7,13 @@ static LK_OBJ_DEFMARKFUNC(err_mark) {
     mark(LK_OBJ(LK_ERROR(self)->message));
 }
 
-void lk_err_typeinit(lk_vm_t *vm) {
-    vm->t_err = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_err_t));
-    lk_obj_setmarkfunc(vm->t_err, err_mark);
+void lk_err_type_init(lk_vm_t *vm) {
+    vm->t_err = lk_obj_alloc_with_size(vm->t_obj, sizeof(lk_err_t));
+    lk_obj_set_mark_func(vm->t_err, err_mark);
 }
 
 // ext map - funcs
-void lk_err_libinit(lk_vm_t *vm) {
+void lk_err_lib_init(lk_vm_t *vm) {
     lk_obj_t *err = vm->t_err, *instr = vm->t_instr, *str = vm->t_str;
     lk_global_set("Error", err);
     lk_obj_set_cfield(err, "instruction", instr, offsetof(lk_err_t, instr));
@@ -27,6 +27,6 @@ lk_err_t *lk_err_new(lk_vm_t *vm, lk_obj_t *parent, const char *message) {
     lk_err_t *self = LK_ERROR(lk_obj_alloc(parent));
     self->instr = vm->currinstr;
     if (message != NULL)
-        self->message = lk_str_new_fromcstr(vm, message);
+        self->message = lk_str_new_from_cstr(vm, message);
     return self;
 }

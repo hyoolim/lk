@@ -5,7 +5,7 @@
 static void at_env_str(lk_obj_t *self, lk_scope_t *local) {
     const char *k = darray_str_tocstr(DARRAY(ARG(0)));
     const char *v = getenv(k);
-    RETURN(v != NULL ? LK_OBJ(lk_str_new_fromcstr(VM, v)) : NIL);
+    RETURN(v != NULL ? LK_OBJ(lk_str_new_from_cstr(VM, v)) : NIL);
 }
 
 extern char **environ;
@@ -27,14 +27,14 @@ static void keys_env(lk_obj_t *self, lk_scope_t *local) {
 
         for (j = 0; v[j] != '\0' && v[j] != '='; j++) {
         }
-        darray_ptr_push(DARRAY(keys), lk_str_new_fromdata(VM, v, j));
+        darray_ptr_push(DARRAY(keys), lk_str_new_from_data(VM, v, j));
     }
     RETURN(keys);
 }
 
-void lk_env_extinit(lk_vm_t *vm) {
+void lk_env_ext_init(lk_vm_t *vm) {
     lk_obj_t *obj = vm->t_obj, *str = vm->t_str;
-    lk_obj_t *env = lk_obj_alloc_withsize(obj, sizeof(lk_env_t));
+    lk_obj_t *env = lk_obj_alloc_with_size(obj, sizeof(lk_env_t));
     lk_global_set("Environment", env);
     lk_obj_set_cfunc_lk(env, "at", at_env_str, str, NULL);
     lk_obj_set_cfunc_lk(env, "size", size_env, NULL);

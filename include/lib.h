@@ -34,7 +34,7 @@
     do { \
         lk_obj_t *_r = LK_OBJ(v); \
         assert(_r != NULL); \
-        lk_scope_stackpush(local->caller, _r); \
+        lk_scope_stack_push(local->caller, _r); \
         DONE; \
     } while (0)
 #define GOTO(name) (name(self, local))

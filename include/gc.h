@@ -14,16 +14,16 @@ struct lk_gc {
 };
 
 // init
-void lk_gc_typeinit(lk_vm_t *vm);
-void lk_gc_libinit(lk_vm_t *vm);
+void lk_gc_type_init(lk_vm_t *vm);
+void lk_gc_lib_init(lk_vm_t *vm);
 
 // update
 void lk_gc_free_objgroup(struct lk_objgroup *self);
 void lk_objgroup_remove(lk_obj_t *v);
 void lk_objgroup_insert(struct lk_objgroup *self, lk_obj_t *v);
-void lk_gc_mark_objpending(lk_obj_t *self);
-void lk_gc_mark_objused(lk_obj_t *self);
-lk_obj_t *lk_obj_addref(lk_obj_t *self, lk_obj_t *v);
+void lk_gc_mark_obj_pending(lk_obj_t *self);
+void lk_gc_mark_obj_used(lk_obj_t *self);
+lk_obj_t *lk_obj_add_ref(lk_obj_t *self, lk_obj_t *v);
 void lk_gc_pause(lk_gc_t *self);
 void lk_gc_resume(lk_gc_t *self);
 void lk_gc_mark(lk_gc_t *self);

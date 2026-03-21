@@ -2,14 +2,14 @@
 
 // type
 static LK_OBJ_DEFMARKFUNC(mark_list) {
-    DARRAY_EACHPTR(DARRAY(self), i, v, mark(v));
+    DARRAY_EACH_PTR(DARRAY(self), i, v, mark(v));
 }
 
-void lk_list_typeinit(lk_vm_t *vm) {
+void lk_list_type_init(lk_vm_t *vm) {
     vm->t_list = lk_obj_alloc(vm->t_seq);
     darray_fin(DARRAY(vm->t_list));
     darray_init(DARRAY(vm->t_list), sizeof(lk_obj_t *), 16);
-    lk_obj_setmarkfunc(vm->t_list, mark_list);
+    lk_obj_set_mark_func(vm->t_list, mark_list);
 }
 
 // new
@@ -17,18 +17,18 @@ lk_list_t *lk_list_new(lk_vm_t *vm) {
     return LK_DARRAY(lk_obj_alloc(vm->t_list));
 }
 
-lk_list_t *lk_list_new_fromdarray(lk_vm_t *vm, darray_t *from) {
+lk_list_t *lk_list_new_from_darray(lk_vm_t *vm, darray_t *from) {
     lk_list_t *self = lk_list_new(vm);
     darray_copy(DARRAY(self), from);
     return self;
 }
 
-lk_list_t *lk_list_newfromargv(lk_vm_t *vm, int argc, const char **argv) {
+lk_list_t *lk_list_new_from_argv(lk_vm_t *vm, int argc, const char **argv) {
     lk_list_t *self = lk_list_new(vm);
     int i = 0;
 
     for (; i < argc; i++) {
-        darray_ptr_push(DARRAY(self), lk_str_new_fromcstr(vm, argv[i]));
+        darray_ptr_push(DARRAY(self), lk_str_new_from_cstr(vm, argv[i]));
     }
 
     return self;
@@ -36,7 +36,7 @@ lk_list_t *lk_list_newfromargv(lk_vm_t *vm, int argc, const char **argv) {
 
 // update
 void lk_list_insert_num_obj(lk_list_t *self, lk_num_t *index, lk_obj_t *value) {
-    darray_ptr_insert(DARRAY(self), CSIZE(index), lk_obj_addref(LK_OBJ(self), value));
+    darray_ptr_insert(DARRAY(self), CSIZE(index), lk_obj_add_ref(LK_OBJ(self), value));
 }
 
 void lk_list_remove_num(lk_list_t *self, lk_num_t *index) {
@@ -65,7 +65,7 @@ void lk_list_flatten(lk_obj_t *self, lk_scope_t *local) {
 }
 
 // bind all c funcs to lk equiv
-void lk_list_libinit(lk_vm_t *vm) {
+void lk_list_lib_init(lk_vm_t *vm) {
     lk_obj_t *list = vm->t_list, *obj = vm->t_obj, *num = vm->t_num;
     lk_global_set("List", list);
 

@@ -57,7 +57,7 @@ int darray_cmp(const darray_t *self, const darray_t *other);
             } \
         } \
     } while (0)
-#define DARRAY_EACHPTR(self, i, v, block) DARRAY_EACH(self, i, v, v = *(void **)v; block);
+#define DARRAY_EACH_PTR(self, i, v, block) DARRAY_EACH(self, i, v, v = *(void **)v; block);
 #define DARRAY_EQ(self, other) (DARRAY_COUNT(self) != DARRAY_COUNT(other) ? 0 : darray_cmp((self), (other)) == 0)
 int darray_find_darray(const darray_t *self, const darray_t *pat, int o);
 void *darray_get(const darray_t *self, int i);

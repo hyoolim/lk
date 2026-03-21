@@ -11,5 +11,5 @@ struct lk_rand {
 };
 
 // ext map
-void lk_rand_extinit(lk_vm_t *vm);
+void lk_rand_ext_init(lk_vm_t *vm);
 #endif

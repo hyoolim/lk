@@ -11,11 +11,11 @@ struct lk_file {
 };
 
 // init
-void lk_file_typeinit(lk_vm_t *vm);
-void lk_file_libinit(lk_vm_t *vm);
+void lk_file_type_init(lk_vm_t *vm);
+void lk_file_lib_init(lk_vm_t *vm);
 
 // new
-lk_file_t *lk_file_new_withpath(lk_vm_t *vm, lk_str_t *path);
+lk_file_t *lk_file_new_with_path(lk_vm_t *vm, lk_str_t *path);
 
 // update
 void lk_file_close(lk_file_t *self);
@@ -27,14 +27,14 @@ void lk_file_open(lk_file_t *self, lk_str_t *mode);
 void lk_file_write_str(lk_file_t *self, lk_str_t *text);
 
 // info
-lk_bool_t *lk_file_isdirectory(lk_file_t *self);
-lk_bool_t *lk_file_isexecutable(lk_file_t *self);
-lk_bool_t *lk_file_isexists(lk_file_t *self);
+lk_bool_t *lk_file_is_directory(lk_file_t *self);
+lk_bool_t *lk_file_is_executable(lk_file_t *self);
+lk_bool_t *lk_file_is_exists(lk_file_t *self);
 lk_str_t *lk_file_read_num(lk_file_t *self, lk_num_t *length);
-lk_str_t *lk_file_readall(lk_file_t *self);
-lk_str_t *lk_file_readuntil_char(lk_file_t *self, lk_char_t *until);
-lk_str_t *lk_file_readuntil_charset(lk_file_t *self, lk_charset_t *until);
-lk_bool_t *lk_file_isreadable(lk_file_t *self);
+lk_str_t *lk_file_read_all(lk_file_t *self);
+lk_str_t *lk_file_read_until_char(lk_file_t *self, lk_char_t *until);
+lk_str_t *lk_file_read_until_charset(lk_file_t *self, lk_charset_t *until);
+lk_bool_t *lk_file_is_readable(lk_file_t *self);
 lk_num_t *lk_file_size(lk_file_t *self);
-lk_bool_t *lk_file_iswritable(lk_file_t *self);
+lk_bool_t *lk_file_is_writable(lk_file_t *self);
 #endif

@@ -62,20 +62,20 @@ struct lk_vm {
 };
 
 // ext map
-void lk_vm_typeinit(lk_vm_t *vm);
-void lk_vm_libinit(lk_vm_t *vm);
+void lk_vm_type_init(lk_vm_t *vm);
+void lk_vm_lib_init(lk_vm_t *vm);
 
 // new
 lk_vm_t *lk_vm_new(void);
 void lk_vm_free(lk_vm_t *self);
 
 // eval
-lk_scope_t *lk_vm_evalfile(lk_vm_t *self, const char *file, const char *base);
-lk_scope_t *lk_vm_evalstr(lk_vm_t *self, const char *code);
-void lk_vm_doevalfunc(lk_vm_t *vm);
-noreturn void lk_vm_raisecstr(lk_vm_t *self, const char *message, ...);
-noreturn void lk_vm_raiseerrno(lk_vm_t *self);
-noreturn void lk_vm_raiseerr(lk_vm_t *self, lk_err_t *err);
+lk_scope_t *lk_vm_eval_file(lk_vm_t *self, const char *file, const char *base);
+lk_scope_t *lk_vm_eval_str(lk_vm_t *self, const char *code);
+void lk_vm_do_eval_func(lk_vm_t *vm);
+noreturn void lk_vm_raise_cstr(lk_vm_t *self, const char *message, ...);
+noreturn void lk_vm_raise_errno(lk_vm_t *self);
+noreturn void lk_vm_raise_err(lk_vm_t *self, lk_err_t *err);
 noreturn void lk_vm_exit(lk_vm_t *self);
 noreturn void lk_vm_abort(lk_vm_t *self, lk_err_t *err);
 #endif

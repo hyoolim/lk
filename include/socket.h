@@ -21,5 +21,5 @@ struct lk_ipaddr {
 };
 
 // ext map
-void lk_socket_extinit(lk_vm_t *vm);
+void lk_socket_ext_init(lk_vm_t *vm);
 #endif

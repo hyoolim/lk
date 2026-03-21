@@ -11,7 +11,7 @@ typedef struct {
     int size;
 } charset_t;
 #define CHARSET_DATA(self) ((uint32_t *)((ptrdiff_t)(self)->data & ~1))
-#define CHARSET_ISINVERTED(self) ((ptrdiff_t)(self)->data & 1)
+#define CHARSET_IS_INVERTED(self) ((ptrdiff_t)(self)->data & 1)
 
 // new
 charset_t *charset_alloc(void);

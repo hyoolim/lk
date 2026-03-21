@@ -9,13 +9,13 @@ static LK_OBJ_DEFMARKFUNC(mark_dir) {
     mark(LK_OBJ(LK_DIR(self)->path));
 }
 
-void lk_dir_typeinit(lk_vm_t *vm) {
-    vm->t_dir = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_dir_t));
-    lk_obj_setmarkfunc(vm->t_dir, mark_dir);
+void lk_dir_type_init(lk_vm_t *vm) {
+    vm->t_dir = lk_obj_alloc_with_size(vm->t_obj, sizeof(lk_dir_t));
+    lk_obj_set_mark_func(vm->t_dir, mark_dir);
 }
 
 // new
-lk_dir_t *lk_dir_new_withpath(lk_vm_t *vm, lk_str_t *path) {
+lk_dir_t *lk_dir_new_with_path(lk_vm_t *vm, lk_str_t *path) {
     lk_dir_t *self = LK_DIR(lk_obj_alloc(vm->t_dir));
     lk_dir_init(self, path);
     return self;
@@ -31,7 +31,7 @@ void lk_dir_init(lk_dir_t *self, lk_str_t *path) {
         char buf[1000];
 
         if (getcwd(buf, 1000) != NULL) {
-            lk_str_t *abs = lk_str_new_fromcstr(VM, buf);
+            lk_str_t *abs = lk_str_new_from_cstr(VM, buf);
             darray_concat(DARRAY(abs), DARRAY(VM->str_filesep));
             darray_concat(DARRAY(abs), DARRAY(path));
             self->path = abs;
@@ -41,7 +41,7 @@ void lk_dir_init(lk_dir_t *self, lk_str_t *path) {
     while ((nextat = darray_str_find(DARRAY(self->path), '/', at)) > -1) {
         at = nextat + 1;
     }
-    self->name = lk_str_new_fromdarray(VM, DARRAY(self->path));
+    self->name = lk_str_new_from_darray(VM, DARRAY(self->path));
     darray_offset(DARRAY(self->name), at);
 }
 
@@ -52,7 +52,7 @@ void lk_dir_create(lk_dir_t *self) {
 
 void lk_dir_work(lk_dir_t *self) {
     if (chdir(CSTRING(self->path)) != 0) {
-        lk_vm_raiseerrno(VM);
+        lk_vm_raise_errno(VM);
     }
 }
 
@@ -68,20 +68,20 @@ lk_list_t *lk_dir_items(lk_dir_t *self) {
 
         if ((entry = readdir(dd)) == NULL) {
             if (errno != 0) {
-                lk_vm_raiseerrno(VM);
+                lk_vm_raise_errno(VM);
             }
             break;
 
         } else if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
-            lk_str_t *path = lk_str_new_fromcstr(VM, entry->d_name);
+            lk_str_t *path = lk_str_new_from_cstr(VM, entry->d_name);
             darray_setrange(DARRAY(path), 0, 0, DARRAY(VM->str_filesep));
             darray_setrange(DARRAY(path), 0, 0, DARRAY(self->path));
 
             if (stat(CSTRING(path), &info) == 0 && S_ISDIR(info.st_mode)) {
-                darray_ptr_push(DARRAY(items), lk_dir_new_withpath(VM, path));
+                darray_ptr_push(DARRAY(items), lk_dir_new_with_path(VM, path));
 
             } else {
-                darray_ptr_push(DARRAY(items), lk_file_new_withpath(VM, path));
+                darray_ptr_push(DARRAY(items), lk_file_new_with_path(VM, path));
             }
         }
     }
@@ -89,7 +89,7 @@ lk_list_t *lk_dir_items(lk_dir_t *self) {
 }
 
 // bind all c funcs to lk equiv
-void lk_dir_libinit(lk_vm_t *vm) {
+void lk_dir_lib_init(lk_vm_t *vm) {
     lk_obj_t *dir = vm->t_dir, *str = vm->t_str;
     lk_global_set("Directory", dir);
 

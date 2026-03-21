@@ -22,13 +22,13 @@ struct lk_scope {
 };
 
 // ext map
-void lk_scope_typeinit(lk_vm_t *vm);
-void lk_scope_libinit(lk_vm_t *vm);
+void lk_scope_type_init(lk_vm_t *vm);
+void lk_scope_lib_init(lk_vm_t *vm);
 
 // update
 lk_scope_t *lk_scope_new(lk_vm_t *vm);
-void lk_scope_stackpush(lk_scope_t *self, lk_obj_t *v);
-lk_obj_t *lk_scope_stackpop(lk_scope_t *self);
-lk_obj_t *lk_scope_stackpeek(lk_scope_t *self);
-lk_list_t *lk_scope_stacktolist(lk_scope_t *self);
+void lk_scope_stack_push(lk_scope_t *self, lk_obj_t *v);
+lk_obj_t *lk_scope_stack_pop(lk_scope_t *self);
+lk_obj_t *lk_scope_stack_peek(lk_scope_t *self);
+lk_list_t *lk_scope_stack_to_list(lk_scope_t *self);
 #endif

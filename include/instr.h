@@ -29,21 +29,21 @@ struct lk_instr {
 };
 
 // ext map
-void lk_instr_typeinit(lk_vm_t *vm);
-void lk_instr_libinit(lk_vm_t *vm);
+void lk_instr_type_init(lk_vm_t *vm);
+void lk_instr_lib_init(lk_vm_t *vm);
 
 // new
 lk_instr_t *lk_instr_new(lk_parser_t *parser);
-lk_instr_t *lk_instr_newmore(lk_parser_t *parser);
-lk_instr_t *lk_instr_newfunc(lk_parser_t *parser, lk_instr_t *first);
-lk_instr_t *lk_instr_newarglist(lk_parser_t *parser, lk_instr_t *first);
-lk_instr_t *lk_instr_newcomment(lk_parser_t *parser, lk_str_t *s);
-lk_instr_t *lk_instr_newstr(lk_parser_t *parser, lk_str_t *s);
-lk_instr_t *lk_instr_newempty(lk_parser_t *parser);
+lk_instr_t *lk_instr_new_more(lk_parser_t *parser);
+lk_instr_t *lk_instr_new_func(lk_parser_t *parser, lk_instr_t *first);
+lk_instr_t *lk_instr_new_arglist(lk_parser_t *parser, lk_instr_t *first);
+lk_instr_t *lk_instr_new_comment(lk_parser_t *parser, lk_str_t *s);
+lk_instr_t *lk_instr_new_str(lk_parser_t *parser, lk_str_t *s);
+lk_instr_t *lk_instr_new_empty(lk_parser_t *parser);
 lk_instr_t *lk_instr_new_number(lk_parser_t *parser, double num);
-lk_instr_t *lk_instr_newchar(lk_parser_t *parser, uint32_t c);
-lk_instr_t *lk_instr_newmessage(lk_parser_t *parser, lk_str_t *name);
-lk_instr_t *lk_instr_newscopemessage(lk_parser_t *parser, lk_str_t *name);
+lk_instr_t *lk_instr_new_char(lk_parser_t *parser, uint32_t c);
+lk_instr_t *lk_instr_new_message(lk_parser_t *parser, lk_str_t *name);
+lk_instr_t *lk_instr_new_scope_message(lk_parser_t *parser, lk_str_t *name);
 
 // info
 void lk_instr_print(lk_instr_t *);

@@ -5,7 +5,7 @@
 #include "num.h"
 
 // type
-void lk_str_typeinit(lk_vm_t *vm) {
+void lk_str_type_init(lk_vm_t *vm) {
     vm->t_str = lk_obj_alloc(vm->t_seq);
     darray_fin(DARRAY(vm->t_str));
     darray_init(DARRAY(vm->t_str), sizeof(uint8_t), 16);
@@ -16,23 +16,23 @@ lk_str_t *lk_str_new(lk_vm_t *vm) {
     return LK_STRING(lk_obj_alloc(vm->t_str));
 }
 
-lk_str_t *lk_str_new_fromdarray(lk_vm_t *vm, darray_t *list) {
+lk_str_t *lk_str_new_from_darray(lk_vm_t *vm, darray_t *list) {
     lk_str_t *self = LK_STRING(lk_obj_alloc(vm->t_str));
 
     darray_copy(DARRAY(self), list);
     return self;
 }
 
-lk_str_t *lk_str_new_fromdata(lk_vm_t *vm, const void *data, int len) {
+lk_str_t *lk_str_new_from_data(lk_vm_t *vm, const void *data, int len) {
     darray_t *l = darray_str_alloc_fromdata(data, len);
-    lk_str_t *s = lk_str_new_fromdarray(vm, l);
+    lk_str_t *s = lk_str_new_from_darray(vm, l);
 
     darray_free(l);
     return s;
 }
 
-lk_str_t *lk_str_new_fromcstr(lk_vm_t *vm, const char *cstr) {
-    return lk_str_new_fromdata(vm, cstr, strlen(cstr));
+lk_str_t *lk_str_new_from_cstr(lk_vm_t *vm, const char *cstr) {
+    return lk_str_new_from_data(vm, cstr, strlen(cstr));
 }
 
 // update
@@ -91,14 +91,14 @@ lk_obj_t *lk_str_find_str_starting(lk_str_t *self, lk_str_t *pattern, lk_num_t *
     return i >= 0 ? LK_OBJ(lk_num_new(VM, i)) : NIL;
 }
 
-lk_charset_t *lk_str_tocharset(lk_str_t *self) {
+lk_charset_t *lk_str_to_charset(lk_str_t *self) {
     lk_charset_t *charset = lk_charset_new(VM);
 
     charset_add_darray(CHARSET(charset), DARRAY(self));
     return charset;
 }
 
-lk_num_t *lk_str_tonum(lk_str_t *self) {
+lk_num_t *lk_str_to_num(lk_str_t *self) {
     numifn_t num;
 
     switch (num_new(0, DARRAY(self), &num)) {
@@ -112,10 +112,10 @@ lk_num_t *lk_str_tonum(lk_str_t *self) {
 }
 
 // bind all c funcs to lk equiv
-void lk_str_libinit(lk_vm_t *vm) {
+void lk_str_lib_init(lk_vm_t *vm) {
     lk_obj_t *str = vm->t_str, *num = vm->t_num, *charset = vm->t_charset, *ch = vm->t_char;
 
-    lk_global_set("Newline", LK_OBJ(lk_str_new_fromcstr(vm, "\n")));
+    lk_global_set("Newline", LK_OBJ(lk_str_new_from_cstr(vm, "\n")));
     lk_global_set("String", str);
 
     // update
@@ -127,6 +127,6 @@ void lk_str_libinit(lk_vm_t *vm) {
     lk_obj_set_cfunc_creturn(str, "find", lk_str_find_char_starting, ch, num, NULL);
     lk_obj_set_cfunc_creturn(str, "find", lk_str_find_charset_starting, charset, num, NULL);
     lk_obj_set_cfunc_creturn(str, "find", lk_str_find_str_starting, str, num, NULL);
-    lk_obj_set_cfunc_creturn(str, "toCharacterSet", lk_str_tocharset, NULL);
-    lk_obj_set_cfunc_creturn(str, "toNumber", lk_str_tonum, NULL);
+    lk_obj_set_cfunc_creturn(str, "toCharacterSet", lk_str_to_charset, NULL);
+    lk_obj_set_cfunc_creturn(str, "toNumber", lk_str_to_num, NULL);
 }

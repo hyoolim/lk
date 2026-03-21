@@ -46,9 +46,9 @@ struct lk_tag {
     int refc;
     lk_vm_t *vm;
     size_t size;
-    lk_tagallocfunc_t *allocfunc;
-    lk_tagmarkfunc_t *markfunc;
-    lk_tagfreefunc_t *freefunc;
+    lk_tagallocfunc_t *alloc_func;
+    lk_tagmarkfunc_t *mark_func;
+    lk_tagfreefunc_t *free_func;
 };
 struct lk_objgroup {
     lk_obj_t *first;

@@ -10,11 +10,11 @@ struct lk_dir {
 };
 
 // init
-void lk_dir_typeinit(lk_vm_t *vm);
-void lk_dir_libinit(lk_vm_t *vm);
+void lk_dir_type_init(lk_vm_t *vm);
+void lk_dir_lib_init(lk_vm_t *vm);
 
 // new
-lk_dir_t *lk_dir_new_withpath(lk_vm_t *vm, lk_str_t *path);
+lk_dir_t *lk_dir_new_with_path(lk_vm_t *vm, lk_str_t *path);
 void lk_dir_init(lk_dir_t *self, lk_str_t *path);
 
 // update

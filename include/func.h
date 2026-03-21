@@ -54,8 +54,8 @@ struct lk_sig {
 };
 
 // ext map
-void lk_func_typeinit(lk_vm_t *vm);
-void lk_func_libinit(lk_vm_t *vm);
+void lk_func_type_init(lk_vm_t *vm);
+void lk_func_lib_init(lk_vm_t *vm);
 
 // new
 lk_cfunc_t *lk_cfunc_new(lk_vm_t *vm, lk_cfuncfunc_t *func, int minargc, int maxargc);
@@ -66,5 +66,5 @@ lk_sig_t *lk_sig_new(lk_vm_t *vm, lk_str_t *name, lk_obj_t *type);
 // update
 lk_gfunc_t *lk_func_combine(lk_func_t *self, lk_func_t *other);
 lk_func_t *lk_func_match(lk_func_t *self, lk_scope_t *args, lk_obj_t *recv);
-void lk_lfunc_updatesig(lk_lfunc_t *self);
+void lk_lfunc_update_sig(lk_lfunc_t *self);
 #endif

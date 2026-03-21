@@ -12,13 +12,13 @@ static void free_dl(lk_obj_t *self) {
     }
 }
 
-void lk_dl_typeinit(lk_vm_t *vm) {
-    vm->t_dl = lk_obj_alloc_withsize(vm->t_obj, sizeof(lk_dl_t));
-    lk_obj_setfreefunc(vm->t_dl, free_dl);
+void lk_dl_type_init(lk_vm_t *vm) {
+    vm->t_dl = lk_obj_alloc_with_size(vm->t_obj, sizeof(lk_dl_t));
+    lk_obj_set_free_func(vm->t_dl, free_dl);
 }
 
 // new
-void lk_dl_init_withpath_andfunc(lk_dl_t *self, lk_str_t *path, lk_str_t *funcname) {
+void lk_dl_init_with_path_and_func(lk_dl_t *self, lk_str_t *path, lk_str_t *funcname) {
     void *dl = dlopen(darray_str_tocstr(DARRAY(path)), RTLD_NOW);
 
     if (dl != NULL) {
@@ -43,18 +43,18 @@ void lk_dl_init_withpath_andfunc(lk_dl_t *self, lk_str_t *path, lk_str_t *funcna
 }
 
 // bind all c funcs to lk equiv
-void lk_dl_libinit(lk_vm_t *vm) {
+void lk_dl_lib_init(lk_vm_t *vm) {
     lk_obj_t *dl = vm->t_dl, *str = vm->t_str;
     lk_global_set("DynamicLibrary", dl);
 
     // new
-    lk_obj_set_cfunc_cvoid(dl, "init!", lk_dl_init_withpath_andfunc, str, str, NULL);
+    lk_obj_set_cfunc_cvoid(dl, "init!", lk_dl_init_with_path_and_func, str, str, NULL);
 }
 
 // update
 void lk_object_set(lk_obj_t *parent, const char *k, lk_obj_t *v) {
     lk_vm_t *vm = LK_VM(parent);
-    lk_str_t *k_kc = lk_str_new_fromcstr(vm, k);
+    lk_str_t *k_kc = lk_str_new_from_cstr(vm, k);
     lk_obj_setslot(parent, LK_OBJ(k_kc), vm->t_obj, v);
     /*
     lk_obj_setslot(v, LK_OBJ(vm->str_type), vm->t_str, LK_OBJ(k_kc));
@@ -67,7 +67,7 @@ void lk_global_set(const char *k, lk_obj_t *v) {
 
 void lk_obj_set_cfield(lk_obj_t *self, const char *k, lk_obj_t *t, size_t offset) {
     lk_vm_t *vm = LK_VM(self);
-    lk_str_t *k_kc = lk_str_new_fromcstr(vm, k);
+    lk_str_t *k_kc = lk_str_new_from_cstr(vm, k);
     struct lk_slot *slot = lk_obj_setslot(LK_OBJ(self), LK_OBJ(k_kc), t, vm->t_nil);
     assert(offset >= sizeof(struct lk_common)); // cfield offsets are relative to lk_obj_t*, so must clear lk_common
     LK_SLOT_SETTYPE(slot, LK_SLOTTYPE_CFIELDLKOBJ);

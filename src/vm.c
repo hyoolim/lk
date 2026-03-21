@@ -30,7 +30,7 @@
 #include <unistd.h>
 
 // ext map - types
-void lk_vm_typeinit(lk_vm_t *vm) {
+void lk_vm_type_init(lk_vm_t *vm) {
     vm->t_vm = lk_obj_alloc(vm->t_obj);
 }
 
@@ -45,7 +45,7 @@ static void fork_vm(lk_obj_t *self, lk_scope_t *local) {
     pid_t child = fork();
 
     if (child == -1)
-        lk_vm_raiseerrno(VM);
+        lk_vm_raise_errno(VM);
 
     RETURN(lk_num_new(VM, (int)child));
 }
@@ -54,7 +54,7 @@ static void fork_vm_f(lk_obj_t *self, lk_scope_t *local) {
     pid_t child = fork();
 
     if (child == -1)
-        lk_vm_raiseerrno(VM);
+        lk_vm_raise_errno(VM);
 
     if (child > 0)
         RETURN(lk_num_new(VM, (int)child));
@@ -68,7 +68,7 @@ static void fork_vm_f(lk_obj_t *self, lk_scope_t *local) {
         fr->func = LK_OBJ(lf);
         fr->returnto = NULL;
         fr->o.parent = LK_OBJ(lf->scope);
-        lk_vm_doevalfunc(VM);
+        lk_vm_do_eval_func(VM);
         lk_vm_exit(VM);
         DONE;
     }
@@ -109,7 +109,7 @@ static void system_vm(lk_obj_t *self, lk_scope_t *local) {
     pid_t child = fork();
 
     if (child == -1)
-        lk_vm_raiseerrno(VM);
+        lk_vm_raise_errno(VM);
 
     if (child > 0) {
         int status;
@@ -126,7 +126,7 @@ static void system_vm(lk_obj_t *self, lk_scope_t *local) {
         }
 
         execvp(args[0], args);
-        lk_vm_raiseerrno(VM);
+        lk_vm_raise_errno(VM);
     }
 }
 
@@ -138,7 +138,7 @@ static void system2_vm_str(lk_obj_t *self, lk_scope_t *local) {
         char *line = fgets(ret, 4096, out);
 
         if (line != NULL)
-            RETURN(lk_str_new_fromcstr(VM, line));
+            RETURN(lk_str_new_from_cstr(VM, line));
     }
 
     RETURN(NIL);
@@ -151,7 +151,7 @@ static void wait_vm(lk_obj_t *self, lk_scope_t *local) {
     RETURN(lk_num_new(VM, (int)child));
 }
 
-void lk_vm_libinit(lk_vm_t *vm) {
+void lk_vm_lib_init(lk_vm_t *vm) {
     lk_obj_t *tvm = vm->t_vm, *f = vm->t_func, *num = vm->t_num, *str = vm->t_str;
 
     lk_global_set("VirtualMachine", tvm);
@@ -171,67 +171,67 @@ lk_vm_t *lk_vm_new(void) {
     lk_vm_t *self = mem_alloc(sizeof(lk_vm_t));
 
     // must be loaded before other primitive types
-    lk_obj_typeinit(self);
-    lk_gc_typeinit(self);
-    lk_vm_typeinit(self);
-    lk_seq_typeinit(self);
-    lk_map_typeinit(self);
-    lk_str_typeinit(self);
+    lk_obj_type_init(self);
+    lk_gc_type_init(self);
+    lk_vm_type_init(self);
+    lk_seq_type_init(self);
+    lk_map_type_init(self);
+    lk_str_type_init(self);
 
     // init all other primitive types
-    lk_bool_typeinit(self);
-    lk_char_typeinit(self);
-    lk_charset_typeinit(self);
-    lk_err_typeinit(self);
-    lk_file_typeinit(self);
-    lk_dir_typeinit(self);
-    lk_vec_typeinit(self);
-    lk_num_typeinit(self);
-    lk_scope_typeinit(self);
-    lk_func_typeinit(self);
-    lk_instr_typeinit(self);
-    lk_list_typeinit(self);
-    lk_parser_typeinit(self);
-    lk_pipe_typeinit(self);
-    lk_dl_typeinit(self);
+    lk_bool_type_init(self);
+    lk_char_type_init(self);
+    lk_charset_type_init(self);
+    lk_err_type_init(self);
+    lk_file_type_init(self);
+    lk_dir_type_init(self);
+    lk_vec_type_init(self);
+    lk_num_type_init(self);
+    lk_scope_type_init(self);
+    lk_func_type_init(self);
+    lk_instr_type_init(self);
+    lk_list_type_init(self);
+    lk_parser_type_init(self);
+    lk_pipe_type_init(self);
+    lk_dl_type_init(self);
 
     // init rest of the fields in vm
     self->global = LK_SCOPE(lk_obj_alloc(self->t_scope));
     self->currscope = self->global;
-    lk_global_set(".str.class", LK_OBJ(self->str_type = lk_str_new_fromcstr(self, "_CLASS")));
-    lk_global_set(".str.forward", LK_OBJ(self->str_forward = lk_str_new_fromcstr(self, "_forward")));
-    lk_global_set(".str.rescue", LK_OBJ(self->str_rescue = lk_str_new_fromcstr(self, "_rescue")));
-    lk_global_set(".str.on assign", LK_OBJ(self->str_onassign = lk_str_new_fromcstr(self, "_on_assign")));
-    lk_global_set(".str.at", LK_OBJ(self->str_at = lk_str_new_fromcstr(self, "at")));
-    lk_global_set(".str.slash", LK_OBJ(self->str_filesep = lk_str_new_fromcstr(self, "/")));
+    lk_global_set(".str.class", LK_OBJ(self->str_type = lk_str_new_from_cstr(self, "_CLASS")));
+    lk_global_set(".str.forward", LK_OBJ(self->str_forward = lk_str_new_from_cstr(self, "_forward")));
+    lk_global_set(".str.rescue", LK_OBJ(self->str_rescue = lk_str_new_from_cstr(self, "_rescue")));
+    lk_global_set(".str.on assign", LK_OBJ(self->str_onassign = lk_str_new_from_cstr(self, "_on_assign")));
+    lk_global_set(".str.at", LK_OBJ(self->str_at = lk_str_new_from_cstr(self, "at")));
+    lk_global_set(".str.slash", LK_OBJ(self->str_filesep = lk_str_new_from_cstr(self, "/")));
 
     // attach all funcs to primitive types
-    lk_bool_libinit(self);
-    lk_char_libinit(self);
-    lk_charset_libinit(self);
-    lk_map_libinit(self);
-    lk_err_libinit(self);
-    lk_file_libinit(self);
-    lk_dir_libinit(self);
-    lk_vec_libinit(self);
-    lk_num_libinit(self);
-    lk_scope_libinit(self);
-    lk_func_libinit(self);
-    lk_gc_libinit(self);
-    lk_instr_libinit(self);
-    lk_list_libinit(self);
-    lk_obj_libinit(self);
-    lk_parser_libinit(self);
-    lk_pipe_libinit(self);
-    lk_str_libinit(self);
-    lk_vm_libinit(self);
-    lk_seq_libinit(self);
-    lk_dl_libinit(self);
+    lk_bool_lib_init(self);
+    lk_char_lib_init(self);
+    lk_charset_lib_init(self);
+    lk_map_lib_init(self);
+    lk_err_lib_init(self);
+    lk_file_lib_init(self);
+    lk_dir_lib_init(self);
+    lk_vec_lib_init(self);
+    lk_num_lib_init(self);
+    lk_scope_lib_init(self);
+    lk_func_lib_init(self);
+    lk_gc_lib_init(self);
+    lk_instr_lib_init(self);
+    lk_list_lib_init(self);
+    lk_obj_lib_init(self);
+    lk_parser_lib_init(self);
+    lk_pipe_lib_init(self);
+    lk_str_lib_init(self);
+    lk_vm_lib_init(self);
+    lk_seq_lib_init(self);
+    lk_dl_lib_init(self);
 
     // extra libs
-    lk_env_extinit(self);
-    lk_rand_extinit(self);
-    lk_socket_extinit(self);
+    lk_env_ext_init(self);
+    lk_rand_ext_init(self);
+    lk_socket_ext_init(self);
     lk_global_set("Global", LK_OBJ(self->global));
     return self;
 }
@@ -243,7 +243,7 @@ void lk_vm_free(lk_vm_t *self) {
     lk_gc_free_objgroup(gc->unused);
     lk_gc_free_objgroup(gc->pending);
     lk_gc_free_objgroup(gc->used);
-    lk_obj_justfree(LK_OBJ(gc));
+    lk_obj_just_free(LK_OBJ(gc));
     mem_free(self);
 
     /*
@@ -262,22 +262,22 @@ static lk_scope_t *eval(lk_vm_t *self, lk_str_t *code) {
 
     fr->first = fr->next = func;
     fr->returnto = NULL;
-    lk_vm_doevalfunc(self);
+    lk_vm_do_eval_func(self);
     return fr;
 }
 
-lk_scope_t *lk_vm_evalfile(lk_vm_t *self, const char *file, const char *base) {
-    lk_str_t *filename = lk_str_new_fromcstr(self, file);
+lk_scope_t *lk_vm_eval_file(lk_vm_t *self, const char *file, const char *base) {
+    lk_str_t *filename = lk_str_new_from_cstr(self, file);
 
     if (base != NULL && file[0] != '/') {
-        lk_str_t *root = lk_str_new_fromcstr(self, base);
+        lk_str_t *root = lk_str_new_from_cstr(self, base);
         int pslen = DARRAY_COUNT(DARRAY(self->str_filesep));
         int pos = darray_find_darray(DARRAY(root), DARRAY(self->str_filesep), 0);
 
         if (pos > 0) {
             lk_str_t *orig = filename;
 
-            root = lk_str_new_fromdarray(self, DARRAY(root));
+            root = lk_str_new_from_darray(self, DARRAY(root));
             pos += pslen;
 
             for (int i; (i = darray_find_darray(DARRAY(root), DARRAY(self->str_filesep), pos)) > 0;)
@@ -308,29 +308,29 @@ lk_scope_t *lk_vm_evalfile(lk_vm_t *self, const char *file, const char *base) {
             fclose(stream);
 
             if (src != NULL) {
-                fr = eval(self, lk_str_new_fromdarray(self, src));
+                fr = eval(self, lk_str_new_from_darray(self, src));
                 darray_free(src);
                 self->rsrc = self->rsrc->prev;
                 return fr;
 
             } else {
                 self->rsrc = self->rsrc->prev;
-                lk_vm_raisecstr(self, "Cannot read from file named %s", filename);
+                lk_vm_raise_cstr(self, "Cannot read from file named %s", filename);
             }
 
         } else {
             self->rsrc = self->rsrc->prev;
-            lk_vm_raisecstr(self, "Cannot open file named %s", filename);
+            lk_vm_raise_cstr(self, "Cannot open file named %s", filename);
         }
     }
 }
 
-lk_scope_t *lk_vm_evalstr(lk_vm_t *self, const char *code) {
+lk_scope_t *lk_vm_eval_str(lk_vm_t *self, const char *code) {
     lk_scope_t *fr;
     struct lk_rsrcchain rsrc;
 
     rsrc.isstr = 1;
-    rsrc.rsrc = lk_str_new_fromcstr(self, code);
+    rsrc.rsrc = lk_str_new_from_cstr(self, code);
     rsrc.prev = self->rsrc;
     self->rsrc = &rsrc;
     fr = eval(self, rsrc.rsrc);
@@ -369,7 +369,7 @@ static void call_cfunc(lk_vm_t *vm, lk_scope_t *self, lk_cfunc_t *cf, lk_scope_t
             BUG("cc void not supported");
         }
 
-        lk_scope_stackpush(args->returnto, recv);
+        lk_scope_stack_push(args->returnto, recv);
 
     } else if (cf->cc == LK_CFUNC_CC_CRETURN) {
         lk_obj_t *result;
@@ -397,7 +397,7 @@ static void call_cfunc(lk_vm_t *vm, lk_scope_t *self, lk_cfunc_t *cf, lk_scope_t
             BUG("cc return not supported");
         }
 
-        lk_scope_stackpush(args->returnto, result);
+        lk_scope_stack_push(args->returnto, result);
 
     } else {
         cf->cfunc.lk(recv, args);
@@ -423,7 +423,7 @@ static void call_cfunc(lk_vm_t *vm, lk_scope_t *self, lk_cfunc_t *cf, lk_scope_t
         goto nextinstr; \
     } while (0)
 
-void lk_vm_doevalfunc(lk_vm_t *vm) {
+void lk_vm_do_eval_func(lk_vm_t *vm) {
     lk_scope_t *self = vm->currscope;
     lk_gc_t *gc = vm->gc;
     lk_instr_t *instr;
@@ -452,7 +452,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
     if (setjmp(rescue.buf)) {
         recv = vm->currscope != NULL ? LK_OBJ(vm->currscope) : LK_OBJ(self->scope);
         args = lk_scope_new(vm);
-        lk_scope_stackpush(args, LK_OBJ(vm->lasterr));
+        lk_scope_stack_push(args, LK_OBJ(vm->lasterr));
 
         for (; recv != NULL; recv = LK_OBJ(LK_SCOPE(recv)->returnto)) {
             if ((slots = recv->o.slots) == NULL)
@@ -460,7 +460,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
             if ((si = qphash_get(slots, vm->str_rescue)) == NULL)
                 continue;
             slot = LK_SLOT(SETITEM_VALUEPTR(si));
-            slotv = lk_obj_getvaluefromslot(recv, slot);
+            slotv = lk_obj_get_value_from_slot(recv, slot);
             if (!LK_OBJ_ISFUNC(slot->check) || LK_OBJ_ISA(slotv, t_func) < 3)
                 continue;
             func = lk_func_match(LK_FUNC(slotv), args, args->self);
@@ -474,7 +474,7 @@ void lk_vm_doevalfunc(lk_vm_t *vm) {
 
         vm->rescue = vm->rescue->prev;
         vm->rsrc = vm->rescue != NULL ? vm->rescue->rsrc : NULL;
-        lk_vm_raiseerr(vm, vm->lasterr);
+        lk_vm_raise_err(vm, vm->lasterr);
     }
 
 nextinstr:
@@ -496,14 +496,14 @@ nextinstr:
     // skip comments
     // msg represents a possiblity, a function to be exec'd
     case LK_INSTRTYPE_SELFMSG:
-        lk_scope_stackpush(self, self->self != NULL ? self->self : NIL);
+        lk_scope_stack_push(self, self->self != NULL ? self->self : NIL);
         goto sendmsg;
     case LK_INSTRTYPE_SCOPEMSG:
-        lk_scope_stackpush(self, LK_OBJ(self->scope));
+        lk_scope_stack_push(self, LK_OBJ(self->scope));
         goto sendmsg;
     case LK_INSTRTYPE_APPLYMSG:
     sendmsg:
-        lk_scope_stackpush(self, LK_OBJ(instr));
+        lk_scope_stack_push(self, LK_OBJ(instr));
         if (instr->opts & LK_INSTROHASMSGARGS)
             goto nextinstr;
         args = NULL;
@@ -522,18 +522,18 @@ nextinstr:
     case LK_INSTRTYPE_NUMBER:
     case LK_INSTRTYPE_STRING:
     case LK_INSTRTYPE_CHAR:
-        lk_scope_stackpush(self, lk_obj_clone(instr->v));
+        lk_scope_stack_push(self, lk_obj_clone(instr->v));
         goto nextinstr;
 
     // funcs also need ref to env for closures to work
     case LK_INSTRTYPE_FUNC: {
         lk_lfunc_t *clone = LK_LFUNC(lk_obj_clone(instr->v));
 
-        lk_lfunc_updatesig(clone);
-        lk_obj_addref(LK_OBJ(clone), LK_OBJ(self->scope));
+        lk_lfunc_update_sig(clone);
+        lk_obj_add_ref(LK_OBJ(clone), LK_OBJ(self->scope));
         clone->scope = self->scope;
-        lk_obj_addref(LK_OBJ(clone), LK_OBJ(self->receiver));
-        lk_scope_stackpush(self, LK_OBJ(clone));
+        lk_obj_add_ref(LK_OBJ(clone), LK_OBJ(self->receiver));
+        lk_scope_stack_push(self, LK_OBJ(clone));
         goto nextinstr;
     }
 
@@ -561,13 +561,13 @@ prevscope:
     switch (args->type) {
     // take the scope and return last val
     case LK_SCOPETYPE_RETURN:
-        lk_scope_stackpush(self, lk_scope_stackpeek(args));
+        lk_scope_stack_push(self, lk_scope_stack_peek(args));
         vm->currscope = self;
         goto nextinstr;
 
     // take the scope and convert to list
     case LK_SCOPETYPE_LIST:
-        lk_scope_stackpush(self, LK_OBJ(lk_scope_stacktolist(args)));
+        lk_scope_stack_push(self, LK_OBJ(lk_scope_stack_to_list(args)));
         vm->currscope = self;
         goto nextinstr;
 
@@ -575,16 +575,16 @@ prevscope:
     case LK_SCOPETYPE_APPLY:
     apply:
         /*
-        msg = LK_INSTR(lk_scope_stackpop(self));
+        msg = LK_INSTR(lk_scope_stack_pop(self));
         msgn = LK_STRING(msg->v);
-        recv = r = lk_scope_stackpop(self);
+        recv = r = lk_scope_stack_pop(self);
         */
-        recv = r = lk_scope_stackpop(self);
+        recv = r = lk_scope_stack_pop(self);
 
         if (LK_OBJ_ISINSTR(recv)) {
             msg = LK_INSTR(recv);
             msgn = LK_STRING(msg->v);
-            recv = r = lk_scope_stackpop(self);
+            recv = r = lk_scope_stack_pop(self);
 
         } else {
             msg = NULL;
@@ -599,7 +599,7 @@ prevscope:
             goto parent;
     found:
         slot = LK_SLOT(SETITEM_VALUEPTR(si));
-        slotv = lk_obj_getvaluefromslot(recv, slot);
+        slotv = lk_obj_get_value_from_slot(recv, slot);
 
         // slot contains func obj - call?
         if (LK_OBJ_ISA(slotv, t_func) > 2 && LK_SLOT_CHECKOPTION(slot, LK_SLOTOPTION_AUTOSEND) &&
@@ -634,7 +634,7 @@ prevscope:
             }
 
             self->lastslot = slot;
-            lk_scope_stackpush(self, slotv);
+            lk_scope_stack_push(self, slotv);
             goto nextinstr;
         }
     parent:
@@ -657,7 +657,7 @@ prevscope:
 
         // forward:
         if (DARRAY_EQ(DARRAY(msgn), DARRAY(vm->str_forward))) {
-            lk_vm_raisecstr(vm, "Cannot find slot named %s", msg->v);
+            lk_vm_raise_cstr(vm, "Cannot find slot named %s", msg->v);
 
         } else {
             msgn = vm->str_forward;
@@ -672,7 +672,7 @@ prevscope:
     }
 }
 
-void lk_vm_raisecstr(lk_vm_t *self, const char *message, ...) {
+void lk_vm_raise_cstr(lk_vm_t *self, const char *message, ...) {
     lk_err_t *err = LK_ERROR(lk_obj_alloc(self->t_err));
     va_list ap;
 
@@ -694,17 +694,17 @@ void lk_vm_raisecstr(lk_vm_t *self, const char *message, ...) {
     }
 
     va_end(ap);
-    lk_vm_raiseerr(self, err);
+    lk_vm_raise_err(self, err);
 }
 
-void lk_vm_raiseerrno(lk_vm_t *self) {
+void lk_vm_raise_errno(lk_vm_t *self) {
     lk_err_t *err = LK_ERROR(lk_obj_alloc(self->t_err));
 
-    err->message = lk_str_new_fromcstr(self, strerror(errno));
-    lk_vm_raiseerr(self, err);
+    err->message = lk_str_new_from_cstr(self, strerror(errno));
+    lk_vm_raise_err(self, err);
 }
 
-void lk_vm_raiseerr(lk_vm_t *self, lk_err_t *err) {
+void lk_vm_raise_err(lk_vm_t *self, lk_err_t *err) {
     if (self->rescue == NULL)
         lk_vm_abort(self, err);
     else {
@@ -720,8 +720,8 @@ void lk_vm_exit(lk_vm_t *self) {
 
 void lk_vm_abort(lk_vm_t *self, lk_err_t *err) {
     if (err != NULL) {
-        struct lk_slot *slot = lk_obj_getslotfromany(LK_OBJ(err), LK_OBJ(self->str_type));
-        lk_str_t *type = LK_STRING(lk_obj_getvaluefromslot(LK_OBJ(err), slot));
+        struct lk_slot *slot = lk_obj_get_slot_from_any(LK_OBJ(err), LK_OBJ(self->str_type));
+        lk_str_t *type = LK_STRING(lk_obj_get_value_from_slot(LK_OBJ(err), slot));
         lk_instr_t *expr = err->instr;
         int i = 0;
 

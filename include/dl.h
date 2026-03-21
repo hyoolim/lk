@@ -9,11 +9,11 @@ struct lk_dl {
 };
 
 // init
-void lk_dl_typeinit(lk_vm_t *vm);
-void lk_dl_libinit(lk_vm_t *vm);
+void lk_dl_type_init(lk_vm_t *vm);
+void lk_dl_lib_init(lk_vm_t *vm);
 
 // new
-void lk_dl_init_withpath_andfunc(lk_dl_t *self, lk_str_t *path, lk_str_t *funcname);
+void lk_dl_init_with_path_and_func(lk_dl_t *self, lk_str_t *path, lk_str_t *funcname);
 
 // update
 void lk_object_set(lk_obj_t *parent, const char *k, lk_obj_t *v);

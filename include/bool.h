@@ -3,6 +3,6 @@
 #include "types.h"
 
 // init
-void lk_bool_typeinit(lk_vm_t *vm);
-void lk_bool_libinit(lk_vm_t *vm);
+void lk_bool_type_init(lk_vm_t *vm);
+void lk_bool_lib_init(lk_vm_t *vm);
 #endif

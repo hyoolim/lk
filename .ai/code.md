@@ -24,6 +24,7 @@ C11. Style choices worth noting:
 - `offset` / `limit`: relative slicing — `offset` skips n elements from the front, `limit` caps the length; together equivalent to `start = offset`, `end = offset + limit`
 
 ## Comments
+- Prefer `//`; use `/* */` only for unusually long multi-line comments
 - Only where the logic isn't self-evident
 - Capitalize the first word; no trailing period unless separating multiple sentences within the same comment
 - Write out full words even when the C identifiers are abbreviated (e.g. "vector" not "vec", "character" not "char")

@@ -55,14 +55,14 @@ void vec_free(vec_t *self) {
     mem_free(self);
 }
 
-static void vec_prepupdate(vec_t *self, int i, int newsize) {
+static void vec_prepupdate(vec_t *self, int at, int new_length) {
     struct vec_buf *bd = self->buf;
     int newcap = bd->capacity, ilen = bd->item_size;
 
-    if (newsize > newcap) {
+    if (new_length > newcap) {
         do {
             newcap *= 2;
-        } while (newsize > newcap);
+        } while (new_length > newcap);
 
         if (bd->ref_count > 1) {
             bd->ref_count--;
@@ -72,20 +72,20 @@ static void vec_prepupdate(vec_t *self, int i, int newsize) {
 
         } else {
             ptrdiff_t d = self->first - bd->items;
-            bd = self->buf = mem_resize(bd, sizeof(struct vec_buf) - sizeof(char) + ilen * newcap);
+            bd = self->buf = mem_resize(bd, sizeof(struct vec_buf) + ilen * newcap);
             bd->capacity = newcap;
             self->first = bd->items + d;
         }
 
-        // new buf if replacing existing item in shared buf
-    } else if (bd->ref_count > 1 && i < bd->used) {
+        // New buffer if replacing an existing item in a shared buffer
+    } else if (bd->ref_count > 1 && at < bd->used) {
         bd->ref_count--;
         bd = self->buf = vec_buf_alloc(ilen, newcap);
         memcpy(bd->items, self->first, ilen * self->length);
         self->first = bd->items;
     }
-    bd->used = newsize + (self->first - bd->items);
-    self->length = newsize;
+    bd->used = new_length + (self->first - bd->items);
+    self->length = new_length;
 }
 
 void vec_clear(vec_t *self) {
@@ -127,19 +127,19 @@ void vec_concat(vec_t *self, vec_t *other) {
     } while (0)
 
 void vec_insert(vec_t *self, int at, void *value) {
-    int size = self->length;
+    int length = self->length;
 
     if (at < 0)
-        at += size;
+        at += length;
 
     if (at < 0)
-        vec_set(self, at - size - 1, value);
-    else if (at > size)
+        vec_set(self, at - length - 1, value);
+    else if (at > length)
         vec_set(self, at, value);
     else {
         int ilen = self->buf->item_size;
-        vec_prepupdate(self, at, size + 1);
-        memmove(self->first + ilen * (at + 1), self->first + ilen * at, ilen * (size - at));
+        vec_prepupdate(self, at, length + 1);
+        memmove(self->first + ilen * (at + 1), self->first + ilen * at, ilen * (length - at));
     }
     SETANYITEM(self, at, value);
 }
@@ -166,19 +166,19 @@ void vec_offset(vec_t *self, int offset) {
 }
 
 void vec_remove(vec_t *self, int at) {
-    int size = self->length;
+    int length = self->length;
 
     if (at < 0)
-        at += size;
+        at += length;
 
-    if (at < 0 || at >= size)
+    if (at < 0 || at >= length)
         return;
     else {
-        int ilen = self->buf->item_size, newsize = size - 1;
-        vec_prepupdate(self, at, newsize);
+        int ilen = self->buf->item_size, new_length = length - 1;
+        vec_prepupdate(self, at, new_length);
 
-        if (at < newsize)
-            memmove(self->first + ilen * at, self->first + ilen * (at + 1), ilen * (newsize - at));
+        if (at < new_length)
+            memmove(self->first + ilen * at, self->first + ilen * (at + 1), ilen * (new_length - at));
     }
 }
 
@@ -198,23 +198,23 @@ void vec_resize_item(vec_t *self, vec_t *other) {
     do { \
         t a; \
         t b; \
-        for (; i < c2; i++) { \
+        for (; i < half; i++) { \
             a = *((t *)from + i); \
-            b = *((t *)from + c - i - 1); \
+            b = *((t *)from + length - i - 1); \
             *((t *)to + i) = b; \
-            *((t *)to + c - i - 1) = a; \
+            *((t *)to + length - i - 1) = a; \
         } \
     } while (0)
 
 void vec_reverse(vec_t *self) {
     struct vec_buf *bd = self->buf;
-    int ilen = bd->item_size, i = 0, c = self->length, c2 = (c + 1) / 2;
+    int ilen = bd->item_size, i = 0, length = self->length, half = (length + 1) / 2;
     char *from = self->first, *to;
 
     if (bd->ref_count > 1) {
         vec_buf_free(bd);
-        bd = self->buf = vec_buf_alloc(ilen, c);
-        bd->used = c;
+        bd = self->buf = vec_buf_alloc(ilen, length);
+        bd->used = length;
         to = self->first = bd->items;
 
     } else {
@@ -235,11 +235,11 @@ void vec_reverse(vec_t *self) {
         char *a = mem_alloc(ilen * 2);
         char *b = a + ilen;
 
-        for (; i < c2; i++) {
+        for (; i < half; i++) {
             memcpy(a, from + i, ilen);
-            memcpy(b, from + c - i - 1, ilen);
+            memcpy(b, from + length - i - 1, ilen);
             memcpy(to + i, b, ilen);
-            memcpy(to + c - i - 1, a, ilen);
+            memcpy(to + length - i - 1, a, ilen);
         }
 
         mem_free(a);
@@ -248,14 +248,14 @@ void vec_reverse(vec_t *self) {
 }
 
 void vec_set(vec_t *self, int at, void *value) {
-    int size = self->length;
+    int length = self->length;
 
     if (at < 0)
-        at += size;
+        at += length;
 
     if (at < 0) {
     } else {
-        vec_prepupdate(self, at, at >= size ? at + 1 : size);
+        vec_prepupdate(self, at, at >= length ? at + 1 : length);
     }
     SETANYITEM(self, at, value);
 }
@@ -311,13 +311,13 @@ int vec_cmp(const vec_t *self, const vec_t *other) {
 }
 
 int vec_find_vec(const vec_t *self, const vec_t *pattern, int offset) {
-    int self_c = self->length, pat_c = pattern->length;
+    int self_length = self->length, pattern_length = pattern->length;
 
-    if (pat_c == 0)
-        return offset < self_c ? offset : -1;
-    if (pat_c > self_c)
+    if (pattern_length == 0)
+        return offset < self_length ? offset : -1;
+    if (pattern_length > self_length)
         return -1;
-    if (pat_c == 1)
+    if (pattern_length == 1)
         return vec_str_find(self, vec_str_get(pattern, 0), offset);
     else {
         switch (self->buf->item_size) {
@@ -328,13 +328,13 @@ int vec_find_vec(const vec_t *self, const vec_t *pattern, int offset) {
             int i, j, k, skip[256];
 
             for (k = 0; k < 256; k++)
-                skip[k] = pat_c;
+                skip[k] = pattern_length;
 
-            for (k = 0; k < pat_c - 1; k++)
-                skip[p[k]] = pat_c - k - 1;
+            for (k = 0; k < pattern_length - 1; k++)
+                skip[p[k]] = pattern_length - k - 1;
 
-            for (k = offset + pat_c - 1; k < self_c; k += skip[s[k] & 255]) {
-                for (j = pat_c - 1, i = k; j >= 0 && s[i] == p[j]; j--)
+            for (k = offset + pattern_length - 1; k < self_length; k += skip[s[k] & 255]) {
+                for (j = pattern_length - 1, i = k; j >= 0 && s[i] == p[j]; j--)
                     i--;
 
                 if (j == -1)
@@ -343,18 +343,18 @@ int vec_find_vec(const vec_t *self, const vec_t *pattern, int offset) {
             break;
         }
         default:
-            BUG("Invalid ilen in vec_find_vec\n");
+            BUG("Invalid item size in vec_find_vec\n");
         }
         return -1;
     }
 }
 
 void *vec_get(const vec_t *self, int at) {
-    int size = self->length;
+    int length = self->length;
 
     if (at < 0)
-        at += size;
-    return at < 0 || at >= size ? NULL : VEC_AT(self, at);
+        at += length;
+    return at < 0 || at >= length ? NULL : VEC_AT(self, at);
 }
 
 int vec_hc(const vec_t *self) {
@@ -385,7 +385,7 @@ void vec_write(const vec_t *self, FILE *stream) {
     fprintf(stream, "vec_t(%p", (void *)self);
     fprintf(stream, ", first=%p", (void *)first);
     fprintf(stream, "(%i)", (int)((first - bd->items) / ilen));
-    fprintf(stream, ", size=%i", self->length);
+    fprintf(stream, ", length=%i", self->length);
     fprintf(stream, ")\n-> buf(%p", (void *)bd);
     fprintf(stream, ", capacity=%i", bd->capacity);
     fprintf(stream, ", used=%i", bd->used);
@@ -503,7 +503,7 @@ void vec_str_insert(vec_t *self, int at, uint32_t value) {
         INSERTUINT(self, uint32_t, at, value);
         break;
     default:
-        BUG("Invalid ilen in vec_str_insert\n");
+        BUG("Invalid item size in vec_str_insert\n");
     }
 }
 
@@ -539,7 +539,7 @@ void vec_str_set(vec_t *self, int at, uint32_t value) {
         SETUINT(self, uint32_t, at, value);
         break;
     default:
-        BUG("Invalid ilen in vec_str_set\n");
+        BUG("Invalid item size in vec_str_set\n");
     }
 }
 
@@ -564,9 +564,9 @@ const char *vec_str_tocstr(vec_t *self) {
 
 int vec_str_cmp_cstr(const vec_t *self, const char *other) {
     int sc = self->length, oc = strlen(other), d = sc - oc;
-    int len = d > 0 ? oc : sc;
-    uint8_t ilen = self->buf->item_size;
-    uint8_t *sb = (uint8_t *)self->first, *sbend = sb + len * ilen;
+    int length = d > 0 ? oc : sc;
+    int ilen = self->buf->item_size;
+    uint8_t *sb = (uint8_t *)self->first, *sbend = sb + length * ilen;
     int cd;
 
     if (ilen == sizeof(uint8_t))
@@ -576,7 +576,7 @@ int vec_str_cmp_cstr(const vec_t *self, const char *other) {
     else if (ilen == sizeof(uint32_t))
         COMPARECSTRING(uint32_t);
     else
-        BUG("Invalid ilen in vec_str_cmp_cstr\n");
+        BUG("Invalid item size in vec_str_cmp_cstr\n");
     return d;
 }
 
@@ -602,7 +602,7 @@ int vec_str_find(const vec_t *self, uint32_t pattern, int offset) {
         MATCHCHAR(uint32_t);
         break;
     default:
-        BUG("Invalid ilen in vec_str_find\n");
+        BUG("Invalid item size in vec_str_find\n");
     }
     return -1;
 }
@@ -620,7 +620,7 @@ uint32_t vec_str_get(const vec_t *self, int at) {
     case sizeof(uint32_t):
         return *(uint32_t *)vptr;
     default:
-        BUG("Invalid ilen in vec_str_get\n");
+        BUG("Invalid item size in vec_str_get\n");
     }
 }
 

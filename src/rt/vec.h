@@ -39,7 +39,7 @@ void vec_set(vec_t *self, int at, void *value);
 void vec_set_range(vec_t *self, int start, int end, vec_t *other);
 void vec_slice(vec_t *self, int offset, int limit);
 
-#define VEC_AT(self, i) ((self)->first + (self)->buf->item_size * i)
+#define VEC_AT(self, i) ((self)->first + (ptrdiff_t)(self)->buf->item_size * (i))
 #define VEC_ATPTR(self, i) (*(void **)VEC_AT(self, (i)))
 #define VEC_COUNT(self) ((self)->length)
 #define VEC_EACH(self, i, v, block) \

@@ -141,11 +141,12 @@ static void return_scope(lk_obj_t *self, lk_scope_t *local) {
 
     for (;; f = LK_OBJ_PROTO(f)) {
         if (f == NULL || f->func == NULL)
-            lk_vm_abort(VM, NULL);
+            lk_vm_abort(VM, NULL); // NOLINT(clang-analyzer-core.NullDereference)
         if (CHKOPT(LK_FUNC(f->func)->cf.opts, LK_FUNCOASSIGNED))
             break;
     }
 
+    assert(f != NULL);
     f = f->returnto;
     SCOPE->next = NULL;
     SCOPE->returnto = f;

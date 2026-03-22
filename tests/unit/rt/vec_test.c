@@ -528,6 +528,7 @@ TEST str_alloc_from_data(void) {
 
 TEST str_alloc_from_file(void) {
     FILE *f = tmpfile();
+    ASSERT(f != NULL);
     fputs("hello", f);
     rewind(f);
 
@@ -543,6 +544,7 @@ TEST str_alloc_from_file(void) {
 
 TEST str_alloc_from_file_until_char(void) {
     FILE *f = tmpfile();
+    ASSERT(f != NULL);
     fputs("hello world", f);
     rewind(f);
 
@@ -559,6 +561,7 @@ TEST str_alloc_from_file_until_char(void) {
 
 TEST str_alloc_from_file_with_length(void) {
     FILE *f = tmpfile();
+    ASSERT(f != NULL);
     fputs("hello world", f);
     rewind(f);
 
@@ -574,6 +577,7 @@ TEST str_alloc_from_file_with_length(void) {
 
 TEST str_alloc_from_file_until_charset(void) {
     FILE *f = tmpfile();
+    ASSERT(f != NULL);
     fputs("hello world", f);
     rewind(f);
 

@@ -9,7 +9,7 @@ static unsigned long primes[] = {11,        19,        37,        67,         13
 // create set data depending on item size
 static struct setdata *setdata_alloc(int ivlen, int ci, sethashfunc_t *hashfunc, setkeycmpfunc_t *cmpfunc) {
     struct setdata *self;
-    int c = primes[ci];
+    int c = (int)primes[ci];
 
     self = mem_alloc(sizeof(struct setdata) - sizeof(setitem_t) + (sizeof(setitem_t) + ivlen) * c);
     self->ci = ci;
@@ -152,9 +152,9 @@ void qphash_unset(qphash_t *self, const void *key) {
 
 // default hash and keycmp
 int qphash_hash(const void *key, int cap) {
-    return (ptrdiff_t)key % cap;
+    return (int)((ptrdiff_t)key % cap);
 }
 
 int qphash_keycmp(const void *self, const void *other) {
-    return (ptrdiff_t)self - (ptrdiff_t)other;
+    return (int)((ptrdiff_t)self - (ptrdiff_t)other);
 }

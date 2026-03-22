@@ -228,7 +228,7 @@ void charset_add_darray(charset_t *self, vec_t *str) {
 
     if (c > 0) {
         int i = 0;
-        uint32_t v = vec_str_get(str, i);
+        uint32_t v;
 
         while (i < c) {
             v = vec_str_get(str, i++);
@@ -273,7 +273,7 @@ void charset_subtract_darray(charset_t *self, vec_t *str) {
 
     if (c > 0) {
         int i = 0;
-        uint32_t v = vec_str_get(str, i);
+        uint32_t v;
 
         while (i < c) {
             v = vec_str_get(str, i++);
@@ -295,11 +295,11 @@ int charset_has(const charset_t *self, uint32_t achar) {
             to = *curr++;
 
             if (from <= achar && achar <= to) {
-                return 1 ^ CHARSET_IS_INVERTED(self);
+                return (int)(1 ^ CHARSET_IS_INVERTED(self));
             }
         }
     }
-    return 0 ^ CHARSET_IS_INVERTED(self);
+    return (int)(0 ^ CHARSET_IS_INVERTED(self));
 }
 
 // print the contents of charset struct - useful for debugging
@@ -337,7 +337,7 @@ int charset_size(const charset_t *self) {
     for (; curr < last;) {
         from = *curr++;
         to = *curr++;
-        total += to - from + 1;
+        total += (int)(to - from + 1);
     }
     return total;
 }

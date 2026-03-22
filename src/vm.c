@@ -95,8 +95,8 @@ static void seconds_west_of_utc_vm(lk_obj_t *self, lk_scope_t *local) {
     gm = *gmtime(&raw);
     l = *localtime(&raw);
     offset = l.tm_sec - gm.tm_sec;
-    offset += (l.tm_min - gm.tm_min) * 60;
-    offset += (l.tm_hour - gm.tm_hour) * 3600;
+    offset += (long)(l.tm_min - gm.tm_min) * 60;
+    offset += (long)(l.tm_hour - gm.tm_hour) * 3600;
 
     if (l.tm_year < gm.tm_year || l.tm_mon < gm.tm_mon || l.tm_mday < gm.tm_mday) {
         offset -= 86400;
@@ -119,7 +119,7 @@ static void system_vm(lk_obj_t *self, lk_scope_t *local) {
 
     } else {
         int c = local->argc;
-        char **args = mem_alloc(sizeof(char *) * (c + 1));
+        char **args = (char **)mem_alloc(sizeof(char *) * (c + 1));
 
         for (int i = 0; i < c; i++) {
             args[i] = (char *)vec_str_tocstr(VEC(ARG(i)));
@@ -450,7 +450,7 @@ void lk_vm_do_eval_func(lk_vm_t *vm) {
     vm->rescue = &rescue;
 
     if (setjmp(rescue.buf)) {
-        recv = vm->currscope != NULL ? LK_OBJ(vm->currscope) : LK_OBJ(self->scope);
+        recv = vm->currscope != NULL ? LK_OBJ(vm->currscope) : (self != NULL ? LK_OBJ(self->scope) : NULL);
         args = lk_scope_new(vm);
         lk_scope_stack_push(args, LK_OBJ(vm->lasterr));
 
@@ -645,7 +645,7 @@ prevscope:
                 r = VEC_ATPTR(ancs, anci);
                 if ((slots = r->o.slots) == NULL)
                     continue;
-                if ((si = qphash_get(slots, msg->v)) == NULL)
+                if ((si = qphash_get(slots, msgn)) == NULL)
                     continue;
                 goto found;
             }
@@ -657,7 +657,7 @@ prevscope:
 
         // forward:
         if (VEC_EQ(VEC(msgn), VEC(vm->str_forward))) {
-            lk_vm_raise_cstr(vm, "Cannot find slot named %s", msg->v);
+            lk_vm_raise_cstr(vm, "Cannot find slot named %s", CSTRING(msgn));
 
         } else {
             msgn = vm->str_forward;

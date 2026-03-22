@@ -25,6 +25,12 @@ static void alloc_sock(lk_obj_t *self, lk_obj_t *parent) {
     int yes = 1;
 
     SOCKET->fd = socket(AF_INET, SOCK_STREAM, 0);
+
+    if (SOCKET->fd == -1) {
+        perror("socket");
+        exit(1);
+    }
+
     SOCKET->in = fdopen(SOCKET->fd, "r");
     SOCKET->out = fdopen(SOCKET->fd, "w");
 
@@ -47,6 +53,11 @@ static void acce_sock(lk_obj_t *self, lk_scope_t *local) {
     lk_socket_t *conn = LK_SOCKET(lk_obj_alloc(VM->t_socket));
 
     conn->fd = accept(SOCKET->fd, &remote, &len);
+
+    if (conn->fd == -1) {
+        lk_vm_raise_cstr(VM, "Cannot accept");
+    }
+
     conn->in = fdopen(conn->fd, "r");
     conn->out = fdopen(conn->fd, "w");
     RETURN(conn);

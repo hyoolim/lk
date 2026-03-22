@@ -109,7 +109,7 @@ static void add_f_f(lk_obj_t *self, lk_scope_t *local) {
 }
 
 static void addB_f_f(lk_obj_t *self, lk_scope_t *local) {
-    if (local->caller == NULL && local->caller->lastslot == NULL) {
+    if (local->caller == NULL || local->caller->lastslot == NULL) {
         lk_vm_raise_cstr(VM, "Cannot add to the function without a slot");
 
     } else {
@@ -367,8 +367,8 @@ void lk_lfunc_update_sig(lk_lfunc_t *self) {
             if (sigs == NULL)
                 sigs = self->cf.sigs = vec_ptr_alloc();
 
-            if (VEC_COUNT(VEC(name)) > 3 && vec_str_get(VEC(name), -1) == '.' &&
-                vec_str_get(VEC(name), -2) == '.' && vec_str_get(VEC(name), -3) == '.') {
+            if (VEC_COUNT(VEC(name)) > 3 && vec_str_get(VEC(name), -1) == '.' && vec_str_get(VEC(name), -2) == '.' &&
+                vec_str_get(VEC(name), -3) == '.') {
                 sig->name = name = LK_STRING(lk_obj_clone(LK_OBJ(name)));
                 vec_limit(VEC(name), -3);
                 self->cf.minargc = VEC_COUNT(sigs);

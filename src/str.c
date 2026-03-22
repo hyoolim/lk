@@ -32,7 +32,7 @@ lk_str_t *lk_str_new_from_data(lk_vm_t *vm, const void *data, int len) {
 }
 
 lk_str_t *lk_str_new_from_cstr(lk_vm_t *vm, const char *cstr) {
-    return lk_str_new_from_data(vm, cstr, strlen(cstr));
+    return lk_str_new_from_data(vm, cstr, (int)strlen(cstr));
 }
 
 // update

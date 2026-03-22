@@ -165,7 +165,7 @@ lk_num_t *lk_file_size(lk_file_t *self) {
         lk_vm_raise_errno(VM);
     }
 
-    return lk_num_new(VM, info.st_size);
+    return lk_num_new(VM, (double)info.st_size);
 }
 
 lk_bool_t *lk_file_is_writable(lk_file_t *self) {

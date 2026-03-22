@@ -276,22 +276,22 @@ static lk_prec_t *shiftreduce(lk_parser_t *self, lk_instr_t *op) {
 }
 
 static const tokentype_t miscmap[] = {
-    /*   0 */ NONE,        NONE,      NONE, NONE,         NONE,       NONE,       NONE, NONE,
-    /*   8 */ NONE,        NONE,      NONE, NONE,         NONE,       NONE,       NONE, NONE,
-    /*  16 */ NONE,        NONE,      NONE, NONE,         NONE,       NONE,       NONE, NONE,
-    /*  24 */ NONE,        NONE,      NONE, NONE,         NONE,       NONE,       NONE, NONE,
-    /*  32 */ NONE,        NONE,      NONE, NONE,         NONE,       NONE,       NONE, NONE,
-    /*  40 */ GROUP_BEGIN, GROUP_END, NONE, NONE,         TERMINATOR, NONE,       NONE, NONE,
-    /*  48 */ NONE,        NONE,      NONE, NONE,         NONE,       NONE,       NONE, NONE,
-    /*  56 */ NONE,        NONE,      NONE, TERMINATOR,   NONE,       NONE,       NONE, NONE,
-    /*  64 */ NONE,        NONE,      NONE, NONE,         NONE,       NONE,       NONE, NONE,
-    /*  72 */ NONE,        NONE,      NONE, NONE,         NONE,       NONE,       NONE, NONE,
-    /*  80 */ NONE,        NONE,      NONE, NONE,         NONE,       NONE,       NONE, NONE,
-    /*  88 */ NONE,        NONE,      NONE, VEC_BEGIN, NONE,       VEC_END, NONE, NONE,
-    /*  96 */ NONE,        NONE,      NONE, NONE,         NONE,       NONE,       NONE, NONE,
-    /* 104 */ NONE,        NONE,      NONE, NONE,         NONE,       NONE,       NONE, NONE,
-    /* 112 */ NONE,        NONE,      NONE, NONE,         NONE,       NONE,       NONE, NONE,
-    /* 120 */ NONE,        NONE,      NONE, FUNC_BEGIN,   NONE,       FUNC_END,   NONE, NONE,
+    /*   0 */ NONE,        NONE,      NONE, NONE,       NONE,       NONE,     NONE, NONE,
+    /*   8 */ NONE,        NONE,      NONE, NONE,       NONE,       NONE,     NONE, NONE,
+    /*  16 */ NONE,        NONE,      NONE, NONE,       NONE,       NONE,     NONE, NONE,
+    /*  24 */ NONE,        NONE,      NONE, NONE,       NONE,       NONE,     NONE, NONE,
+    /*  32 */ NONE,        NONE,      NONE, NONE,       NONE,       NONE,     NONE, NONE,
+    /*  40 */ GROUP_BEGIN, GROUP_END, NONE, NONE,       TERMINATOR, NONE,     NONE, NONE,
+    /*  48 */ NONE,        NONE,      NONE, NONE,       NONE,       NONE,     NONE, NONE,
+    /*  56 */ NONE,        NONE,      NONE, TERMINATOR, NONE,       NONE,     NONE, NONE,
+    /*  64 */ NONE,        NONE,      NONE, NONE,       NONE,       NONE,     NONE, NONE,
+    /*  72 */ NONE,        NONE,      NONE, NONE,       NONE,       NONE,     NONE, NONE,
+    /*  80 */ NONE,        NONE,      NONE, NONE,       NONE,       NONE,     NONE, NONE,
+    /*  88 */ NONE,        NONE,      NONE, VEC_BEGIN,  NONE,       VEC_END,  NONE, NONE,
+    /*  96 */ NONE,        NONE,      NONE, NONE,       NONE,       NONE,     NONE, NONE,
+    /* 104 */ NONE,        NONE,      NONE, NONE,       NONE,       NONE,     NONE, NONE,
+    /* 112 */ NONE,        NONE,      NONE, NONE,       NONE,       NONE,     NONE, NONE,
+    /* 120 */ NONE,        NONE,      NONE, FUNC_BEGIN, NONE,       FUNC_END, NONE, NONE,
 };
 
 static READTOKENFUNC(readtoken_misc) {
@@ -569,7 +569,7 @@ static lk_str_t *getnexttoken(lk_parser_t *self, tokentype_t type) {
 static READFUNC(readpad) {
     lk_str_t *tok;
 
-    if ((tok = getnexttoken(self, WS2)) != NULL)
+    if (getnexttoken(self, WS2) != NULL)
         return 1;
     else if ((tok = getnexttoken(self, COMMENT)) != NULL) {
         vec_remove(VEC(tok), 0);
@@ -694,7 +694,7 @@ static READFUNC(readfunc) {
                 expr = vec_ptr_pop(self->words);
                 (last->next = expr)->prev = last;
                 last = expr;
-                isbreak = !(self->isterminated || getnexttoken(self, TERMINATOR)) != NONE;
+                (void)(self->isterminated || getnexttoken(self, TERMINATOR));
                 continue;
 
             } else {
@@ -951,8 +951,6 @@ lk_instr_t *lk_parser_getmore(lk_parser_t *self) {
 
     if (readexpr(self)) {
         lk_instr_t *instr = first = vec_ptr_pop(self->words);
-        lk_str_t *tok;
-
         while (instr->next != NULL)
             instr = instr->next;
         (instr->next = lk_instr_new_more(self))->prev = instr;
@@ -962,7 +960,7 @@ lk_instr_t *lk_parser_getmore(lk_parser_t *self) {
         if (self->isterminated)
             goto done;
 
-        if ((tok = getnexttoken(self, TERMINATOR)) != NULL) {
+        if (getnexttoken(self, TERMINATOR) != NULL) {
             goto done;
         }
         lk_vm_raise_cstr(VM, "Cannot find terminator after expression");

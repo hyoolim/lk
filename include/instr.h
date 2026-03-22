@@ -6,6 +6,7 @@
 struct lk_instr {
     struct lk_common o;
     enum lk_instrtype_t {
+        LK_INSTRTYPE_NONE = 0,
         LK_INSTRTYPE_FUNC = 1,
         LK_INSTRTYPE_APPLY,
         LK_INSTRTYPE_LIST,

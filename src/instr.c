@@ -72,7 +72,7 @@ static lk_instr_t *instr_new(lk_parser_t *parser, enum lk_instrtype_t type) {
 }
 
 lk_instr_t *lk_instr_new(lk_parser_t *parser) {
-    return instr_new(parser, (enum lk_instrtype_t)0);
+    return instr_new(parser, LK_INSTRTYPE_NONE);
 }
 
 lk_instr_t *lk_instr_new_more(lk_parser_t *parser) {
@@ -112,7 +112,7 @@ lk_instr_t *lk_instr_new_char(lk_parser_t *parser, uint32_t c) {
 }
 
 lk_instr_t *lk_instr_new_empty(lk_parser_t *parser) {
-    return instr_new(parser, (enum lk_instrtype_t)0);
+    return instr_new(parser, LK_INSTRTYPE_NONE);
 }
 
 lk_instr_t *lk_instr_new_message(lk_parser_t *parser, lk_str_t *name) {

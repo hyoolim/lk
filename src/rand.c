@@ -21,7 +21,7 @@ static void alloc_rand(lk_obj_t *self, lk_obj_t *parent) {
     int seed;
 
     gettimeofday(&tv, 0);
-    seed = tv.tv_sec ^ tv.tv_usec ^ n++;
+    seed = (int)(tv.tv_sec ^ tv.tv_usec ^ n++);
     LK_RANDOM(self)->seed = lk_num_new(LK_VM(self), seed);
     init_genrand(LK_RANDOM(self), seed);
 }
@@ -170,7 +170,7 @@ static unsigned long genrand_int32(lk_rand_t *self) {
 
 // generates a rand num on [0,1]-real-interval
 static double genrand_real1(lk_rand_t *self) {
-    return genrand_int32(self) * (1.0 / 4294967295.0);
+    return (double)genrand_int32(self) * (1.0 / 4294967295.0);
 
     // divided by 2^32-1
 }

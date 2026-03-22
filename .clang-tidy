@@ -1,0 +1,15 @@
+Checks: >
+  clang-analyzer-*,
+  -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
+  bugprone-*,
+  -bugprone-assignment-in-if-condition,
+  -bugprone-casting-through-void,
+  -bugprone-command-processor,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-inc-dec-in-conditions,
+  -bugprone-macro-parentheses,
+  -bugprone-switch-missing-default-case,
+  -bugprone-tagged-union-member-count,
+  -bugprone-unsafe-functions,
+  readability-misleading-indentation,
+  readability-non-const-parameter

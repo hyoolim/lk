@@ -74,11 +74,11 @@ lk_obj_isa((self), (t)))
 #define LK_OBJ_PROTO(self) LK_OBJ_HASONEPARENT((self)->o.parents) \
 ? LK_OBJ_ONEPARENT((self)->o.parents) : VEC_ATPTR((self)->o.parents, 0)
  */
-#define LK_OBJ_HASPARENTS(self) ((ptrdiff_t)((self)->o.parent) & 1)
-#define LK_OBJ_PARENTS(self) ((vec_t *)((ptrdiff_t)((self)->o.parent) & ~1))
-#define LK_OBJ_PROTO(self) (LK_OBJ_HASPARENTS(self) ? vec_ptr_get(LK_OBJ_PARENTS(self), -1) : (self)->o.parent)
+#define LK_OBJ_HASPARENTS(self) ((ptrdiff_t)((self)->o.tag->parent) & 1)
+#define LK_OBJ_PARENTS(self) ((vec_t *)((ptrdiff_t)((self)->o.tag->parent) & ~1))
+#define LK_OBJ_PROTO(self) (LK_OBJ_HASPARENTS(self) ? vec_ptr_get(LK_OBJ_PARENTS(self), -1) : (self)->o.tag->parent)
 #define LK_OBJ_ISA(self, t) \
-    ((self) == (t) ? 1 : !LK_OBJ_HASPARENTS(self) && (self)->o.parent == (t) ? 2 : lk_obj_isa((self), (t)))
+    ((self) == (t) ? 1 : !LK_OBJ_HASPARENTS(self) && (self)->o.tag->parent == (t) ? 2 : lk_obj_isa((self), (t)))
 #define LK_OBJ_ISCFUNC(self) ((self)->o.tag->alloc_func == LK_VM(self)->t_cfunc->o.tag->alloc_func)
 #define LK_OBJ_ISSCOPE(self) ((self)->o.tag->free_func == LK_VM(self)->t_scope->o.tag->free_func)
 #define LK_OBJ_ISGFUNC(self) ((self)->o.tag->free_func == LK_VM(self)->t_gfunc->o.tag->free_func)

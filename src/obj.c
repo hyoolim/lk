@@ -9,10 +9,10 @@ void lk_obj_type_init(lk_vm_t *vm) {
     lk_obj_t *o = vm->t_obj = mem_alloc(sizeof(lk_obj_t));
     o->o.vm = vm;
     o->o.tag = mem_alloc(sizeof(lk_tag_t));
+    memset(o->o.tag, 0, sizeof(lk_tag_t));
     o->o.tag->refc = 1;
     o->o.tag->size = sizeof(lk_obj_t);
-    o->o.parent = NULL;
-    vec_ptr_push(o->o.ancestors = vec_ptr_alloc(), o);
+    vec_ptr_push(o->o.tag->ancestors = vec_ptr_alloc(), o);
 }
 
 // ext map - funcs
@@ -89,8 +89,8 @@ static void ancestor_obj_obj(lk_obj_t *self, lk_scope_t *local) {
 }
 
 static void ancestors_obj(lk_obj_t *self, lk_scope_t *local) {
-    if (self->o.ancestors != NULL || lk_obj_calc_ancestors(self)) {
-        RETURN(lk_list_new_from_darray(VM, self->o.ancestors));
+    if (self->o.tag->ancestors != NULL || lk_obj_calc_ancestors(self)) {
+        RETURN(lk_list_new_from_darray(VM, self->o.tag->ancestors));
 
     } else {
         printf("BUG: Throw proper ancestor err here\n");
@@ -110,7 +110,7 @@ static void do_obj_f(lk_obj_t *self, lk_scope_t *local) {
     fr->func = LK_OBJ(lf);
     fr->returnto = NULL;
     fr->parent = lf->scope;
-    fr->o.parent = LK_OBJ(lf->scope);
+    fr->o.tag->parent = LK_OBJ(lf->scope);
     lk_vm_do_eval_func(VM);
     RETURN(self);
 }
@@ -134,7 +134,7 @@ static void parents_obj(lk_obj_t *self, lk_scope_t *local) {
 
     } else {
         lk_list_t *ret = lk_list_new(VM);
-        vec_ptr_push(VEC(ret), self->o.parent);
+        vec_ptr_push(VEC(ret), self->o.tag->parent);
         RETURN(ret);
     }
 }
@@ -144,7 +144,7 @@ static void parent_obj(lk_obj_t *self, lk_scope_t *local) {
         vec_t *pars = LK_OBJ_PARENTS(self);
         RETURN(VEC_COUNT(pars) > 0 ? vec_ptr_get(pars, -1) : NIL);
     }
-    RETURN(self->o.parent);
+    RETURN(self->o.tag->parent);
 }
 
 static void with_obj_f(lk_obj_t *self, lk_scope_t *local) {
@@ -187,14 +187,12 @@ static lk_tag_t *tag_clone(lk_tag_t *self) {
 lk_obj_t *lk_obj_alloc_with_size(lk_obj_t *parent, size_t s) {
     lk_gc_t *gc = LK_VM(parent)->gc;
     lk_obj_t *self = mem_alloc(s);
-    lk_tag_t *tag = parent->o.tag;
+    lk_tag_t *tag = tag_clone(parent->o.tag);
 
-    if (tag->size == s)
-        tag->refc++;
-    else
-        (tag = tag_clone(tag))->size = s;
+    tag->parent = parent;
+    tag->size = s;
+    tag->ancestors = NULL;
     self->o.vm = LK_VM(parent);
-    self->o.parent = parent;
     self->o.tag = tag;
 
     if (tag->alloc_func != NULL)
@@ -224,14 +222,16 @@ void lk_obj_just_free(lk_obj_t *self) {
 
     if (tag->free_func != NULL)
         tag->free_func(self);
-    if (LK_OBJ_HASPARENTS(self))
-        vec_free(LK_OBJ_PARENTS(self));
-    if (self->o.ancestors != NULL)
-        vec_free(self->o.ancestors);
     if (self->o.slots != NULL)
         qphash_free(self->o.slots);
-    if (--tag->refc < 1)
+
+    if (--tag->refc < 1) {
+        if (LK_OBJ_HASPARENTS(self))
+            vec_free(LK_OBJ_PARENTS(self));
+        if (tag->ancestors != NULL)
+            vec_free(tag->ancestors);
         mem_free(tag);
+    }
     mem_free(self);
 }
 
@@ -260,6 +260,7 @@ LK_OBJ_IMPLTAGSETTER(lk_tagfreefunc_t *, free_func);
 
 // update
 void lk_obj_extend(lk_obj_t *self, lk_obj_t *parent) {
+    lk_tag_t *tag = self->o.tag;
     vec_t *parents;
 
     if (LK_OBJ_HASPARENTS(self)) {
@@ -267,8 +268,8 @@ void lk_obj_extend(lk_obj_t *self, lk_obj_t *parent) {
 
     } else {
         parents = vec_ptr_alloc();
-        vec_ptr_push(parents, self->o.parent);
-        self->o.parent = LK_OBJ((ptrdiff_t)parents | 1); // lowest bit = multi-parent flag; requires 2-byte alignment
+        vec_ptr_push(parents, tag->parent);
+        tag->parent = LK_OBJ((ptrdiff_t)parents | 1); // lowest bit = multi-parent flag; requires 2-byte alignment
     }
     vec_ptr_unshift(parents, parent);
 
@@ -344,25 +345,25 @@ int lk_obj_calc_ancestors(lk_obj_t *self) {
             cand = VEC_ATPTR(pars, candi);
             il = vec_ptr_alloc();
 
-            if (cand->o.ancestors == NULL)
+            if (cand->o.tag->ancestors == NULL)
                 lk_obj_calc_ancestors(cand);
-            if (cand->o.ancestors == NULL)
+            if (cand->o.tag->ancestors == NULL)
                 return 0;
-            vec_concat(il, cand->o.ancestors);
+            vec_concat(il, cand->o.tag->ancestors);
             vec_ptr_push(ol, il);
         }
 
     } else {
-        cand = self->o.parent;
+        cand = self->o.tag->parent;
 
         if (cand != NULL) {
             il = vec_ptr_alloc();
 
-            if (cand->o.ancestors == NULL)
+            if (cand->o.tag->ancestors == NULL)
                 lk_obj_calc_ancestors(cand);
-            if (cand->o.ancestors == NULL)
+            if (cand->o.tag->ancestors == NULL)
                 return 0;
-            vec_concat(il, cand->o.ancestors);
+            vec_concat(il, cand->o.tag->ancestors);
             vec_ptr_push(ol, il);
         }
     }
@@ -373,9 +374,9 @@ int lk_obj_calc_ancestors(lk_obj_t *self) {
         vec_ptr_push(ol, il);
 
     } else {
-        if (self->o.parent != NULL) {
+        if (self->o.tag->parent != NULL) {
             il = vec_ptr_alloc();
-            vec_ptr_push(il, self->o.parent);
+            vec_ptr_push(il, self->o.tag->parent);
             vec_ptr_push(ol, il);
         }
     }
@@ -420,11 +421,11 @@ startover:
     if (cand == NULL)
         return 0;
     else {
-        vec_t *oldancs = self->o.ancestors;
+        vec_t *oldancs = self->o.tag->ancestors;
 
         if (oldancs != NULL)
             vec_free(oldancs);
-        self->o.ancestors = newancs;
+        self->o.tag->ancestors = newancs;
         return 1;
     }
 }
@@ -489,11 +490,11 @@ void lk_obj_set_cfunc_cvoid(lk_obj_t *self, const char *name, ...) {
 #define FIND(nil, check) \
     do { \
         while (1) { \
-            check if (self->o.ancestors != NULL) goto checkancestors; \
-            self = self->o.parent; \
+            check if (self->o.tag->ancestors != NULL) goto checkancestors; \
+            self = self->o.tag->parent; \
         } \
     checkancestors: { \
-        vec_t *ancs = self->o.ancestors; \
+        vec_t *ancs = self->o.tag->ancestors; \
         int i, c = VEC_COUNT(ancs); \
         for (i = 1; i < c; i++) { \
             self = VEC_ATPTR(ancs, i); \

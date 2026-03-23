@@ -197,7 +197,7 @@ lk_scope_t *lk_scope_new(lk_vm_t *vm) {
         vm->stat.recycledscopes++;
         self = parent->child;
         self->parent = parent;
-        self->o.parent = LK_OBJ(parent);
+        self->o.tag->parent = LK_OBJ(parent);
         vec_clear(&self->stack);
 
         if (self->o.slots != NULL) {

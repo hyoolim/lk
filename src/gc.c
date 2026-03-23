@@ -81,8 +81,8 @@ void lk_gc_mark_obj_used(lk_obj_t *self) {
             VEC_EACH_PTR(LK_OBJ_PARENTS(self), i, v, lk_gc_mark_obj_pending(LK_OBJ(v)););
 
         } else {
-            if (self->o.parent != NULL)
-                lk_gc_mark_obj_pending(self->o.parent);
+            if (self->o.tag->parent != NULL)
+                lk_gc_mark_obj_pending(self->o.tag->parent);
         }
 
         if (self->o.slots != NULL) {

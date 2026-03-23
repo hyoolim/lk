@@ -48,8 +48,6 @@ struct lk_objgroup {
     lk_obj_t *last;
 };
 struct lk_common {
-    lk_obj_t *parent;
-    vec_t *ancestors;
     qphash_t *slots;
     lk_vm_t *vm;
     lk_tag_t *tag;

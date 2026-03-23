@@ -23,6 +23,7 @@
 #include "seq.h"
 #include "socket.h"
 #include "str.h"
+#include "tag.h"
 #include "types.h"
 #include "vec.h"
 #include "vm.h"

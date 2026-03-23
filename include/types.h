@@ -42,13 +42,7 @@ typedef void lk_tagallocfunc_t(lk_obj_t *self, lk_obj_t *parent);
 #define LK_OBJ_DEFMARKFUNC(name) void name(lk_obj_t *self, void (*mark)(lk_obj_t * self))
 typedef LK_OBJ_DEFMARKFUNC(lk_tagmarkfunc_t);
 typedef void lk_tagfreefunc_t(lk_obj_t *self);
-typedef struct lk_tag {
-    int refc;
-    size_t size;
-    lk_tagallocfunc_t *alloc_func;
-    lk_tagmarkfunc_t *mark_func;
-    lk_tagfreefunc_t *free_func;
-} lk_tag_t;
+typedef struct lk_tag lk_tag_t;
 struct lk_objgroup {
     lk_obj_t *first;
     lk_obj_t *last;

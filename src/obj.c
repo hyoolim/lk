@@ -7,7 +7,7 @@ _Static_assert(_Alignof(lk_obj_t) >= 2, "lk_obj_t must be at least 2-byte aligne
 // ext map - types
 void lk_obj_type_init(lk_vm_t *vm) {
     lk_obj_t *o = vm->t_obj = mem_alloc(sizeof(lk_obj_t));
-    o->o.tag = mem_alloc(sizeof(struct lk_tag));
+    o->o.tag = mem_alloc(sizeof(lk_tag_t));
     o->o.tag->refc = 1;
     o->o.tag->vm = vm;
     o->o.tag->size = sizeof(lk_obj_t);
@@ -176,9 +176,9 @@ void lk_obj_lib_init(lk_vm_t *vm) {
 }
 
 // new
-static struct lk_tag *tag_clone(struct lk_tag *self) {
-    struct lk_tag *clone = mem_alloc(sizeof(struct lk_tag));
-    memcpy(clone, self, sizeof(struct lk_tag));
+static lk_tag_t *tag_clone(lk_tag_t *self) {
+    lk_tag_t *clone = mem_alloc(sizeof(lk_tag_t));
+    memcpy(clone, self, sizeof(lk_tag_t));
     clone->refc = 1;
     return clone;
 }
@@ -186,7 +186,7 @@ static struct lk_tag *tag_clone(struct lk_tag *self) {
 lk_obj_t *lk_obj_alloc_with_size(lk_obj_t *parent, size_t s) {
     lk_gc_t *gc = LK_VM(parent)->gc;
     lk_obj_t *self = mem_alloc(s);
-    struct lk_tag *tag = parent->o.tag;
+    lk_tag_t *tag = parent->o.tag;
 
     if (tag->size == s)
         tag->refc++;
@@ -218,7 +218,7 @@ lk_obj_t *lk_obj_clone(lk_obj_t *self) {
 }
 
 void lk_obj_just_free(lk_obj_t *self) {
-    struct lk_tag *tag = self->o.tag;
+    lk_tag_t *tag = self->o.tag;
 
     if (tag->free_func != NULL)
         tag->free_func(self);
@@ -241,7 +241,7 @@ void lk_obj_free(lk_obj_t *self) {
 // update - tag
 #define LK_OBJ_IMPLTAGSETTER(t, field) \
     LK_OBJ_DEFTAGSETTER(t, field) { \
-        struct lk_tag *tag = self->o.tag; \
+        lk_tag_t *tag = self->o.tag; \
         if (tag->field != field) { \
             if (tag->refc > 1) { \
                 tag->refc--; \

@@ -1,9 +1,9 @@
 #ifndef LK_TYPES_H
 #define LK_TYPES_H
 #include "rt/common.h"
-#include "rt/vec.h"
 #include "rt/num.h"
 #include "rt/qphash.h"
+#include "rt/vec.h"
 
 // foward decl of all types
 typedef struct lk_obj lk_bool_t;
@@ -42,14 +42,14 @@ typedef void lk_tagallocfunc_t(lk_obj_t *self, lk_obj_t *parent);
 #define LK_OBJ_DEFMARKFUNC(name) void name(lk_obj_t *self, void (*mark)(lk_obj_t * self))
 typedef LK_OBJ_DEFMARKFUNC(lk_tagmarkfunc_t);
 typedef void lk_tagfreefunc_t(lk_obj_t *self);
-struct lk_tag {
+typedef struct lk_tag {
     int refc;
     lk_vm_t *vm;
     size_t size;
     lk_tagallocfunc_t *alloc_func;
     lk_tagmarkfunc_t *mark_func;
     lk_tagfreefunc_t *free_func;
-};
+} lk_tag_t;
 struct lk_objgroup {
     lk_obj_t *first;
     lk_obj_t *last;
@@ -58,7 +58,7 @@ struct lk_common {
     lk_obj_t *parent;
     vec_t *ancestors;
     qphash_t *slots;
-    struct lk_tag *tag;
+    lk_tag_t *tag;
     struct {
         lk_obj_t *prev;
         lk_obj_t *next;

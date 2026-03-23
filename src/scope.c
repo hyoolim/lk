@@ -196,6 +196,7 @@ lk_scope_t *lk_scope_new(lk_vm_t *vm) {
     if (parent->child != NULL && parent->child->o.mark.isref == 0) {
         vm->stat.recycledscopes++;
         self = parent->child;
+        self->parent = parent;
         self->o.parent = LK_OBJ(parent);
         vec_clear(&self->stack);
 
@@ -205,6 +206,7 @@ lk_scope_t *lk_scope_new(lk_vm_t *vm) {
 
     } else {
         self = parent->child = LK_SCOPE(lk_obj_alloc(LK_OBJ(parent)));
+        self->parent = parent;
     }
 
     // init scope struct

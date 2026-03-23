@@ -67,6 +67,7 @@ static void fork_vm_f(lk_obj_t *self, lk_scope_t *local) {
         fr->receiver = fr->self = self;
         fr->func = LK_OBJ(lf);
         fr->returnto = NULL;
+        fr->parent = lf->scope;
         fr->o.parent = LK_OBJ(lf->scope);
         lk_vm_do_eval_func(VM);
         lk_vm_exit(VM);
@@ -416,6 +417,7 @@ static void call_cfunc(lk_vm_t *vm, lk_scope_t *self, lk_cfunc_t *cf, lk_scope_t
         if (LK_OBJ_ISCFUNC(LK_OBJ(func))) { \
             call_cfunc(vm, self, LK_CFUNC(func), args); \
         } else { \
+            (args)->parent = LK_LFUNC(func)->scope; \
             (args)->o.parent = LK_OBJ(LK_LFUNC(func)->scope); \
             (args)->self = LK_OBJ_ISSCOPE((args)->receiver) ? LK_LFUNC(func)->scope->self : (args)->receiver; \
             (args)->first = (args)->next = LK_LFUNC(func)->first; \
@@ -652,7 +654,7 @@ prevscope:
             }
 
         } else {
-            r = r->o.parent;
+            r = (LK_OBJ_ISSCOPE(r) && LK_SCOPE(r)->parent != NULL) ? LK_OBJ(LK_SCOPE(r)->parent) : r->o.parent;
             goto findslot;
         }
 

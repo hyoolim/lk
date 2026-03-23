@@ -109,6 +109,7 @@ static void do_obj_f(lk_obj_t *self, lk_scope_t *local) {
     fr->receiver = fr->self = self;
     fr->func = LK_OBJ(lf);
     fr->returnto = NULL;
+    fr->parent = lf->scope;
     fr->o.parent = LK_OBJ(lf->scope);
     lk_vm_do_eval_func(VM);
     RETURN(self);

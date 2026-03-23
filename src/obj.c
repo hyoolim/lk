@@ -7,9 +7,9 @@ _Static_assert(_Alignof(lk_obj_t) >= 2, "lk_obj_t must be at least 2-byte aligne
 // ext map - types
 void lk_obj_type_init(lk_vm_t *vm) {
     lk_obj_t *o = vm->t_obj = mem_alloc(sizeof(lk_obj_t));
+    o->o.vm = vm;
     o->o.tag = mem_alloc(sizeof(lk_tag_t));
     o->o.tag->refc = 1;
-    o->o.tag->vm = vm;
     o->o.tag->size = sizeof(lk_obj_t);
     o->o.parent = NULL;
     vec_ptr_push(o->o.ancestors = vec_ptr_alloc(), o);
@@ -192,6 +192,7 @@ lk_obj_t *lk_obj_alloc_with_size(lk_obj_t *parent, size_t s) {
         tag->refc++;
     else
         (tag = tag_clone(tag))->size = s;
+    self->o.vm = LK_VM(parent);
     self->o.parent = parent;
     self->o.tag = tag;
 

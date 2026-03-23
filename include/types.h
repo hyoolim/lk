@@ -44,7 +44,6 @@ typedef LK_OBJ_DEFMARKFUNC(lk_tagmarkfunc_t);
 typedef void lk_tagfreefunc_t(lk_obj_t *self);
 typedef struct lk_tag {
     int refc;
-    lk_vm_t *vm;
     size_t size;
     lk_tagallocfunc_t *alloc_func;
     lk_tagmarkfunc_t *mark_func;
@@ -58,6 +57,7 @@ struct lk_common {
     lk_obj_t *parent;
     vec_t *ancestors;
     qphash_t *slots;
+    lk_vm_t *vm;
     lk_tag_t *tag;
     struct {
         lk_obj_t *prev;
@@ -120,5 +120,5 @@ typedef void lk_cfuncfunc_t(lk_obj_t *self, lk_scope_t *local);
 #define LK_IPADDR(obj) ((lk_ipaddr_t *)(obj))
 #define LK_STRING(obj) ((lk_str_t *)(obj))
 #define LK_VECTOR(obj) ((lk_vec_t *)(obj))
-#define LK_VM(obj) ((obj)->o.tag->vm)
+#define LK_VM(obj) ((obj)->o.vm)
 #endif

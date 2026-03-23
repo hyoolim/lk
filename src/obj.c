@@ -109,7 +109,6 @@ static void do_obj_f(lk_obj_t *self, lk_scope_t *local) {
     fr->func = LK_OBJ(lf);
     fr->returnto = NULL;
     fr->parent = lf->scope;
-    fr->o.tag->parent = LK_OBJ(lf->scope);
     lk_vm_do_eval_func(VM);
     RETURN(self);
 }
@@ -483,7 +482,8 @@ void lk_obj_set_cfunc_cvoid(lk_obj_t *self, const char *name, ...) {
     do { \
         while (1) { \
             check if (self->o.tag->ancestors != NULL) goto checkancestors; \
-            self = self->o.tag->parent; \
+            self = (LK_OBJ_ISSCOPE(self) && LK_SCOPE(self)->parent != NULL) ? LK_OBJ(LK_SCOPE(self)->parent) \
+                                                                            : self->o.tag->parent; \
         } \
     checkancestors: { \
         vec_t *ancs = self->o.tag->ancestors; \

@@ -139,7 +139,7 @@ static void retry_scope(lk_obj_t *self, lk_scope_t *local) {
 static void return_scope(lk_obj_t *self, lk_scope_t *local) {
     lk_scope_t *f = SCOPE;
 
-    for (;; f = LK_OBJ_PROTO(f)) {
+    for (;; f = f->parent) {
         if (f == NULL || f->func == NULL)
             lk_vm_abort(VM, NULL); // NOLINT(clang-analyzer-core.NullDereference)
         if (CHKOPT(LK_FUNC(f->func)->cf.opts, LK_FUNCOASSIGNED))
@@ -197,7 +197,6 @@ lk_scope_t *lk_scope_new(lk_vm_t *vm) {
         vm->stat.recycledscopes++;
         self = parent->child;
         self->parent = parent;
-        self->o.tag->parent = LK_OBJ(parent);
         vec_clear(&self->stack);
 
         if (self->o.slots != NULL) {

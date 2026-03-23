@@ -136,6 +136,7 @@ static void system2_vm_str(lk_obj_t *self, lk_scope_t *local) {
     if (out != NULL) {
         char ret[4096];
         char *line = fgets(ret, 4096, out);
+        pclose(out);
 
         if (line != NULL)
             RETURN(lk_str_new_from_cstr(VM, line));

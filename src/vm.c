@@ -175,6 +175,7 @@ lk_vm_t *lk_vm_new(void) {
     // must be loaded before other primitive types
     lk_obj_type_init(self);
     lk_gc_type_init(self);
+    lk_tag_type_init(self);
     lk_vm_type_init(self);
     lk_seq_type_init(self);
     lk_map_type_init(self);

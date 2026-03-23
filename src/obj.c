@@ -10,7 +10,6 @@ void lk_obj_type_init(lk_vm_t *vm) {
     o->o.vm = vm;
     o->o.tag = mem_alloc(sizeof(lk_tag_t));
     memset(o->o.tag, 0, sizeof(lk_tag_t));
-    o->o.tag->refc = 1;
     o->o.tag->size = sizeof(lk_obj_t);
     vec_ptr_push(o->o.tag->ancestors = vec_ptr_alloc(), o);
 }
@@ -177,22 +176,30 @@ void lk_obj_lib_init(lk_vm_t *vm) {
 }
 
 // new
-static lk_tag_t *tag_clone(lk_tag_t *self) {
-    lk_tag_t *clone = mem_alloc(sizeof(lk_tag_t));
-    memcpy(clone, self, sizeof(lk_tag_t));
-    clone->refc = 1;
-    return clone;
+static lk_tag_t *tag_new(lk_tag_t *proto, lk_vm_t *vm) {
+    lk_tag_t *tag = mem_alloc(sizeof(lk_tag_t));
+
+    memcpy(tag, proto, sizeof(lk_tag_t));
+    tag->o.vm = vm;
+    tag->o.tag = vm->t_tag != NULL ? LK_TAG(vm->t_tag) : NULL;
+    memset(&tag->o.mark, 0, sizeof(tag->o.mark));
+    tag->ancestors = NULL;
+
+    if (vm->gc != NULL)
+        lk_objgroup_insert(vm->gc->unused, LK_OBJ(tag));
+
+    return tag;
 }
 
 lk_obj_t *lk_obj_alloc_with_size(lk_obj_t *parent, size_t s) {
-    lk_gc_t *gc = LK_VM(parent)->gc;
+    lk_vm_t *vm = LK_VM(parent);
+    lk_gc_t *gc = vm->gc;
     lk_obj_t *self = mem_alloc(s);
-    lk_tag_t *tag = tag_clone(parent->o.tag);
+    lk_tag_t *tag = tag_new(parent->o.tag, vm);
 
     tag->parent = parent;
     tag->size = s;
-    tag->ancestors = NULL;
-    self->o.vm = LK_VM(parent);
+    self->o.vm = vm;
     self->o.tag = tag;
 
     if (tag->alloc_func != NULL)
@@ -224,14 +231,6 @@ void lk_obj_just_free(lk_obj_t *self) {
         tag->free_func(self);
     if (self->o.slots != NULL)
         qphash_free(self->o.slots);
-
-    if (--tag->refc < 1) {
-        if (LK_OBJ_HASPARENTS(self))
-            vec_free(LK_OBJ_PARENTS(self));
-        if (tag->ancestors != NULL)
-            vec_free(tag->ancestors);
-        mem_free(tag);
-    }
     mem_free(self);
 }
 
@@ -243,14 +242,7 @@ void lk_obj_free(lk_obj_t *self) {
 // update - tag
 #define LK_OBJ_IMPLTAGSETTER(t, field) \
     LK_OBJ_DEFTAGSETTER(t, field) { \
-        lk_tag_t *tag = self->o.tag; \
-        if (tag->field != field) { \
-            if (tag->refc > 1) { \
-                tag->refc--; \
-                tag = self->o.tag = tag_clone(tag); \
-            } \
-            tag->field = field; \
-        } \
+        self->o.tag->field = field; \
     } \
     LK_OBJ_DEFTAGSETTER(t, field)
 

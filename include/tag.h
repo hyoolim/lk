@@ -5,7 +5,6 @@
 // type
 struct lk_tag {
     struct lk_common o;
-    int refc;
     size_t size;
     lk_obj_t *parent;
     vec_t *ancestors;

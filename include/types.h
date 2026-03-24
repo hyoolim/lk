@@ -51,6 +51,7 @@ struct lk_common {
     qphash_t *slots;
     lk_vm_t *vm;
     lk_tag_t *tag;
+    lk_tag_t *instance_tag;
     struct {
         lk_obj_t *prev;
         lk_obj_t *next;

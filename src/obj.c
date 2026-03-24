@@ -182,6 +182,7 @@ static lk_tag_t *tag_new(lk_tag_t *proto, lk_vm_t *vm) {
     tag->o.vm = vm;
     tag->o.tag = vm->t_tag != NULL ? LK_TAG(vm->t_tag) : NULL;
     memset(&tag->o.mark, 0, sizeof(tag->o.mark));
+    tag->o.instance_tag = NULL;
     tag->ancestors = NULL;
 
     if (vm->gc != NULL)
@@ -194,10 +195,17 @@ lk_obj_t *lk_obj_alloc_with_size(lk_obj_t *parent, size_t s) {
     lk_vm_t *vm = LK_VM(parent);
     lk_gc_t *gc = vm->gc;
     lk_obj_t *self = mem_alloc(s);
-    lk_tag_t *tag = tag_new(parent->o.tag, vm);
+    lk_tag_t *ptag = parent->o.tag;
+    lk_tag_t *tag;
 
-    tag->parent = parent;
-    tag->size = s;
+    if (parent->o.instance_tag != NULL && parent->o.instance_tag->size == s) {
+        tag = parent->o.instance_tag;
+    } else {
+        tag = tag_new(ptag, vm);
+        tag->parent = parent;
+        tag->size = s;
+        parent->o.instance_tag = tag;
+    }
     self->o.vm = vm;
     self->o.tag = tag;
 
@@ -241,6 +249,9 @@ void lk_obj_free(lk_obj_t *self) {
 // update - tag
 #define LK_OBJ_IMPLTAGSETTER(t, field) \
     LK_OBJ_DEFTAGSETTER(t, field) { \
+        lk_obj_t *_par = !LK_OBJ_HASPARENTS(self) ? self->o.tag->parent : NULL; \
+        if (_par != NULL && _par->o.instance_tag == self->o.tag) \
+            self->o.tag = tag_new(self->o.tag, LK_VM(self)); \
         self->o.tag->field = field; \
     } \
     LK_OBJ_DEFTAGSETTER(t, field)
@@ -251,11 +262,19 @@ LK_OBJ_IMPLTAGSETTER(lk_tagfreefunc_t *, free_func);
 
 // update
 void lk_obj_extend(lk_obj_t *self, lk_obj_t *parent) {
-    lk_tag_t *tag = self->o.tag;
+    lk_tag_t *tag;
     vec_t *parents;
 
+    // COW: detach from any shared instance tag before mutating
+    tag = tag_new(self->o.tag, LK_VM(self));
+    self->o.tag = tag;
+
     if (LK_OBJ_HASPARENTS(self)) {
-        parents = LK_OBJ_PARENTS(self);
+        // deep-copy the parents vec so the old and new tags don't alias it
+        vec_t *old_parents = LK_OBJ_PARENTS(self);
+        parents = vec_ptr_alloc();
+        vec_copy(parents, old_parents);
+        tag->parent = LK_OBJ((ptrdiff_t)parents | 1);
 
     } else {
         parents = vec_ptr_alloc();
@@ -412,6 +431,12 @@ startover:
     if (cand == NULL)
         return 0;
     else {
+        // COW the tag before storing ancestors so shared instance tags aren't corrupted
+        lk_obj_t *_par = !LK_OBJ_HASPARENTS(self) ? self->o.tag->parent : NULL;
+
+        if (_par != NULL && _par->o.instance_tag == self->o.tag)
+            self->o.tag = tag_new(self->o.tag, LK_VM(self));
+
         vec_t *oldancs = self->o.tag->ancestors;
 
         if (oldancs != NULL)

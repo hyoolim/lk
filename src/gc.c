@@ -87,6 +87,9 @@ void lk_gc_mark_obj_used(lk_obj_t *self) {
 
         lk_gc_mark_obj_pending(LK_OBJ(self->o.tag));
 
+        if (self->o.instance_tag != NULL)
+            lk_gc_mark_obj_pending(LK_OBJ(self->o.instance_tag));
+
         if (self->o.slots != NULL) {
             struct lk_slot *slot;
             SET_EACH(self->o.slots, item, lk_gc_mark_obj_pending(LK_OBJ(item->key));

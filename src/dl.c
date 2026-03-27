@@ -5,20 +5,16 @@
 _Static_assert(offsetof(lk_obj_t, o) == 0, "lk_common must be first member of lk_obj_t for cfield offsets");
 
 // type
-static void free_dl(lk_obj_t *self) {
-    if (LK_DL(self)->dl != NULL) {
-        dlclose(LK_DL(self)->dl);
-        LK_DL(self)->dl = NULL;
-    }
+static void close_dl(void *ptr) {
+    dlclose(ptr);
 }
 
 void lk_dl_type_init(lk_vm_t *vm) {
-    vm->t_dl = lk_obj_alloc_type(vm->t_obj, sizeof(lk_dl_t));
-    lk_obj_set_free_func(vm->t_dl, free_dl);
+    vm->t_dl = lk_obj_alloc_type(vm->t_obj, sizeof(lk_obj_t));
 }
 
 // new
-void lk_dl_init_with_path_and_func(lk_dl_t *self, lk_str_t *path, lk_str_t *funcname) {
+void lk_dl_init_with_path_and_func(lk_obj_t *self, lk_str_t *path, lk_str_t *funcname) {
     void *dl = dlopen(vec_str_tocstr(VEC(path)), RTLD_NOW);
 
     if (dl != NULL) {
@@ -27,7 +23,7 @@ void lk_dl_init_with_path_and_func(lk_dl_t *self, lk_str_t *path, lk_str_t *func
             void (*f)(lk_vm_t *vm);
         } func;
 
-        self->dl = dl;
+        lk_obj_set_slot_by_cstr(self, "dl", NULL, LK_OBJ(lk_cptr_new(VM, dl, close_dl)));
         func.p = dlsym(dl, vec_str_tocstr(VEC(funcname)));
 
         if (func.f != NULL) {

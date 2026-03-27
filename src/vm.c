@@ -677,11 +677,13 @@ prevscope:
 }
 
 void lk_vm_raise_cstr(lk_vm_t *self, const char *message, ...) {
-    lk_err_t *err = LK_ERROR(lk_obj_alloc(self->t_err));
+    lk_obj_t *err = lk_obj_alloc(self->t_err);
+    lk_str_t *msg = LK_STRING(lk_obj_alloc(self->t_str));
     va_list ap;
 
-    err->instr = self->currinstr;
-    err->message = LK_STRING(lk_obj_alloc(self->t_str));
+    if (self->currinstr != NULL)
+        lk_obj_set_slot_by_cstr(err, "instr", NULL, LK_OBJ(self->currinstr));
+
     va_start(ap, message);
 
     for (; *message != '\0'; message++) {
@@ -689,26 +691,27 @@ void lk_vm_raise_cstr(lk_vm_t *self, const char *message, ...) {
             message++;
             switch (*message) {
             case 's':
-                vec_concat(VEC(err->message), VEC(va_arg(ap, lk_str_t *)));
+                vec_concat(VEC(msg), VEC(va_arg(ap, lk_str_t *)));
                 break;
             }
         } else {
-            vec_str_push(VEC(err->message), *message);
+            vec_str_push(VEC(msg), *message);
         }
     }
 
     va_end(ap);
+    lk_obj_set_slot_by_cstr(err, "message", NULL, LK_OBJ(msg));
     lk_vm_raise_err(self, err);
 }
 
 void lk_vm_raise_errno(lk_vm_t *self) {
-    lk_err_t *err = LK_ERROR(lk_obj_alloc(self->t_err));
+    lk_obj_t *err = lk_obj_alloc(self->t_err);
 
-    err->message = lk_str_new_from_cstr(self, strerror(errno));
+    lk_obj_set_slot_by_cstr(err, "message", NULL, LK_OBJ(lk_str_new_from_cstr(self, strerror(errno))));
     lk_vm_raise_err(self, err);
 }
 
-void lk_vm_raise_err(lk_vm_t *self, lk_err_t *err) {
+void lk_vm_raise_err(lk_vm_t *self, lk_obj_t *err) {
     if (self->rescue == NULL)
         lk_vm_abort(self, err);
     else {
@@ -722,11 +725,13 @@ void lk_vm_exit(lk_vm_t *self) {
     exit(EXIT_SUCCESS);
 }
 
-void lk_vm_abort(lk_vm_t *self, lk_err_t *err) {
+void lk_vm_abort(lk_vm_t *self, lk_obj_t *err) {
     if (err != NULL) {
-        struct lk_slot *slot = lk_obj_get_slot_from_any(LK_OBJ(err), LK_OBJ(self->str_type));
-        lk_str_t *type = LK_STRING(lk_obj_get_value_from_slot(LK_OBJ(err), slot));
-        lk_instr_t *expr = err->instr;
+        struct lk_slot *slot = lk_obj_get_slot_from_any(err, LK_OBJ(self->str_type));
+        lk_str_t *type = LK_STRING(lk_obj_get_value_from_slot(err, slot));
+        lk_obj_t *instr_obj = lk_obj_get_value_by_cstr(err, "instr");
+        lk_instr_t *expr = (instr_obj != NULL && instr_obj != self->t_nil) ? LK_INSTR(instr_obj) : NULL;
+        lk_obj_t *msg_obj = lk_obj_get_value_by_cstr(err, "message");
         int i = 0;
 
         vec_print_tostream(VEC(type), stdout);
@@ -752,8 +757,8 @@ void lk_vm_abort(lk_vm_t *self, lk_err_t *err) {
         }
 
         fprintf(stdout, "\n* text: ");
-        if (err->message != NULL)
-            vec_print_tostream(VEC(err->message), stdout);
+        if (msg_obj != NULL && msg_obj != self->t_nil)
+            vec_print_tostream(VEC(LK_STRING(msg_obj)), stdout);
         printf("\n");
 
     } else {

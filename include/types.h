@@ -11,7 +11,6 @@ typedef struct lk_char lk_char_t;
 typedef struct lk_cptr lk_cptr_t;
 typedef struct lk_charset lk_charset_t;
 typedef struct lk_env lk_env_t;
-typedef struct lk_err lk_err_t;
 typedef struct lk_func lk_func_t;
 typedef struct lk_cfunc lk_cfunc_t;
 typedef struct lk_gfunc lk_gfunc_t;
@@ -79,7 +78,6 @@ typedef void lk_cfuncfunc_t(lk_obj_t *self, lk_scope_t *local);
 #define LK_CHAR(obj) ((lk_char_t *)(obj))
 #define LK_CHARSET(obj) ((lk_charset_t *)(obj))
 #define LK_ENV(obj) ((lk_env_t *)(obj))
-#define LK_ERROR(obj) ((lk_err_t *)(obj))
 #define LK_FUNC(obj) ((lk_func_t *)(obj))
 #define LK_FUNCORUNNING (1 << 0)
 #define LK_FUNCOASSIGNED (1 << 1)

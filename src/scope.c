@@ -93,13 +93,13 @@ static void include_scope_str_str(lk_obj_t *self, lk_scope_t *local) {
 }
 
 static void raise_scope_err(lk_obj_t *self, lk_scope_t *local) {
-    lk_vm_raise_err(VM, LK_ERROR(ARG(0)));
+    lk_vm_raise_err(VM, ARG(0));
 }
 
 static void raise_scope_str(lk_obj_t *self, lk_scope_t *local) {
-    lk_err_t *err = lk_err_new(VM, VM->t_err, NULL);
+    lk_obj_t *err = lk_err_new(VM, VM->t_err, NULL);
 
-    err->message = LK_STRING(ARG(0));
+    lk_obj_set_slot_by_cstr(err, "message", NULL, ARG(0));
     lk_vm_raise_err(VM, err);
 }
 

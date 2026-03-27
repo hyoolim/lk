@@ -19,7 +19,7 @@ struct lk_vm {
     } *rescue;
     lk_instr_t *currinstr;
     lk_scope_t *currscope;
-    lk_err_t *lasterr;
+    lk_obj_t *lasterr;
     lk_gc_t *gc;
     lk_scope_t *global;
 
@@ -77,7 +77,7 @@ lk_scope_t *lk_vm_eval_str(lk_vm_t *self, const char *code);
 void lk_vm_do_eval_func(lk_vm_t *vm);
 noreturn void lk_vm_raise_cstr(lk_vm_t *self, const char *message, ...);
 noreturn void lk_vm_raise_errno(lk_vm_t *self);
-noreturn void lk_vm_raise_err(lk_vm_t *self, lk_err_t *err);
+noreturn void lk_vm_raise_err(lk_vm_t *self, lk_obj_t *err);
 noreturn void lk_vm_exit(lk_vm_t *self);
-noreturn void lk_vm_abort(lk_vm_t *self, lk_err_t *err);
+noreturn void lk_vm_abort(lk_vm_t *self, lk_obj_t *err);
 #endif

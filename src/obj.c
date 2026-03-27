@@ -8,10 +8,10 @@ _Static_assert(_Alignof(lk_obj_t) >= 2, "lk_obj_t must be at least 2-byte aligne
 void lk_obj_type_init(lk_vm_t *vm) {
     lk_obj_t *o = vm->t_obj = mem_alloc(sizeof(lk_obj_t));
     o->o.vm = vm;
-    o->o.tag = mem_alloc(sizeof(lk_tag_t));
-    memset(o->o.tag, 0, sizeof(lk_tag_t));
-    o->o.tag->size = sizeof(lk_obj_t);
-    vec_ptr_push(o->o.tag->ancestors = vec_ptr_alloc(), o);
+    o->o.view = mem_alloc(sizeof(lk_view_t));
+    memset(o->o.view, 0, sizeof(lk_view_t));
+    o->o.view->size = sizeof(lk_obj_t);
+    vec_ptr_push(o->o.view->ancestors = vec_ptr_alloc(), o);
 }
 
 // ext map - funcs
@@ -88,8 +88,8 @@ static void ancestor_obj_obj(lk_obj_t *self, lk_scope_t *local) {
 }
 
 static void ancestors_obj(lk_obj_t *self, lk_scope_t *local) {
-    if (self->o.tag->ancestors != NULL || lk_obj_calc_ancestors(self)) {
-        RETURN(lk_list_new_from_darray(VM, self->o.tag->ancestors));
+    if (self->o.view->ancestors != NULL || lk_obj_calc_ancestors(self)) {
+        RETURN(lk_list_new_from_darray(VM, self->o.view->ancestors));
 
     } else {
         printf("BUG: Throw proper ancestor err here\n");
@@ -132,7 +132,7 @@ static void parents_obj(lk_obj_t *self, lk_scope_t *local) {
 
     } else {
         lk_list_t *ret = lk_list_new(VM);
-        vec_ptr_push(VEC(ret), self->o.tag->parent);
+        vec_ptr_push(VEC(ret), self->o.view->parent);
         RETURN(ret);
     }
 }
@@ -142,7 +142,7 @@ static void parent_obj(lk_obj_t *self, lk_scope_t *local) {
         vec_t *pars = LK_OBJ_PARENTS(self);
         RETURN(VEC_COUNT(pars) > 0 ? vec_ptr_get(pars, -1) : NIL);
     }
-    RETURN(self->o.tag->parent);
+    RETURN(self->o.view->parent);
 }
 
 static void with_obj_f(lk_obj_t *self, lk_scope_t *local) {
@@ -175,14 +175,14 @@ void lk_obj_lib_init(lk_vm_t *vm) {
 }
 
 // new
-static lk_tag_t *tag_new(lk_tag_t *proto, lk_vm_t *vm) {
-    lk_tag_t *tag = mem_alloc(sizeof(lk_tag_t));
+static lk_view_t *view_new(lk_view_t *proto, lk_vm_t *vm) {
+    lk_view_t *tag = mem_alloc(sizeof(lk_view_t));
 
-    memcpy(tag, proto, sizeof(lk_tag_t));
+    memcpy(tag, proto, sizeof(lk_view_t));
     tag->o.vm = vm;
-    tag->o.tag = vm->t_tag != NULL ? LK_TAG(vm->t_tag) : NULL;
+    tag->o.view = vm->t_view != NULL ? LK_VIEW(vm->t_view) : NULL;
     memset(&tag->o.mark, 0, sizeof(tag->o.mark));
-    tag->o.instance_tag = NULL;
+    tag->o.instance_view = NULL;
     tag->ancestors = NULL;
 
     if (vm->gc != NULL)
@@ -195,12 +195,12 @@ lk_obj_t *lk_obj_alloc_type(lk_obj_t *parent, size_t s) {
     lk_vm_t *vm = LK_VM(parent);
     lk_gc_t *gc = vm->gc;
     lk_obj_t *self = mem_alloc(s);
-    lk_tag_t *tag = tag_new(parent->o.tag, vm);
+    lk_view_t *tag = view_new(parent->o.view, vm);
 
     tag->parent = parent;
     tag->size = s;
     self->o.vm = vm;
-    self->o.tag = tag;
+    self->o.view = tag;
 
     if (tag->alloc_func != NULL)
         tag->alloc_func(self, parent);
@@ -215,20 +215,20 @@ lk_obj_t *lk_obj_alloc_type(lk_obj_t *parent, size_t s) {
 lk_obj_t *lk_obj_alloc(lk_obj_t *parent) {
     lk_vm_t *vm = LK_VM(parent);
     lk_gc_t *gc = vm->gc;
-    size_t s = parent->o.tag->size;
+    size_t s = parent->o.view->size;
     lk_obj_t *self = mem_alloc(s);
-    lk_tag_t *tag;
+    lk_view_t *tag;
 
-    if (parent->o.instance_tag != NULL) {
-        tag = parent->o.instance_tag;
+    if (parent->o.instance_view != NULL) {
+        tag = parent->o.instance_view;
     } else {
-        tag = tag_new(parent->o.tag, vm);
+        tag = view_new(parent->o.view, vm);
         tag->parent = parent;
         tag->size = s;
-        parent->o.instance_tag = tag;
+        parent->o.instance_view = tag;
     }
     self->o.vm = vm;
-    self->o.tag = tag;
+    self->o.view = tag;
 
     if (tag->alloc_func != NULL)
         tag->alloc_func(self, parent);
@@ -243,13 +243,13 @@ lk_obj_t *lk_obj_alloc(lk_obj_t *parent) {
 lk_obj_t *lk_obj_clone(lk_obj_t *self) {
     lk_obj_t *c = lk_obj_alloc(LK_OBJ_PROTO(self));
 
-    if (c->o.tag->alloc_func != NULL)
-        c->o.tag->alloc_func(c, self);
+    if (c->o.view->alloc_func != NULL)
+        c->o.view->alloc_func(c, self);
     return c;
 }
 
 void lk_obj_just_free(lk_obj_t *self) {
-    lk_tag_t *tag = self->o.tag;
+    lk_view_t *tag = self->o.view;
 
     if (tag->free_func != NULL)
         tag->free_func(self);
@@ -264,27 +264,27 @@ void lk_obj_free(lk_obj_t *self) {
 }
 
 // update - tag
-#define LK_OBJ_IMPLTAGSETTER(t, field) \
-    LK_OBJ_DEFTAGSETTER(t, field) { \
-        lk_obj_t *_par = !LK_OBJ_HASPARENTS(self) ? self->o.tag->parent : NULL; \
-        if (_par != NULL && _par->o.instance_tag == self->o.tag) \
-            self->o.tag = tag_new(self->o.tag, LK_VM(self)); \
-        self->o.tag->field = field; \
+#define LK_OBJ_IMPLVIEWSETTER(t, field) \
+    LK_OBJ_DEFVIEWSETTER(t, field) { \
+        lk_obj_t *_par = !LK_OBJ_HASPARENTS(self) ? self->o.view->parent : NULL; \
+        if (_par != NULL && _par->o.instance_view == self->o.view) \
+            self->o.view = view_new(self->o.view, LK_VM(self)); \
+        self->o.view->field = field; \
     } \
-    LK_OBJ_DEFTAGSETTER(t, field)
+    LK_OBJ_DEFVIEWSETTER(t, field)
 
-LK_OBJ_IMPLTAGSETTER(lk_tagallocfunc_t *, alloc_func);
-LK_OBJ_IMPLTAGSETTER(lk_tagmarkfunc_t *, mark_func);
-LK_OBJ_IMPLTAGSETTER(lk_tagfreefunc_t *, free_func);
+LK_OBJ_IMPLVIEWSETTER(lk_viewallocfunc_t *, alloc_func);
+LK_OBJ_IMPLVIEWSETTER(lk_viewmarkfunc_t *, mark_func);
+LK_OBJ_IMPLVIEWSETTER(lk_viewfreefunc_t *, free_func);
 
 // update
 void lk_obj_extend(lk_obj_t *self, lk_obj_t *parent) {
-    lk_tag_t *tag;
+    lk_view_t *tag;
     vec_t *parents;
 
     // COW: detach from any shared instance tag before mutating
-    tag = tag_new(self->o.tag, LK_VM(self));
-    self->o.tag = tag;
+    tag = view_new(self->o.view, LK_VM(self));
+    self->o.view = tag;
 
     if (LK_OBJ_HASPARENTS(self)) {
         // deep-copy the parents vec so the old and new tags don't alias it
@@ -379,25 +379,25 @@ int lk_obj_calc_ancestors(lk_obj_t *self) {
             cand = VEC_ATPTR(pars, candi);
             il = vec_ptr_alloc();
 
-            if (cand->o.tag->ancestors == NULL)
+            if (cand->o.view->ancestors == NULL)
                 lk_obj_calc_ancestors(cand);
-            if (cand->o.tag->ancestors == NULL)
+            if (cand->o.view->ancestors == NULL)
                 return 0;
-            vec_concat(il, cand->o.tag->ancestors);
+            vec_concat(il, cand->o.view->ancestors);
             vec_ptr_push(ol, il);
         }
 
     } else {
-        cand = self->o.tag->parent;
+        cand = self->o.view->parent;
 
         if (cand != NULL) {
             il = vec_ptr_alloc();
 
-            if (cand->o.tag->ancestors == NULL)
+            if (cand->o.view->ancestors == NULL)
                 lk_obj_calc_ancestors(cand);
-            if (cand->o.tag->ancestors == NULL)
+            if (cand->o.view->ancestors == NULL)
                 return 0;
-            vec_concat(il, cand->o.tag->ancestors);
+            vec_concat(il, cand->o.view->ancestors);
             vec_ptr_push(ol, il);
         }
     }
@@ -408,9 +408,9 @@ int lk_obj_calc_ancestors(lk_obj_t *self) {
         vec_ptr_push(ol, il);
 
     } else {
-        if (self->o.tag->parent != NULL) {
+        if (self->o.view->parent != NULL) {
             il = vec_ptr_alloc();
-            vec_ptr_push(il, self->o.tag->parent);
+            vec_ptr_push(il, self->o.view->parent);
             vec_ptr_push(ol, il);
         }
     }
@@ -456,16 +456,16 @@ startover:
         return 0;
     else {
         // COW the tag before storing ancestors so shared instance tags aren't corrupted
-        lk_obj_t *_par = !LK_OBJ_HASPARENTS(self) ? self->o.tag->parent : NULL;
+        lk_obj_t *_par = !LK_OBJ_HASPARENTS(self) ? self->o.view->parent : NULL;
 
-        if (_par != NULL && _par->o.instance_tag == self->o.tag)
-            self->o.tag = tag_new(self->o.tag, LK_VM(self));
+        if (_par != NULL && _par->o.instance_view == self->o.view)
+            self->o.view = view_new(self->o.view, LK_VM(self));
 
-        vec_t *oldancs = self->o.tag->ancestors;
+        vec_t *oldancs = self->o.view->ancestors;
 
         if (oldancs != NULL)
             vec_free(oldancs);
-        self->o.tag->ancestors = newancs;
+        self->o.view->ancestors = newancs;
         return 1;
     }
 }
@@ -530,12 +530,12 @@ void lk_obj_set_cfunc_cvoid(lk_obj_t *self, const char *name, ...) {
 #define FIND(nil, check) \
     do { \
         while (1) { \
-            check if (self->o.tag->ancestors != NULL) goto checkancestors; \
+            check if (self->o.view->ancestors != NULL) goto checkancestors; \
             self = (LK_OBJ_ISSCOPE(self) && LK_SCOPE(self)->parent != NULL) ? LK_OBJ(LK_SCOPE(self)->parent) \
-                                                                            : self->o.tag->parent; \
+                                                                            : self->o.view->parent; \
         } \
     checkancestors: { \
-        vec_t *ancs = self->o.tag->ancestors; \
+        vec_t *ancs = self->o.view->ancestors; \
         int i, c = VEC_COUNT(ancs); \
         for (i = 1; i < c; i++) { \
             self = VEC_ATPTR(ancs, i); \

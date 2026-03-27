@@ -174,7 +174,7 @@ lk_vm_t *lk_vm_new(void) {
     // must be loaded before other primitive types
     lk_obj_type_init(self);
     lk_gc_type_init(self);
-    lk_tag_type_init(self);
+    lk_view_type_init(self);
     lk_vm_type_init(self);
     lk_seq_type_init(self);
     lk_map_type_init(self);
@@ -642,7 +642,7 @@ prevscope:
             goto nextinstr;
         }
     parent:
-        if ((ancs = r->o.tag->ancestors) != NULL) {
+        if ((ancs = r->o.view->ancestors) != NULL) {
             int ancc = VEC_COUNT(ancs);
 
             for (int anci = 1; anci < ancc; anci++) {
@@ -655,7 +655,7 @@ prevscope:
             }
 
         } else {
-            r = (LK_OBJ_ISSCOPE(r) && LK_SCOPE(r)->parent != NULL) ? LK_OBJ(LK_SCOPE(r)->parent) : r->o.tag->parent;
+            r = (LK_OBJ_ISSCOPE(r) && LK_SCOPE(r)->parent != NULL) ? LK_OBJ(LK_SCOPE(r)->parent) : r->o.view->parent;
             goto findslot;
         }
 

@@ -81,14 +81,14 @@ void lk_gc_mark_obj_used(lk_obj_t *self) {
             VEC_EACH_PTR(LK_OBJ_PARENTS(self), i, v, lk_gc_mark_obj_pending(LK_OBJ(v)););
 
         } else {
-            if (self->o.tag->parent != NULL)
-                lk_gc_mark_obj_pending(self->o.tag->parent);
+            if (self->o.view->parent != NULL)
+                lk_gc_mark_obj_pending(self->o.view->parent);
         }
 
-        lk_gc_mark_obj_pending(LK_OBJ(self->o.tag));
+        lk_gc_mark_obj_pending(LK_OBJ(self->o.view));
 
-        if (self->o.instance_tag != NULL)
-            lk_gc_mark_obj_pending(LK_OBJ(self->o.instance_tag));
+        if (self->o.instance_view != NULL)
+            lk_gc_mark_obj_pending(LK_OBJ(self->o.instance_view));
 
         if (self->o.slots != NULL) {
             struct lk_slot *slot;
@@ -98,8 +98,8 @@ void lk_gc_mark_obj_used(lk_obj_t *self) {
                      lk_gc_mark_obj_pending(lk_obj_get_value_from_slot(self, slot)););
         }
 
-        if (self->o.tag->mark_func != NULL) {
-            self->o.tag->mark_func(self, gc_markpendingifunused);
+        if (self->o.view->mark_func != NULL) {
+            self->o.view->mark_func(self, gc_markpendingifunused);
         }
     }
 }

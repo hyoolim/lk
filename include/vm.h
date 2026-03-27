@@ -44,7 +44,7 @@ struct lk_vm {
     lk_obj_t *t_pipe;                                         // pipe
     lk_obj_t *t_socket;                                       // socket
     lk_obj_t *t_str;                                          // str
-    lk_obj_t *t_tag;                                          // tag
+    lk_obj_t *t_view;                                          // view
     lk_obj_t *t_vm;                                           // vm
 
     // freq used strs

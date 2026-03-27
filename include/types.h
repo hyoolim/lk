@@ -34,11 +34,11 @@ typedef struct lk_vec lk_vec_t;
 typedef struct lk_vm lk_vm_t;
 
 // common data for all lk objs
-typedef void lk_tagallocfunc_t(lk_obj_t *self, lk_obj_t *parent);
+typedef void lk_viewallocfunc_t(lk_obj_t *self, lk_obj_t *parent);
 #define LK_OBJ_DEFMARKFUNC(name) void name(lk_obj_t *self, void (*mark)(lk_obj_t * self))
-typedef LK_OBJ_DEFMARKFUNC(lk_tagmarkfunc_t);
-typedef void lk_tagfreefunc_t(lk_obj_t *self);
-typedef struct lk_tag lk_tag_t;
+typedef LK_OBJ_DEFMARKFUNC(lk_viewmarkfunc_t);
+typedef void lk_viewfreefunc_t(lk_obj_t *self);
+typedef struct lk_view lk_view_t;
 struct lk_objgroup {
     lk_obj_t *first;
     lk_obj_t *last;
@@ -46,8 +46,8 @@ struct lk_objgroup {
 struct lk_common {
     qphash_t *slots;
     lk_vm_t *vm;
-    lk_tag_t *tag;
-    lk_tag_t *instance_tag;
+    lk_view_t *view;
+    lk_view_t *instance_view;
     struct {
         lk_obj_t *prev;
         lk_obj_t *next;

@@ -46,6 +46,7 @@ LK_OBJ_DEFTAGSETTER(lk_tagfreefunc_t *, free_func);
 void lk_obj_extend(lk_obj_t *self, lk_obj_t *parent);
 struct lk_slot *lk_obj_setslot(lk_obj_t *self, lk_obj_t *k, lk_obj_t *check, lk_obj_t *v);
 struct lk_slot *lk_obj_set_slot_by_cstr(lk_obj_t *self, const char *k, lk_obj_t *check, lk_obj_t *v);
+lk_obj_t *lk_obj_get_value_by_cstr(lk_obj_t *self, const char *k);
 void lk_obj_set_value_on_slot(lk_obj_t *self, struct lk_slot *slot, lk_obj_t *v);
 int lk_obj_calc_ancestors(lk_obj_t *self);
 void lk_obj_set_cfunc_lk(lk_obj_t *self, const char *name, lk_cfunc_lk_t *cfunc, ...);

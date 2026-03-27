@@ -30,7 +30,7 @@ void lk_obj_lib_init(lk_vm_t *vm);
 
 // new
 #define LK_OBJ_MAXRECYCLED 1000
-lk_obj_t *lk_obj_alloc_with_size(lk_obj_t *parent, size_t s);
+lk_obj_t *lk_obj_alloc_type(lk_obj_t *parent, size_t s);
 lk_obj_t *lk_obj_alloc(lk_obj_t *parent);
 lk_obj_t *lk_obj_clone(lk_obj_t *self);
 void lk_obj_just_free(lk_obj_t *self);

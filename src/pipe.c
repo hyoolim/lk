@@ -12,7 +12,7 @@ static void free_pipe(lk_obj_t *self) {
 }
 
 void lk_pipe_type_init(lk_vm_t *vm) {
-    vm->t_pipe = lk_obj_alloc_with_size(vm->t_obj, sizeof(lk_pipe_t));
+    vm->t_pipe = lk_obj_alloc_type(vm->t_obj, sizeof(lk_pipe_t));
     lk_obj_set_mark_func(vm->t_pipe, mark_pipe);
     lk_obj_set_free_func(vm->t_pipe, free_pipe);
 }

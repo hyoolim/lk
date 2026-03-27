@@ -102,8 +102,8 @@ static void listen_sock(lk_obj_t *self, lk_scope_t *local) {
 
 void lk_socket_ext_init(lk_vm_t *vm) {
     lk_obj_t *obj = vm->t_obj, *str = vm->t_str, *num = vm->t_num;
-    lk_obj_t *ip = lk_obj_alloc_with_size(obj, sizeof(lk_ipaddr_t));
-    lk_obj_t *sock = lk_obj_alloc_with_size(obj, sizeof(lk_socket_t));
+    lk_obj_t *ip = lk_obj_alloc_type(obj, sizeof(lk_ipaddr_t));
+    lk_obj_t *sock = lk_obj_alloc_type(obj, sizeof(lk_socket_t));
 
     lk_obj_set_alloc_func(sock, alloc_sock);
     lk_obj_set_free_func(sock, free_sock);

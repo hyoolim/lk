@@ -6,7 +6,7 @@ static void alloc_ch(lk_obj_t *self, lk_obj_t *parent) {
 }
 
 void lk_char_type_init(lk_vm_t *vm) {
-    vm->t_char = lk_obj_alloc_with_size(vm->t_obj, sizeof(lk_char_t));
+    vm->t_char = lk_obj_alloc_type(vm->t_obj, sizeof(lk_char_t));
     lk_obj_set_alloc_func(vm->t_char, alloc_ch);
 }
 

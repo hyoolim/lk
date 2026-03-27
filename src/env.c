@@ -34,7 +34,7 @@ static void keys_env(lk_obj_t *self, lk_scope_t *local) {
 
 void lk_env_ext_init(lk_vm_t *vm) {
     lk_obj_t *obj = vm->t_obj, *str = vm->t_str;
-    lk_obj_t *env = lk_obj_alloc_with_size(obj, sizeof(lk_env_t));
+    lk_obj_t *env = lk_obj_alloc_type(obj, sizeof(lk_env_t));
     lk_global_set("Environment", env);
     lk_obj_set_cfunc_lk(env, "at", at_env_str, str, NULL);
     lk_obj_set_cfunc_lk(env, "size", size_env, NULL);

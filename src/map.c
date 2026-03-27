@@ -14,7 +14,7 @@ static void free_map(lk_obj_t *self) {
 }
 
 void lk_map_type_init(lk_vm_t *vm) {
-    vm->t_map = lk_obj_alloc_with_size(vm->t_obj, sizeof(lk_map_t));
+    vm->t_map = lk_obj_alloc_type(vm->t_obj, sizeof(lk_map_t));
     qphash_init(QPHASH(vm->t_map), sizeof(lk_obj_t *), lk_obj_hash_code, lk_obj_key_cmp);
     lk_obj_set_alloc_func(vm->t_map, alloc_map);
     lk_obj_set_mark_func(vm->t_map, mark_map);

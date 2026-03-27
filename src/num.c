@@ -7,7 +7,7 @@ static void alloc_num(lk_obj_t *self, lk_obj_t *parent) {
 }
 
 void lk_num_type_init(lk_vm_t *vm) {
-    vm->t_num = lk_obj_alloc_with_size(vm->t_obj, sizeof(lk_num_t));
+    vm->t_num = lk_obj_alloc_type(vm->t_obj, sizeof(lk_num_t));
     lk_obj_set_alloc_func(vm->t_num, alloc_num);
 }
 

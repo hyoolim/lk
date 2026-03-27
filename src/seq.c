@@ -12,7 +12,7 @@ static void free_seq(lk_obj_t *self) {
 }
 
 void lk_seq_type_init(lk_vm_t *vm) {
-    vm->t_seq = lk_obj_alloc_with_size(vm->t_obj, sizeof(lk_seq_t));
+    vm->t_seq = lk_obj_alloc_type(vm->t_obj, sizeof(lk_seq_t));
     vec_init(VEC(vm->t_seq), 1, 16);
     lk_obj_set_alloc_func(vm->t_seq, alloc_seq);
     lk_obj_set_free_func(vm->t_seq, free_seq);

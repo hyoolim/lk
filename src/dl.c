@@ -13,7 +13,7 @@ static void free_dl(lk_obj_t *self) {
 }
 
 void lk_dl_type_init(lk_vm_t *vm) {
-    vm->t_dl = lk_obj_alloc_with_size(vm->t_obj, sizeof(lk_dl_t));
+    vm->t_dl = lk_obj_alloc_type(vm->t_obj, sizeof(lk_dl_t));
     lk_obj_set_free_func(vm->t_dl, free_dl);
 }
 

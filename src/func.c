@@ -76,29 +76,29 @@ static LK_OBJ_DEFMARKFUNC(mark_sig) {
 
 void lk_func_type_init(lk_vm_t *vm) {
     //
-    vm->t_func = lk_obj_alloc_with_size(vm->t_obj, sizeof(lk_func_t));
+    vm->t_func = lk_obj_alloc_type(vm->t_obj, sizeof(lk_func_t));
     lk_obj_set_alloc_func(vm->t_func, alloc_f);
     lk_obj_set_mark_func(vm->t_func, mark_f);
     lk_obj_set_free_func(vm->t_func, free_f);
 
     //
-    vm->t_cfunc = lk_obj_alloc_with_size(vm->t_func, sizeof(lk_cfunc_t));
+    vm->t_cfunc = lk_obj_alloc_type(vm->t_func, sizeof(lk_cfunc_t));
     lk_obj_set_alloc_func(vm->t_cfunc, alloc_cf);
 
     //
-    vm->t_gfunc = lk_obj_alloc_with_size(vm->t_func, sizeof(lk_gfunc_t));
+    vm->t_gfunc = lk_obj_alloc_type(vm->t_func, sizeof(lk_gfunc_t));
     LK_GFUNC(vm->t_gfunc)->funcs = vec_alloc(sizeof(lk_func_t *), 4);
     lk_obj_set_alloc_func(vm->t_gfunc, alloc_gf);
     lk_obj_set_mark_func(vm->t_gfunc, mark_gf);
     lk_obj_set_free_func(vm->t_gfunc, free_gf);
 
     //
-    vm->t_lfunc = lk_obj_alloc_with_size(vm->t_func, sizeof(lk_lfunc_t));
+    vm->t_lfunc = lk_obj_alloc_type(vm->t_func, sizeof(lk_lfunc_t));
     lk_obj_set_alloc_func(vm->t_lfunc, alloc_lf);
     lk_obj_set_mark_func(vm->t_lfunc, mark_lf);
 
     //
-    vm->t_sig = lk_obj_alloc_with_size(vm->t_obj, sizeof(lk_sig_t));
+    vm->t_sig = lk_obj_alloc_type(vm->t_obj, sizeof(lk_sig_t));
     lk_obj_set_alloc_func(vm->t_sig, alloc_sig);
     lk_obj_set_mark_func(vm->t_sig, mark_sig);
 }

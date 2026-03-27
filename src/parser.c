@@ -102,8 +102,8 @@ static void free_parser(lk_obj_t *self) {
 void lk_parser_type_init(lk_vm_t *vm) {
     lk_obj_t *obj = vm->t_obj;
 
-    vm->t_prec = lk_obj_alloc_with_size(obj, sizeof(lk_prec_t));
-    vm->t_parser = lk_obj_alloc_with_size(obj, sizeof(lk_parser_t));
+    vm->t_prec = lk_obj_alloc_type(obj, sizeof(lk_prec_t));
+    vm->t_parser = lk_obj_alloc_type(obj, sizeof(lk_parser_t));
     lk_obj_set_alloc_func(vm->t_parser, alloc_parser);
     lk_obj_set_mark_func(vm->t_parser, mark_parser);
     lk_obj_set_free_func(vm->t_parser, free_parser);

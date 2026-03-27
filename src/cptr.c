@@ -9,7 +9,7 @@ static void free_cptr(lk_obj_t *self) {
 }
 
 void lk_cptr_type_init(lk_vm_t *vm) {
-    vm->t_cptr = lk_obj_alloc_with_size(vm->t_obj, sizeof(lk_cptr_t));
+    vm->t_cptr = lk_obj_alloc_type(vm->t_obj, sizeof(lk_cptr_t));
     lk_obj_set_free_func(vm->t_cptr, free_cptr);
 }
 

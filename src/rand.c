@@ -41,7 +41,7 @@ static void nextInteger_rand(lk_obj_t *self, lk_scope_t *local) {
 
 void lk_rand_ext_init(lk_vm_t *vm) {
     lk_obj_t *num = vm->t_num;
-    lk_obj_t *rand = lk_obj_alloc_with_size(vm->t_obj, sizeof(lk_rand_t));
+    lk_obj_t *rand = lk_obj_alloc_type(vm->t_obj, sizeof(lk_rand_t));
 
     lk_obj_set_alloc_func(rand, alloc_rand);
     alloc_rand(rand, NULL);

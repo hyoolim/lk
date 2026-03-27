@@ -10,7 +10,7 @@ static void free_charset(lk_obj_t *self) {
 }
 
 void lk_charset_type_init(lk_vm_t *vm) {
-    vm->t_charset = lk_obj_alloc_with_size(vm->t_obj, sizeof(lk_charset_t));
+    vm->t_charset = lk_obj_alloc_type(vm->t_obj, sizeof(lk_charset_t));
     charset_init(CHARSET(vm->t_charset));
     lk_obj_set_alloc_func(vm->t_charset, alloc_charset);
     lk_obj_set_free_func(vm->t_charset, free_charset);

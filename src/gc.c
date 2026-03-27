@@ -9,7 +9,7 @@ static void free_gc(lk_obj_t *self) {
 }
 
 void lk_gc_type_init(lk_vm_t *vm) {
-    vm->gc = LK_GC(lk_obj_alloc_with_size(vm->t_obj, sizeof(lk_gc_t)));
+    vm->gc = LK_GC(lk_obj_alloc_type(vm->t_obj, sizeof(lk_gc_t)));
     vm->gc->unused = mem_alloc(sizeof(struct lk_objgroup));
     vm->gc->pending = mem_alloc(sizeof(struct lk_objgroup));
     vm->gc->used = mem_alloc(sizeof(struct lk_objgroup));

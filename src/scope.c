@@ -31,7 +31,7 @@ static void free_scope(lk_obj_t *self) {
 }
 
 void lk_scope_type_init(lk_vm_t *vm) {
-    vm->t_scope = lk_obj_alloc_with_size(vm->t_obj, sizeof(lk_scope_t));
+    vm->t_scope = lk_obj_alloc_type(vm->t_obj, sizeof(lk_scope_t));
     lk_obj_set_mark_func(vm->t_scope, mark_scope);
     lk_obj_set_free_func(vm->t_scope, free_scope);
 }

@@ -12,7 +12,7 @@ static LK_OBJ_DEFMARKFUNC(mark_instr) {
 }
 
 void lk_instr_type_init(lk_vm_t *vm) {
-    vm->t_instr = lk_obj_alloc_with_size(vm->t_obj, sizeof(lk_instr_t));
+    vm->t_instr = lk_obj_alloc_type(vm->t_obj, sizeof(lk_instr_t));
     lk_obj_set_mark_func(vm->t_instr, mark_instr);
 }
 

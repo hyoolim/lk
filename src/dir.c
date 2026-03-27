@@ -6,7 +6,7 @@
 
 // type
 void lk_dir_type_init(lk_vm_t *vm) {
-    vm->t_dir = lk_obj_alloc_with_size(vm->t_obj, sizeof(lk_obj_t));
+    vm->t_dir = lk_obj_alloc_type(vm->t_obj, sizeof(lk_obj_t));
 }
 
 // new

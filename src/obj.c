@@ -191,17 +191,38 @@ static lk_tag_t *tag_new(lk_tag_t *proto, lk_vm_t *vm) {
     return tag;
 }
 
-lk_obj_t *lk_obj_alloc_with_size(lk_obj_t *parent, size_t s) {
+lk_obj_t *lk_obj_alloc_type(lk_obj_t *parent, size_t s) {
     lk_vm_t *vm = LK_VM(parent);
     lk_gc_t *gc = vm->gc;
     lk_obj_t *self = mem_alloc(s);
-    lk_tag_t *ptag = parent->o.tag;
+    lk_tag_t *tag = tag_new(parent->o.tag, vm);
+
+    tag->parent = parent;
+    tag->size = s;
+    self->o.vm = vm;
+    self->o.tag = tag;
+
+    if (tag->alloc_func != NULL)
+        tag->alloc_func(self, parent);
+
+    if (gc != NULL) {
+        gc->newvalues++;
+        lk_objgroup_insert(gc->unused, self);
+    }
+    return self;
+}
+
+lk_obj_t *lk_obj_alloc(lk_obj_t *parent) {
+    lk_vm_t *vm = LK_VM(parent);
+    lk_gc_t *gc = vm->gc;
+    size_t s = parent->o.tag->size;
+    lk_obj_t *self = mem_alloc(s);
     lk_tag_t *tag;
 
-    if (parent->o.instance_tag != NULL && parent->o.instance_tag->size == s) {
+    if (parent->o.instance_tag != NULL) {
         tag = parent->o.instance_tag;
     } else {
-        tag = tag_new(ptag, vm);
+        tag = tag_new(parent->o.tag, vm);
         tag->parent = parent;
         tag->size = s;
         parent->o.instance_tag = tag;
@@ -217,10 +238,6 @@ lk_obj_t *lk_obj_alloc_with_size(lk_obj_t *parent, size_t s) {
         lk_objgroup_insert(gc->unused, self);
     }
     return self;
-}
-
-lk_obj_t *lk_obj_alloc(lk_obj_t *parent) {
-    return lk_obj_alloc_with_size(parent, parent->o.tag->size);
 }
 
 lk_obj_t *lk_obj_clone(lk_obj_t *self) {

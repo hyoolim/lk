@@ -6,7 +6,8 @@ int main(int argc, const char **argv) {
     lk_list_t *libpaths = lk_list_new(vm);
     lk_list_t *args = lk_list_new(vm);
     lk_str_t *script, *initfile = lk_str_new_from_cstr(vm, "Init.lk");
-    lk_file_t *tmp;
+    lk_obj_t *tmp;
+    lk_str_t *tmp_path;
 
     // options for vm
     lk_object_set(LK_OBJ(vm->t_dl), "paths", LK_OBJ(libpaths));
@@ -60,10 +61,11 @@ int main(int argc, const char **argv) {
     // load the initial lib
     VEC_EACH_PTR(
         VEC(libpaths), i, path, tmp = lk_file_new_with_path(vm, LK_STRING(lk_obj_clone(LK_OBJ(path))));
-        vec_concat(VEC(tmp->path), VEC(vm->str_filesep));
-        vec_concat(VEC(tmp->path), VEC(initfile));
+        tmp_path = LK_STRING(lk_obj_get_value_by_cstr(tmp, "path"));
+        vec_concat(VEC(tmp_path), VEC(vm->str_filesep));
+        vec_concat(VEC(tmp_path), VEC(initfile));
         if (lk_file_is_exists(tmp) == vm->t_true) {
-            lk_vm_eval_file(vm, vec_str_tocstr(VEC(tmp->path)), "");
+            lk_vm_eval_file(vm, vec_str_tocstr(VEC(tmp_path)), "");
             break;
         });
 

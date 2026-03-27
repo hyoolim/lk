@@ -328,7 +328,8 @@ struct lk_slot *lk_obj_setslot(lk_obj_t *self, lk_obj_t *k, lk_obj_t *check, lk_
 }
 
 struct lk_slot *lk_obj_set_slot_by_cstr(lk_obj_t *self, const char *k, lk_obj_t *check, lk_obj_t *v) {
-    return lk_obj_setslot(self, LK_OBJ(lk_str_new_from_cstr(LK_VM(self), k)), check, v);
+    lk_vm_t *vm = LK_VM(self);
+    return lk_obj_setslot(self, LK_OBJ(lk_str_new_from_cstr(vm, k)), check != NULL ? check : vm->t_obj, v);
 }
 
 lk_obj_t *lk_obj_get_value_by_cstr(lk_obj_t *self, const char *k) {

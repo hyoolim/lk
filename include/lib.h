@@ -3,6 +3,7 @@
 #include "bool.h"
 #include "char.h"
 #include "charset.h"
+#include "cptr.h"
 #include "dir.h"
 #include "dl.h"
 #include "env.h"

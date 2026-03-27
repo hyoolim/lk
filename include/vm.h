@@ -27,6 +27,7 @@ struct lk_vm {
     lk_obj_t *t_nil, *t_bool, *t_true, *t_false;              // bool
     lk_obj_t *t_char;                                         // char
     lk_obj_t *t_charset;                                      // charset
+    lk_obj_t *t_cptr;                                         // cptr
     lk_obj_t *t_dl;                                           // dl
     lk_obj_t *t_err;                                          // err
     lk_obj_t *t_file, *t_dir, *t_stdin, *t_stdout, *t_stderr; // file

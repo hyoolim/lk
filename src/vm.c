@@ -185,6 +185,7 @@ lk_vm_t *lk_vm_new(void) {
     lk_char_type_init(self);
     lk_charset_type_init(self);
     lk_err_type_init(self);
+    lk_cptr_type_init(self);
     lk_file_type_init(self);
     lk_dir_type_init(self);
     lk_vec_type_init(self);
@@ -213,6 +214,7 @@ lk_vm_t *lk_vm_new(void) {
     lk_charset_lib_init(self);
     lk_map_lib_init(self);
     lk_err_lib_init(self);
+    lk_cptr_lib_init(self);
     lk_file_lib_init(self);
     lk_dir_lib_init(self);
     lk_vec_lib_init(self);

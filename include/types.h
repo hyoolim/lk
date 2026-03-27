@@ -8,6 +8,7 @@
 // foward decl of all types
 typedef struct lk_obj lk_bool_t;
 typedef struct lk_char lk_char_t;
+typedef struct lk_cptr lk_cptr_t;
 typedef struct lk_charset lk_charset_t;
 typedef struct lk_env lk_env_t;
 typedef struct lk_err lk_err_t;

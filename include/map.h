@@ -14,7 +14,6 @@ void lk_map_lib_init(lk_vm_t *vm);
 
 // new
 lk_map_t *lk_map_new(lk_vm_t *vm);
-lk_map_t *lk_map_newFromQPHash(lk_vm_t *vm, qphash_t *ht);
 
 // update
 void lk_map_clear(lk_map_t *self);

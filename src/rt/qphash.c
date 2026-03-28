@@ -15,19 +15,10 @@ static struct setdata *setdata_alloc(int ivlen, int ci, sethashfunc_t *hashfunc,
     self->ci = ci;
     self->cap = c;
     self->ivlen = ivlen;
-    self->refc = 1;
     self->size = 0;
     self->hashfunc = hashfunc;
     self->cmpfunc = cmpfunc;
     return self;
-}
-
-// simple ref sizeing mem management for clones
-static void setdata_free(struct setdata *self) {
-    if (self->refc > 0)
-        self->refc--;
-    if (self->refc < 1)
-        mem_free(self);
 }
 
 // create new set data and repopulate
@@ -51,7 +42,7 @@ static void qphash_resize(qphash_t *self, int ci) {
             delta += 2;
         } memcpy(newitem, olditem, SETITEM_SIZE(olddata)););
     newdata->size = olddata->size;
-    setdata_free(olddata);
+    mem_free(olddata);
     self->data = newdata;
 }
 
@@ -62,18 +53,8 @@ qphash_t *qphash_alloc(int ivlen, sethashfunc_t *hashfunc, setkeycmpfunc_t *cmpf
     return self;
 }
 
-qphash_t *qphash_clone(qphash_t *self) {
-    qphash_t *clone = mem_alloc(sizeof(qphash_t));
-    qphash_copy(clone, self);
-    return clone;
-}
-
-void qphash_copy(qphash_t *self, qphash_t *src) {
-    (self->data = src->data)->refc++;
-}
-
 void qphash_fin(qphash_t *self) {
-    setdata_free(self->data);
+    mem_free(self->data);
 }
 
 void qphash_free(qphash_t *self) {

@@ -14,7 +14,6 @@ struct setdata {
     int ci;
     int cap;
     int ivlen; // length of item value
-    int refc;
     int size;
     sethashfunc_t *hashfunc;
     setkeycmpfunc_t *cmpfunc;
@@ -28,8 +27,6 @@ typedef struct set {
 
 // for set construction/destruction
 qphash_t *qphash_alloc(int ivlen, sethashfunc_t *hashfunc, setkeycmpfunc_t *cmpfunc);
-qphash_t *qphash_clone(qphash_t *self);
-void qphash_copy(qphash_t *self, qphash_t *src);
 void qphash_fin(qphash_t *self);
 void qphash_free(qphash_t *self);
 void qphash_init(qphash_t *self, int ivlen, sethashfunc_t *hashfunc, setkeycmpfunc_t *cmpfunc);

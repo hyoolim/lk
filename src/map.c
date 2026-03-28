@@ -2,7 +2,8 @@
 
 // type
 static void alloc_map(lk_obj_t *self, lk_obj_t *parent) {
-    qphash_copy(QPHASH(self), QPHASH(parent));
+    qphash_init(QPHASH(self), sizeof(lk_obj_t *), lk_obj_hash_code, lk_obj_key_cmp);
+    SET_EACH(QPHASH(parent), i, *(lk_obj_t **)qphash_set(QPHASH(self), i->key) = SETITEM_VALUE(lk_obj_t *, i););
 }
 
 static LK_OBJ_DEFMARKFUNC(mark_map) {
@@ -24,12 +25,6 @@ void lk_map_type_init(lk_vm_t *vm) {
 // new
 lk_map_t *lk_map_new(lk_vm_t *vm) {
     return LK_MAP(lk_obj_alloc(vm->t_map));
-}
-
-lk_map_t *lk_map_newfromset(lk_vm_t *vm, qphash_t *from) {
-    lk_map_t *self = lk_map_new(vm);
-    qphash_copy(QPHASH(self), from);
-    return self;
 }
 
 // update

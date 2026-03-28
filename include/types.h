@@ -27,8 +27,6 @@ typedef struct lk_prec lk_prec_t;
 typedef struct lk_rand lk_rand_t;
 typedef struct lk_scope lk_scope_t;
 typedef struct lk_seq lk_seq_t;
-typedef struct lk_socket lk_socket_t;
-typedef struct lk_ipaddr lk_ipaddr_t;
 typedef struct lk_seq lk_str_t;
 typedef struct lk_vec lk_vec_t;
 typedef struct lk_vm lk_vm_t;
@@ -100,8 +98,6 @@ typedef void lk_cfuncfunc_t(lk_obj_t *self, lk_scope_t *local);
 #define LK_RANDOM_N 624
 #define LK_SCOPE(obj) ((lk_scope_t *)(obj))
 #define LK_SEQ(obj) ((lk_seq_t *)(obj))
-#define LK_SOCKET(obj) ((lk_socket_t *)(obj))
-#define LK_IPADDR(obj) ((lk_ipaddr_t *)(obj))
 #define LK_STRING(obj) ((lk_str_t *)(obj))
 #define LK_VECTOR(obj) ((lk_vec_t *)(obj))
 #define LK_VM(obj) ((obj)->o.vm)

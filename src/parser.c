@@ -6,7 +6,7 @@
 // ext map - types
 static void setbinaryop(lk_parser_t *self, const char *op, const char *subst) {
     lk_vm_t *vm = LK_VM(self);
-    *(lk_str_t **)qphash_set(self->binaryops, lk_str_new_from_cstr(vm, op)) = lk_str_new_from_cstr(vm, subst);
+    *(lk_str_t **)ht_set(self->binaryops, lk_str_new_from_cstr(vm, op)) = lk_str_new_from_cstr(vm, subst);
 }
 
 static void setprec(lk_parser_t *self, const char *op, int level, enum lk_precassoc_t assoc) {
@@ -15,13 +15,13 @@ static void setprec(lk_parser_t *self, const char *op, int level, enum lk_precas
 
     prec->level = level;
     prec->assoc = assoc;
-    *(lk_prec_t **)qphash_set(self->precs, lk_str_new_from_cstr(vm, op)) = prec;
+    *(lk_prec_t **)ht_set(self->precs, lk_str_new_from_cstr(vm, op)) = prec;
 }
 
 static void alloc_parser(lk_obj_t *self, lk_obj_t *parent) {
     (void)parent;
-    PARSER->binaryops = qphash_alloc(sizeof(lk_prec_t *), lk_obj_hash_code, lk_obj_key_cmp);
-    PARSER->precs = qphash_alloc(sizeof(lk_prec_t *), lk_obj_hash_code, lk_obj_key_cmp);
+    PARSER->binaryops = ht_alloc(sizeof(lk_prec_t *), lk_obj_hash_code, lk_obj_key_cmp);
+    PARSER->precs = ht_alloc(sizeof(lk_prec_t *), lk_obj_hash_code, lk_obj_key_cmp);
     PARSER->tokentypes = vec_ptr_alloc();
     PARSER->tokenvalues = vec_ptr_alloc();
     PARSER->words = vec_ptr_alloc();
@@ -63,10 +63,10 @@ static LK_OBJ_DEFMARKFUNC(mark_parser) {
     mark(LK_OBJ(PARSER->text));
 
     if (PARSER->binaryops != NULL) {
-        SET_EACH(PARSER->binaryops, item, mark(LK_OBJ(item->key)); mark(SETITEM_VALUE(lk_obj_t *, item)););
+        HT_EACH(PARSER->binaryops, item, mark(LK_OBJ(item->key)); mark(HT_ITEM_VALUE(lk_obj_t *, item)););
     }
     if (PARSER->precs != NULL) {
-        SET_EACH(PARSER->precs, item, mark(LK_OBJ(item->key)); mark(SETITEM_VALUE(lk_obj_t *, item)););
+        HT_EACH(PARSER->precs, item, mark(LK_OBJ(item->key)); mark(HT_ITEM_VALUE(lk_obj_t *, item)););
     }
     if (PARSER->tokenvalues != NULL) {
         VEC_EACH_PTR(PARSER->tokenvalues, i, v, mark(v));
@@ -84,9 +84,9 @@ static LK_OBJ_DEFMARKFUNC(mark_parser) {
 
 static void free_parser(lk_obj_t *self) {
     if (PARSER->binaryops != NULL)
-        qphash_free(PARSER->binaryops);
+        ht_free(PARSER->binaryops);
     if (PARSER->precs != NULL)
-        qphash_free(PARSER->precs);
+        ht_free(PARSER->precs);
     if (PARSER->tokentypes != NULL)
         vec_free(PARSER->tokentypes);
     if (PARSER->tokenvalues != NULL)
@@ -181,13 +181,13 @@ typedef READFUNC(readfunc_t);
 
 //
 static lk_str_t *getbinaryop(lk_parser_t *self, lk_str_t *op) {
-    setitem_t *item = qphash_get(self->binaryops, op);
-    return item != NULL ? SETITEM_VALUE(lk_str_t *, item) : op;
+    ht_item_t *item = ht_get(self->binaryops, op);
+    return item != NULL ? HT_ITEM_VALUE(lk_str_t *, item) : op;
 }
 
 static lk_prec_t *getprec(lk_parser_t *self, lk_instr_t *op) {
-    setitem_t *item = qphash_get(self->precs, op->v);
-    return item != NULL ? SETITEM_VALUE(lk_prec_t *, item) : NULL;
+    ht_item_t *item = ht_get(self->precs, op->v);
+    return item != NULL ? HT_ITEM_VALUE(lk_prec_t *, item) : NULL;
 }
 
 static lk_prec_t *shiftreduce(lk_parser_t *self, lk_instr_t *op) {

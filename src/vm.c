@@ -439,8 +439,8 @@ void lk_vm_do_eval_func(lk_vm_t *vm) {
     // used in slot resolution
     lk_instr_t *msg;
     lk_str_t *msgn;
-    qphash_t *slots;
-    setitem_t *si;
+    ht_t *slots;
+    ht_item_t *si;
     struct lk_slot *slot;
     vec_t *ancs;
     lk_obj_t *recv, *r, *slotv;
@@ -461,9 +461,9 @@ void lk_vm_do_eval_func(lk_vm_t *vm) {
         for (; recv != NULL; recv = LK_OBJ(LK_SCOPE(recv)->returnto)) {
             if ((slots = recv->o.slots) == NULL)
                 continue;
-            if ((si = qphash_get(slots, vm->str_rescue)) == NULL)
+            if ((si = ht_get(slots, vm->str_rescue)) == NULL)
                 continue;
-            slot = LK_SLOT(SETITEM_VALUEPTR(si));
+            slot = LK_SLOT(HT_ITEM_VALUEPTR(si));
             slotv = lk_obj_get_value_from_slot(recv, slot);
             if (!LK_OBJ_ISFUNC(slot->check) || LK_OBJ_ISA(slotv, t_func) < 3)
                 continue;
@@ -599,10 +599,10 @@ prevscope:
     findslot:
         if ((slots = r->o.slots) == NULL)
             goto parent;
-        if ((si = qphash_get(slots, msgn)) == NULL)
+        if ((si = ht_get(slots, msgn)) == NULL)
             goto parent;
     found:
-        slot = LK_SLOT(SETITEM_VALUEPTR(si));
+        slot = LK_SLOT(HT_ITEM_VALUEPTR(si));
         slotv = lk_obj_get_value_from_slot(recv, slot);
 
         // slot contains func obj - call?
@@ -649,7 +649,7 @@ prevscope:
                 r = VEC_ATPTR(ancs, anci);
                 if ((slots = r->o.slots) == NULL)
                     continue;
-                if ((si = qphash_get(slots, msgn)) == NULL)
+                if ((si = ht_get(slots, msgn)) == NULL)
                     continue;
                 goto found;
             }

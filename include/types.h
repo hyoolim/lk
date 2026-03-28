@@ -1,8 +1,8 @@
 #ifndef LK_TYPES_H
 #define LK_TYPES_H
 #include "rt/common.h"
+#include "rt/ht.h"
 #include "rt/num.h"
-#include "rt/qphash.h"
 #include "rt/vec.h"
 
 // foward decl of all types
@@ -42,7 +42,7 @@ struct lk_objgroup {
     lk_obj_t *last;
 };
 struct lk_common {
-    qphash_t *slots;
+    ht_t *slots;
     lk_vm_t *vm;
     lk_view_t *view;
     lk_view_t *instance_view;

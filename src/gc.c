@@ -92,10 +92,10 @@ void lk_gc_mark_obj_used(lk_obj_t *self) {
 
         if (self->o.slots != NULL) {
             struct lk_slot *slot;
-            SET_EACH(self->o.slots, item, lk_gc_mark_obj_pending(LK_OBJ(item->key));
-                     slot = LK_SLOT(SETITEM_VALUEPTR(item));
-                     lk_gc_mark_obj_pending(slot->check);
-                     lk_gc_mark_obj_pending(lk_obj_get_value_from_slot(self, slot)););
+            HT_EACH(self->o.slots, item, lk_gc_mark_obj_pending(LK_OBJ(item->key));
+                    slot = LK_SLOT(HT_ITEM_VALUEPTR(item));
+                    lk_gc_mark_obj_pending(slot->check);
+                    lk_gc_mark_obj_pending(lk_obj_get_value_from_slot(self, slot)););
         }
 
         if (self->o.view->mark_func != NULL) {

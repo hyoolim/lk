@@ -34,7 +34,7 @@ static void Ddefine_and_assignB_obj_str_obj_obj(lk_obj_t *self, lk_scope_t *loca
     lk_obj_t *v = ARG(2);
     struct lk_slot *slot;
 
-    if (self->o.slots != NULL && qphash_get(self->o.slots, k) != NULL) {
+    if (self->o.slots != NULL && ht_get(self->o.slots, k) != NULL) {
         lk_vm_raise_cstr(VM, "Cannot redefine %s", k);
     }
     slot = lk_obj_setslot(self, k, ARG(1), v);
@@ -69,7 +69,7 @@ static void Dslots_obj(lk_obj_t *self, lk_scope_t *local) {
     lk_list_t *slots = lk_list_new(VM);
 
     if (self->o.slots != NULL) {
-        SET_EACH(self->o.slots, i, vec_ptr_push(VEC(slots), (void *)i->key););
+        HT_EACH(self->o.slots, i, vec_ptr_push(VEC(slots), (void *)i->key););
     }
     RETURN(slots);
 }
@@ -114,14 +114,14 @@ static void do_obj_f(lk_obj_t *self, lk_scope_t *local) {
 }
 
 static void import_obj_obj(lk_obj_t *self, lk_scope_t *local) {
-    qphash_t *from = ARG(0)->o.slots;
+    ht_t *from = ARG(0)->o.slots;
 
     if (from != NULL) {
-        qphash_t *to = self->o.slots;
+        ht_t *to = self->o.slots;
 
         if (to == NULL)
-            to = self->o.slots = qphash_alloc(sizeof(struct lk_slot), lk_obj_hash_code, lk_obj_key_cmp);
-        SET_EACH(from, i, *LK_SLOT(qphash_set(to, i->key)) = *LK_SLOT(SETITEM_VALUEPTR(i)););
+            to = self->o.slots = ht_alloc(sizeof(struct lk_slot), lk_obj_hash_code, lk_obj_key_cmp);
+        HT_EACH(from, i, *LK_SLOT(ht_set(to, i->key)) = *LK_SLOT(HT_ITEM_VALUEPTR(i)););
     }
     RETURN(self);
 }
@@ -254,7 +254,7 @@ void lk_obj_just_free(lk_obj_t *self) {
     if (tag->free_func != NULL)
         tag->free_func(self);
     if (self->o.slots != NULL)
-        qphash_free(self->o.slots);
+        ht_free(self->o.slots);
     mem_free(self);
 }
 
@@ -313,9 +313,9 @@ struct lk_slot *lk_obj_setslot(lk_obj_t *self, lk_obj_t *k, lk_obj_t *check, lk_
         uint32_t first = vec_str_get(VEC(k), 0);
 
         if (self->o.slots == NULL) {
-            self->o.slots = qphash_alloc(sizeof(struct lk_slot), lk_obj_hash_code, lk_obj_key_cmp);
+            self->o.slots = ht_alloc(sizeof(struct lk_slot), lk_obj_hash_code, lk_obj_key_cmp);
         }
-        slot = LK_SLOT(qphash_set(self->o.slots, k));
+        slot = LK_SLOT(ht_set(self->o.slots, k));
         slot->check = check;
 
         if ('A' <= first && first <= 'Z') {
@@ -551,20 +551,19 @@ int lk_obj_isa(lk_obj_t *self, lk_obj_t *t) {
 }
 
 struct lk_slot *lk_obj_getslot(lk_obj_t *self, lk_obj_t *k) {
-    qphash_t *slots = self->o.slots;
-    setitem_t *item;
+    ht_t *slots = self->o.slots;
+    ht_item_t *item;
 
-    if (slots == NULL || (item = qphash_get(slots, k)) == NULL)
+    if (slots == NULL || (item = ht_get(slots, k)) == NULL)
         return NULL;
-    return LK_SLOT(SETITEM_VALUEPTR(item));
+    return LK_SLOT(HT_ITEM_VALUEPTR(item));
 }
 
 struct lk_slot *lk_obj_get_slot_from_any(lk_obj_t *self, lk_obj_t *k) {
-    qphash_t *slots;
-    setitem_t *si;
+    ht_t *slots;
+    ht_item_t *si;
     FIND(NULL,
-         if ((slots = self->o.slots) != NULL &&
-             (si = qphash_get(slots, k)) != NULL) return LK_SLOT(SETITEM_VALUEPTR(si)););
+         if ((slots = self->o.slots) != NULL && (si = ht_get(slots, k)) != NULL) return LK_SLOT(HT_ITEM_VALUEPTR(si)););
 }
 
 lk_obj_t *lk_obj_get_value_from_slot(lk_obj_t *self, struct lk_slot *slot) {

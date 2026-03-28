@@ -7,8 +7,8 @@ struct lk_parser {
     struct lk_common o;
     const lk_str_t *text;
     const char *err;
-    qphash_t *binaryops;
-    qphash_t *precs;
+    ht_t *binaryops;
+    ht_t *precs;
     vec_t *tokentypes;
     vec_t *tokenvalues;
     vec_t *words;

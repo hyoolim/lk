@@ -78,14 +78,14 @@ static void include_scope_str_str(lk_obj_t *self, lk_scope_t *local) {
     lk_scope_t *fr = lk_vm_eval_file(VM, vec_str_tocstr(VEC(ARG(0))), vec_str_tocstr(VEC(ARG(1))));
 
     if (fr != NULL) {
-        qphash_t *from = fr->o.slots;
+        ht_t *from = fr->o.slots;
 
         if (from != NULL) {
-            qphash_t *to = self->o.slots;
+            ht_t *to = self->o.slots;
 
             if (to == NULL)
-                to = self->o.slots = qphash_alloc(sizeof(struct lk_slot), lk_obj_hash_code, lk_obj_key_cmp);
-            SET_EACH(from, i, *LK_SLOT(qphash_set(to, i->key)) = *LK_SLOT(SETITEM_VALUEPTR(i)););
+                to = self->o.slots = ht_alloc(sizeof(struct lk_slot), lk_obj_hash_code, lk_obj_key_cmp);
+            HT_EACH(from, i, *LK_SLOT(ht_set(to, i->key)) = *LK_SLOT(HT_ITEM_VALUEPTR(i)););
         }
     }
 
@@ -200,7 +200,7 @@ lk_scope_t *lk_scope_new(lk_vm_t *vm) {
         vec_clear(&self->stack);
 
         if (self->o.slots != NULL) {
-            qphash_clear(self->o.slots);
+            ht_clear(self->o.slots);
         }
 
     } else {

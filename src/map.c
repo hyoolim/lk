@@ -66,7 +66,7 @@ lk_list_t *lk_map_keys(lk_map_t *self) {
 }
 
 lk_num_t *lk_map_size(lk_map_t *self) {
-    return lk_num_new(VM, ht_size(QPHASH(self)));
+    return lk_num_new(VM, ht_length(QPHASH(self)));
 }
 
 lk_list_t *lk_map_values(lk_map_t *self) {

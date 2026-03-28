@@ -49,7 +49,7 @@ int ht_hash(const void *key, int cap);
 #define HT_ITEM_VALUE(type, item) (*(type *)HT_ITEM_VALUEPTR(item))
 #define HT_ITEM_VALUEPTR(item) ((void *)((char *)(item) + sizeof(ht_item_t)))
 
-// placeholder key for deleted items
+// Placeholder key for deleted items. Pointer value 1 is reserved — callers must never use it as a real key.
 #define HT_ITEM_SKIPKEY ((ht_item_t *)1)
 
 // simple way to iterate over the whole set

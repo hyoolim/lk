@@ -68,6 +68,7 @@ static void ht_resize(ht_t *self, int cap) {
 ht_t *ht_alloc(int value_length, ht_hash_func_t *hash_func, ht_cmp_func_t *cmp_func) {
     ht_t *self = mem_alloc(sizeof(ht_t));
     ht_init(self, value_length, hash_func, cmp_func);
+    self->refc = 1;
     return self;
 }
 
@@ -76,8 +77,16 @@ void ht_fin(ht_t *self) {
 }
 
 void ht_free(ht_t *self) {
+    if (--self->refc > 0)
+        return;
+
     ht_fin(self);
     mem_free(self);
+}
+
+ht_t *ht_retain(ht_t *self) {
+    self->refc++;
+    return self;
 }
 
 void ht_init(ht_t *self, int value_length, ht_hash_func_t *hash_func, ht_cmp_func_t *cmp_func) {

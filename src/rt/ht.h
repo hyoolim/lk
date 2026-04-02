@@ -23,6 +23,7 @@ struct ht_data {
 
 typedef struct ht {
     struct ht_data *data;
+    int refc;
 } ht_t;
 
 // construction/destruction
@@ -30,6 +31,7 @@ ht_t *ht_alloc(int value_length, ht_hash_func_t *hash_func, ht_cmp_func_t *cmp_f
 void ht_fin(ht_t *self);
 void ht_free(ht_t *self);
 void ht_init(ht_t *self, int value_length, ht_hash_func_t *hash_func, ht_cmp_func_t *cmp_func);
+ht_t *ht_retain(ht_t *self);
 
 // manipulation
 void ht_clear(ht_t *self);

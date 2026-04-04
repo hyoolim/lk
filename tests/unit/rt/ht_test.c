@@ -330,6 +330,65 @@ TEST each_after_resize(void) {
 }
 
 #pragma endregion
+#pragma region sharing
+
+TEST retain_returns_same_pointer(void) {
+    ht_t *a = new_int_map();
+    ht_t *b = ht_retain(a);
+
+    ASSERT_EQ(a, b);
+
+    ht_free(b);
+    ht_free(a);
+    PASS();
+}
+
+TEST retain_shares_data(void) {
+    ht_t *a = new_int_map();
+    set_int(a, K(1), 100);
+    set_int(a, K(2), 200);
+
+    ht_t *b = ht_retain(a);
+
+    ASSERT_EQ(100, *get_int(b, K(1)));
+    ASSERT_EQ(200, *get_int(b, K(2)));
+
+    ht_free(b);
+    ht_free(a);
+    PASS();
+}
+
+TEST writes_visible_through_shared(void) {
+    ht_t *a = new_int_map();
+    ht_t *b = ht_retain(a);
+
+    set_int(a, K(1), 42);
+    ASSERT_EQ(42, *get_int(b, K(1)));
+
+    set_int(b, K(2), 99);
+    ASSERT_EQ(99, *get_int(a, K(2)));
+
+    ht_free(a);
+    ht_free(b);
+    PASS();
+}
+
+TEST free_retained_keeps_data(void) {
+    // Freeing one reference must not destroy data still held by the other
+    ht_t *a = new_int_map();
+    set_int(a, K(1), 55);
+
+    ht_t *b = ht_retain(a);
+    ht_free(a); // refc 2 → 1; data must survive
+
+    ASSERT_EQ(55, *get_int(b, K(1)));
+    ASSERT_EQ(1, ht_length(b));
+
+    ht_free(b); // refc 1 → 0; actually freed
+    PASS();
+}
+
+#pragma endregion
 #pragma region lifecycle
 
 TEST init_fin(void) {
@@ -370,6 +429,11 @@ SUITE(ht) {
     RUN_TEST(each_empty);
     RUN_TEST(each_after_clear);
     RUN_TEST(each_after_resize);
+    // sharing
+    RUN_TEST(retain_returns_same_pointer);
+    RUN_TEST(retain_shares_data);
+    RUN_TEST(writes_visible_through_shared);
+    RUN_TEST(free_retained_keeps_data);
     // lifecycle
     RUN_TEST(init_fin);
 }

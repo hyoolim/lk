@@ -82,7 +82,7 @@ static void resize(charset_t *self) {
     } while (0)
 #define REMOVE(self, i) \
     do { \
-        memmove(CHARSET_DATA(self) + (i), CHARSET_DATA(self) + (i) + 1, sizeof(uint32_t) * ((self)->size - (i))); \
+        memmove(CHARSET_DATA(self) + (i), CHARSET_DATA(self) + (i) + 1, sizeof(uint32_t) * ((self)->size - (i) - 1)); \
         (self)->size--; \
     } while (0)
 

@@ -661,7 +661,7 @@ prevscope:
 
         // forward:
         if (VEC_EQ(VEC(msgn), VEC(vm->str_forward))) {
-            lk_vm_raise_cstr(vm, "Cannot find slot named %s", CSTRING(msgn));
+            lk_vm_raise_cstr(vm, "Cannot find slot named %s", msgn);
 
         } else {
             msgn = vm->str_forward;

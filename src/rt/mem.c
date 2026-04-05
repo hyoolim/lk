@@ -28,7 +28,7 @@ void *mem_alloc(size_t size) {
     assert(size > 0);
     atomic_fetch_add_explicit(&alloc_count, 1, memory_order_relaxed);
 
-    if (size < MEM_MAX_RECYCLED && recycled[size] != NULL) {
+    if (size >= sizeof(void *) && size < MEM_MAX_RECYCLED && recycled[size] != NULL) {
         // Pop from free list — first word of each recycled block stores the next pointer
         void *block = recycled[size];
         recycled[size] = *(void **)block;
@@ -56,8 +56,8 @@ void mem_free(void *block) {
         size_t size = *((size_t *)block - 1);
         atomic_fetch_sub_explicit(&alloc_count, 1, memory_order_relaxed);
 
-        if (size < MEM_MAX_RECYCLED) {
-            // Push onto free list — threads the next pointer through the block
+        if (size >= sizeof(void *) && size < MEM_MAX_RECYCLED) {
+            // Push onto free list — first word stores next pointer; requires size >= sizeof(void *)
             *(void **)block = recycled[size];
             recycled[size] = block;
             atomic_fetch_sub_explicit(&alloc_used, size, memory_order_relaxed);
@@ -96,7 +96,7 @@ void *mem_resize(void *old, size_t size) {
     if (size == old_size)
         return old;
 
-    if (size < MEM_MAX_RECYCLED && recycled[size] != NULL) {
+    if (size >= sizeof(void *) && size < MEM_MAX_RECYCLED && recycled[size] != NULL) {
         // Serve new size from recycler, copy data, then recycle or free old
         void *block = recycled[size];
         recycled[size] = *(void **)block;
@@ -108,7 +108,7 @@ void *mem_resize(void *old, size_t size) {
 
         atomic_fetch_sub_explicit(&alloc_recycled, size, memory_order_relaxed);
 
-        if (old_size < MEM_MAX_RECYCLED) {
+        if (old_size >= sizeof(void *) && old_size < MEM_MAX_RECYCLED) {
             *(void **)old = recycled[old_size];
             recycled[old_size] = old;
             atomic_fetch_add_explicit(&alloc_recycled, old_size, memory_order_relaxed);

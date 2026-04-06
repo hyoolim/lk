@@ -48,6 +48,35 @@ static void Ddefine_and_assignB_obj_str_obj_obj(lk_obj_t *self, lk_scope_t *loca
     RETURN(v);
 }
 
+static void DassignB_obj_str_obj(lk_obj_t *self, lk_scope_t *local) {
+    lk_str_t *k = LK_STRING(ARG(0));
+    lk_obj_t *v = ARG(1);
+    struct lk_slot *slot = lk_obj_getslot(self, LK_OBJ(k));
+    lk_obj_t *oldval;
+
+    if (slot == NULL) {
+        lk_vm_raise_cstr(VM, "Cannot assign to undefined slot %s", k);
+
+    } else if (LK_SLOT_CHECKOPTION(slot, LK_SLOTOPTION_READONLY)) {
+        lk_vm_raise_cstr(VM, "Cannot assign to readonly slot %s", k);
+
+    } else {
+        oldval = lk_obj_get_value_from_slot(self, slot);
+
+        if (LK_OBJ_ISFUNC(oldval))
+            v = LK_OBJ(lk_func_combine(LK_FUNC(oldval), LK_FUNC(v)));
+
+        lk_obj_set_value_on_slot(self, slot, v);
+        v = lk_obj_get_value_from_slot(self, slot);
+
+        if (LK_OBJ_ISFUNC(v)) {
+            LK_SLOT_SETOPTION(slot, LK_SLOTOPTION_AUTOSEND);
+            SETOPT(LK_FUNC(v)->cf.opts, LK_FUNCOASSIGNED);
+        }
+        RETURN(v);
+    }
+}
+
 static void Did_obj(lk_obj_t *self, lk_scope_t *local) {
     RETURN(lk_num_new(VM, (double)(uintptr_t)self));
 }
@@ -126,6 +155,19 @@ static void import_obj_obj(lk_obj_t *self, lk_scope_t *local) {
     RETURN(self);
 }
 
+static void as_obj_obj(lk_obj_t *self, lk_scope_t *local) {
+    lk_obj_t *result = lk_obj_alloc(ARG(0));
+
+    if (result->o.slots != NULL) {
+        ht_free(result->o.slots);
+        result->o.slots = NULL;
+    }
+    if (self->o.slots != NULL)
+        result->o.slots = ht_retain(self->o.slots);
+
+    RETURN(result);
+}
+
 static void parents_obj(lk_obj_t *self, lk_scope_t *local) {
     if (LK_OBJ_HASPARENTS(self)) {
         RETURN(lk_list_new_from_darray(VM, LK_OBJ_PARENTS(self)));
@@ -156,11 +198,13 @@ void lk_obj_lib_init(lk_vm_t *vm) {
     lk_obj_set_cfunc_lk(obj, ":", Ddefine_obj_str_obj, str, obj, NULL);
     lk_obj_set_cfunc_lk(obj, ":=", Ddefine_and_assignB_obj_str_obj, str, obj, NULL);
     lk_obj_set_cfunc_lk(obj, ":=", Ddefine_and_assignB_obj_str_obj_obj, str, obj, obj, NULL);
+    lk_obj_set_cfunc_lk(obj, "=", DassignB_obj_str_obj, str, obj, NULL);
     lk_obj_set_cfunc_lk(obj, "_id", Did_obj, NULL);
     lk_obj_set_cfunc_lk(obj, "_retrieve", Dretrieve_obj_str, str, NULL);
     lk_obj_set_cfunc_lk(obj, "_self", Dself_obj, NULL);
     lk_obj_set_cfunc_lk(obj, "_slots", Dslots_obj, NULL);
     lk_obj_set_cfunc_lk(obj, "alloc", alloc_obj, NULL);
+    lk_obj_set_cfunc_lk(obj, "as", as_obj_obj, obj, NULL);
     lk_obj_set_cfunc_lk(obj, "also", also_obj_obj, obj, NULL);
     lk_obj_set_cfunc_lk(obj, "ancestor?", ancestor_obj_obj, obj, NULL);
     lk_obj_set_cfunc_lk(obj, "ancestors", ancestors_obj, NULL);

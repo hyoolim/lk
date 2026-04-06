@@ -1,0 +1,16 @@
+include('tester.lk')
+Tester.new('as').do {
+
+Dog := Object.new
+Cat := Object.new
+dog := Dog.new
+dog.name := 'Rex'
+cat := dog.as(Cat)
+.test('as returns different object', dog == cat, False)
+.test('shared slot visible from as()', cat.name, 'Rex')
+dog.name = 'Max'
+.test('set via original visible from as()', cat.name, 'Max')
+cat.name = 'Scout'
+.test('set via as() visible from original', dog.name, 'Scout')
+.finish
+}

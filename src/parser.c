@@ -4,11 +4,6 @@
 #define PARSER (LK_PARSER(self))
 
 // ext map - types
-static void setbinaryop(lk_parser_t *self, const char *op, const char *subst) {
-    lk_vm_t *vm = LK_VM(self);
-    *(lk_str_t **)ht_set(self->binaryops, lk_str_new_from_cstr(vm, op)) = lk_str_new_from_cstr(vm, subst);
-}
-
 static void setprec(lk_parser_t *self, const char *op, int level, enum lk_precassoc_t assoc) {
     lk_vm_t *vm = LK_VM(self);
     lk_prec_t *prec = LK_PREC(lk_obj_alloc(vm->t_prec));
@@ -27,10 +22,6 @@ static void alloc_parser(lk_obj_t *self, lk_obj_t *parent) {
     PARSER->words = vec_ptr_alloc();
     PARSER->ops = vec_ptr_alloc();
     PARSER->comments = vec_ptr_alloc();
-
-    // binary op names
-    setbinaryop(PARSER, "->", "send");
-    setbinaryop(PARSER, ".", "send");
 
     // prec map
     setprec(PARSER, "@", 100000, LK_PREC_ASSOC_LEFT); // misc
@@ -249,15 +240,32 @@ static lk_prec_t *shiftreduce(lk_parser_t *self, lk_instr_t *op) {
             top->v = LK_OBJ(getbinaryop(self, LK_STRING(top->v)));
             topstr = VEC(top->v);
 
-            // rec / arg -> rec /arg
-            if ((arg->type == LK_INSTRTYPE_SCOPEMSG || arg->type == LK_INSTRTYPE_STRING) &&
-                vec_str_cmp_cstr(topstr, "send") == 0) {
-                top = arg;
-                top->type = LK_INSTRTYPE_APPLYMSG;
-                goto gotarg;
+            // . / -> / @ force RHS identifier as literal key
+            if (arg->type == LK_INSTRTYPE_SCOPEMSG) {
+                if (vec_str_cmp_cstr(topstr, ".") == 0 || vec_str_cmp_cstr(topstr, "->") == 0) {
+                    top->type = LK_INSTRTYPE_APPLYMSG;
+                    top->v = arg->v;
+                    top->opts &= ~LK_INSTROHASMSGARGS;
 
-                // rec ? arg -> rec ? { arg }
-            } else if (arg->type != LK_INSTRTYPE_FUNC && vec_str_cmp_cstr(topstr, "?") == 0) {
+                    if (arg->opts & LK_INSTROHASMSGARGS)
+                        SETOPT(top->opts, LK_INSTROHASMSGARGS);
+
+                    if (arg->next != NULL) {
+                        top->next = arg->next;
+                        arg->next->prev = top;
+                    }
+                    goto gotarg;
+
+                } else if (vec_str_cmp_cstr(topstr, "@") == 0) {
+                    top->type = LK_INSTRTYPE_SLOTMSG;
+                    top->v = arg->v;
+                    top->opts &= ~LK_INSTROHASMSGARGS;
+                    goto gotarg;
+                }
+            }
+
+            // rec ? arg -> rec ? { arg }
+            if (arg->type != LK_INSTRTYPE_FUNC && vec_str_cmp_cstr(topstr, "?") == 0) {
                 arg = lk_instr_new_func(self, arg);
             }
             arg = lk_instr_new_arglist(self, arg);
@@ -1013,6 +1021,33 @@ static lk_instr_t *applymacros(lk_parser_t *self, lk_instr_t *it) {
                 args->v = LK_OBJ(name);
 
                 // var[] /: @[Object ] /= @[1 ] -> := @['var' Object 1 ]
+                if (nextop != NULL && nextop->type == LK_INSTRTYPE_APPLYMSG &&
+                    vec_str_cmp_cstr(VEC(nextop->v), "=") == 0) {
+                    lk_instr_t *a, *nextargs = nextop->next;
+
+                    it->v = LK_OBJ(lk_str_new_from_cstr(LK_VM(it), ":="));
+                    (it->next = nextargs)->prev = it;
+                    a = LK_INSTR(args->v);
+
+                    while (a->next != NULL)
+                        a = a->next;
+                    (a->next = LK_INSTR(nextargs->v))->prev = a;
+                    nextargs->v = args->v;
+                }
+
+            } else if (name->type == LK_INSTRTYPE_SLOTMSG) {
+                // foo@name := val → foo :=(APPLYMSG) @['name' val]
+                lk_instr_t *nextop = args->next;
+
+                if ((it->prev = name->prev) != NULL)
+                    it->prev->next = it;
+                else
+                    first = it;
+                name->type = LK_INSTRTYPE_STRING;
+                (name->next = LK_INSTR(args->v))->prev = name;
+                args->v = LK_OBJ(name);
+
+                // foo@name : Type = val → foo :=(APPLYMSG) @['name' Type val]
                 if (nextop != NULL && nextop->type == LK_INSTRTYPE_APPLYMSG &&
                     vec_str_cmp_cstr(VEC(nextop->v), "=") == 0) {
                     lk_instr_t *a, *nextargs = nextop->next;

@@ -17,6 +17,7 @@ struct lk_instr {
         LK_INSTRTYPE_APPLYMSG,
         LK_INSTRTYPE_SCOPEMSG,
         LK_INSTRTYPE_SELFMSG,
+        LK_INSTRTYPE_SLOTMSG,
         LK_INSTRTYPE_MORE
     } type;
     lk_instr_t *prev;

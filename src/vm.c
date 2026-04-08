@@ -505,6 +505,7 @@ nextinstr:
     case LK_INSTRTYPE_SCOPEMSG:
         lk_scope_stack_push(self, LK_OBJ(self->scope));
         goto sendmsg;
+    case LK_INSTRTYPE_SLOTMSG:
     case LK_INSTRTYPE_APPLYMSG:
     sendmsg:
         lk_scope_stack_push(self, LK_OBJ(instr));
@@ -593,6 +594,12 @@ prevscope:
         } else {
             msg = NULL;
             msgn = vm->str_at;
+        }
+
+        if (msg != NULL && msg->type == LK_INSTRTYPE_SLOTMSG) {
+            struct lk_slot *slot = lk_obj_getslot(recv, LK_OBJ(msgn));
+            lk_scope_stack_push(self, slot != NULL ? lk_obj_get_value_from_slot(recv, slot) : NIL);
+            goto nextinstr;
         }
 
         ancs = NULL;

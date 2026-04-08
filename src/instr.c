@@ -33,6 +33,7 @@ lk_str_t *lk_instr_message(lk_obj_t *self) {
         case LK_INSTRTYPE_APPLYMSG:
         case LK_INSTRTYPE_SCOPEMSG:
         case LK_INSTRTYPE_SELFMSG:
+        case LK_INSTRTYPE_SLOTMSG:
             return LK_STRING(instr->v);
         default:
             instr = instr->prev;
@@ -187,6 +188,11 @@ void lk_instr_print(lk_instr_t *self) {
 
         if (!(self->opts & LK_INSTROHASMSGARGS))
             printf("[]");
+        break;
+    case LK_INSTRTYPE_SLOTMSG:
+        printf("@");
+        vec_print_tostream(VEC(self->v), stdout);
+        printf("[]");
         break;
     case LK_INSTRTYPE_MORE:
         break;

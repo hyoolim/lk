@@ -104,7 +104,10 @@ static void Dslots_obj(lk_obj_t *self, lk_scope_t *local) {
 }
 
 static void alloc_obj(lk_obj_t *self, lk_scope_t *local) {
-    RETURN(lk_obj_alloc(self));
+    lk_obj_t *result = lk_obj_alloc(self);
+
+    lk_obj_set_slot_by_cstr(result, "_type", VM->t_obj, self);
+    RETURN(result);
 }
 
 static void also_obj_obj(lk_obj_t *self, lk_scope_t *local) {

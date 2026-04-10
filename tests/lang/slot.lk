@@ -1,6 +1,12 @@
 include('tester.lk')
 Tester.new('slot').do {
 
+Dog := Object.new
+dog := Dog.new
+
+.test('@_type is set on new', dog@_type == Dog, True)
+.test('@_type is not the parent type', dog@_type == Object, False)
+
 obj := Object.new
 
 .test('@name read on missing slot returns Nil', obj@name, Nil)

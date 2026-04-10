@@ -1,0 +1,19 @@
+include('tester.lk')
+Tester.new('slot').do {
+
+obj := Object.new
+
+.test('@name read on missing slot returns Nil', obj@name, Nil)
+
+obj@name := 'Rex'
+.test('@name := defines and assigns', obj@name, 'Rex')
+
+obj@name = 'Max'
+.test('@name = assigns to existing', obj@name, 'Max')
+
+f := { 42 }
+obj@fn := f
+.test('@name returns function ref, does not call', obj@fn == f, True)
+
+.finish
+}

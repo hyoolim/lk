@@ -207,6 +207,7 @@ lk_vm_t *lk_vm_new(void) {
     lk_global_set(".str.on assign", LK_OBJ(self->str_onassign = lk_str_new_from_cstr(self, "_on_assign")));
     lk_global_set(".str.at", LK_OBJ(self->str_at = lk_str_new_from_cstr(self, "at")));
     lk_global_set(".str.slash", LK_OBJ(self->str_filesep = lk_str_new_from_cstr(self, "/")));
+    lk_global_set(".str.lktype", LK_OBJ(self->str_lktype = lk_str_new_from_cstr(self, "_type")));
 
     // attach all funcs to primitive types
     lk_bool_lib_init(self);
@@ -445,6 +446,7 @@ void lk_vm_do_eval_func(lk_vm_t *vm) {
     vec_t *ancs;
     lk_obj_t *recv, *r, *slotv;
     lk_func_t *func;
+    bool tried_type;
 
     // rescue err and run approp func
     struct lk_rescue rescue;
@@ -603,6 +605,7 @@ prevscope:
         }
 
         ancs = NULL;
+        tried_type = false;
     findslot:
         if ((slots = r->o.slots) == NULL)
             goto parent;
@@ -663,7 +666,25 @@ prevscope:
 
         } else {
             r = (LK_OBJ_ISSCOPE(r) && LK_SCOPE(r)->parent != NULL) ? LK_OBJ(LK_SCOPE(r)->parent) : r->o.view->parent;
-            goto findslot;
+
+            if (r != NULL)
+                goto findslot;
+        }
+
+        // _type fallback: if _view chain exhausted and _type differs from the view's type, try it
+        if (!tried_type && recv->o.slots != NULL) {
+            si = ht_get(recv->o.slots, vm->str_lktype);
+
+            if (si != NULL) {
+                lk_obj_t *type_obj = lk_obj_get_value_from_slot(recv, LK_SLOT(HT_ITEM_VALUEPTR(si)));
+
+                if (type_obj != NULL && type_obj != vm->t_nil && type_obj != recv->o.view->parent) {
+                    tried_type = true;
+                    r = type_obj;
+                    ancs = NULL;
+                    goto findslot;
+                }
+            }
         }
 
         // forward:

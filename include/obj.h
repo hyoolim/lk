@@ -61,10 +61,7 @@ lk_obj_t *lk_obj_get_value_from_slot(lk_obj_t *self, struct lk_slot *slot);
 int lk_obj_hash_code(const void *k, int cap);
 int lk_obj_key_cmp(const void *self, const void *other);
 #define LK_OBJ_ISTYPE(self, t) \
-    ((self) == (t) || (t) == LK_VM(self)->t_obj /* || (  (t)->o.view != LK_VM(self)->t_obj->o.view \
-                                                   && (self)->o.view == (t)->o.view \
-                                                   ) */ \
-     || lk_obj_isa((self), (t)))
+    ((self) == (t) || (t) == LK_VM(self)->t_obj || ((self)->o.view->type == (t)) || lk_obj_isa((self), (t)))
 /*
 #define LK_OBJ_ISA(self, t) ((self) == (t) ? 1 : \
 LK_OBJ_HASONEPARENT((self)->o.parents) && \
@@ -77,13 +74,19 @@ lk_obj_isa((self), (t)))
  */
 #define LK_OBJ_HASPARENTS(self) ((ptrdiff_t)((self)->o.view->parent) & 1)
 #define LK_OBJ_PARENTS(self) ((vec_t *)((ptrdiff_t)((self)->o.view->parent) & ~1))
-#define LK_OBJ_PROTO(self) (LK_OBJ_HASPARENTS(self) ? vec_ptr_get(LK_OBJ_PARENTS(self), -1) : (self)->o.view->parent)
+#define LK_OBJ_PROTO(self) \
+    ((self)->o.view->type != NULL && (self)->o.view->type != (lk_obj_t *)(self) ? (self)->o.view->type \
+     : LK_OBJ_HASPARENTS(self)                                                  ? vec_ptr_get(LK_OBJ_PARENTS(self), -1) \
+                                                                                : (self)->o.view->parent)
 #define LK_OBJ_ISA(self, t) \
-    ((self) == (t) ? 1 : !LK_OBJ_HASPARENTS(self) && (self)->o.view->parent == (t) ? 2 : lk_obj_isa((self), (t)))
+    ((self) == (t)                                                         ? 1 \
+     : !LK_OBJ_HASPARENTS(self) && (self)->o.view->type == (lk_obj_t *)(t) ? 2 \
+                                                                           : lk_obj_isa((self), (t)))
 #define LK_OBJ_ISCFUNC(self) ((self)->o.view->alloc_func == LK_VM(self)->t_cfunc->o.view->alloc_func)
 #define LK_OBJ_ISSCOPE(self) ((self)->o.view->free_func == LK_VM(self)->t_scope->o.view->free_func)
 #define LK_OBJ_ISGFUNC(self) ((self)->o.view->free_func == LK_VM(self)->t_gfunc->o.view->free_func)
 #define LK_OBJ_ISFUNC(self) \
     ((self)->o.view->free_func == LK_VM(self)->t_func->o.view->free_func || LK_OBJ_ISGFUNC(self))
+#define LK_OBJ_ISCALLABLE(self) (LK_OBJ_ISFUNC(self) && (self)->o.view->type != (lk_obj_t *)(self))
 #define LK_OBJ_ISINSTR(self) ((self)->o.view->mark_func == LK_VM(self)->t_instr->o.view->mark_func)
 #endif

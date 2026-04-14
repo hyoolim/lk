@@ -87,9 +87,6 @@ void lk_gc_mark_obj_used(lk_obj_t *self) {
 
         lk_gc_mark_obj_pending(LK_OBJ(self->o.view));
 
-        if (self->o.instance_view != NULL)
-            lk_gc_mark_obj_pending(LK_OBJ(self->o.instance_view));
-
         if (self->o.slots != NULL) {
             struct lk_slot *slot;
             HT_EACH(self->o.slots, item, lk_gc_mark_obj_pending(LK_OBJ(item->key));

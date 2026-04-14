@@ -4,7 +4,7 @@
 
 // ext map - types
 void lk_vec_type_init(lk_vm_t *vm) {
-    vm->t_vec = lk_obj_alloc(vm->t_seq);
+    vm->t_vec = lk_obj_alloc_type(vm->t_seq, sizeof(lk_seq_t));
     vec_fin(VEC(vm->t_vec));
     vec_init(VEC(vm->t_vec), sizeof(int), 16);
 }

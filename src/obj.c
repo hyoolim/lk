@@ -12,6 +12,7 @@ void lk_obj_type_init(lk_vm_t *vm) {
     memset(o->o.view, 0, sizeof(lk_view_t));
     o->o.view->size = sizeof(lk_obj_t);
     vec_ptr_push(o->o.view->ancestors = vec_ptr_alloc(), o);
+    o->o.view->type = o;
 }
 
 // ext map - funcs
@@ -191,7 +192,10 @@ static void parent_obj(lk_obj_t *self, lk_scope_t *local) {
 }
 
 static void with_obj_f(lk_obj_t *self, lk_scope_t *local) {
-    do_obj_f(lk_obj_add_ref(LK_OBJ(local), lk_obj_alloc(self)), local);
+    lk_obj_t *result = lk_obj_alloc(self);
+
+    lk_obj_set_slot_by_cstr(result, "_type", VM->t_obj, self);
+    do_obj_f(lk_obj_add_ref(LK_OBJ(local), result), local);
 }
 
 void lk_obj_lib_init(lk_vm_t *vm) {
@@ -229,7 +233,7 @@ static lk_view_t *view_new(lk_view_t *proto, lk_vm_t *vm) {
     tag->o.vm = vm;
     tag->o.view = vm->t_view != NULL ? LK_VIEW(vm->t_view) : NULL;
     memset(&tag->o.mark, 0, sizeof(tag->o.mark));
-    tag->o.instance_view = NULL;
+    tag->type = NULL;
     tag->ancestors = NULL;
 
     if (vm->gc != NULL)
@@ -246,6 +250,7 @@ lk_obj_t *lk_obj_alloc_type(lk_obj_t *parent, size_t s) {
 
     tag->parent = parent;
     tag->size = s;
+    tag->type = self;
     self->o.vm = vm;
     self->o.view = tag;
 
@@ -262,23 +267,13 @@ lk_obj_t *lk_obj_alloc_type(lk_obj_t *parent, size_t s) {
 lk_obj_t *lk_obj_alloc(lk_obj_t *parent) {
     lk_vm_t *vm = LK_VM(parent);
     lk_gc_t *gc = vm->gc;
-    size_t s = parent->o.view->size;
-    lk_obj_t *self = mem_alloc(s);
-    lk_view_t *tag;
+    lk_obj_t *self = mem_alloc(parent->o.view->size);
 
-    if (parent->o.instance_view != NULL) {
-        tag = parent->o.instance_view;
-    } else {
-        tag = view_new(parent->o.view, vm);
-        tag->parent = parent;
-        tag->size = s;
-        parent->o.instance_view = tag;
-    }
     self->o.vm = vm;
-    self->o.view = tag;
+    self->o.view = parent->o.view;
 
-    if (tag->alloc_func != NULL)
-        tag->alloc_func(self, parent);
+    if (parent->o.view->alloc_func != NULL)
+        parent->o.view->alloc_func(self, parent);
 
     if (gc != NULL) {
         gc->newvalues++;
@@ -313,9 +308,10 @@ void lk_obj_free(lk_obj_t *self) {
 // update - tag
 #define LK_OBJ_IMPLVIEWSETTER(t, field) \
     LK_OBJ_DEFVIEWSETTER(t, field) { \
-        lk_obj_t *_par = !LK_OBJ_HASPARENTS(self) ? self->o.view->parent : NULL; \
-        if (_par != NULL && _par->o.instance_view == self->o.view) \
+        if (self->o.view->type != self) { \
             self->o.view = view_new(self->o.view, LK_VM(self)); \
+            self->o.view->type = self; \
+        } \
         self->o.view->field = field; \
     } \
     LK_OBJ_DEFVIEWSETTER(t, field)
@@ -328,22 +324,49 @@ LK_OBJ_IMPLVIEWSETTER(lk_viewfreefunc_t *, free_func);
 void lk_obj_extend(lk_obj_t *self, lk_obj_t *parent) {
     lk_view_t *tag;
     vec_t *parents;
+    lk_vm_t *vm = LK_VM(self);
+    // Capture original view's type before COW so we can detect instances vs. types.
+    // Instances share their creator's view (original_type != self); types own their view
+    // (original_type == self after alloc_type) or have no view owner (original_type == NULL).
+    lk_obj_t *original_type = self->o.view->type;
 
     // COW: detach from any shared instance tag before mutating
-    tag = view_new(self->o.view, LK_VM(self));
+    tag = view_new(self->o.view, vm);
     self->o.view = tag;
+    tag->type = self;
 
-    if (LK_OBJ_HASPARENTS(self)) {
-        // deep-copy the parents vec so the old and new tags don't alias it
+    if (original_type != NULL && original_type != self) {
+        // self was sharing a type's view (it's an instance or a first-time 'with'-created object).
+        // Start from the _type slot as the sole natural parent rather than inheriting
+        // the shared type's multi-parent structure.
+        parents = vec_ptr_alloc();
+
+        if (self->o.slots != NULL) {
+            ht_item_t *si = ht_get(self->o.slots, vm->str_lktype);
+
+            if (si != NULL) {
+                lk_obj_t *type_obj = lk_obj_get_value_from_slot(self, LK_SLOT(HT_ITEM_VALUEPTR(si)));
+
+                if (type_obj != NULL && type_obj != vm->t_nil)
+                    vec_ptr_push(parents, type_obj);
+            }
+        }
+        tag->parent = LK_OBJ((ptrdiff_t)parents | 1); // lowest bit = multi-parent flag; requires 2-byte alignment
+
+    } else if (LK_OBJ_HASPARENTS(self)) {
+        // self already has its own multi-parent structure from a previous 'also' call — deep-copy it
         vec_t *old_parents = LK_OBJ_PARENTS(self);
         parents = vec_ptr_alloc();
         vec_copy(parents, old_parents);
         tag->parent = LK_OBJ((ptrdiff_t)parents | 1);
 
     } else {
+        // self is a type created with alloc_type that has a single natural parent
         parents = vec_ptr_alloc();
-        vec_ptr_push(parents, tag->parent);
-        tag->parent = LK_OBJ((ptrdiff_t)parents | 1); // lowest bit = multi-parent flag; requires 2-byte alignment
+
+        if (tag->parent != NULL)
+            vec_ptr_push(parents, tag->parent);
+        tag->parent = LK_OBJ((ptrdiff_t)parents | 1);
     }
     vec_ptr_unshift(parents, parent);
 
@@ -409,8 +432,15 @@ void lk_obj_set_value_on_slot(lk_obj_t *self, struct lk_slot *slot, lk_obj_t *v)
     }
 }
 
+// Returns true when obj was created via 'new'/'alloc' and thus has a _type slot.
+// Such objects may share their creator's ancestor vec (stale when obj != vec[0]).
+static bool is_proto_object(lk_obj_t *obj, lk_vm_t *vm) {
+    return obj->o.slots != NULL && ht_get(obj->o.slots, vm->str_lktype) != NULL;
+}
+
 int lk_obj_calc_ancestors(lk_obj_t *self) {
     lk_obj_t *cand = NULL;
+    lk_vm_t *vm = LK_VM(self);
     vec_t *pars;
     vec_t *il, *newancs = vec_ptr_alloc(), *ol = vec_ptr_alloc();
     int candi, j, k, olc, ilc;
@@ -426,7 +456,12 @@ int lk_obj_calc_ancestors(lk_obj_t *self) {
             cand = VEC_ATPTR(pars, candi);
             il = vec_ptr_alloc();
 
-            if (cand->o.view->ancestors == NULL)
+            // recompute if stale: proto-objects created via 'new' share their type's ancestor
+            // vec, so ancestors[0] != self — must recompute so self appears at index 0.
+            // Objects created via 'with' intentionally share the creator's ancestor vec; leave as-is.
+            if (cand->o.view->ancestors == NULL ||
+                (is_proto_object(cand, vm) && VEC_COUNT(cand->o.view->ancestors) > 0 &&
+                 VEC_ATPTR(cand->o.view->ancestors, 0) != cand))
                 lk_obj_calc_ancestors(cand);
             if (cand->o.view->ancestors == NULL)
                 return 0;
@@ -437,10 +472,24 @@ int lk_obj_calc_ancestors(lk_obj_t *self) {
     } else {
         cand = self->o.view->parent;
 
+        // for prototype instances (view->parent == NULL), use _type slot as effective parent
+        if (cand == NULL && self->o.slots != NULL) {
+            ht_item_t *si = ht_get(self->o.slots, vm->str_lktype);
+
+            if (si != NULL) {
+                lk_obj_t *type_obj = lk_obj_get_value_from_slot(self, LK_SLOT(HT_ITEM_VALUEPTR(si)));
+
+                if (type_obj != NULL && type_obj != vm->t_nil)
+                    cand = type_obj;
+            }
+        }
+
         if (cand != NULL) {
             il = vec_ptr_alloc();
 
-            if (cand->o.view->ancestors == NULL)
+            if (cand->o.view->ancestors == NULL ||
+                (is_proto_object(cand, vm) && VEC_COUNT(cand->o.view->ancestors) > 0 &&
+                 VEC_ATPTR(cand->o.view->ancestors, 0) != cand))
                 lk_obj_calc_ancestors(cand);
             if (cand->o.view->ancestors == NULL)
                 return 0;
@@ -455,9 +504,10 @@ int lk_obj_calc_ancestors(lk_obj_t *self) {
         vec_ptr_push(ol, il);
 
     } else {
-        if (self->o.view->parent != NULL) {
+        // use cand (which may be the _type-derived effective parent) for the flat parents list
+        if (cand != NULL) {
             il = vec_ptr_alloc();
-            vec_ptr_push(il, self->o.view->parent);
+            vec_ptr_push(il, cand);
             vec_ptr_push(ol, il);
         }
     }
@@ -503,10 +553,10 @@ startover:
         return 0;
     else {
         // COW the tag before storing ancestors so shared instance tags aren't corrupted
-        lk_obj_t *_par = !LK_OBJ_HASPARENTS(self) ? self->o.view->parent : NULL;
-
-        if (_par != NULL && _par->o.instance_view == self->o.view)
+        if (self->o.view->type != self) {
             self->o.view = view_new(self->o.view, LK_VM(self));
+            self->o.view->type = self;
+        }
 
         vec_t *oldancs = self->o.view->ancestors;
 
@@ -574,12 +624,24 @@ void lk_obj_set_cfunc_cvoid(lk_obj_t *self, const char *name, ...) {
 }
 
 // info
+// In the new design, instances share their type's view (view->type = owning type).
+// When walking the prototype chain, if self is an instance (view->type != self),
+// the next step is view->type (the owning type), not view->parent (the type's parent).
 #define FIND(nil, check) \
     do { \
         while (1) { \
-            check if (self->o.view->ancestors != NULL) goto checkancestors; \
-            self = (LK_OBJ_ISSCOPE(self) && LK_SCOPE(self)->parent != NULL) ? LK_OBJ(LK_SCOPE(self)->parent) \
-                                                                            : self->o.view->parent; \
+            check /* only use ancestors when self is a type (not an instance sharing a type's view) */ \
+                if (self->o.view->ancestors != NULL && \
+                    (self->o.view->type == NULL || self->o.view->type == (lk_obj_t *)self)) goto checkancestors; \
+            if (LK_OBJ_ISSCOPE(self) && LK_SCOPE(self)->parent != NULL) { \
+                self = LK_OBJ(LK_SCOPE(self)->parent); \
+            } else if (self->o.view->type != NULL && self->o.view->type != self) { \
+                self = self->o.view->type; \
+            } else { \
+                self = self->o.view->parent; \
+            } \
+            if (self == NULL) \
+                return (nil); \
         } \
     checkancestors: { \
         vec_t *ancs = self->o.view->ancestors; \

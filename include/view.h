@@ -7,6 +7,7 @@ struct lk_view {
     struct lk_common o;
     size_t size;
     lk_obj_t *parent;
+    lk_obj_t *type; // back-reference to the type object that owns this view
     vec_t *ancestors;
     lk_viewallocfunc_t *alloc_func;
     lk_viewmarkfunc_t *mark_func;

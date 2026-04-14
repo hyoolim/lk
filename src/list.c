@@ -6,7 +6,7 @@ static LK_OBJ_DEFMARKFUNC(mark_list) {
 }
 
 void lk_list_type_init(lk_vm_t *vm) {
-    vm->t_list = lk_obj_alloc(vm->t_seq);
+    vm->t_list = lk_obj_alloc_type(vm->t_seq, sizeof(lk_seq_t));
     vec_fin(VEC(vm->t_list));
     vec_init(VEC(vm->t_list), sizeof(lk_obj_t *), 16);
     lk_obj_set_mark_func(vm->t_list, mark_list);

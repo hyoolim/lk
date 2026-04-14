@@ -45,7 +45,6 @@ struct lk_common {
     ht_t *slots;
     lk_vm_t *vm;
     lk_view_t *view;
-    lk_view_t *instance_view;
     struct {
         lk_obj_t *prev;
         lk_obj_t *next;

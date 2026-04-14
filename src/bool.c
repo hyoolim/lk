@@ -2,8 +2,8 @@
 
 // ext map - types
 void lk_bool_type_init(lk_vm_t *vm) {
-    vm->t_nil = lk_obj_alloc(vm->t_obj);
-    vm->t_bool = lk_obj_alloc(vm->t_obj);
+    vm->t_nil = lk_obj_alloc_type(vm->t_obj, sizeof(lk_obj_t));
+    vm->t_bool = lk_obj_alloc_type(vm->t_obj, sizeof(lk_obj_t));
     vm->t_true = lk_obj_alloc(vm->t_bool);
     vm->t_false = lk_obj_alloc(vm->t_bool);
 }

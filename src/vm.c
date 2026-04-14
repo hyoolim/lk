@@ -31,7 +31,7 @@
 
 // ext map - types
 void lk_vm_type_init(lk_vm_t *vm) {
-    vm->t_vm = lk_obj_alloc(vm->t_obj);
+    vm->t_vm = lk_obj_alloc_type(vm->t_obj, sizeof(lk_obj_t));
 }
 
 // ext map - funcs
@@ -434,9 +434,6 @@ void lk_vm_do_eval_func(lk_vm_t *vm) {
     lk_instr_t *instr;
     lk_scope_t *args;
 
-    // freq used types
-    lk_obj_t *t_func = vm->t_func;
-
     // used in slot resolution
     lk_instr_t *msg;
     lk_str_t *msgn;
@@ -446,7 +443,7 @@ void lk_vm_do_eval_func(lk_vm_t *vm) {
     vec_t *ancs;
     lk_obj_t *recv, *r, *slotv;
     lk_func_t *func;
-    bool tried_type;
+    int dispatch_phase;
 
     // rescue err and run approp func
     struct lk_rescue rescue;
@@ -467,7 +464,7 @@ void lk_vm_do_eval_func(lk_vm_t *vm) {
                 continue;
             slot = LK_SLOT(HT_ITEM_VALUEPTR(si));
             slotv = lk_obj_get_value_from_slot(recv, slot);
-            if (!LK_OBJ_ISFUNC(slot->check) || LK_OBJ_ISA(slotv, t_func) < 3)
+            if (!LK_OBJ_ISFUNC(slot->check) || !LK_OBJ_ISCALLABLE(slotv))
                 continue;
             func = lk_func_match(LK_FUNC(slotv), args, args->self);
             if (func == NULL)
@@ -604,8 +601,58 @@ prevscope:
             goto nextinstr;
         }
 
+        // Phase 1: instance slots (recv directly)
+        dispatch_phase = 0;
+
+        if ((slots = recv->o.slots) != NULL && (si = ht_get(slots, msgn)) != NULL) {
+            r = recv;
+            goto found;
+        }
+
+    view_dispatch:
+        // Phase 2: view type slots (flat — one lookup, no chain walk)
+        dispatch_phase = 1;
+
+        if (recv->o.view->type != NULL) {
+            r = recv->o.view->type;
+
+            if ((slots = r->o.slots) != NULL && (si = ht_get(slots, msgn)) != NULL)
+                goto found;
+        }
+
+    type_chain:
+        // Phase 3: _type chain or scope parent chain
+        dispatch_phase = 2;
         ancs = NULL;
-        tried_type = false;
+
+        if (LK_OBJ_ISSCOPE(recv) && LK_SCOPE(recv)->parent != NULL) {
+            r = LK_OBJ(LK_SCOPE(recv)->parent);
+            goto findslot;
+        }
+
+        r = NULL;
+
+        if (recv->o.slots != NULL && (si = ht_get(recv->o.slots, vm->str_lktype)) != NULL) {
+            r = lk_obj_get_value_from_slot(recv, LK_SLOT(HT_ITEM_VALUEPTR(si)));
+
+            if (r == vm->t_nil)
+                r = NULL;
+        }
+
+        if (r == NULL) {
+            if (LK_OBJ_HASPARENTS(recv)) {
+                r = recv;
+                goto parent;
+            }
+
+            r = recv->o.view->parent;
+        }
+
+        if (r != NULL)
+            goto findslot;
+
+        goto forward;
+
     findslot:
         if ((slots = r->o.slots) == NULL)
             goto parent;
@@ -616,7 +663,7 @@ prevscope:
         slotv = lk_obj_get_value_from_slot(recv, slot);
 
         // slot contains func obj - call?
-        if (LK_OBJ_ISA(slotv, t_func) > 2 && LK_SLOT_CHECKOPTION(slot, LK_SLOTOPTION_AUTOSEND) &&
+        if (LK_OBJ_ISCALLABLE(slotv) && LK_SLOT_CHECKOPTION(slot, LK_SLOTOPTION_AUTOSEND) &&
             (instr == NULL || instr->next == NULL || instr->next->type != LK_INSTRTYPE_APPLYMSG ||
              vec_str_cmp_cstr(VEC(instr->next->v), "+=") != 0)) {
         callfunc:
@@ -635,15 +682,18 @@ prevscope:
             // called like a func?
             if (args != NULL) {
                 // slot contains func
-                if (LK_OBJ_ISA(slotv, t_func) > 2) {
+                if (LK_OBJ_ISCALLABLE(slotv)) {
                     goto callfunc;
 
                     // call at/apply if there are args
                 } else if (VEC_ISINIT(&args->stack) && VEC_COUNT(&args->stack) > 0) {
                     msgn = vm->str_at;
                     recv = r = slotv;
-                    ancs = NULL;
-                    goto findslot;
+                    dispatch_phase = 0;
+
+                    if ((slots = recv->o.slots) != NULL && (si = ht_get(slots, msgn)) != NULL)
+                        goto found;
+                    goto view_dispatch;
                 }
             }
 
@@ -652,6 +702,18 @@ prevscope:
             goto nextinstr;
         }
     parent:
+        if (dispatch_phase < 2) {
+            if (dispatch_phase == 0)
+                goto view_dispatch;
+            goto type_chain;
+        }
+
+        // if r is a non-scope instance (not a type), navigate to its type before using ancestors
+        if (!LK_OBJ_ISSCOPE(r) && r->o.view->type != NULL && r->o.view->type != r) {
+            r = r->o.view->type;
+            goto findslot;
+        }
+
         if ((ancs = r->o.view->ancestors) != NULL) {
             int ancc = VEC_COUNT(ancs);
 
@@ -671,31 +733,19 @@ prevscope:
                 goto findslot;
         }
 
-        // _type fallback: if _view chain exhausted and _type differs from the view's type, try it
-        if (!tried_type && recv->o.slots != NULL) {
-            si = ht_get(recv->o.slots, vm->str_lktype);
-
-            if (si != NULL) {
-                lk_obj_t *type_obj = lk_obj_get_value_from_slot(recv, LK_SLOT(HT_ITEM_VALUEPTR(si)));
-
-                if (type_obj != NULL && type_obj != vm->t_nil && type_obj != recv->o.view->parent) {
-                    tried_type = true;
-                    r = type_obj;
-                    ancs = NULL;
-                    goto findslot;
-                }
-            }
-        }
-
-        // forward:
+    forward:
         if (VEC_EQ(VEC(msgn), VEC(vm->str_forward))) {
             lk_vm_raise_cstr(vm, "Cannot find slot named %s", msgn);
 
         } else {
             msgn = vm->str_forward;
-            r = recv;
-            ancs = NULL;
-            goto findslot;
+            dispatch_phase = 0;
+
+            if ((slots = recv->o.slots) != NULL && (si = ht_get(slots, msgn)) != NULL) {
+                r = recv;
+                goto found;
+            }
+            goto view_dispatch;
         }
 
     // should never happen

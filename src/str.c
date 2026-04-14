@@ -6,7 +6,7 @@
 
 // type
 void lk_str_type_init(lk_vm_t *vm) {
-    vm->t_str = lk_obj_alloc(vm->t_seq);
+    vm->t_str = lk_obj_alloc_type(vm->t_seq, sizeof(lk_seq_t));
     vec_fin(VEC(vm->t_str));
     vec_init(VEC(vm->t_str), sizeof(uint8_t), 16);
 }

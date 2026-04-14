@@ -12,6 +12,9 @@ static LK_OBJ_DEFMARKFUNC(mark_view) {
 
     if (tag->ancestors != NULL)
         VEC_EACH_PTR(tag->ancestors, i, v, mark(v));
+
+    if (tag->type != NULL)
+        mark(tag->type);
 }
 
 static void free_view(lk_obj_t *self) {

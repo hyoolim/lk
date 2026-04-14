@@ -160,6 +160,10 @@ static void return_scope(lk_obj_t *self, lk_scope_t *local) {
     DONE;
 }
 
+static void SELF_scope(lk_obj_t *self, lk_scope_t *local) {
+    RETURN(LK_SCOPE(self)->self != NULL ? LK_OBJ(LK_SCOPE(self)->self) : NIL);
+}
+
 void lk_scope_lib_init(lk_vm_t *vm) {
     lk_obj_t *scope = vm->t_scope, *obj = vm->t_obj, *instr = vm->t_instr, *str = vm->t_str, *err = vm->t_err,
              *f = vm->t_func;
@@ -185,6 +189,7 @@ void lk_scope_lib_init(lk_vm_t *vm) {
     lk_obj_set_cfunc_lk(scope, "RESOURCE", RESOURCE_scope, NULL);
     lk_obj_set_cfunc_lk(scope, "retry", retry_scope, NULL);
     lk_obj_set_cfunc_lk(scope, "return", return_scope, (lk_obj_t *)-1);
+    lk_obj_set_cfunc_lk(scope, "SELF", SELF_scope, NULL);
 }
 
 // create a new scope based on the current one set in vm

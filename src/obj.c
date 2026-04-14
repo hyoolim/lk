@@ -208,7 +208,6 @@ void lk_obj_lib_init(lk_vm_t *vm) {
     lk_obj_set_cfunc_lk(obj, "=", DassignB_obj_str_obj, str, obj, NULL);
     lk_obj_set_cfunc_lk(obj, "_id", Did_obj, NULL);
     lk_obj_set_cfunc_lk(obj, "_retrieve", Dretrieve_obj_str, str, NULL);
-    lk_obj_set_cfunc_lk(obj, "_self", Dself_obj, NULL);
     lk_obj_set_cfunc_lk(obj, "_slots", Dslots_obj, NULL);
     lk_obj_set_cfunc_lk(obj, "alloc", alloc_obj, NULL);
     lk_obj_set_cfunc_lk(obj, "as", as_obj_obj, obj, NULL);
